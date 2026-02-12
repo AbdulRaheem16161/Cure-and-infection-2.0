@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4834100609965941143
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2499994586662525520}
+  - component: {fileID: 5505703825312774198}
+  m_Layer: 0
+  m_Name: NPC Manager_old
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2499994586662525520
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4834100609965941143}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -148.13214, y: 14.43, z: -180.83}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5505703825312774198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4834100609965941143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b1ce5e8acd69fd498e6766a8c3cfd4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NPCPrefab: {fileID: 3347344219518645559, guid: fbd0585714c35e4489da5331a0d981b9, type: 3}
+  GuardPrefab: {fileID: 4135283440339799756, guid: e20d114dc859d9940ae0f88711ceb74e, type: 3}
+  ZombiePrefab: {fileID: 4125029387023148961, guid: 975e17cc457d5ec4cb1e7e28e7d16d46, type: 3}
+  PatrolFollowPointPrefab: {fileID: 2381440725353376839, guid: 0f301285e7f019941b05c5c0babde482, type: 3}
+  RandomFollowPrefab: {fileID: 2381440725353376839, guid: 94a4fc18475c1b34bba6266df46784db, type: 3}

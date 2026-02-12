@@ -1,0 +1,35 @@
+{
+    "name": "Controls_Generic",
+    "maps": [
+        {
+            "name": "New action map",
+            "id": "55aa5afe-63ef-4630-9982-d716536b4784",
+            "actions": [],
+            "bindings": []
+        },
+        {
+            "name": "Player",
+            "id": "3a17b28f-72c0-4ee4-b390-49a4527343a0",
+            "actions": [],
+            "bindings": []
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard & Mouse",
+            "bindingGroup": "Keyboard & Mouse",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

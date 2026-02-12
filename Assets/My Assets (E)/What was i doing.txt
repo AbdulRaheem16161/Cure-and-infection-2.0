@@ -1,0 +1,66 @@
+making a delegate to add random follow points in the list of random movement manager every time a new NPC is spawned
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+31 october: organizing all the scripts and trying to remember where did i left
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+2 November: 
+1. completed NPC Manager (which includes NPC Spawner, Random Movement Manager, AreaGizmoz, TrackGizmoz, Random Follow Point, Patrol Follow Point)
+2. there is no Patrol Movement Manager. the Patrol Movement is managed by just Patrol Follow Point and TrackGizmos only. where as Random Movement is
+   managed by Random Movement Manager, Random Follow Point and Area Gizmos.
+Now:
+    i need to complete the T-Rex Game. i will make a collider ahed of the T-Rex. On Collider's collision with the player, The actual T-Rex and Player will get
+    invisible and The T-Rex Eating Seo animatiom will play along with shift in camera's position.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+9 November: Making Health System (completed)
+
+O State Machine (player + Enemy):
+
+--> Make 3 new Veriables
+  int Damage = 5
+  int CurrentHealth 
+  int TotalHealth = 100
+
+--> Make a new Function
+  void ReceiveDamage(int Damage)
+  {
+    currentHealth = currentHealth - Damage;
+    if (currentHealth <= 0)
+    {
+         Die();
+    }
+  }
+
+O HitBox (player + Enemy):
+
+--> Replace player.Die() with player.ReceiveDamage (Statemachine.Damage) in HitBox.OnTriggerEnter(){}
+
+#region Handle Enemy Hit
+if (other.CompareTag(stateMachine.TargetTag))
+{
+    var player = other.GetComponentInParent<PlayerStateMachine>();
+
+    if (player != null)
+    {
+        player.RecieveDamage(stateMachine.Damage);
+    }
+}
+#endregion
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+November: Fixed the Enemy(zombie) keeps attacking even when the player is dead
+created a new tag "Dead"
+made changes in AttackChangeTrigger.cs:
+    changed OnTriggerEnter to OnTriggerStay
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+9 November: Making Player and Enemy Respawn System
+made changes in PlayerstateMachine.cs and EnemyStateMachine.cs
+
+https://ibb.co/9mYGyRjv
