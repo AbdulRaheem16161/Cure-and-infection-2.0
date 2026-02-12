@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37daac3594d03944db1234698600dac2, type: 3}
+  m_Name: DeliverFood
+  m_EditorClassIdentifier: 
+  questName: Deliver Food
+  questDialogues:
+  - questDialogueKey: Quest_Offer
+    questDialogueText: Hey, we're starving.
+  - questDialogueKey: Quest_intro
+    questDialogueText: We need you to gather some more food for us.
+  - questDialogueKey: Quest_Accepted
+    questDialogueText: Find it quick, we're all hungry.
+  - questDialogueKey: Quest_Fail
+    questDialogueText: Some people have started dying of starvation. its too late
+  - questDialogueKey: Quest_Complete
+    questDialogueText: Thanks this will keep us going for a while.
+  questType: 2
+  questMinDifficulty: 0.05
+  questMaxDifficulty: 0.2
+  forceVehicleVersion: 0
+  chanceForVehicleVersion: 0.2
+  questItemsNeeded:
+  - {fileID: 11400000, guid: 7e467749e195ee146bc705b586ea942a, type: 2}
+  questRewardType: 3
+  questRewards:
+  - {fileID: 0}
+  questRewardCurrency: 40
+  questFailMoneyLoss: -100
