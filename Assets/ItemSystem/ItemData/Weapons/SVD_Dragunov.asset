@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18415577feb680f4a85a1f6c7219209d, type: 3}
+  m_Name: SVD_Dragunov
+  m_EditorClassIdentifier: 
+  itemId: SVD_Dragunov
+  itemName: SVD Dragunov
+  itemDescription: Scoped precision rifle for long-range engagements with faster
+    follow-up shots than bolt actions.
+  itemPrice: 780
+  tradable: 0
+  allowedSlots: 3
+  stackLimit: 1
+  itemWeight: 9.7
+  weaponType: 5
+  damage: 70
+  magazineSize: 10
+  fireMode: 2
+  fireRateRPM: 60
+  reloadTime: 3
+  effectiveRange: 800
+  ammoType: {fileID: 11400000, guid: dd3556abc8561bb4a8257db32aa1da4d, type: 2}
