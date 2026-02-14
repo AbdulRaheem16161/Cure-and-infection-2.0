@@ -27,16 +27,23 @@ public class ItemDefinition : ScriptableObject
 
 	//add fields for ui icons, 3d prefab models etc, sfx/vfx etc...
 	#region common item model, vfx, sfx
+	[Header("Item Model and Ui")]
+	[SerializeField] private GameObject itemPrefab;
+	[SerializeField] private Sprite itemUiIcon;
 	#endregion
 
 	#region readonly properties
 	public string ItemId => itemId;
 	public string ItemName => itemName;
+	public string ItemDescription => itemDescription;
 	public string ItemPrice => itemPrice;
 
 	public bool Tradable => tradable;
 	public InventorySlotType AllowedSlots => allowedSlots;
 	public int StackLimit => stackLimit;
 	public float ItemWeight => itemWeight;
+
+	public GameObject ItemPrefab => itemPrefab;
+	public Sprite ItemUiIcon => itemUiIcon;
 	#endregion
 }
