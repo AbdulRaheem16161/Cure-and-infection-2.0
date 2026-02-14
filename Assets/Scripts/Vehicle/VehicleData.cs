@@ -5,16 +5,17 @@ public class VehicleData : MonoBehaviour
 {
     public GameObject steeringWheel;
     public string vehicleName;
-    public int maxHealth;
-    public int currentHealth;
+    public float maxHealth;
+    public float currentHealth;
     public float maxSpeed;
     public float acceleration;
     public float handlingSpeed;
     public float MaxTurnAngle;
     public float brakeForce;
     public float handBrakeForce;
-    public int fuelCapacity;
-    public int currentFuel;
+    public float engineBrakeForce;
+    public float fuelCapacity;
+    public float currentFuel;
     public Vector3 centerOfMass;
     public Light[] headLights, brakeLights, reverseLights;
     public enum Axel { Front, Rear, All }
@@ -26,6 +27,7 @@ public class VehicleData : MonoBehaviour
         public WheelCollider wheelCollider;
         public GameObject wheelEffects; 
         public Axel axel;
+        public float brakeRatio;
     }
     public Wheel[] wheels;
     private Rigidbody _rigidbody;
@@ -36,7 +38,9 @@ public class VehicleData : MonoBehaviour
     }
     public bool IsAlive() => currentHealth > 0;
     
-    public void TakeDamage(int damage) => currentHealth = Mathf.Max(0, currentHealth - damage);
+    public void TakeDamage(float damage) => currentHealth = Mathf.Max(0, currentHealth - damage);
     
-    public void ConsumeFuel(int amount) => currentFuel = Mathf.Max(0, currentFuel - amount);
+    public void ConsumeFuel(float amount) => currentFuel = Mathf.Max(0, currentFuel - amount);
+    public void AddFuel(float amount) => currentFuel = Mathf.Min(fuelCapacity, currentFuel + amount);
+    public float GetFuelPercentage() => fuelCapacity > 0 ? (float)currentFuel / fuelCapacity : 0f;
 }

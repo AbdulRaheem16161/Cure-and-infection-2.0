@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System;
 using TMPro;
+using UnityEngine.TextCore.LowLevel;
 
 
 public class VehicleController : MonoBehaviour
@@ -10,6 +11,7 @@ public class VehicleController : MonoBehaviour
     private VehicleData _data;
     private Rigidbody _rigidbody;
     private WheelFrictionCurve baseFriction;
+    private bool engineOn = false;
     private bool isReverse = false;
 
     void Start()
@@ -28,12 +30,26 @@ public class VehicleController : MonoBehaviour
     {
         // Input
         float forwardSpeed = transform.InverseTransformDirection(_rigidbody.linearVelocity).z;
-        float throttle = Input.GetAxis("Vertical");
+        float throttle = Input.GetAxis("Vertical") * (engineOn ? 1 : 0); // Disable throttle if out of fuel
         float steer = Input.GetAxis("Horizontal");
-        // Drive
-
-        Drive(throttle);
         
+        if(Input.GetKeyDown(KeyCode.E) && _data.currentFuel > 0)
+        {
+            engineOn = !engineOn;
+        }
+        if (_data.currentFuel <= 0)
+        {
+            engineOn = false;
+        }
+
+        // turnoff lights
+        TurnoffLights(engineOn);
+        
+        // Drive
+        Drive(throttle);
+            
+        ConsumeFuel(throttle);
+
         // steering
 
         WheelTurning(steer);
@@ -42,11 +58,35 @@ public class VehicleController : MonoBehaviour
 
         // braking
         Braking(forwardSpeed);
-
         // Update wheel meshes
         foreach (VehicleData.Wheel wheel in _data.wheels)
         {            
             UpdateWheel(wheel.wheelCollider, wheel.wheelObject.transform, wheel.wheelEffects);
+        }
+    }
+
+    private void TurnoffLights(bool engineOn)
+    {
+        foreach (Light light in _data.headLights)
+        {
+            light.enabled = engineOn;
+        }
+        foreach (Light light in _data.brakeLights)
+        {
+            light.enabled = engineOn;
+        }
+        foreach (Light light in _data.reverseLights)
+        {
+            light.enabled = engineOn;
+        }
+    }
+
+    private void ConsumeFuel(float throttle)
+    {
+        if (throttle != 0 && _data.currentFuel > 0)
+        {
+            float fuelConsumption = Mathf.Abs(throttle) * 0.01f; // Adjust this multiplier as needed
+            _data.ConsumeFuel(fuelConsumption);
         }
     }
     private void Drive(float throttle)
@@ -113,14 +153,9 @@ public class VehicleController : MonoBehaviour
         {
             foreach (VehicleData.Wheel wheel in _data.wheels)
             {
-                if (wheel.axel == VehicleData.Axel.Rear)
-                {
-                    wheel.wheelCollider.brakeTorque = _data.brakeForce;
-                    wheel.wheelCollider.motorTorque = 0;
-                    WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
-                    friction.stiffness = 0.5f;
-                    wheel.wheelCollider.sidewaysFriction = friction;
-                }
+                wheel.wheelCollider.motorTorque = 0;
+                wheel.wheelCollider.brakeTorque = _data.brakeForce*wheel.brakeRatio;
+                wheel.wheelCollider.motorTorque = 0;
             }
            
         }
@@ -142,18 +177,37 @@ public class VehicleController : MonoBehaviour
         {
             foreach (VehicleData.Wheel wheel in _data.wheels)
             {
-                if (wheel.axel == VehicleData.Axel.Rear)
+                wheel.wheelCollider.brakeTorque = 0;
+                WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
+                friction.stiffness = baseFriction.stiffness;
+                wheel.wheelCollider.sidewaysFriction = friction;
+            }
+        }
+
+        if (!isBraking)
+        {
+            EngineBreaking(forwardSpeed);
+        }
+    }
+    private void EngineBreaking(float forwardSpeed)
+    {
+        if (Mathf.Abs(forwardSpeed) > 10f)
+        {
+            foreach (VehicleData.Wheel wheel in _data.wheels)
+            {
+                if (wheel.axel == _data.driveAxel || _data.driveAxel == VehicleData.Axel.All)
+                {
+                    wheel.wheelCollider.brakeTorque = _data.engineBrakeForce;
+                }
+            }
+        }
+        else
+        {
+            foreach (VehicleData.Wheel wheel in _data.wheels)
+            {
+                if (wheel.axel == _data.driveAxel || _data.driveAxel == VehicleData.Axel.All)
                 {
                     wheel.wheelCollider.brakeTorque = 0;
-                    WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
-                    friction.stiffness = baseFriction.stiffness;
-                    wheel.wheelCollider.sidewaysFriction = friction;
-                }
-                if (wheel.axel == VehicleData.Axel.Front)
-                {
-                    WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
-                    friction.stiffness = baseFriction.stiffness;
-                    wheel.wheelCollider.sidewaysFriction = friction;
                 }
             }
         }
