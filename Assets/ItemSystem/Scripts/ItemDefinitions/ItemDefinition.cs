@@ -9,7 +9,7 @@ public class ItemDefinition : ScriptableObject
 	[SerializeField] private string itemId;
 	[SerializeField] private string itemName;
 	[SerializeField] private string itemDescription;
-	[SerializeField] private string itemPrice;
+	[SerializeField] private int itemPrice;
 	#endregion
 
 	#region inventory properties
@@ -36,7 +36,7 @@ public class ItemDefinition : ScriptableObject
 	public string ItemId => itemId;
 	public string ItemName => itemName;
 	public string ItemDescription => itemDescription;
-	public string ItemPrice => itemPrice;
+	public int ItemPrice => itemPrice;
 
 	public bool Tradable => tradable;
 	public InventorySlotType AllowedSlots => allowedSlots;
@@ -45,5 +45,41 @@ public class ItemDefinition : ScriptableObject
 
 	public GameObject ItemPrefab => itemPrefab;
 	public Sprite ItemUiIcon => itemUiIcon;
+	#endregion
+
+	#region common item behaviour methods
+	public void DropItem()
+	{
+		//instantiate object in world space at feet
+		Debug.Log($"dropped item: {ItemName}");
+	}
+	public void BuyItem(InventoryHandler inventory, int buyPirce)
+	{
+		inventory.RemoveMoney(buyPirce);
+	}
+	public void SellItem(InventoryHandler inventory, int sellPirce)
+	{
+		inventory.AddMoney(sellPirce);
+	}
+	public virtual void UseItem()
+	{
+		Debug.LogError("UseItem method not implemented for this item type");
+	}
+	public virtual void EquipItem()
+	{
+		Debug.LogError("EquipItem method not implemented for this item type");
+	}
+	public virtual void UnEquipItem()
+	{
+		Debug.LogError("UnEquipItem method not implemented for this item type");
+	}
+	public virtual void Holster()
+	{
+		Debug.LogError("Holster method not implemented for this item type");
+	}
+	public virtual void UnHolster()
+	{
+		Debug.LogError("UnHolster method not implemented for this item type");
+	}
 	#endregion
 }
