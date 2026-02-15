@@ -36,9 +36,6 @@ namespace Game.MyPlayer
         {
             controls = new Controls_C();
             controls.Player.SetCallbacks(this);
-
-            stateMachine = GetComponent<PlayerStateMachine>();
-
         }
 
         private void OnEnable()

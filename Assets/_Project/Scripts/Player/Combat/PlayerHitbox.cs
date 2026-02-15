@@ -2,19 +2,15 @@
 using Game.MyPlayer;
 using Game.MyNPC;
 
-public class PlayerHitbox : MonoBehaviour
+public class MeleeHitBox : MonoBehaviour
 {
     #region Fields
-    private PlayerStateMachine stateMachine;
+    public PlayerStateMachine stateMachine;
     private bool hasDamaged = false;
     #endregion
 
     private void Awake()
     {
-        #region Cache State Machine
-        stateMachine = GetComponentInParent<PlayerStateMachine>();
-        #endregion
-
         #region Disable Hitbox Initially
         gameObject.SetActive(false);
         #endregion

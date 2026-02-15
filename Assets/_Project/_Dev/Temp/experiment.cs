@@ -1,25 +1,29 @@
-//using NUnit.Framework;
 //using UnityEngine;
-//using System.Collections.Generic;
 
-//public class experiment : MonoBehaviour
+//public class Data
 //{
-//    public List<GameObject> MarchingFOllowPoints = new List<GameObject>();
-//    public GameObject ClossestPoint;
+//    public SlotNum slotNum;
 
-//    // Update is called once per frame
-//    void Awake()
+//    public enum SlotNum
 //    {
-//        int index = 0;
-//        float clossestDistance = 0f;
-
-//        while (true)
-//        {
-//            if (clossestDistance < Vector3.Distance(transform.position, MarchingFOllowPoints[i].transform.position))
-//            {
-//                ClossestPoint = MarchingFOllowPoints[i];
-//                index++;
-//            }
-//        }
+//        one,
+//        two,
+//        three,
+//        four,
+//        five
 //    }
 //}
+
+
+//public class Weapon : MonoBehaviour
+//{
+//    public Data data;
+
+//    void Start()
+//    {
+//        int slot = (int)data.slotNum;
+//    }
+//}
+
+
+

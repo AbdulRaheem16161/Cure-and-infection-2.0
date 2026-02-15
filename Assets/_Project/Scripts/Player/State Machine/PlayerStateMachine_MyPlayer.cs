@@ -130,9 +130,9 @@ namespace Game.MyPlayer
 
         private void LateUpdate()
         {
+            #region Functions
             if (isDead) return;
 
-            #region Functions
             base.Update();
             UpdateStateName();
             ApplyGravity(Time.deltaTime);
