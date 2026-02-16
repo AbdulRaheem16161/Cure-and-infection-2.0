@@ -1,29 +1,33 @@
 using System;
+using UnityEngine;
 
 [Serializable]
 public class InventoryItem
 {
-	public ItemDefinition ItemDefinition { get; private set; }
+	[SerializeField] private ItemDefinition itemDefinition;
+	[SerializeField] private int currentStack;
 
-	public bool StackEmpty => CurrentStack <= 0;
-	public int CurrentStack { get; private set; }
+	//read only
+	public ItemDefinition ItemDefinition => itemDefinition;
+	public int CurrentStack => currentStack;
+	public bool StackEmpty => currentStack <= 0;
 
 	public InventoryItem(ItemDefinition itemDefinition, int currentStack)
 	{
-		this.ItemDefinition = itemDefinition;
-		this.CurrentStack = currentStack;
+		this.itemDefinition = itemDefinition;
+		this.currentStack = currentStack;
 	}
 
 	public void SetItemStack(int newStack)
 	{
-		CurrentStack = newStack;
+		currentStack = newStack;
 	}
 	public void AddItemStack(int stackToAdd)
 	{
-		CurrentStack += stackToAdd;
+		currentStack += stackToAdd;
 	}
 	public void RemoveItemStack(int stackToRemove)
 	{
-		CurrentStack -= stackToRemove;
+		currentStack -= stackToRemove;
 	}
 }

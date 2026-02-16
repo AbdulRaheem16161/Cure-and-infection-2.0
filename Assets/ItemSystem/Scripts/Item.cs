@@ -1,4 +1,6 @@
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 {
@@ -11,10 +13,12 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 		itemDefinition = definition;
 	}
 
-	//add generic item behaviour like picking up items etc...
-	public virtual void PickUp(InventoryHandler inventory) //would be a player collider/interact action here that passes inventory
+	#region item pickup (TODO: destroy world object being picked up, decide how its called eg: interact or trigger collider etc...)
+	public virtual void PickUp(InventoryHandler inventory)
 	{
-		inventory.AddNewItemPickUp(itemDefinition, CurrentItemStack);
+		InventoryItem newItem = new(itemDefinition, CurrentItemStack);
+		inventory.AddNewItemPickUp(newItem);
 		//pick up item and add to inventory etc...
 	}
+	#endregion
 }

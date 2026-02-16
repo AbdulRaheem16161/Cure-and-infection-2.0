@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: Crowbar
   itemName: Crowbar
   itemDescription: 
-  itemPrice: 140
+  itemPrice: 0
   tradable: 0
   allowedSlots: 3
   stackLimit: 1

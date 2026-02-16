@@ -48,11 +48,8 @@ public class ItemDefinition : ScriptableObject
 	#endregion
 
 	#region common item behaviour methods
-	public void DropItem()
-	{
-		//instantiate object in world space at feet
-		Debug.Log($"dropped item: {ItemName}");
-	}
+	public bool CanBePickedUp => true;
+	public bool CanBeDroppedUp => true;
 	public void BuyItem(InventoryHandler inventory, int buyPirce)
 	{
 		inventory.RemoveMoney(buyPirce);

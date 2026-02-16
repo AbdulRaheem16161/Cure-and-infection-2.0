@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b76c873d305c9d342a1d5ed670b72db0, type: 3}
   m_Name: Pipe_Wrench
   m_EditorClassIdentifier: 
-  itemId: Crowbar
-  itemName: Crowbar
+  itemId: Pipe_Wrench
+  itemName: Pipe Wrench
   itemDescription: 
-  itemPrice: 140
+  itemPrice: 0
   tradable: 0
   allowedSlots: 3
   stackLimit: 1
-  itemWeight: 2.6
+  itemWeight: 3.8
   itemPrefab: {fileID: 0}
   itemUiIcon: {fileID: 0}
   weaponType: 1
-  damage: 35
-  attackSpeed: 1.1
+  damage: 50
+  attackSpeed: 2.3
