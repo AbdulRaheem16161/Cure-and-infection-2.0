@@ -24,32 +24,4 @@ public class ArmourDefinition : ItemDefinition
 	public int ProtectionProvided => protectionProvided;
 	public int InventorySlotsProvided => inventorySlotsProvided;
 	#endregion
-
-	#region armour behaviour methods
-	public override void UseItem()
-	{
-		//not supported
-		Debug.LogError("UseItem method not implemented for this item type");
-	}
-	public override void EquipItem()
-	{
-		//add protection to stats
-		Debug.Log($"equipped armour: {ItemName}");
-	}
-	public override void UnEquipItem()
-	{
-		//remove protection from stats
-		Debug.Log($"unequipped armour: {ItemName}");
-	}
-	public override void Holster()
-	{
-		//not supported
-		Debug.LogError("Holster method not implemented for this item type");
-	}
-	public override void UnHolster()
-	{
-		//not supported
-		Debug.LogError("UnHolster method not implemented for this item type");
-	}
-	#endregion
 }

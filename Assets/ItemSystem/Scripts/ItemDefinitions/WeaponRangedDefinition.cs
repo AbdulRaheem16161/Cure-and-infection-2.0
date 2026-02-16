@@ -99,32 +99,4 @@ public class WeaponRangedDefinition : ItemDefinition
 	//projectile
 	public ProjectileDefinition AmmoType => ammoType;
 	#endregion
-
-	#region ranged weapon behaviour methods
-	public override void UseItem()
-	{
-		//not supported
-		Debug.LogError("UseItem method not implemented for this item type");
-	}
-	public override void EquipItem()
-	{
-		//instantiate in a holster of some kind
-		Debug.Log($"equipped ranged weapon: {ItemName}");
-	}
-	public override void UnEquipItem()
-	{
-		//Destroy from holster of some kind
-		Debug.Log($"unequipped ranged weapon: {ItemName}");
-	}
-	public override void Holster()
-	{
-		//unequip from hands back into holster of some kind
-		Debug.Log($"holstered ranged weapon: {ItemName}");
-	}
-	public override void UnHolster()
-	{
-		//unequip from holster into hands
-		Debug.Log($"unholstered ranged weapon: {ItemName}");
-	}
-	#endregion
 }

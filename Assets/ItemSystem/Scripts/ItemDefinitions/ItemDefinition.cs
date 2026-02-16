@@ -46,37 +46,4 @@ public class ItemDefinition : ScriptableObject
 	public GameObject ItemPrefab => itemPrefab;
 	public Sprite ItemUiIcon => itemUiIcon;
 	#endregion
-
-	#region common item behaviour methods
-	public bool CanBePickedUp => true;
-	public bool CanBeDroppedUp => true;
-	public void BuyItem(InventoryHandler inventory, int buyPirce)
-	{
-		inventory.RemoveMoney(buyPirce);
-	}
-	public void SellItem(InventoryHandler inventory, int sellPirce)
-	{
-		inventory.AddMoney(sellPirce);
-	}
-	public virtual void UseItem()
-	{
-		Debug.LogError("UseItem method not implemented for this item type");
-	}
-	public virtual void EquipItem()
-	{
-		Debug.LogError("EquipItem method not implemented for this item type");
-	}
-	public virtual void UnEquipItem()
-	{
-		Debug.LogError("UnEquipItem method not implemented for this item type");
-	}
-	public virtual void Holster()
-	{
-		Debug.LogError("Holster method not implemented for this item type");
-	}
-	public virtual void UnHolster()
-	{
-		Debug.LogError("UnHolster method not implemented for this item type");
-	}
-	#endregion
 }

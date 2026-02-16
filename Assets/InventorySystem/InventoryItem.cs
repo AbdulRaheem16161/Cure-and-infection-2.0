@@ -30,4 +30,19 @@ public class InventoryItem
 	{
 		currentStack -= stackToRemove;
 	}
+
+	#region item behaviour
+	public virtual void UseItem()
+	{
+		Debug.LogError("UseItem method not implemented");
+	}
+	public virtual void EquipItem()
+	{
+		Debug.LogError("EquipItem method not implemented");
+	}
+	public virtual void UnEquipItem()
+	{
+		Debug.LogError("UnEquipItem method not implemented");
+	}
+	#endregion
 }

@@ -21,32 +21,4 @@ public class WeaponMeleeDefinition : ItemDefinition
 	public int Damage => damage;
 	public float AttackSpeed => attackSpeed;
 	#endregion
-
-	#region melee weapon behaviour methods
-	public override void UseItem()
-	{
-		//not supported
-		Debug.LogError("UseItem method not implemented for this item type");
-	}
-	public override void EquipItem()
-	{
-		//instantiate in a holster of some kind
-		Debug.Log($"equipped melee weapon: {ItemName}");
-	}
-	public override void UnEquipItem()
-	{
-		//Destroy from holster of some kind
-		Debug.Log($"unequipped melee weapon: {ItemName}");
-	}
-	public override void Holster()
-	{
-		//unequip from hands back into holster of some kind
-		Debug.Log($"holstered melee weapon: {ItemName}");
-	}
-	public override void UnHolster()
-	{
-		//unequip from holster into hands
-		Debug.Log($"unholstered melee weapon: {ItemName}");
-	}
-	#endregion
 }
