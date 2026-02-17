@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: Pipe_Wrench
   itemName: Pipe Wrench
   itemDescription: 
-  itemPrice: 0
+  itemPrice: 110
   tradable: 0
   allowedSlots: 3
   stackLimit: 1

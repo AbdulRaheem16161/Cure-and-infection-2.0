@@ -12,19 +12,42 @@ public class InventoryHandlerEditor : Editor
 		InventoryHandler inventory = (InventoryHandler)target;
 
 		GUILayout.Space(10);
+		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
 
-		#region adding items to inventory buttons
-		GUILayout.Label("Debug Controls", EditorStyles.boldLabel);
-
-		if (GUILayout.Button("Pick Up Random Item"))
+		#region modifying money buttons
+		GUILayout.Label("Debug money", EditorStyles.boldLabel);
+		inventory.addMoney = EditorGUILayout.IntField("Add money", inventory.addMoney);
+		if (GUILayout.Button("Modify Money"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.AddNewItemPickUp(TestInventoryManager.GenerateRandomInventoryItem());
+			inventory.AddMoney(inventory.addMoney);
 		}
+		#endregion
 
 		GUILayout.Space(10);
 
+		#region inventory resize buttons
+		GUILayout.Label("Inventory Resizing", EditorStyles.boldLabel);
+		inventory.modifyInventorySizeByThis = EditorGUILayout.IntField("Modify Inventory By", inventory.modifyInventorySizeByThis);
+		if (GUILayout.Button("Modify Inventory Size"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			if (inventory.InventorySize + inventory.modifyInventorySizeByThis <= 0)
+			{
+				Debug.LogWarning("minimum inventory size is 1");
+				return;
+			}
+
+			inventory.ModifyInventorySize(inventory.modifyInventorySizeByThis);
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region adding items to inventory buttons
+		GUILayout.Label("Item Adding", EditorStyles.boldLabel);
 		inventory.itemToSpawn = (ItemDefinition)EditorGUILayout.ObjectField("Item To Spawn", inventory.itemToSpawn, typeof(ItemDefinition), false);
 		inventory.itemToSpawnCount = EditorGUILayout.IntField("Item To Spawn Count", inventory.itemToSpawnCount);
 
@@ -39,6 +62,13 @@ public class InventoryHandlerEditor : Editor
 			}
 
 			inventory.AddNewItemPickUp(TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));
+		}
+
+		if (GUILayout.Button("Pick Up Random Item"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			inventory.AddNewItemPickUp(TestInventoryManager.GenerateRandomInventoryItem());
 		}
 		#endregion
 
@@ -90,6 +120,7 @@ public class InventoryHandlerEditor : Editor
 		GUILayout.Space(10);
 
 		#region resetting inventory button
+		GUILayout.Label("Reset Inventory", EditorStyles.boldLabel);
 		if (GUILayout.Button("Reset Inventory"))
 		{
 			if (!ApplicationPlaying()) return;

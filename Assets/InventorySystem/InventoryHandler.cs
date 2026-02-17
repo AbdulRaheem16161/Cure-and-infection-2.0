@@ -3,17 +3,28 @@ using static UnityEditor.Progress;
 
 public class InventoryHandler : MonoBehaviour
 {
+	#region inventory settings
 	[Header("Inventory Settings")]
-	[SerializeField] private int InventorySize;
+	[SerializeField] private int money;
+	[SerializeField] private int inventorySize;
 	[SerializeField] private InventoryItem[] inventoryItems;
-	[SerializeField] private int Money;
+	#endregion
 
+    #region inventory readonly settings
+	public int Money => money;
+	public int InventorySize => inventorySize;
+	public InventoryItem[] InventoryItems => inventoryItems;
+	#endregion
+
+	#region debug settings
 	[Header("Debug Settings")]
+	[HideInInspector] public int addMoney;
 	[HideInInspector] public int modifyInventorySizeByThis;
 	[HideInInspector] public bool actionEffectsStack = false;
 	[HideInInspector] public int slotIndex = 0;
 	[HideInInspector] public ItemDefinition itemToSpawn;
 	[HideInInspector] public int itemToSpawnCount;
+	#endregion
 
 	private void Awake()
 	{
@@ -25,15 +36,17 @@ public class InventoryHandler : MonoBehaviour
 		inventoryItems = new InventoryItem[InventorySize];
 	}
 
-	#region adjust inventory size (TODO methods need testing for bugs)
+	#region adjust inventory size
 	public void ModifyInventorySize(int sizeAdjustment)
 	{
 		if (sizeAdjustment > 0)
 			IncreaseInventorySize(inventoryItems.Length + sizeAdjustment);
 		else
-			DecreaseInventorySize(inventoryItems.Length - sizeAdjustment);
+			DecreaseInventorySize(inventoryItems.Length + sizeAdjustment);
+
+		inventorySize = inventoryItems.Length;
 	}
-	public void IncreaseInventorySize(int newSize)
+	private void IncreaseInventorySize(int newSize)
 	{
 		InventoryItem[] newInventory = new InventoryItem[newSize];
 
@@ -42,7 +55,7 @@ public class InventoryHandler : MonoBehaviour
 
 		inventoryItems = newInventory;
 	}
-	public void DecreaseInventorySize(int newSize)
+	private void DecreaseInventorySize(int newSize)
 	{
 		InventoryItem[] newInventory = new InventoryItem[newSize];
 
@@ -51,7 +64,7 @@ public class InventoryHandler : MonoBehaviour
 
 		for (int i = newSize; i < inventoryItems.Length; i++) //drop items on floor if they dont fit
 		{
-			if (inventoryItems[i] != null)
+			if (ItemExists(inventoryItems[i]))
 			{
 				Debug.LogWarning($"Item {inventoryItems[i].ItemDefinition.ItemName} was dropped on the ground");
 				DropItem(i, true);
@@ -62,46 +75,45 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region money methods (TODO add and test methods individually, currently seem to work with buying/selling tho)
+	#region modifying money
 	public bool HasEnoughMoney(int cost)
 	{
-		if (cost > Money)
+		if (cost > money)
 			return false;
 		else return true;
 	}
 	public void SetMoney(int moneyToSet)
 	{
-		Money = moneyToSet;
+		money = moneyToSet;
 	}
 	public void AddMoney(int moneyToAdd)
 	{
-		Money += moneyToAdd;
+		money += moneyToAdd;
 	}
 	public void RemoveMoney(int moneyToRemove)
 	{
-		Money -= moneyToRemove;
+		money -= moneyToRemove;
 	}
 	#endregion
 
 	//ways to add/remove items to/from inventory
-	#region item pickup (TODO handle inventory full but same item has stack space, handle destroying world items/leaving them if stack count not 0)
+	#region item pickup (TODO handle destroying world items/leaving them if stack count not 0)
 	public void AddNewItemPickUp(InventoryItem newItem)
 	{
-		if (InventoryFull())
-		{
-			Debug.LogWarning("inventory full");
-			return;
-		}
-
 		newItem = TryStackItem(newItem);
 
-		if (newItem.CurrentStack > 0) //check stack count after try stacking
+		if (InventoryFull() && newItem.CurrentStack > 0)
+		{
+			Debug.LogWarning("inventory full and cant stack anymore items");
+			return;
+		}
+		else if (newItem.CurrentStack > 0)
 		{
 			for (int i = 0; i < inventoryItems.Length; i++)
 			{
-				if (!SlotExists(i, true) || ItemExists(inventoryItems[i], true)) continue;
+				if (!SlotExists(i) || ItemExists(inventoryItems[i])) continue;
 
-				Debug.LogError($"added new item: {newItem.ItemDefinition.ItemName}");
+				Debug.Log($"added new item: {newItem.ItemDefinition.ItemName}");
 				AddInventoryItemToSlot(newItem, i); //add to first empty slot
 				return;
 			}
@@ -112,7 +124,11 @@ public class InventoryHandler : MonoBehaviour
 	#region item drop (TODO: update so world item is spawned)
 	public void DropItem(int slot, bool dropStack)
 	{
-		if (!SlotExists(slot, true) || !ItemExists(inventoryItems[slot], true)) return;
+		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot]))
+		{
+			Debug.LogError($"no item exists in slot {slot}");
+			return;
+		}
 
 		InventoryItem itemToDrop = inventoryItems[slot];
 
@@ -126,7 +142,11 @@ public class InventoryHandler : MonoBehaviour
 	#region removing items
 	public void RemoveItemsFromSlot(int slot, int stackToRemove)
 	{
-		if (!SlotExists(slot, true) || !ItemExists(inventoryItems[slot], true)) return;
+		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot]))
+		{
+			Debug.LogError($"no item exists in slot {slot}");
+			return;
+		}
 
 		inventoryItems[slot].RemoveItemStack(stackToRemove);
 		if (inventoryItems[slot].CurrentStack <= 0)
@@ -134,60 +154,55 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region buying/selling items (TODO: buying method still needs testing)
-	public void BuyItemInSlot(InventoryHandler sellersInventory, int slot, bool buyingStack)
+	#region buying/selling items
+	public void BuyItemInSlot(InventoryHandler otherInventory, int slot, bool buyingStack)
 	{
-		if (InventoryFull(true)) return;
-		if (!SlotExists(slot, true) || !ItemExists(inventoryItems[slot], true)) return;
+		if (InventoryFull() || otherInventory.InventoryFull()) return;
+		if (!otherInventory.SlotExists(slot) || !ItemExists(otherInventory.inventoryItems[slot]))
+		{
+			Debug.LogError($"no item exists in slot {slot}");
+			return;
+		}
 
-		InventoryItem item = sellersInventory.inventoryItems[slot];
-
-		ProcessTransaction(sellersInventory, item, slot, buyingStack, false);
-		ProcessTransaction(this, item, slot, buyingStack, true);
+		InventoryItem item = otherInventory.inventoryItems[slot];
+		ProcessTransaction(this, otherInventory, item, slot, buyingStack);
 	}
-	public void SellItemInSlot(InventoryHandler buyersInventory, int slot, bool sellingStack)
+	public void SellItemInSlot(InventoryHandler otherInventory, int slot, bool sellingStack)
 	{
-		if (buyersInventory.InventoryFull(true)) return;
-		if (!SlotExists(slot, true) || !ItemExists(inventoryItems[slot], true)) return;
+		if (InventoryFull() || otherInventory.InventoryFull()) return;
+		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot]))
+		{
+			Debug.LogError($"no item exists in slot {slot}");
+			return;
+		}
 
 		InventoryItem item = inventoryItems[slot];
-
-		ProcessTransaction(buyersInventory, item, slot, sellingStack, true);
-		ProcessTransaction(this, item, slot, sellingStack, false);
+		ProcessTransaction(otherInventory, this, item, slot, sellingStack);
 	}
-	private void ProcessTransaction(InventoryHandler inventory, InventoryItem item, int slot, bool sellingStack, bool isBuying)
+	private void ProcessTransaction(InventoryHandler buyer, InventoryHandler seller, InventoryItem item, int slot, bool fullStack)
 	{
-		int price = item.ItemDefinition.ItemPrice;
-		int stackCount = 1;
+		int stackCount = fullStack ? item.CurrentStack : 1;
+		int price = item.ItemDefinition.ItemPrice * stackCount;
 
-		if (sellingStack)
+		if (!buyer.HasEnoughMoney(price))
 		{
-			price *= item.CurrentStack;
-			stackCount = item.CurrentStack;
+			Debug.LogWarning($"Buyer cannot afford {stackCount}x {item.ItemDefinition.ItemName} ({buyer.Money}/{price})");
+			return;
 		}
 
-		if (isBuying)
+		if (buyer.InventoryFull())
 		{
-			if (!inventory.HasEnoughMoney(price)) //show in ui to player when ui exists
-			{
-				Debug.LogWarning($"cant afford to buy {stackCount}x {item.ItemDefinition.ItemName} : {inventory.Money}/{price}");
-				return;
-			}
-
-			inventory.RemoveMoney(price);
-			inventory.AddNewItemPickUp(new(item.ItemDefinition, stackCount));
+			Debug.LogWarning("Buyer inventory full.");
+			return;
 		}
-		else
-		{
-			if (!inventory.HasEnoughMoney(price)) //show in ui to player when ui exists
-			{
-				Debug.LogWarning($"buyer cant afford to buy {stackCount}x {item.ItemDefinition.ItemName} : {inventory.Money}/{price}");
-				return;
-			}
 
-			inventory.AddMoney(price);
-			inventory.RemoveItemsFromSlot(slot, stackCount);
-		}
+		//money transfer
+		buyer.RemoveMoney(price);
+		seller.AddMoney(price);
+
+		//item transfer
+		buyer.AddNewItemPickUp(new(item.ItemDefinition, stackCount));
+		seller.RemoveItemsFromSlot(slot, stackCount);
 	}
 	#endregion
 
@@ -204,7 +219,7 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region reset inventory (TODO needs testing)
+	#region reset inventory
 	public void ResetInventory()
 	{
 		for (int i = 0; i < inventoryItems.Length; i++)
@@ -215,12 +230,12 @@ public class InventoryHandler : MonoBehaviour
 	#region item stacking helpers
 	private InventoryItem TryStackItem(InventoryItem itemToSack)
 	{
-		Debug.LogError($"trying to stack item: {itemToSack.ItemDefinition.ItemName} ({itemToSack.CurrentStack}x)");
+		Debug.Log($"trying to stack item: {itemToSack.ItemDefinition.ItemName} ({itemToSack.CurrentStack}x)");
 		foreach (InventoryItem existingItem in inventoryItems)
 		{
 			if (!ItemExists(existingItem) || !ItemDefinitionMatches(existingItem, itemToSack)) continue; //filter
 
-			Debug.LogError($"existing item: {existingItem.ItemDefinition.ItemName} with stack {existingItem.CurrentStack}");
+			Debug.Log($"existing item: {existingItem.ItemDefinition.ItemName} with stack {existingItem.CurrentStack}");
 
 			if (existingItem.CurrentStack < existingItem.ItemDefinition.StackLimit) //check for valid stack space
 				itemToSack = StackItem(existingItem, itemToSack); //stack item
@@ -237,13 +252,13 @@ public class InventoryHandler : MonoBehaviour
 			existingItem.SetItemStack(existingItem.ItemDefinition.StackLimit); //set max stack limit
 			newStackCount -= existingItem.ItemDefinition.StackLimit; //carry overflow
 			itemToSack.SetItemStack(newStackCount); //set to overflow
-			Debug.LogError($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
+			Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 		}
 		else
 		{
 			existingItem.AddItemStack(itemToSack.CurrentStack); //add to stack
 			itemToSack.SetItemStack(0); //nothing left to stack
-			Debug.LogError($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
+			Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 		}
 
 		return itemToSack;
@@ -253,7 +268,11 @@ public class InventoryHandler : MonoBehaviour
 	#region item unstacking helpers
 	private void UnstackItem(int slot, int stackToRemove)
 	{
-		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot])) return;
+		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot]))
+		{
+			Debug.LogError($"no item exists in slot {slot}");
+			return;
+		}
 
 		inventoryItems[slot].RemoveItemStack(stackToRemove);
 
@@ -263,7 +282,7 @@ public class InventoryHandler : MonoBehaviour
 	#endregion
 
 	#region inventory checks
-	public bool InventoryFull(bool log = false)
+	public bool InventoryFull()
 	{
 		int fullSlots = 0;
 		foreach (InventoryItem item in inventoryItems)
@@ -273,36 +292,29 @@ public class InventoryHandler : MonoBehaviour
 		}
 
 		if (InventorySize <= fullSlots)
-		{
-			if (log)
-				Debug.LogWarning("inventory is full");
 			return true;
-		}
 		else
 			return false;
 	}
-	public bool SlotExists(int slot, bool log = false)
+	public bool SlotExists(int slot)
 	{
 		if (slot < 0 || slot >= inventoryItems.Length)
 		{
-			if (log) Debug.LogError($"Invalid slot index {slot}. Inventory size is 0-{inventoryItems.Length - 1}");
+			Debug.LogError("slot index out of range");
 			return false;
 		}
 		return true;
 	}
-	public bool ItemExists(InventoryItem item, bool log = false)
+	public bool ItemExists(InventoryItem item)
 	{
 		if (item == null)
 		{
-			if (log) Debug.LogError("Item reference null");
+			Debug.LogError("inventory item null");
 			return false;
 		}
 
 		if (item.ItemDefinition == null)
-		{
-			if (log) Debug.LogError($"InventoryItems, ItemDefinition is null");
 			return false;
-		}
 
 		return true;
 	}
