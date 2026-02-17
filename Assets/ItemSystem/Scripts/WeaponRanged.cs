@@ -8,9 +8,9 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
 
-	public override void InitializeItem(WeaponRangedDefinition definition)
+	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition);
+		base.InitializeItem(definition, itemStack);
 		weaponDefinition = definition;
 
 		// weapon-specific setup here

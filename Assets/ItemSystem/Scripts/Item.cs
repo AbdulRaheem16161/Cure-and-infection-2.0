@@ -1,6 +1,4 @@
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 {
@@ -8,9 +6,12 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 
 	public int CurrentItemStack{ get; private set; }
 
-	public virtual void InitializeItem(T definition)
+	public virtual void InitializeItem(T definition, int itemStack)
 	{
 		itemDefinition = definition;
+		CurrentItemStack = itemStack;
+
+		//do common things to set up item, eg setting 3d model, item drop sound initial position etc...
 	}
 
 	#region item pickup (TODO: destroy world object being picked up, decide how its called eg: interact or trigger collider etc...)

@@ -7,9 +7,9 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	private bool CanSwing => swingCooldownTimer <= 0;
 	private float swingCooldownTimer;
 
-	public override void InitializeItem(WeaponMeleeDefinition definition)
+	public override void InitializeItem(WeaponMeleeDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition);
+		base.InitializeItem(definition, itemStack);
 		weaponDefinition = definition;
 
 		// weapon-specific setup here
