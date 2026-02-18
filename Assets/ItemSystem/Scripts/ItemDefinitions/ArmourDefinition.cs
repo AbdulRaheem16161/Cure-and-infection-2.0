@@ -11,8 +11,10 @@ public class ArmourDefinition : ItemDefinition
 		unset, helmet, chest, backpack
 	}
 
-	[SerializeField] private int protectionProvided;
-	[SerializeField] private int inventorySlotsProvided;
+	[Tooltip("% Damage reduction")]
+	[Range(0f, 1f)]
+	[SerializeField] private float protectionProvided;
+	[SerializeField] private float inventorySlotsProvided;
 	#endregion
 
 	//add fields for ui icons, 3d prefab models etc, sfx/vfx specific for armour etc...
@@ -21,7 +23,7 @@ public class ArmourDefinition : ItemDefinition
 
 	#region readoly properties
 	public ArmourSlotType ArmourSlot => armourType;
-	public int ProtectionProvided => protectionProvided;
-	public int InventorySlotsProvided => inventorySlotsProvided;
+	public float ProtectionProvided => protectionProvided;
+	public float InventorySlotsProvided => inventorySlotsProvided;
 	#endregion
 }

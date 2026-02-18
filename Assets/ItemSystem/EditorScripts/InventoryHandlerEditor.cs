@@ -17,6 +17,7 @@ public class InventoryHandlerEditor : Editor
 		#region modifying money buttons
 		GUILayout.Label("Debug money", EditorStyles.boldLabel);
 		inventory.addMoney = EditorGUILayout.IntField("Add money", inventory.addMoney);
+
 		if (GUILayout.Button("Modify Money"))
 		{
 			if (!ApplicationPlaying()) return;
@@ -30,6 +31,7 @@ public class InventoryHandlerEditor : Editor
 		#region inventory resize buttons
 		GUILayout.Label("Inventory Resizing", EditorStyles.boldLabel);
 		inventory.modifyInventorySizeByThis = EditorGUILayout.IntField("Modify Inventory By", inventory.modifyInventorySizeByThis);
+
 		if (GUILayout.Button("Modify Inventory Size"))
 		{
 			if (!ApplicationPlaying()) return;
@@ -59,6 +61,17 @@ public class InventoryHandlerEditor : Editor
 			{
 				Debug.LogError("no item specified in itemToSpawn field");
 				return;
+			}
+
+			if (inventory.itemToSpawnCount > inventory.itemToSpawn.StackLimit)
+			{
+				Debug.LogWarning($"{inventory.itemToSpawnCount} is higher then stack limit of {inventory.itemToSpawn.StackLimit}, setting to max");
+				inventory.itemToSpawnCount = inventory.itemToSpawn.StackLimit;
+			}
+			if (inventory.itemToSpawnCount < 1)
+			{
+				Debug.LogWarning($"{inventory.itemToSpawnCount} is smaller then minimum limit of 1, setting to 1");
+				inventory.itemToSpawnCount = 1;
 			}
 
 			inventory.AddNewItemPickUp(TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));
@@ -121,6 +134,7 @@ public class InventoryHandlerEditor : Editor
 
 		#region resetting inventory button
 		GUILayout.Label("Reset Inventory", EditorStyles.boldLabel);
+
 		if (GUILayout.Button("Reset Inventory"))
 		{
 			if (!ApplicationPlaying()) return;

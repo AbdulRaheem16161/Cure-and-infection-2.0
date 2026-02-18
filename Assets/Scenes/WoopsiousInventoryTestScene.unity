@@ -422,7 +422,7 @@ GameObject:
   - component: {fileID: 247431651}
   - component: {fileID: 247431652}
   m_Layer: 0
-  m_Name: NpcInventory
+  m_Name: NpcObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -455,9 +455,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  money: 0
   inventorySize: 5
   inventoryItems: []
-  Money: 500
   addMoney: 500
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0
@@ -473,9 +473,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1563066642}
+  - component: {fileID: 1563066645}
+  - component: {fileID: 1563066644}
   - component: {fileID: 1563066643}
   m_Layer: 0
-  m_Name: PlayerInventory
+  m_Name: PlayerObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -508,15 +510,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  money: 0
   inventorySize: 5
   inventoryItems: []
-  Money: 500
   addMoney: 500
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0
   slotIndex: 0
   itemToSpawn: {fileID: 0}
   itemToSpawnCount: 0
+--- !u!114 &1563066644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563066641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edda677364658b744ba34b0e7a8ea499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentSlots: []
+  equippedRangedWeapon: {fileID: 0}
+  equippedMeleeWeapon: {fileID: 0}
+  equippedHelmet: {fileID: 0}
+  equippedChest: {fileID: 0}
+  equippedBackpack: {fileID: 0}
+--- !u!114 &1563066645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563066641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100
+  food: 100
+  water: 100
+  stamina: 100
+  headProtection: 0
+  chestProtection: 0
 --- !u!1 &1792759529
 GameObject:
   m_ObjectHideFlags: 0

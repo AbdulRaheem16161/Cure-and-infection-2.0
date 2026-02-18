@@ -4,6 +4,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 {
 	private WeaponRangedDefinition weaponDefinition;
 
+	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
+
 	private int currentMagazineAmmo; //track mag ammo count at runtime
 	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing

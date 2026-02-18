@@ -4,6 +4,8 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 {
 	private WeaponMeleeDefinition weaponDefinition;
 
+	public WeaponMeleeDefinition WeaponDefinition => weaponDefinition;
+
 	private bool CanSwing => swingCooldownTimer <= 0;
 	private float swingCooldownTimer;
 

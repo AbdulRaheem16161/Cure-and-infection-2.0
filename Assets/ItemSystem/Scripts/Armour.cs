@@ -4,6 +4,8 @@ public class Armour : Item<ArmourDefinition>
 {
 	private ArmourDefinition armourDefinition;
 
+	public ArmourDefinition ArmourDefinition => armourDefinition;
+
 	public override void InitializeItem(ArmourDefinition definition, int itemStack)
 	{
 		base.InitializeItem(definition, itemStack);
