@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WeaponRanged : Item<WeaponRangedDefinition>
 {
-	private WeaponRangedDefinition weaponDefinition;
+	[SerializeField] private WeaponRangedDefinition weaponDefinition;
 
 	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
 

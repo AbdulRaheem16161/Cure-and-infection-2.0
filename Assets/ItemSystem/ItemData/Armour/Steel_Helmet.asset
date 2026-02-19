@@ -17,11 +17,11 @@ MonoBehaviour:
   itemDescription: 
   itemPrice: 170
   tradable: 0
-  allowedSlots: 5
+  allowedSlots: 9
   stackLimit: 1
   itemWeight: 3.7
   itemPrefab: {fileID: 0}
   itemUiIcon: {fileID: 0}
   armourType: 1
-  protectionProvided: 0.1
+  protectionProvided: 0.05
   inventorySlotsProvided: 0

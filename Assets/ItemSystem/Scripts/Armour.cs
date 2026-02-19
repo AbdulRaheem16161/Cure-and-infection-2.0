@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Armour : Item<ArmourDefinition>
 {
-	private ArmourDefinition armourDefinition;
+	[SerializeField] private ArmourDefinition armourDefinition;
 
 	public ArmourDefinition ArmourDefinition => armourDefinition;
 

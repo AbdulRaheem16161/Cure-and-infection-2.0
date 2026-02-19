@@ -19,7 +19,7 @@ public class ItemDefinition : ScriptableObject
 	[Flags]
 	public enum InventorySlotType //move into inventory system at some point
 	{
-		basic = 1, weapon = 2, armour = 4, consumable = 8
+		basic = 1, weaponRanged = 2, weaponMelee = 4, armour = 8, consumable = 16
 	}
 	[SerializeField] private int stackLimit;
 	[SerializeField] private float itemWeight;

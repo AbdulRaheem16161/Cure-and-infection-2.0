@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62d3e23b25745e244829608f1f902157, type: 3}
   m_Name: Composite_Chestpiece
   m_EditorClassIdentifier: 
-  itemId: Steel_Helmet
-  itemName: Steel helmet
+  itemId: Composite_Chespiece
+  itemName: Composite Chespiece
   itemDescription: 
-  itemPrice: 365
+  itemPrice: 830
   tradable: 0
-  allowedSlots: 5
+  allowedSlots: 9
   stackLimit: 1
-  itemWeight: 2.4
+  itemWeight: 6.8
   itemPrefab: {fileID: 0}
   itemUiIcon: {fileID: 0}
-  armourType: 1
-  protectionProvided: 0.3
+  armourType: 2
+  protectionProvided: 0.35
   inventorySlotsProvided: 0

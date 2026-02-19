@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WeaponMelee : Item<WeaponMeleeDefinition>
 {
-	private WeaponMeleeDefinition weaponDefinition;
+	[SerializeField] private WeaponMeleeDefinition weaponDefinition;
 
 	public WeaponMeleeDefinition WeaponDefinition => weaponDefinition;
 

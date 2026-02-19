@@ -17,9 +17,11 @@ MonoBehaviour:
   itemDescription: Restores a lot of water
   itemPrice: 80
   tradable: 0
-  allowedSlots: 9
+  allowedSlots: 17
   stackLimit: 5
   itemWeight: 0.8
+  itemPrefab: {fileID: 0}
+  itemUiIcon: {fileID: 0}
   restorationType: 4
   healthRestored: 60
   foodRestored: 70

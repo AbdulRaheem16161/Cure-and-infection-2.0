@@ -19,7 +19,7 @@ public class EquipmentHandlerEditor : Editor
 		equipment.slotToEquipItemTo = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
 		equipment.itemToEquipCount = EditorGUILayout.IntField("Item To Equip Count", equipment.itemToEquipCount);
 
-		if (GUILayout.Button("Equip Item"))
+		if (GUILayout.Button("Equip Item (destroys any equipped one)"))
 		{
 			if (!ApplicationPlaying()) return;
 
@@ -41,6 +41,23 @@ public class EquipmentHandlerEditor : Editor
 			}
 
 			equipment.EquipItem(equipment.itemToEquip, equipment.itemToEquipCount, equipment.slotToEquipItemTo);
+		}
+
+		GUILayout.Label("Equipping Item From Inventory", EditorStyles.boldLabel);
+		equipment.equipItemFromSlot = EditorGUILayout.IntField("Equip Item From Slot", equipment.equipItemFromSlot);
+		equipment.slotToEquipItemTo = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
+
+		if (GUILayout.Button("Equip Item From Inventory"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			if (equipment.itemToEquip == null)
+			{
+				Debug.LogError("no item specified in itemToEquip field");
+				return;
+			}
+
+			equipment.EquipItemFromInventory(equipment.equipItemFromSlot, equipment.slotToEquipItemTo);
 		}
 		#endregion
 

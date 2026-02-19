@@ -17,9 +17,11 @@ MonoBehaviour:
   itemDescription: Restores a lot of health
   itemPrice: 75
   tradable: 0
-  allowedSlots: 9
+  allowedSlots: 17
   stackLimit: 3
   itemWeight: 0.25
+  itemPrefab: {fileID: 0}
+  itemUiIcon: {fileID: 0}
   restorationType: 1
   healthRestored: 60
   foodRestored: 6
