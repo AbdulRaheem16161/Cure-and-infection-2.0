@@ -3,8 +3,8 @@ using UnityEngine;
 public class CharacterStatsTest : MonoBehaviour
 {
 	public int health;
-	public int food;
 	public int water;
+	public int food;
 	public int stamina;
 
 	public float headProtection;
@@ -26,5 +26,15 @@ public class CharacterStatsTest : MonoBehaviour
 			else if (armourDefinition.ArmourSlot == ArmourDefinition.ArmourSlotType.chest)
 				chestProtection += armourDefinition.ProtectionProvided;
 		}
+	}
+
+	public void UseConsumable(ConsumableDefinition consumable)
+	{
+		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
+			health += consumable.HealthRestored;
+		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.water))
+			water += consumable.WaterRestored;
+		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
+			food += consumable.FoodRestored;
 	}
 }

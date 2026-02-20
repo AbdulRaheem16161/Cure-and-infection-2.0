@@ -43,6 +43,8 @@ public class EquipmentHandlerEditor : Editor
 			equipment.EquipItem(equipment.itemToEquip, equipment.itemToEquipCount, equipment.slotToEquipItemTo);
 		}
 
+		GUILayout.Space(10);
+
 		GUILayout.Label("Equipping Item From Inventory", EditorStyles.boldLabel);
 		equipment.equipItemFromSlot = EditorGUILayout.IntField("Equip Item From Slot", equipment.equipItemFromSlot);
 		equipment.slotToEquipItemTo = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
@@ -63,7 +65,7 @@ public class EquipmentHandlerEditor : Editor
 
 		GUILayout.Space(10);
 
-		#region unequip item buttons
+		#region unequip item button
 		GUILayout.Label("Unequipping Items", EditorStyles.boldLabel);
 		equipment.equipmentSlotToUnequip = 
 			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Unequip", equipment.equipmentSlotToUnequip);
@@ -73,6 +75,21 @@ public class EquipmentHandlerEditor : Editor
 			if (!ApplicationPlaying()) return;
 
 			equipment.UnequipItem(equipment.equipmentSlotToUnequip);
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region use consumable in equipment slot button
+		GUILayout.Label("Use Consumable In Slot", EditorStyles.boldLabel);
+		equipment.consumableSlotToUse =
+			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Unequip", equipment.consumableSlotToUse);
+
+		if (GUILayout.Button("Use Consumable Item"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.UseConsumable(equipment.consumableSlotToUse);
 		}
 		#endregion
 	}
