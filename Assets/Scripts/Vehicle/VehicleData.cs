@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class VehicleData : MonoBehaviour
@@ -7,6 +8,7 @@ public class VehicleData : MonoBehaviour
     public string vehicleName;
     public float maxHealth;
     public float currentHealth;
+    [DoNotSerialize] public float currentSpeed = 0f;
     public float maxSpeed;
     public float acceleration;
     public float handlingSpeed;

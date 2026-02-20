@@ -63,6 +63,9 @@ public class VehicleController : MonoBehaviour
         {            
             UpdateWheel(wheel.wheelCollider, wheel.wheelObject.transform, wheel.wheelEffects);
         }
+
+        // Send speed
+        _data.currentSpeed = forwardSpeed; // Convert to km/h
     }
 
     private void TurnoffLights(bool engineOn)
