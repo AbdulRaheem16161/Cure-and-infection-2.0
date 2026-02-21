@@ -488,6 +488,7 @@ MonoBehaviour:
   itemToEquipCount: 0
   slotToEquipItemTo: 0
   equipmentSlotToUnequip: 0
+  consumableSlotToUse: 0
   equipItemFromSlot: 0
 --- !u!114 &247431654
 MonoBehaviour:
@@ -502,8 +503,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 0
-  food: 0
   water: 0
+  food: 0
   stamina: 0
   headProtection: 0
   chestProtection: 0
@@ -646,6 +647,7 @@ MonoBehaviour:
   itemToEquipCount: 1
   slotToEquipItemTo: 0
   equipmentSlotToUnequip: 0
+  consumableSlotToUse: 0
   equipItemFromSlot: 0
 --- !u!114 &1563066645
 MonoBehaviour:
@@ -659,10 +661,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
-  food: 100
-  water: 100
-  stamina: 100
+  health: 50
+  water: 50
+  food: 50
+  stamina: 50
   headProtection: 0
   chestProtection: 0
 --- !u!1 &1792759529

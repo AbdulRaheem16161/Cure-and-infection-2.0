@@ -42,9 +42,9 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 
 	#region events
-	public static event Action<EquipmentSlot> OnItemEquip;
-	public static event Action<EquipmentSlot> OnItemUnEquip;
-	public static event Action<EquipmentSlot> OnConsumableUsed;
+	public event Action<EquipmentSlot> OnItemEquip;
+	public event Action<EquipmentSlot> OnItemUnEquip;
+	public event Action<EquipmentSlot> OnConsumableUsed;
 	#endregion
 
 	public enum EquipmentType
@@ -78,7 +78,7 @@ public class EquipmentHandler : MonoBehaviour
 		equipmentSlots = new();
 		slotLookup = new();
 
-		foreach (EquipmentType type in System.Enum.GetValues(typeof(EquipmentType)))
+		foreach (EquipmentType type in Enum.GetValues(typeof(EquipmentType)))
 		{
 			EquipmentSlot newSlot = new(type, null);
 
@@ -88,7 +88,7 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region equipping/unequipping item method calls
+	#region equipping item method calls
 	/// <summary>
 	/// equip item, replacing any existing item, safe to use for npcs
 	/// </summary>
@@ -128,7 +128,9 @@ public class EquipmentHandler : MonoBehaviour
 		HandleItemEquipping(itemToEquip, equipmentSlot);
 		InventoryHandler.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack);
 	}
+	#endregion
 
+	#region unequipping item method calls
 	/// <summary>
 	/// unequip item, returning existing item to inventory by default
 	/// </summary>
@@ -140,10 +142,13 @@ public class EquipmentHandler : MonoBehaviour
 		if (equippedItem == null) return; //no equipped item to unequip
 		HandleItemUnequipping(equipmentSlot);
 
-		if (returnItem && !InventoryHandler.InventoryFull()) //return equipped item
-			InventoryHandler.AddNewItemPickUp(equippedItem);
-		else
-			Debug.LogWarning("inventory full, cannot unequip item");
+		if (returnItem)
+		{
+			if (!InventoryHandler.InventoryFull()) //return equipped item
+				InventoryHandler.AddNewItemPickUp(equippedItem);
+			else
+				Debug.LogWarning("inventory full, cannot unequip item");
+		}
 	}
 	#endregion
 
@@ -174,6 +179,7 @@ public class EquipmentHandler : MonoBehaviour
 			//no world object to instantiate
 		}
 
+		OnItemEquip?.Invoke(slot);
 		Debug.Log($"equipped {item.ItemDefinition.ItemName} to {slot.equipmentType} slot");
 	}
 	#endregion
@@ -199,6 +205,7 @@ public class EquipmentHandler : MonoBehaviour
 			//no world object
 		}
 
+		OnItemUnEquip?.Invoke(slot);
 		Debug.Log($"unequipped {slot.item.ItemDefinition.ItemName} from {slot.equipmentType} slot");
 		slot.item = null;
 	}
@@ -296,7 +303,6 @@ public class EquipmentHandler : MonoBehaviour
 
 		armourInstance.gameObject.SetActive(true);
 		armourInstance.InitializeItem((ArmourDefinition)slot.item.ItemDefinition, slot.item.CurrentStack);
-		UpdateArmourStats();
 	}
 
 	private void UnEquipArmour(EquipmentSlot slot)
@@ -312,17 +318,7 @@ public class EquipmentHandler : MonoBehaviour
 			equippedArmour[slot.equipmentType] = armourInstance;
 
 		//destroy or disable game object
-		UpdateArmourStats();
 		armourInstance.gameObject.SetActive(false);
-	}
-
-	private void UpdateArmourStats()
-	{
-		var armourPieces = equippedArmour.Values
-			.Where(a => a != null) //ignore null armours
-			.ToArray();
-
-		CharacterStats.RecalculateArmourProtectionStats(armourPieces);
 	}
 	#endregion
 
@@ -365,8 +361,6 @@ public class EquipmentHandler : MonoBehaviour
 		}
 
 		Debug.Log($"used consumable {equippedItem.ItemDefinition.ItemName} in {equipmentType} slot");
-
-		CharacterStats.UseConsumable((ConsumableDefinition)equippedItem.ItemDefinition);
 		equippedItem.RemoveItemStack(1);
 
 		if (equippedItem.CurrentStack <= 0)
@@ -374,6 +368,8 @@ public class EquipmentHandler : MonoBehaviour
 			Debug.Log($"no more consumables left in {equipmentType} slot, deleting item");
 			HandleItemUnequipping(equipmentSlot);
 		}
+
+		OnConsumableUsed?.Invoke(equipmentSlot);
 	}
 	#endregion
 

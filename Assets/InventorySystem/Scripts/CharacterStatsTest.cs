@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class CharacterStatsTest : MonoBehaviour
 {
+	public EquipmentHandler EquipmentHandler { get; private set; }
+	public InventoryHandler InventoryHandler { get; private set; }
+
 	public int health;
 	public int water;
 	public int food;
@@ -10,31 +13,90 @@ public class CharacterStatsTest : MonoBehaviour
 	public float headProtection;
 	public float chestProtection;
 
-	public void RecalculateArmourProtectionStats(Armour[] equippedArmour)
+	private void Awake()
 	{
-		float headProtection = 0;
-		float chestProtection = 0;
+		EquipmentHandler = GetComponent<EquipmentHandler>();
 
-		foreach (Armour armour in equippedArmour)
+		if (EquipmentHandler == null)
 		{
-			if (armour == null) continue; //no armour equipped
+			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
+			return;
+		}
 
-			ArmourDefinition armourDefinition = armour.ArmourDefinition;
+		InventoryHandler = GetComponent<InventoryHandler>();
 
-			if (armourDefinition.ArmourSlot == ArmourDefinition.ArmourSlotType.helmet)
-				headProtection += armourDefinition.ProtectionProvided;
-			else if (armourDefinition.ArmourSlot == ArmourDefinition.ArmourSlotType.chest)
-				chestProtection += armourDefinition.ProtectionProvided;
+		if (InventoryHandler == null)
+		{
+			Debug.LogError($"InventoryHandler script not found on this gameobject: {gameObject.name}");
+			return;
 		}
 	}
 
-	public void UseConsumable(ConsumableDefinition consumable)
+	private void OnEnable()
 	{
-		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
-			health += consumable.HealthRestored;
-		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.water))
-			water += consumable.WaterRestored;
-		if (consumable.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
-			food += consumable.FoodRestored;
+		EquipmentHandler.OnItemEquip += OnItemEquipped;
+		EquipmentHandler.OnItemUnEquip += OnItemUnEquipped;
+		EquipmentHandler.OnConsumableUsed += UseConsumable;
+	}
+
+	private void OnDisable()
+	{
+		EquipmentHandler.OnItemEquip -= OnItemEquipped;
+		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
+		EquipmentHandler.OnConsumableUsed -= UseConsumable;
+	}
+
+	private void OnItemEquipped(EquipmentSlot slot)
+	{
+		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		{
+			switch (slot.equipmentType)
+			{
+				case EquipmentHandler.EquipmentType.helmet:
+				headProtection += armourDefinition.ProtectionProvided;
+				break;
+
+				case EquipmentHandler.EquipmentType.chest:
+				chestProtection += armourDefinition.ProtectionProvided;
+				break;
+			}
+		}
+	}
+
+	private void OnItemUnEquipped(EquipmentSlot slot)
+	{
+		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		{
+			switch (slot.equipmentType)
+			{
+				case EquipmentHandler.EquipmentType.helmet:
+				headProtection -= armourDefinition.ProtectionProvided;
+				break;
+
+				case EquipmentHandler.EquipmentType.chest:
+				chestProtection -= armourDefinition.ProtectionProvided;
+				break;
+			}
+		}
+	}
+
+	private void UseConsumable(EquipmentSlot slot)
+	{
+		if (slot.item.ItemDefinition is ConsumableDefinition consumableDefinition)
+		{
+			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
+			{
+				Mathf.Clamp(health += consumableDefinition.HealthRestored, 0, 100);
+			}
+			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.water))
+			{
+				Mathf.Clamp(water += consumableDefinition.WaterRestored, 0, 100);
+			}
+			water += consumableDefinition.WaterRestored;
+			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
+			{
+				Mathf.Clamp(food += consumableDefinition.FoodRestored, 0, 100);
+			}
+		}
 	}
 }

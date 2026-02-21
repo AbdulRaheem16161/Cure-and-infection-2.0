@@ -70,11 +70,17 @@ public class EquipmentHandlerEditor : Editor
 		equipment.equipmentSlotToUnequip = 
 			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Unequip", equipment.equipmentSlotToUnequip);
 
-		if (GUILayout.Button("Unequip Item"))
+		if (GUILayout.Button("Unequip Item To Inventory"))
 		{
 			if (!ApplicationPlaying()) return;
 
 			equipment.UnequipItem(equipment.equipmentSlotToUnequip);
+		}
+		if (GUILayout.Button("Unequip Item (destroys)"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.UnequipItem(equipment.equipmentSlotToUnequip, false);
 		}
 		#endregion
 

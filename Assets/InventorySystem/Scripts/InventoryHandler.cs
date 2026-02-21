@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 using static UnityEditor.Progress;
 
 public class InventoryHandler : MonoBehaviour
 {
+	public CharacterStatsTest CharacterStats { get; private set; }
+	public EquipmentHandler EquipmentHandler { get; private set; }
+
 	#region inventory settings
 	[Header("Inventory Settings")]
 	[SerializeField] private int money;
@@ -16,6 +20,11 @@ public class InventoryHandler : MonoBehaviour
 	public InventoryItem[] InventoryItems => inventoryItems;
 	#endregion
 
+	#region events
+	public event Action<int> OnInventorySizeChanged;
+	public event Action<int, InventoryItem> OnInventoryItemChanged;
+	#endregion
+
 	#region debug settings
 	[Header("Debug Settings")]
 	[HideInInspector] public int addMoney;
@@ -26,15 +35,28 @@ public class InventoryHandler : MonoBehaviour
 	[HideInInspector] public int itemToSpawnCount;
 	#endregion
 
+	#region initilize inventory + grab script refs on awake
 	private void Awake()
 	{
-		InitilizeInventory();
-	}
+		CharacterStats = GetComponent<CharacterStatsTest>();
 
-	private void InitilizeInventory() //call on awake (can be changed)
-	{
+		if (CharacterStats == null)
+		{
+			Debug.LogError($"CharacterStats script not found on this gameobject: {gameObject.name}");
+			return;
+		}
+
+		EquipmentHandler = GetComponent<EquipmentHandler>();
+
+		if (EquipmentHandler == null)
+		{
+			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
+			return;
+		}
+
 		inventoryItems = new InventoryItem[InventorySize];
 	}
+	#endregion
 
 	#region adjust inventory size
 	public void ModifyInventorySize(int sizeAdjustment)
@@ -45,6 +67,7 @@ public class InventoryHandler : MonoBehaviour
 			DecreaseInventorySize(inventoryItems.Length + sizeAdjustment);
 
 		inventorySize = inventoryItems.Length;
+		OnInventorySizeChanged?.Invoke(inventorySize);
 	}
 	private void IncreaseInventorySize(int newSize)
 	{
@@ -96,7 +119,6 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	//ways to add/remove items to/from inventory
 	#region item pickup (TODO handle destroying world items/leaving them if stack count not 0)
 	public void AddNewItemPickUp(InventoryItem newItem)
 	{
@@ -104,6 +126,7 @@ public class InventoryHandler : MonoBehaviour
 
 		if (InventoryFull() && newItem.CurrentStack > 0)
 		{
+			//leave world item on ground (stack already updated)
 			Debug.LogWarning("inventory full and cant stack anymore items");
 			return;
 		}
@@ -114,10 +137,12 @@ public class InventoryHandler : MonoBehaviour
 				if (!SlotExists(i) || ItemExists(inventoryItems[i])) continue;
 
 				Debug.Log($"added new item: {newItem.ItemDefinition.ItemName}");
-				AddInventoryItemToSlot(newItem, i); //add to first empty slot
+				AddInventoryItemToSlot(i, newItem); //add to first empty slot
 				return;
 			}
 		}
+
+		//destroy world item
 	}
 	#endregion
 
@@ -136,6 +161,8 @@ public class InventoryHandler : MonoBehaviour
 			RemoveItemsFromSlot(slot, itemToDrop.CurrentStack);
 		else
 			RemoveItemsFromSlot(slot, 1);
+
+		//spawn world item
 	}
 	#endregion
 
@@ -207,15 +234,17 @@ public class InventoryHandler : MonoBehaviour
 	#endregion
 
 	#region adding/removing InventoryItem to/from inventory
-	private void AddInventoryItemToSlot(InventoryItem item, int slot)
+	private void AddInventoryItemToSlot(int slot, InventoryItem item)
 	{
 		if (!SlotExists(slot)) return;
 		inventoryItems[slot] = item;
+		OnInventoryItemChanged?.Invoke(slot, item);
 	}
 	private void RemoveInventoryItemFromSlot(int slot)
 	{
 		if (!SlotExists(slot)) return;
 		inventoryItems[slot] = null;
+		OnInventoryItemChanged?.Invoke(slot, null);
 	}
 	#endregion
 
@@ -231,19 +260,21 @@ public class InventoryHandler : MonoBehaviour
 	private InventoryItem TryStackItem(InventoryItem itemToSack)
 	{
 		Debug.Log($"trying to stack item: {itemToSack.ItemDefinition.ItemName} ({itemToSack.CurrentStack}x)");
-		foreach (InventoryItem existingItem in inventoryItems)
+
+		for (int i = 0;i < inventoryItems.Length; i++)
 		{
+			InventoryItem existingItem = inventoryItems[i];
 			if (!ItemExists(existingItem) || !ItemDefinitionMatches(existingItem, itemToSack)) continue; //filter
 
 			Debug.Log($"existing item: {existingItem.ItemDefinition.ItemName} with stack {existingItem.CurrentStack}");
 
 			if (existingItem.CurrentStack < existingItem.ItemDefinition.StackLimit) //check for valid stack space
-				itemToSack = StackItem(existingItem, itemToSack); //stack item
+				itemToSack = StackItem(i, existingItem, itemToSack); //stack item
 		}
 
 		return itemToSack;
 	}
-	private InventoryItem StackItem(InventoryItem existingItem, InventoryItem itemToSack)
+	private InventoryItem StackItem(int slot, InventoryItem existingItem, InventoryItem itemToSack)
 	{
 		int newStackCount = existingItem.CurrentStack + itemToSack.CurrentStack;
 
@@ -252,14 +283,15 @@ public class InventoryHandler : MonoBehaviour
 			existingItem.SetItemStack(existingItem.ItemDefinition.StackLimit); //set max stack limit
 			newStackCount -= existingItem.ItemDefinition.StackLimit; //carry overflow
 			itemToSack.SetItemStack(newStackCount); //set to overflow
-			Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 		}
 		else
 		{
 			existingItem.AddItemStack(itemToSack.CurrentStack); //add to stack
 			itemToSack.SetItemStack(0); //nothing left to stack
-			Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 		}
+
+		OnInventoryItemChanged?.Invoke(slot, existingItem);
+		Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 
 		return itemToSack;
 	}
@@ -278,6 +310,12 @@ public class InventoryHandler : MonoBehaviour
 
 		if (inventoryItems[slot].CurrentStack <= 0)
 			RemoveInventoryItemFromSlot(slot);
+		else
+		{
+			InventoryItem item = inventoryItems[slot];
+			OnInventoryItemChanged?.Invoke(slot, inventoryItems[slot]);
+			Debug.Log($"unstacked item: {item.ItemDefinition.ItemName} to {item.CurrentStack}");
+		}
 	}
 	#endregion
 
