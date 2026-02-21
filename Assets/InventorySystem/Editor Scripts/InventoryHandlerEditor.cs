@@ -120,13 +120,15 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.SellItemInSlot(TestInventoryManager.Instance.npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
+			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			inventory.SellItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
 		}
 		if (GUILayout.Button("Buy Item In NPC Inventory Slot"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.BuyItemInSlot(TestInventoryManager.Instance.npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
+			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			inventory.BuyItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
 		}
 		#endregion
 

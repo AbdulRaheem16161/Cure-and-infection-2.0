@@ -56,6 +56,17 @@ public class InventoryHandler : MonoBehaviour
 
 		inventoryItems = new InventoryItem[InventorySize];
 	}
+
+	private void OnEnable()
+	{
+		EquipmentHandler.OnItemEquip += OnItemEquipped;
+		EquipmentHandler.OnItemUnEquip += OnItemUnEquipped;
+	}
+	private void OnDisable()
+	{
+		EquipmentHandler.OnItemEquip -= OnItemEquipped;
+		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
+	}
 	#endregion
 
 	#region adjust inventory size
@@ -116,6 +127,34 @@ public class InventoryHandler : MonoBehaviour
 	public void RemoveMoney(int moneyToRemove)
 	{
 		money -= moneyToRemove;
+	}
+	#endregion
+
+	#region item equipment events
+	private void OnItemEquipped(EquipmentSlot slot)
+	{
+		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		{
+			switch (slot.equipmentType)
+			{
+				case EquipmentHandler.EquipmentType.backpack:
+				ModifyInventorySize((int)armourDefinition.InventorySlotsProvided);
+				break;
+			}
+		}
+	}
+
+	private void OnItemUnEquipped(EquipmentSlot slot)
+	{
+		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		{
+			switch (slot.equipmentType)
+			{
+				case EquipmentHandler.EquipmentType.backpack:
+				ModifyInventorySize((int)armourDefinition.InventorySlotsProvided);
+				break;
+			}
+		}
 	}
 	#endregion
 

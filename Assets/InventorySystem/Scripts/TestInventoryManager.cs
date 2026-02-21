@@ -5,9 +5,9 @@ public class TestInventoryManager : MonoBehaviour
 {
 	public static TestInventoryManager Instance;
 
-	public InventoryHandler playerInventory;
+	public GameObject playerObj;
 
-	public InventoryHandler npcInventory;
+	public GameObject npcObj;
 
 	static System.Random systemRandom = new();
 
