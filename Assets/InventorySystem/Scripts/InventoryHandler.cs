@@ -185,6 +185,27 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
+	#region move items to slot (TODO: needs testing for bugs with stacking then swapping items logic)
+	public void MoveItemInSlot(int currentSlot, int newSlot)
+	{
+		InventoryItem itemInCurrentSlot = InventoryItems[currentSlot];
+		InventoryItem itemInNewSlot = InventoryItems[newSlot];
+
+		if (itemInCurrentSlot.ItemDefinition == null) return; //no item to move
+
+		itemInCurrentSlot = TryStackItem(itemInCurrentSlot); //see if item can stack
+		AddInventoryItemToSlot(newSlot, itemInCurrentSlot);
+
+		if (itemInNewSlot.ItemDefinition == null) //no item to swap back, null slot
+		{
+			RemoveInventoryItemFromSlot(currentSlot);
+			return;
+		}
+
+		AddInventoryItemToSlot(currentSlot, itemInNewSlot);
+	}
+	#endregion
+
 	#region item drop (TODO: update so world item is spawned)
 	public void DropItem(int slot, bool dropStack)
 	{
