@@ -362,14 +362,13 @@ public class EquipmentHandler : MonoBehaviour
 
 		Debug.Log($"used consumable {equippedItem.ItemDefinition.ItemName} in {equipmentType} slot");
 		equippedItem.RemoveItemStack(1);
+		OnConsumableUsed?.Invoke(equipmentSlot);
 
 		if (equippedItem.CurrentStack <= 0)
 		{
 			Debug.Log($"no more consumables left in {equipmentType} slot, deleting item");
 			HandleItemUnequipping(equipmentSlot);
 		}
-
-		OnConsumableUsed?.Invoke(equipmentSlot);
 	}
 	#endregion
 

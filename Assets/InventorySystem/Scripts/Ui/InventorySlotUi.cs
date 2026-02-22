@@ -16,10 +16,12 @@ public class InventorySlotUi : MonoBehaviour
 	#region inventory slot settings
 	[Header("Inventory Slot Settings")]
 	[SerializeField] private int slotIndex;
+	[SerializeField] private EquipmentHandler.EquipmentType slotEquipmentType;
 	#endregion
 
 	#region inventory refs (passed from InventoryUi, should hopefully be reusable for something like ShopUi as it uses an inventory)
 	[SerializeField] private InventoryHandler inventoryToRepresent;
+	[SerializeField] private EquipmentHandler equipmentToRepresent;
 	#endregion
 
 	private void Awake()
@@ -28,10 +30,21 @@ public class InventorySlotUi : MonoBehaviour
 		UpdateSlotUi(null);
 	}
 
+	/// <summary>
+	/// will probably need consumable uses event listener for EquipmentHandler for quick consumable slots
+	/// </summary>
+
 	private void OnDestroy()
 	{
 		if (inventoryToRepresent != null)
 			inventoryToRepresent.OnInventoryItemChanged -= HandleItemChanges;
+
+		if (equipmentToRepresent != null)
+		{
+			equipmentToRepresent.OnItemEquip -= HandleEquippingItem;
+			equipmentToRepresent.OnItemUnEquip -= HandleUnequippingItem;
+			equipmentToRepresent.OnConsumableUsed -= HandleEquippingItem;
+		}
 	}
 
 	#region enable/disable inventory slot
@@ -56,6 +69,55 @@ public class InventorySlotUi : MonoBehaviour
 	}
 	#endregion
 
+	#region enable/disable equipment slot
+	public void EnableEquipmentSlot(EquipmentHandler equipmentToRepresent, EquipmentHandler.EquipmentType equipmentType)
+	{
+		inventorySlotUi.SetActive(true);
+
+		if (equipmentToRepresent != null) //sub to events
+		{
+			this.equipmentToRepresent = equipmentToRepresent;
+			this.slotEquipmentType = equipmentType;
+			equipmentToRepresent.OnItemEquip += HandleEquippingItem;
+			equipmentToRepresent.OnItemUnEquip += HandleUnequippingItem;
+			equipmentToRepresent.OnConsumableUsed += HandleEquippingItem;
+		}
+
+		inventorySlotUi.SetActive(true);
+	}
+	public void DisableEquipmentSlot()
+	{
+		inventorySlotUi.SetActive(false);
+
+		if (equipmentToRepresent != null) //unsub to events
+		{
+			equipmentToRepresent.OnItemEquip -= HandleEquippingItem;
+			equipmentToRepresent.OnItemUnEquip -= HandleUnequippingItem;
+			equipmentToRepresent.OnConsumableUsed -= HandleEquippingItem;
+		}
+
+		UpdateSlotUi(null);
+	}
+	#endregion
+
+	#region equipment slot listeners
+	private void HandleEquippingItem(EquipmentSlot slot)
+	{
+		if (equipmentToRepresent == null) return;
+		if (slotEquipmentType != slot.equipmentType) return; //not correct equipment slot type
+
+		UpdateSlotUi(slot.item);
+	}
+	private void HandleUnequippingItem(EquipmentSlot slot)
+	{
+		if (equipmentToRepresent == null) return;
+		if (slotEquipmentType != slot.equipmentType) return; //not correct equipment slot type
+
+		UpdateSlotUi(null);
+	}
+	#endregion
+
+	#region inventory listener
 	private void HandleItemChanges(int slot, InventoryItem item)
 	{
 		if (inventoryToRepresent == null) return; //doesnt have inventory to represent
@@ -63,7 +125,9 @@ public class InventorySlotUi : MonoBehaviour
 
 		UpdateSlotUi(item);
 	}
+	#endregion
 
+	#region updating ui elements
 	private void UpdateSlotUi(InventoryItem item)
 	{
 		if (item != null)
@@ -90,4 +154,5 @@ public class InventorySlotUi : MonoBehaviour
 			itemCountText.text = "";
 		}
 	}
+	#endregion
 }

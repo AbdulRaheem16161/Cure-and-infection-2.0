@@ -13,6 +13,7 @@ public class InventoryUi : MonoBehaviour
 	/// for npc shop inventory, on interact pass interacted obj (npc in this case) and grab InventoryHandler script through some new method
 	/// </summary>
 	#region inventory ref
+	[Header("Runtime Ref")]
 	[SerializeField] private InventoryHandler inventory;
 	#endregion
 
