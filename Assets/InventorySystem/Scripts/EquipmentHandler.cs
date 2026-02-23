@@ -111,6 +111,13 @@ public class EquipmentHandler : MonoBehaviour
 		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
 		InventoryItem itemToEquip = InventoryHandler.InventoryItems[itemSlot];
 
+		if (itemToEquip.ItemDefinition == null && equippedItem != null && returnItem) //return early if no weapon to equip
+		{
+			HandleItemUnequipping(equipmentSlot);
+			InventoryHandler.AddNewItemPickUp(equippedItem);
+			return;
+		}
+
 		if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
 
 		if (equippedItem != null && returnItem) //return item
@@ -127,6 +134,35 @@ public class EquipmentHandler : MonoBehaviour
 
 		HandleItemEquipping(itemToEquip, equipmentSlot);
 		InventoryHandler.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack);
+	}
+	/// <summary>
+	/// equip item from equipment, swapping item places if slot matches
+	/// </summary>
+	public void EquipItemFromEquipment(EquipmentType currentSlotType, EquipmentType newSlotType)
+	{
+		EquipmentSlot currentEquipmentSlot = GetEquipmentSlot(currentSlotType);
+		EquipmentSlot newEquipmentSlot = GetEquipmentSlot(newSlotType);
+
+		InventoryItem currentEquippedItem = CheckForEquippedItem(currentSlotType);
+		InventoryItem newEquippedItem = CheckForEquippedItem(newSlotType);
+
+		if (!SlotTypesMatch(currentEquipmentSlot, newEquipmentSlot)) return; //cant swap equipped items
+
+		HandleItemEquipping(currentEquippedItem, newEquipmentSlot);
+
+		if (newEquippedItem == null)
+		{
+			HandleItemUnequipping(currentEquipmentSlot);
+			Debug.LogWarning("inventory item null");
+			return;
+		}
+		if (newEquippedItem.ItemDefinition == null) //item def null nothing to swap
+		{
+			Debug.LogWarning("inventory item definition null");
+			return;
+		}
+
+		HandleItemEquipping(newEquippedItem, currentEquipmentSlot);
 	}
 	#endregion
 
@@ -405,7 +441,23 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region slot-item type match
+	#region slot and item type checks
+	private bool SlotTypesMatch(EquipmentSlot slotOne, EquipmentSlot slotTwo)
+	{
+		if (IsRangedWeaponSlot(slotOne.equipmentType) && IsRangedWeaponSlot(slotTwo.equipmentType))
+			return true;
+		else if (IsMeleeWeaponSlot(slotOne.equipmentType) && IsMeleeWeaponSlot(slotTwo.equipmentType))
+			return true;
+		else if (IsArmourSlot(slotOne.equipmentType) && IsArmourSlot(slotTwo.equipmentType))
+			return true;
+		else if (IsConsumableSlot(slotOne.equipmentType) && IsConsumableSlot(slotTwo.equipmentType))
+			return true;
+		else
+		{
+			Debug.LogWarning("slot type and items allowed slots dont match");
+			return false;
+		}
+	}
 	private bool SlotAndItemTypeMatch(EquipmentSlot slot, InventoryItem item)
 	{
 		InventorySlotType itemAllowedInSlots = item.ItemDefinition.AllowedSlots;

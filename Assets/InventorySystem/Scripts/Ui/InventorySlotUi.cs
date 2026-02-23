@@ -137,21 +137,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	/// <summary>
-	/// implement TODO then consider if its worth switching to events so ui isnt directly calling game logic
+	/// consider if its worth switching to events so ui isnt directly calling game logic
+	/// fine for now but when swapping inventory items to equipment slots (+ equipment slots to inventory items) i use add new item which finds the
+	/// first empty slot. instead of adding it to the slot player dragged item into or from. 
 	/// </summary>
 
-	#region I drop event listener (TODO logic to handle inventory-equipment slots (+ vis versa) and equipment-equipment slots)
+	#region I drop event listener
 	public void OnDrop(PointerEventData eventData)
 	{
-		//called once a draggable object gets dropped on it.
-		//compare the dragged object InventorySlotUi + item data to this one, if its the same InventorySlotUi do nothing.
-		//if its different, check if its an equipment slot or basic inventory slot
-
-		//if equipment slot, make item type and slot type checks, if fail do nothing, if success call equip item for linked equipmentToRepresent
-		//(unequipping of other items handled internally + ui should then update through events)
-
-		//if inventory slot, add item to this specific slot, (swapping if both have items) (ui should then update through events)
-
 		Debug.LogWarning("dropped");
 		GameObject draggedObject = eventData.pointerDrag;
 		if (draggedObject == null)
@@ -160,7 +153,6 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 			return;
 		}
 
-		
 		if (!draggedObject.TryGetComponent<InventorySlotUi>(out var draggedSlotUi))
 		{
 			Debug.LogError("dragged item has no InventorySlotUi component");
@@ -169,9 +161,20 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 		if (draggedSlotUi == this) return;
 
-		inventoryToRepresent.MoveItemInSlot(draggedSlotUi.slotIndex, slotIndex);
+		if (IsInventorySlot(draggedSlotUi) && IsInventorySlot(this))
+			inventoryToRepresent.SwapItemsInSlots(draggedSlotUi.slotIndex, slotIndex);
 
-		Debug.LogError($"dragged slot {draggedSlotUi.name} was dragged ontop of slot {gameObject.name}");
+		else if (IsEquipmentSlot(draggedSlotUi) && IsEquipmentSlot(this))
+			equipmentToRepresent.EquipItemFromEquipment(draggedSlotUi.slotEquipmentType, slotEquipmentType);
+
+		else if (IsInventorySlot(draggedSlotUi) && IsEquipmentSlot(this))
+			equipmentToRepresent.EquipItemFromInventory(draggedSlotUi.slotIndex, slotEquipmentType);
+
+		else if (IsEquipmentSlot(draggedSlotUi) && IsInventorySlot(this))
+			draggedSlotUi.equipmentToRepresent.EquipItemFromInventory(slotIndex, draggedSlotUi.slotEquipmentType);
+
+		else
+			Debug.LogError("drag and drop action not supported");
 	}
 	#endregion
 
@@ -244,6 +247,23 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 			itemCountText.text = "";
 			draggableCountText.text = "";
 		}
+	}
+	#endregion
+
+	#region slot checks
+	private bool IsInventorySlot(InventorySlotUi inventorySlot)
+	{
+		if (inventorySlot.inventoryToRepresent != null)
+			return true;
+		else 
+			return false;
+	}
+	private bool IsEquipmentSlot(InventorySlotUi inventorySlot)
+	{
+		if (inventorySlot.equipmentToRepresent != null)
+			return true;
+		else
+			return false;
 	}
 	#endregion
 }

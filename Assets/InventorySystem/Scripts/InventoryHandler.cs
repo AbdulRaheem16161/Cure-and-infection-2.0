@@ -161,7 +161,7 @@ public class InventoryHandler : MonoBehaviour
 	#region item pickup (TODO handle destroying world items/leaving them if stack count not 0)
 	public void AddNewItemPickUp(InventoryItem newItem)
 	{
-		newItem = TryStackItem(newItem);
+		newItem = TryStackNewItem(newItem);
 
 		if (InventoryFull() && newItem.CurrentStack > 0)
 		{
@@ -185,18 +185,17 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region move items to slot (TODO: needs testing for bugs with stacking then swapping items logic)
-	public void MoveItemInSlot(int currentSlot, int newSlot)
+	#region move items to specific slot methods
+	public void SwapItemsInSlots(int currentSlot, int newSlot)
 	{
 		InventoryItem itemInCurrentSlot = InventoryItems[currentSlot];
 		InventoryItem itemInNewSlot = InventoryItems[newSlot];
 
-		if (itemInCurrentSlot.ItemDefinition == null) return; //no item to move
+		if (StackedExistingItems(currentSlot, newSlot)) return; //return early if successful
 
-		itemInCurrentSlot = TryStackItem(itemInCurrentSlot); //see if item can stack
 		AddInventoryItemToSlot(newSlot, itemInCurrentSlot);
 
-		if (itemInNewSlot.ItemDefinition == null) //no item to swap back, null slot
+		if (itemInNewSlot.ItemDefinition == null)
 		{
 			RemoveInventoryItemFromSlot(currentSlot);
 			return;
@@ -317,22 +316,34 @@ public class InventoryHandler : MonoBehaviour
 	#endregion
 
 	#region item stacking helpers
-	private InventoryItem TryStackItem(InventoryItem itemToSack)
+	private bool StackedExistingItems(int currentSlot, int newSlot) //bool used to check fail or success
 	{
-		Debug.Log($"trying to stack item: {itemToSack.ItemDefinition.ItemName} ({itemToSack.CurrentStack}x)");
+		InventoryItem itemInCurrentSlot = InventoryItems[currentSlot];
+		InventoryItem itemInNewSlot = InventoryItems[newSlot];
+
+		if (!ItemExists(itemInCurrentSlot) || !ItemExists(itemInNewSlot) || !ItemDefinitionMatches(itemInCurrentSlot, itemInNewSlot)) return false;
+
+		itemInCurrentSlot = StackItem(newSlot, itemInNewSlot, itemInCurrentSlot);
+		OnInventoryItemChanged?.Invoke(newSlot, itemInNewSlot);
+		OnInventoryItemChanged?.Invoke(currentSlot, itemInCurrentSlot);
+		return true;
+	}
+	private InventoryItem TryStackNewItem(InventoryItem itemToStack)
+	{
+		Debug.Log($"trying to stack new item: {itemToStack.ItemDefinition.ItemName} ({itemToStack.CurrentStack}x)");
 
 		for (int i = 0;i < inventoryItems.Length; i++)
 		{
 			InventoryItem existingItem = inventoryItems[i];
-			if (!ItemExists(existingItem) || !ItemDefinitionMatches(existingItem, itemToSack)) continue; //filter
+			if (!ItemExists(existingItem) || !ItemDefinitionMatches(existingItem, itemToStack)) continue; //filter
 
 			Debug.Log($"existing item: {existingItem.ItemDefinition.ItemName} with stack {existingItem.CurrentStack}");
 
 			if (existingItem.CurrentStack < existingItem.ItemDefinition.StackLimit) //check for valid stack space
-				itemToSack = StackItem(i, existingItem, itemToSack); //stack item
+				itemToStack = StackItem(i, existingItem, itemToStack); //stack item
 		}
 
-		return itemToSack;
+		return itemToStack;
 	}
 	private InventoryItem StackItem(int slot, InventoryItem existingItem, InventoryItem itemToSack)
 	{
@@ -351,7 +362,7 @@ public class InventoryHandler : MonoBehaviour
 		}
 
 		OnInventoryItemChanged?.Invoke(slot, existingItem);
-		Debug.Log($"stacked existing item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
+		Debug.Log($"stacked item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
 
 		return itemToSack;
 	}
