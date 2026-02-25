@@ -28,7 +28,7 @@ public class InventoryUi : MonoBehaviour
 		inventory.OnInventorySizeChanged -= HandleInventorySizeChanges;
 	}
 
-	#region show/hide inventory (should listen out for player input events + when opening other ui elements except pause screen)
+	#region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
 	public void ShowInventory()
 	{
 		inventoryUiPanel.SetActive(true);
@@ -39,6 +39,7 @@ public class InventoryUi : MonoBehaviour
 	}
 	#endregion
 
+	#region inventory size changes
 	private void HandleInventorySizeChanges(int newSize)
 	{
 		if (newSize > inventorySlotUis.Length)
@@ -56,4 +57,5 @@ public class InventoryUi : MonoBehaviour
 				inventorySlotUis[i].DisableSlot();
 		}
 	}
+	#endregion
 }

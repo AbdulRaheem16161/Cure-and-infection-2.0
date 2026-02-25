@@ -21,4 +21,14 @@ public class WeaponMeleeDefinition : ItemDefinition
 	public int Damage => damage;
 	public float AttackSpeed => attackSpeed;
 	#endregion
+
+	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.EquipMeleeWeapon(slot);
+	}
+
+	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.UnEquipMeleeWeapon(slot);
+	}
 }

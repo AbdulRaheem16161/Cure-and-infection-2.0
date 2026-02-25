@@ -26,4 +26,14 @@ public class ArmourDefinition : ItemDefinition
 	public float ProtectionProvided => protectionProvided;
 	public float InventorySlotsProvided => inventorySlotsProvided;
 	#endregion
+
+	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.EquipArmour(slot);
+	}
+
+	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.UnEquipArmour(slot);
+	}
 }

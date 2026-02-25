@@ -99,4 +99,14 @@ public class WeaponRangedDefinition : ItemDefinition
 	//projectile
 	public ProjectileDefinition AmmoType => ammoType;
 	#endregion
+
+	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.EquipRangedWeapon(slot);
+	}
+
+	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		handler.UnEquipRangedWeapon(slot);
+	}
 }

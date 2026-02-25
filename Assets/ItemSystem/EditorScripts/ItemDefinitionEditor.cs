@@ -18,6 +18,7 @@ public class ItemDefinitionEditor : Editor
 
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("tradable"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("allowedSlots"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("allowedEquipmentSlots"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("stackLimit"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("itemWeight"));
 

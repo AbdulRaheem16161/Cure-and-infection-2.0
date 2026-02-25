@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using static EquipmentHandler;
 
 [Serializable]
 public class ItemDefinition : ScriptableObject
@@ -19,8 +20,15 @@ public class ItemDefinition : ScriptableObject
 	[Flags]
 	public enum InventorySlotType //move into inventory system at some point
 	{
-		basic = 1, weaponRanged = 2, weaponMelee = 4, armour = 8, consumable = 16
+		none = 0,
+		basic = 1 << 0,
+		weaponRanged = 1 << 1,
+		weaponMelee = 1 << 2,
+		armour = 1 << 3,
+		consumable = 1 << 4
 	}
+
+	[SerializeField] private EquipmentType allowedEquipmentSlots;
 	[SerializeField] private int stackLimit;
 	[SerializeField] private float itemWeight;
 	#endregion
@@ -46,4 +54,16 @@ public class ItemDefinition : ScriptableObject
 	public GameObject ItemPrefab => itemPrefab;
 	public Sprite ItemUiIcon => itemUiIcon;
 	#endregion
+
+	public bool CanEquipTo(EquipmentType slot)
+	{
+		return (allowedEquipmentSlots & slot) != 0;
+	}
+
+	public virtual void OnEquip(EquipmentHandler handler, EquipmentSlot slot) { }
+	public virtual void OnUnequip(EquipmentHandler handler, EquipmentSlot slot) { }
+	public virtual bool OnUsed(EquipmentHandler handler, EquipmentSlot slot)
+	{
+		return false; // return true if item was consumed
+	}
 }
