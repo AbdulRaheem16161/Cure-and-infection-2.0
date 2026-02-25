@@ -5,10 +5,12 @@ using UnityEngine;
 public class VehicleData : MonoBehaviour
 {
     public GameObject steeringWheel;
+    public ParticleSystem hitParticles, smokeParticles, fireParticles, exhaustParticles;
+    public Transform driverSeat, passengerSeat, exhaustPoint;
     public string vehicleName;
     public float maxHealth;
     public float currentHealth;
-    [DoNotSerialize] public float currentSpeed = 0f;
+    public float currentSpeed = 0f;
     public float maxSpeed;
     public float acceleration;
     public float handlingSpeed;
@@ -19,10 +21,13 @@ public class VehicleData : MonoBehaviour
     public float fuelCapacity;
     public float currentFuel;
     public Vector3 centerOfMass;
+    public Axel driveAxel;
+    public HealthState currentHealthState;
+    public enum HealthState { Healthy, Damaged, Smoking, Critical}
+
     public Light[] headLights, brakeLights, reverseLights;
     public enum Axel { Front, Rear, All }
-    public Axel driveAxel;
-    [Serializable]
+        [Serializable]
     public struct Wheel
     {
         public GameObject wheelObject;
@@ -32,6 +37,7 @@ public class VehicleData : MonoBehaviour
         public float brakeRatio;
     }
     public Wheel[] wheels;
+    public AudioClip engineSfx, revSfx, brakeSfx, hornSfx;
     private Rigidbody _rigidbody;
     void Start()
     {

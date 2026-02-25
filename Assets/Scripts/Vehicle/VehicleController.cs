@@ -8,42 +8,67 @@ using UnityEngine.TextCore.LowLevel;
 public class VehicleController : MonoBehaviour
 {
     private Quaternion steeringWheelBaseRotation;
-    private VehicleData _data;
+    private VehicleData data;
     private Rigidbody _rigidbody;
     private WheelFrictionCurve baseFriction;
+    private float baseMaxSpeed;
+    private float baseHandlingSpeed;
+    private float baseMaxTurnAngle;
+    private float speedMultiplier = 1f;
+    private float handlingMultiplier = 1f;
+    private float nextFlickerTime;
+    private bool flickerBurstActive;
     private bool engineOn = false;
     private bool isReverse = false;
 
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        _data = GetComponent<VehicleData>();
-        steeringWheelBaseRotation = _data.steeringWheel.transform.localRotation;
+        data = GetComponent<VehicleData>();
+        steeringWheelBaseRotation = data.steeringWheel.transform.localRotation;
 
-        baseFriction = _data.wheels[0].wheelCollider.sidewaysFriction;
-        baseFriction.stiffness = _data.wheels[0].wheelCollider.sidewaysFriction.stiffness;
+        baseFriction = data.wheels[0].wheelCollider.sidewaysFriction;
+        baseFriction.stiffness = data.wheels[0].wheelCollider.sidewaysFriction.stiffness;
+
+        baseMaxSpeed = data.maxSpeed;
+        baseHandlingSpeed = data.handlingSpeed;
+        baseMaxTurnAngle = data.MaxTurnAngle;
 
 
-        if (_data == null) Debug.LogError("DATA IS NULL");
+        if (data == null) Debug.LogError("DATA IS NULL");
     }
     void Update()
     {
         // Input
         float forwardSpeed = transform.InverseTransformDirection(_rigidbody.linearVelocity).z;
-        float throttle = Input.GetAxis("Vertical") * (engineOn ? 1 : 0); // Disable throttle if out of fuel
+        float throttle = 0;
+        if (engineOn)
+        {
+            throttle = Input.GetAxis("Vertical"); 
+           //AudioManager.Instance.PlaySound(data.engineSfx);
+            if(throttle > 0.5f){
+                //AudioManager.Instance.PlaySound(data.revSfx);
+            }
+        }
+        
         float steer = Input.GetAxis("Horizontal");
         
-        if(Input.GetKeyDown(KeyCode.E) && _data.currentFuel > 0)
+        if(Input.GetKeyDown(KeyCode.E) && data.currentFuel > 0 && data.IsAlive())
         {
             engineOn = !engineOn;
         }
-        if (_data.currentFuel <= 0)
+        if (data.currentFuel <= 0)
         {
             engineOn = false;
         }
+        // honking
+        //if(Input.GetKeyDown(KeyCode.H)) AudioManager.Instance.PlaySound(data.hornSfx);
 
         // turnoff lights
         TurnoffLights(engineOn);
+
+        UpdateHealthState();
+        ApplyHealthPerformanceAndEffects();
         
         // Drive
         Drive(throttle);
@@ -58,27 +83,63 @@ public class VehicleController : MonoBehaviour
 
         // braking
         Braking(forwardSpeed);
+        ApplyRandomLightFlicker();
+
         // Update wheel meshes
-        foreach (VehicleData.Wheel wheel in _data.wheels)
+        foreach (VehicleData.Wheel wheel in data.wheels)
         {            
             UpdateWheel(wheel.wheelCollider, wheel.wheelObject.transform, wheel.wheelEffects);
         }
-
         // Send speed
-        _data.currentSpeed = forwardSpeed; // Convert to km/h
+        data.currentSpeed = forwardSpeed; // Convert to km/h
     }
-
+    private void UpdateHealthState()
+    {
+        float healthPercentage = data.currentHealth / data.maxHealth;
+        if (healthPercentage >= 0.75f)
+        {
+            data.currentHealthState = VehicleData.HealthState.Healthy;
+        }
+        else if (healthPercentage >= 0.5f)
+        {
+            data.currentHealthState = VehicleData.HealthState.Damaged;
+        }
+        else if (healthPercentage >= 0.25f)
+        {
+            data.currentHealthState = VehicleData.HealthState.Smoking;
+        }
+        else
+        {
+            data.currentHealthState = VehicleData.HealthState.Critical;
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.relativeVelocity.magnitude > 10f)
+        {
+            float damage = collision.relativeVelocity.magnitude * collision.relativeVelocity.magnitude * 0.01f; // Adjust this multiplier as needed
+            data.TakeDamage(damage);
+            Debug.Log($"Vehicle took {damage} damage!");
+            PlayParticleEffect(data.hitParticles, collision.contacts[0].point, Mathf.Clamp(damage/10f, 1f, 5f));
+        }
+    }
+    private void PlayParticleEffect(ParticleSystem effect, Vector3 position, float scale)
+    {
+        GameObject hitParticlesInstance = Instantiate(data.hitParticles.gameObject, position, Quaternion.identity);
+        hitParticlesInstance.transform.localScale = Vector3.one * scale;
+        hitParticlesInstance.GetComponent<ParticleSystem>().Play();
+    }
     private void TurnoffLights(bool engineOn)
     {
-        foreach (Light light in _data.headLights)
+        foreach (Light light in data.headLights)
         {
             light.enabled = engineOn;
         }
-        foreach (Light light in _data.brakeLights)
+        foreach (Light light in data.brakeLights)
         {
             light.enabled = engineOn;
         }
-        foreach (Light light in _data.reverseLights)
+        foreach (Light light in data.reverseLights)
         {
             light.enabled = engineOn;
         }
@@ -86,32 +147,134 @@ public class VehicleController : MonoBehaviour
 
     private void ConsumeFuel(float throttle)
     {
-        if (throttle != 0 && _data.currentFuel > 0)
+        if (throttle != 0 && data.currentFuel > 0)
         {
             float fuelConsumption = Mathf.Abs(throttle) * 0.01f; // Adjust this multiplier as needed
-            _data.ConsumeFuel(fuelConsumption);
+            data.ConsumeFuel(fuelConsumption);
         }
     }
     private void Drive(float throttle)
     {
-        float torque = throttle * _data.acceleration;
-        torque = Mathf.Clamp(torque, -_data.maxSpeed, _data.maxSpeed);
+        float maxAllowedSpeed = baseMaxSpeed * speedMultiplier;
+        float torque = throttle * data.acceleration;
+        torque = Mathf.Clamp(torque, -maxAllowedSpeed, maxAllowedSpeed);
 
-        foreach (VehicleData.Wheel wheel in _data.wheels)
+        foreach (VehicleData.Wheel wheel in data.wheels)
         {
-            if (wheel.axel == _data.driveAxel || _data.driveAxel == VehicleData.Axel.All)
+            if (wheel.axel == data.driveAxel || data.driveAxel == VehicleData.Axel.All)
             {
                 wheel.wheelCollider.motorTorque = torque;
             }
         }
     }
+    private void ApplyHealthPerformanceAndEffects()
+    {
+        switch (data.currentHealthState)
+        {
+            case VehicleData.HealthState.Healthy:
+                speedMultiplier = 1f;
+                handlingMultiplier = 1f;
+                break;
+            case VehicleData.HealthState.Damaged:
+                speedMultiplier = 0.5f;
+                handlingMultiplier = 1f;
+                break;
+            case VehicleData.HealthState.Smoking:
+                speedMultiplier = 0.3f;
+                handlingMultiplier = 0.7f;
+                break;
+            case VehicleData.HealthState.Critical:
+                speedMultiplier = 0.1f;
+                handlingMultiplier = 0.2f;
+                break;
+        }
+
+        data.maxSpeed = baseMaxSpeed * speedMultiplier;
+        data.handlingSpeed = baseHandlingSpeed * handlingMultiplier;
+        data.MaxTurnAngle = baseMaxTurnAngle * handlingMultiplier;
+
+        bool shouldSmoke = data.currentHealthState == VehicleData.HealthState.Smoking;
+        bool shouldFire = data.currentHealthState == VehicleData.HealthState.Critical;
+
+        ToggleEffect(data.smokeParticles, shouldSmoke);
+        ToggleEffect(data.fireParticles, shouldFire);
+    }
+    private void ToggleEffect(ParticleSystem effect, bool shouldPlay)
+    {
+        if (effect == null)
+        {
+            return;
+        }
+
+        if (shouldPlay)
+        {
+            if (!effect.isPlaying)
+            {
+                effect.Play();
+            }
+        }
+        else
+        {
+            if (effect.isPlaying)
+            {
+                effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+    }
+    private void ApplyRandomLightFlicker()
+    {
+        bool shouldFlicker = engineOn &&
+            (data.currentHealthState == VehicleData.HealthState.Smoking ||
+             data.currentHealthState == VehicleData.HealthState.Critical);
+
+        if (!shouldFlicker)
+        {
+            return;
+        }
+
+        if (Time.time >= nextFlickerTime)
+        {
+            flickerBurstActive = UnityEngine.Random.value < 0.75f;
+            nextFlickerTime = Time.time + UnityEngine.Random.Range(0.1f, 1f);
+        }
+
+        if (!flickerBurstActive)
+        {
+            return;
+        }
+
+        ForEachVehicleLight(light =>
+        {
+            if (light != null && light.enabled && UnityEngine.Random.value < 0.5f)
+            {
+                light.enabled = false;
+            }
+        });
+    }
+    private void ForEachVehicleLight(Action<Light> action)
+    {
+        foreach (Light light in data.headLights)
+        {
+            action?.Invoke(light);
+        }
+
+        foreach (Light light in data.brakeLights)
+        {
+            action?.Invoke(light);
+        }
+
+        foreach (Light light in data.reverseLights)
+        {
+            action?.Invoke(light);
+        }
+    }
     private void WheelTurning(float steerInput)
     {
         float steerAngle = Mathf.Lerp
-            (_data.wheels[0].wheelCollider.steerAngle, steerInput * _data.MaxTurnAngle, 
-            _data.handlingSpeed * Time.deltaTime);
+            (data.wheels[0].wheelCollider.steerAngle, steerInput * data.MaxTurnAngle,
+            data.handlingSpeed * Time.deltaTime);
         
-        foreach (VehicleData.Wheel wheel in _data.wheels)
+        foreach (VehicleData.Wheel wheel in data.wheels)
         {
             if (wheel.axel == VehicleData.Axel.Front)
             {
@@ -122,7 +285,7 @@ public class VehicleController : MonoBehaviour
     private void steeringWheel(float steerInput)
     {
         float steeringAngle = steerInput * 180f; 
-        _data.steeringWheel.transform.localRotation =
+        data.steeringWheel.transform.localRotation =
             steeringWheelBaseRotation * Quaternion.Euler(0, -steeringAngle, 0);
     }
     private void Braking(float forwardSpeed)
@@ -141,34 +304,34 @@ public class VehicleController : MonoBehaviour
             isReverse = false;
         }
         // reverse lights
-        foreach (Light light in _data.reverseLights)
+        foreach (Light light in data.reverseLights)
         {
             light.intensity = isReverse ? 2f : 0f;
         }
 
         //turning brakelights on/off
-        foreach (Light light in _data.brakeLights)
+        foreach (Light light in data.brakeLights)
         {
             light.intensity = isBraking ? 0.8f : 0.1f;
         }
 
         if (isBraking)
         {
-            foreach (VehicleData.Wheel wheel in _data.wheels)
+            foreach (VehicleData.Wheel wheel in data.wheels)
             {
                 wheel.wheelCollider.motorTorque = 0;
-                wheel.wheelCollider.brakeTorque = _data.brakeForce*wheel.brakeRatio;
+                wheel.wheelCollider.brakeTorque = data.brakeForce*wheel.brakeRatio;
                 wheel.wheelCollider.motorTorque = 0;
             }
            
         }
         else if (Input.GetKey(KeyCode.Space))
         {
-            foreach (VehicleData.Wheel wheel in _data.wheels)
+            foreach (VehicleData.Wheel wheel in data.wheels)
             {
                 if (wheel.axel == VehicleData.Axel.Rear)
                 {
-                    wheel.wheelCollider.brakeTorque = _data.handBrakeForce;
+                    wheel.wheelCollider.brakeTorque = data.handBrakeForce;
                     wheel.wheelCollider.motorTorque = 0;
                     WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
                     friction.stiffness = 0.5f;
@@ -178,7 +341,7 @@ public class VehicleController : MonoBehaviour
         }
         else
         {
-            foreach (VehicleData.Wheel wheel in _data.wheels)
+            foreach (VehicleData.Wheel wheel in data.wheels)
             {
                 wheel.wheelCollider.brakeTorque = 0;
                 WheelFrictionCurve friction = wheel.wheelCollider.sidewaysFriction;
@@ -196,19 +359,19 @@ public class VehicleController : MonoBehaviour
     {
         if (Mathf.Abs(forwardSpeed) > 10f)
         {
-            foreach (VehicleData.Wheel wheel in _data.wheels)
+            foreach (VehicleData.Wheel wheel in data.wheels)
             {
-                if (wheel.axel == _data.driveAxel || _data.driveAxel == VehicleData.Axel.All)
+                if (wheel.axel == data.driveAxel || data.driveAxel == VehicleData.Axel.All)
                 {
-                    wheel.wheelCollider.brakeTorque = _data.engineBrakeForce;
+                    wheel.wheelCollider.brakeTorque = data.engineBrakeForce;
                 }
             }
         }
         else
         {
-            foreach (VehicleData.Wheel wheel in _data.wheels)
+            foreach (VehicleData.Wheel wheel in data.wheels)
             {
-                if (wheel.axel == _data.driveAxel || _data.driveAxel == VehicleData.Axel.All)
+                if (wheel.axel == data.driveAxel || data.driveAxel == VehicleData.Axel.All)
                 {
                     wheel.wheelCollider.brakeTorque = 0;
                 }
