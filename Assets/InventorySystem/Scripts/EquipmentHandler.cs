@@ -119,7 +119,7 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region equipping item method calls
+	#region equipping item
 	/// <summary>
 	/// equip item, replacing any existing item, safe to use for npcs
 	/// </summary>
@@ -197,7 +197,7 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region unequipping item method calls
+	#region unequipping item
 	/// <summary>
 	/// unequip item, returning existing item to inventory by default
 	/// </summary>
@@ -216,6 +216,18 @@ public class EquipmentHandler : MonoBehaviour
 			else
 				Debug.LogWarning("inventory full, cannot unequip item");
 		}
+	}
+	#endregion
+
+	#region dropping item in equipment
+	public void DropItem(EquipmentType equipmentType, bool dropStack)
+	{
+		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
+		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
+
+		HandleItemUnequipping(equipmentSlot);
+
+		//spawn world item
 	}
 	#endregion
 

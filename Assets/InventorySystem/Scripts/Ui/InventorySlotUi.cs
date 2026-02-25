@@ -169,6 +169,10 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 			return;
 		}
 
+		HandleItemDropEvent(draggedSlotUi);
+	}
+	private void HandleItemDropEvent(InventorySlotUi draggedSlotUi)
+	{
 		if (draggedSlotUi == this) return;
 
 		if (draggedSlotUi.IsInventorySlot() && IsInventorySlot())
@@ -191,7 +195,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region i pointer click event listener
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if (Input.GetKeyDown(KeyCode.Mouse1))
+		if (eventData.button == PointerEventData.InputButton.Right && slotItem != null)
 			OnToggleInventoryContextMenu?.Invoke(this, eventData.position);
 	}
 	#endregion
@@ -268,23 +272,13 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 			itemCountText.text = "";
 			draggableCountText.text = "";
 		}
+
+		OnToggleInventoryContextMenu?.Invoke(null, new(0, 0)); //disable on inventory changes
 	}
 	#endregion
 
 	#region slot checks
-	public bool IsInventorySlot()
-	{
-		if (inventoryRef != null)
-			return true;
-		else 
-			return false;
-	}
-	public bool IsEquipmentSlot()
-	{
-		if (equipmentRef != null)
-			return true;
-		else
-			return false;
-	}
+	public bool IsInventorySlot() => inventoryRef != null;
+	public bool IsEquipmentSlot() => equipmentRef != null;
 	#endregion
 }

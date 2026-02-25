@@ -18,6 +18,7 @@ MonoBehaviour:
   itemPrice: 25
   tradable: 0
   allowedSlots: 17
+  allowedEquipmentSlots: 448
   stackLimit: 10
   itemWeight: 0.1
   itemPrefab: {fileID: 0}

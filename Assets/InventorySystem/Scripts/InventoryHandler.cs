@@ -159,9 +159,13 @@ public class InventoryHandler : MonoBehaviour
 	#endregion
 
 	#region item pickup (TODO handle destroying world items/leaving them if stack count not 0)
-	public void AddNewItemPickUp(InventoryItem newItem)
+	/// <summary>
+	/// add new items to inventory, by default trying to stack them
+	/// </summary>
+	public void AddNewItemPickUp(InventoryItem newItem, bool tryStack = true)
 	{
-		newItem = TryStackNewItem(newItem);
+		if (tryStack)
+			newItem = TryStackNewItem(newItem);
 
 		if (InventoryFull() && newItem.CurrentStack > 0)
 		{
@@ -205,7 +209,35 @@ public class InventoryHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region item drop (TODO: update so world item is spawned)
+	#region splitting items
+	public void SplitItem(int slot)
+	{
+		if (InventoryFull())
+		{
+			Debug.LogWarning("Inventory full cant split item stack");
+		}
+
+		InventoryItem item = InventoryItems[slot];
+
+		if (!ItemExists(item))
+		{
+			Debug.LogWarning($"no item in slot {slot}");
+			return;
+		}
+
+		int originalStack = item.CurrentStack / 2;      // floor division
+		int newStack = item.CurrentStack - originalStack; // remainder
+
+		// Reduce original stack
+		item.RemoveItemStack(newStack); // remove amount going to new stack
+		OnInventoryItemChanged?.Invoke(slot, item);
+
+		// Create new item with remaining stack
+		AddNewItemPickUp(new InventoryItem(item.ItemDefinition, newStack), false);
+	}
+	#endregion
+
+	#region dropping items (TODO: update so world item is spawned)
 	public void DropItem(int slot, bool dropStack)
 	{
 		if (!SlotExists(slot) || !ItemExists(inventoryItems[slot]))
@@ -233,9 +265,12 @@ public class InventoryHandler : MonoBehaviour
 			Debug.LogError($"no item exists in slot {slot}");
 			return;
 		}
+		InventoryItem item = inventoryItems[slot];
 
-		inventoryItems[slot].RemoveItemStack(stackToRemove);
-		if (inventoryItems[slot].CurrentStack <= 0)
+		item.RemoveItemStack(stackToRemove);
+		OnInventoryItemChanged?.Invoke(slot, item);
+
+		if (item.CurrentStack <= 0)
 			RemoveInventoryItemFromSlot(slot);
 	}
 	#endregion
@@ -326,6 +361,10 @@ public class InventoryHandler : MonoBehaviour
 		itemInCurrentSlot = StackItem(newSlot, itemInNewSlot, itemInCurrentSlot);
 		OnInventoryItemChanged?.Invoke(newSlot, itemInNewSlot);
 		OnInventoryItemChanged?.Invoke(currentSlot, itemInCurrentSlot);
+
+		if (itemInCurrentSlot.CurrentStack <= 0)
+			RemoveInventoryItemFromSlot(currentSlot);
+
 		return true;
 	}
 	private InventoryItem TryStackNewItem(InventoryItem itemToStack)

@@ -24,6 +24,7 @@ public class InventoryContextUi : MonoBehaviour
 	private void Awake()
 	{
 		InventorySlotUi.OnToggleInventoryContextMenu += ToggleInventoryContextMenu;
+		HideContextPanel();
 	}
 	private void OnDestroy()
 	{
@@ -44,40 +45,79 @@ public class InventoryContextUi : MonoBehaviour
 	private void ToggleInventoryContextMenu(InventorySlotUi slot, Vector2 position)
 	{
 		if (slot != null)
-			ShowContextPanel(slot);
+			ShowContextPanel(slot, position);
 		else
 			HideContextPanel();
 	}
-	private void ShowContextPanel(InventorySlotUi slot)
+	private void ShowContextPanel(InventorySlotUi slot, Vector2 position)
 	{
-		//buttons needed, equip/unequip as max 3, split stack as 1 (stack count > 1), drop 1x as 1, drop stack as 1 (stack count > 1)
-
-		if (slot.IsEquipmentSlot())
-		{
-			SetUpUnEquipContext(slot);
-		}
-		else if (slot.IsInventorySlot())
-		{
-			SetUpEquipContext(slot);
-			SetupSplitContext(slot);
-		}
-
+		SetUpEquipContext(slot);
+		SetUpUnEquipContext(slot);
+		SetupSplitContext(slot);
 		SetupDropContext(slot);
 
 		contextUiPanel.SetActive(true);
+		SetMenuPosition(position);
 	}
 	private void HideContextPanel()
 	{
 		contextUiPanel.SetActive(false);
+
+		foreach (Button button in equipItemButtons)
+			button.gameObject.SetActive(false);
+
+		unEquipItem.gameObject.SetActive(false);
+		splitItem.gameObject.SetActive(false);
+		dropItem.gameObject.SetActive(false);
+		dropItemStack.gameObject.SetActive(false);
+	}
+	#endregion
+
+	#region set context menu position and size
+	private void SetMenuPosition(Vector2 position)
+	{
+		RectTransform rect = contextUiPanel.GetComponent<RectTransform>();
+		rect.sizeDelta = SetMenuSize();
+
+		RectTransformUtility.ScreenPointToLocalPointInRectangle(
+			rect.parent as RectTransform, position, null, out Vector2 anchoredPos);
+
+		Vector2 offset = new(rect.rect.width / 2f, -rect.rect.height / 2f);
+		rect.anchoredPosition = anchoredPos + offset;
+	}
+	private Vector2 SetMenuSize()
+	{
+		int baseWidth = 4;
+		int baseHeight = 4;
+		int buttonWidth = 160;
+		int buttonHeight = 45;
+		int buttonCount = 0;
+
+		// Count active buttons
+		foreach (Button button in equipItemButtons)
+			if (button.gameObject.activeInHierarchy)
+				buttonCount++;
+
+		if (unEquipItem.gameObject.activeInHierarchy) buttonCount++;
+		if (splitItem.gameObject.activeInHierarchy) buttonCount++;
+		if (dropItem.gameObject.activeInHierarchy) buttonCount++;
+		if (dropItemStack.gameObject.activeInHierarchy) buttonCount++;
+
+		int width = baseWidth + buttonWidth; // width is fixed
+		int height = baseHeight + (buttonHeight * buttonCount);
+
+		Debug.Log(buttonCount);
+
+		return new Vector2(width, height);
 	}
 	#endregion
 
 	#region set up equip item context menu buttons
 	private void SetUpEquipContext(InventorySlotUi slot)
 	{
-		//show button to equip items to slot (include multiple options for items with them)
-		ItemDefinition item = slot.SlotItem.ItemDefinition;
+		if (slot.IsEquipmentSlot()) return;
 
+		ItemDefinition item = slot.SlotItem.ItemDefinition;
 		var validSlots = GetValidEquipmentSlotsForItem(item).ToList();
 
 		for (int i = 0; i < equipItemButtons.Length; i++)
@@ -104,6 +144,8 @@ public class InventoryContextUi : MonoBehaviour
 	#region set up un equip item context menu buttons
 	private void SetUpUnEquipContext(InventorySlotUi slot)
 	{
+		if (slot.IsInventorySlot()) return;
+
 		unEquipItem.onClick.RemoveAllListeners();
 		unEquipItem.onClick.AddListener(() => UnEquipItem(slot));
 		unEquipItem.GetComponentInChildren<TMP_Text>().text = $"Unequip {slot.SlotItem.ItemDefinition.ItemName}";
@@ -181,19 +223,31 @@ public class InventoryContextUi : MonoBehaviour
 	#region button actions
 	private void EquipItem(InventorySlotUi slot, EquipmentType equipmentType)
 	{
-		
+		slot.InventoryRef.EquipmentHandler.EquipItemFromInventory(slot.SlotIndex, equipmentType);
+		HideContextPanel();
 	}
 	private void UnEquipItem(InventorySlotUi slot)
 	{
-
+		slot.InventoryRef.EquipmentHandler.UnequipItem(slot.SlotEquipmentType);
+		HideContextPanel();
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
-
+		//handle splitting logic in inventory
+		slot.InventoryRef.SplitItem(slot.SlotIndex);
+		HideContextPanel();
 	}
 	private void DropItem(InventorySlotUi slot, bool dropStack)
 	{
-
+		if (slot.EquipmentRef != null)
+		{
+			slot.EquipmentRef.DropItem(slot.SlotEquipmentType, dropStack);
+		}
+		else if (slot.InventoryRef != null)
+		{
+			slot.InventoryRef.DropItem(slot.SlotIndex, dropStack);
+		}
+		HideContextPanel();
 	}
 	#endregion
 }

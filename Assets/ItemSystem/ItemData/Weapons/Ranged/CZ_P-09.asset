@@ -18,8 +18,11 @@ MonoBehaviour:
   itemPrice: 160
   tradable: 0
   allowedSlots: 3
+  allowedEquipmentSlots: 3
   stackLimit: 1
   itemWeight: 2.2
+  itemPrefab: {fileID: 0}
+  itemUiIcon: {fileID: 0}
   weaponType: 2
   damage: 25
   magazineSize: 19
@@ -27,4 +30,24 @@ MonoBehaviour:
   fireRateRPM: 400
   reloadTime: 1.5
   effectiveRange: 100
+  aimTime: 0
+  moveSpeedModifier: 0
+  aimMoveSpeedModifer: 0
+  hipFireSpread: 0
+  adsSpread: 0
+  spreadIncreasePerShot: 0
+  spreadRecoveryRate: 0
+  maxSpread: 0
+  recoilPerShot: {x: 0, y: 0}
+  recoilPattern:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilRecoveryRate: 0
   ammoType: {fileID: 11400000, guid: 948da52156225bc4f8229e48462d7096, type: 2}
+  fireSFX: {fileID: 0}
+  reloadSfx: {fileID: 0}
+  muzzleFlashVfx: {fileID: 0}
+  impactVfx: {fileID: 0}
