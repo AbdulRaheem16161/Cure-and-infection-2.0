@@ -78,7 +78,7 @@ public class Quest
 				else
 					rewardInfo += questDefinition.questRewards[i].ItemDefinition.ItemName;
 
-				QuestManager.instance.playerInventory.AddNewItemPickUp(questDefinition.questRewards[i]);
+				QuestManager.instance.playerInventory.ItemContainer.AddNewItem(questDefinition.questRewards[i]);
 			}
 			break;
 			case QuestDefinition.QuestRewardType.money:
@@ -106,7 +106,7 @@ public class Quest
 
 			foreach (InventoryItem itemNeeded in questDefinition.questItemsNeeded)
 			{
-				foreach (InventoryItem item in QuestManager.instance.playerInventory.InventoryItems)
+				foreach (InventoryItem item in QuestManager.instance.playerInventory.ItemContainer.Items)
 				{
 					if (itemNeeded.ItemDefinition != item.ItemDefinition)
 						missingItems.Add(itemNeeded);

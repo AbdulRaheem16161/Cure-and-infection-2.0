@@ -36,13 +36,13 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			if (inventory.InventorySize + inventory.modifyInventorySizeByThis <= 0)
+			if (inventory.ItemContainer.ContainerSize + inventory.modifyInventorySizeByThis <= 0)
 			{
 				Debug.LogWarning("minimum inventory size is 1");
 				return;
 			}
 
-			inventory.ModifyInventorySize(inventory.modifyInventorySizeByThis);
+			inventory.ItemContainer.ModifySize(inventory.modifyInventorySizeByThis);
 		}
 		#endregion
 
@@ -74,14 +74,15 @@ public class InventoryHandlerEditor : Editor
 				inventory.itemToSpawnCount = 1;
 			}
 
-			inventory.AddNewItemPickUp(TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));
+			inventory.ItemContainer.AddNewItem(
+				TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));
 		}
 
 		if (GUILayout.Button("Pick Up Random Item"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.AddNewItemPickUp(TestInventoryManager.GenerateRandomInventoryItem());
+			inventory.ItemContainer.AddNewItem(TestInventoryManager.GenerateRandomInventoryItem());
 		}
 		#endregion
 
@@ -141,7 +142,7 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.ResetInventory();
+			inventory.ItemContainer.ResetContainer();
 		}
 		#endregion
 	}

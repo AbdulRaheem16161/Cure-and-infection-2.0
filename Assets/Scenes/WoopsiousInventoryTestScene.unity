@@ -1085,9 +1085,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  money: 0
-  inventorySize: 5
-  inventoryItems: []
+  money: 500
+  initialInventorySize: 0
+  itemContainer:
+    items: []
   addMoney: 500
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0
@@ -1129,10 +1130,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 0
-  water: 0
-  food: 0
-  stamina: 0
+  health: 50
+  water: 50
+  food: 50
+  stamina: 50
   headProtection: 0
   chestProtection: 0
 --- !u!1001 &254047156
@@ -6490,9 +6491,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  money: 0
-  inventorySize: 12
-  inventoryItems: []
+  money: 500
+  initialInventorySize: 12
+  itemContainer:
+    items: []
   addMoney: 500
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0

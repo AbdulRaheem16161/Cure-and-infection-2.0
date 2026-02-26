@@ -18,7 +18,7 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 	public virtual void PickUp(InventoryHandler inventory)
 	{
 		InventoryItem newItem = new(itemDefinition, CurrentItemStack);
-		inventory.AddNewItemPickUp(newItem);
+		inventory.AddNewItem(newItem);
 		//pick up item and add to inventory etc...
 	}
 	#endregion

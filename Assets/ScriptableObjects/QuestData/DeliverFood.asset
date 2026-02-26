@@ -30,9 +30,11 @@ MonoBehaviour:
   forceVehicleVersion: 0
   chanceForVehicleVersion: 0.2
   questItemsNeeded:
-  - {fileID: 11400000, guid: 7e467749e195ee146bc705b586ea942a, type: 2}
+  - itemDefinition: {fileID: 11400000, guid: 3ce479535e188bb45b03111dcbef433f, type: 2}
+    currentStack: 4
   questRewardType: 3
   questRewards:
-  - {fileID: 0}
+  - itemDefinition: {fileID: 0}
+    currentStack: 0
   questRewardCurrency: 40
   questFailMoneyLoss: -100

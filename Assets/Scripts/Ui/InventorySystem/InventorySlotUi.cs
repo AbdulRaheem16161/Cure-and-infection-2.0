@@ -57,7 +57,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	private void OnDestroy()
 	{
 		if (inventoryRef != null)
-			inventoryRef.OnInventoryItemChanged -= HandleItemChanges;
+			inventoryRef.ItemContainer.OnContainerItemChanged -= HandleItemChanges;
 
 		if (equipmentRef != null)
 		{
@@ -104,7 +104,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		if (inventoryRef != null) //sub to events
 		{
 			this.inventoryRef = inventoryRef;
-			inventoryRef.OnInventoryItemChanged += HandleItemChanges;
+			inventoryRef.ItemContainer.OnContainerItemChanged += HandleItemChanges;
 		}
 
 		inventorySlotUi.SetActive(true);
@@ -114,7 +114,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		inventorySlotUi.SetActive(false);
 
 		if (inventoryRef != null) //unsub to events
-			inventoryRef.OnInventoryItemChanged -= HandleItemChanges;
+			inventoryRef.ItemContainer.OnContainerItemChanged -= HandleItemChanges;
 
 		UpdateSlotUi(null);
 	}

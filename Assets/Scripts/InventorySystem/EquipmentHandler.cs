@@ -140,12 +140,12 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
 		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
-		InventoryItem itemToEquip = InventoryHandler.InventoryItems[itemSlot];
+		InventoryItem itemToEquip = InventoryHandler.ItemContainer.Items[itemSlot];
 
 		if (itemToEquip.ItemDefinition == null && equippedItem != null && returnItem) //return early if no weapon to equip
 		{
 			HandleItemUnequipping(equipmentSlot);
-			InventoryHandler.AddNewItemPickUp(equippedItem);
+			InventoryHandler.ItemContainer.AddNewItem(equippedItem);
 			return;
 		}
 
@@ -153,14 +153,14 @@ public class EquipmentHandler : MonoBehaviour
 
 		if (equippedItem != null && returnItem) //return item
 		{
-			if (InventoryHandler.InventoryFull())
+			if (InventoryHandler.ItemContainer.ContainerFull())
 			{
 				Debug.LogWarning("inventory full, cannot equip new item and return old one");
 				return;
 			}
 
 			HandleItemUnequipping(equipmentSlot);
-			InventoryHandler.AddNewItemPickUp(equippedItem);
+			InventoryHandler.ItemContainer.AddNewItem(equippedItem);
 		}
 
 		HandleItemEquipping(itemToEquip, equipmentSlot);
@@ -211,8 +211,8 @@ public class EquipmentHandler : MonoBehaviour
 
 		if (returnItem)
 		{
-			if (!InventoryHandler.InventoryFull()) //return equipped item
-				InventoryHandler.AddNewItemPickUp(equippedItem);
+			if (!InventoryHandler.ItemContainer.ContainerFull()) //return equipped item
+				InventoryHandler.ItemContainer.AddNewItem(equippedItem);
 			else
 				Debug.LogWarning("inventory full, cannot unequip item");
 		}

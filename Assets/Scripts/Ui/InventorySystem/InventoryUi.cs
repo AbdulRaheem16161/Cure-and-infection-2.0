@@ -20,12 +20,12 @@ public class InventoryUi : MonoBehaviour
 	private void Start()
 	{
 		inventory = TestInventoryManager.Instance.playerObj.GetComponent<InventoryHandler>(); //grab via test manager for now
-		inventory.OnInventorySizeChanged += HandleInventorySizeChanges;
-		HandleInventorySizeChanges(inventory.InventorySize);
+		inventory.ItemContainer.OnContainerSizeChanged += HandleInventorySizeChanges;
+		HandleInventorySizeChanges(inventory.ItemContainer.ContainerSize);
 	}
 	private void OnDestroy()
 	{
-		inventory.OnInventorySizeChanged -= HandleInventorySizeChanges;
+		inventory.ItemContainer.OnContainerSizeChanged -= HandleInventorySizeChanges;
 	}
 
 	#region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
