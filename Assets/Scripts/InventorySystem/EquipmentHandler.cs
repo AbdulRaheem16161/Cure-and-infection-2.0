@@ -128,7 +128,8 @@ public class EquipmentHandler : MonoBehaviour
 		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
 		InventoryItem itemToEquip = new(item, stackCount);
 
-		if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
+		//if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
+		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
 
 		HandleItemEquipping(itemToEquip, equipmentSlot);
 	}
@@ -149,7 +150,8 @@ public class EquipmentHandler : MonoBehaviour
 			return;
 		}
 
-		if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
+		//if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
+		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
 
 		if (equippedItem != null && returnItem) //return item
 		{
@@ -178,6 +180,7 @@ public class EquipmentHandler : MonoBehaviour
 		InventoryItem newEquippedItem = CheckForEquippedItem(newSlotType);
 
 		if (!SlotTypesMatch(currentEquipmentSlot, newEquipmentSlot)) return; //cant swap equipped items
+		if (!EquipmentSlotsMatch(newEquipmentSlot, currentEquippedItem)) return;
 
 		HandleItemEquipping(currentEquippedItem, newEquipmentSlot);
 
@@ -438,19 +441,9 @@ public class EquipmentHandler : MonoBehaviour
 		Debug.LogWarning($"Slot One ({slotTypeOne}) and Slot Two ({slotTypeTwo}) types do not match");
 		return false;
 	}
-	private bool SlotAndItemTypeMatch(EquipmentSlot slot, InventoryItem item)
+	private bool EquipmentSlotsMatch(EquipmentSlot slot, InventoryItem item)
 	{
-		if (!slotToInventoryType.TryGetValue(slot.equipmentType, out var slotCategory))
-		{
-			Debug.LogWarning($"EquipmentType {slot.equipmentType} has no mapped InventorySlotType");
-			return false;
-		}
-
-		if (item.ItemDefinition.AllowedSlots.HasFlag(slotCategory))
-			return true;
-
-		Debug.LogWarning($"Slot {slot.equipmentType} and item {item.ItemDefinition.ItemName} type do not match");
-		return false;
+		return (slot.equipmentType & item.ItemDefinition.AllowedEquipmentSlots) != 0;
 	}
 	#endregion
 }

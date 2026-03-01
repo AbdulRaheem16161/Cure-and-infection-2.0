@@ -201,9 +201,12 @@ MonoBehaviour:
   canBeDragged: 0
   isBeingDragged: 0
   slotIndex: 0
+  equipmentRef: {fileID: 0}
+  inventoryRef: {fileID: 0}
+  slotItem:
+    itemDefinition: {fileID: 0}
+    currentStack: 0
   slotEquipmentType: 0
-  inventoryToRepresent: {fileID: 0}
-  equipmentToRepresent: {fileID: 0}
   canvasParent: {fileID: 0}
 --- !u!222 &5714949797599198130
 CanvasRenderer:
@@ -355,8 +358,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 35}
+  m_AnchoredPosition: {x: 0, y: -5}
+  m_SizeDelta: {x: -10, y: 40}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &2791742626440261026
 CanvasRenderer:
@@ -567,7 +570,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: -20}
+  m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &700245966598106424
 CanvasRenderer:
@@ -641,7 +644,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -5, y: 5}
   m_SizeDelta: {x: 50, y: 25}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &4671102348305728604

@@ -42,7 +42,7 @@ public class WeaponRangedDefinitionEditor : ItemDefinitionEditor
 
 		EditorGUILayout.Space();
 
-		EditorGUILayout.PropertyField(serializedObject.FindProperty("fireSFX"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("fireSfx"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("reloadSfx"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("muzzleFlashVfx"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("impactVfx"));

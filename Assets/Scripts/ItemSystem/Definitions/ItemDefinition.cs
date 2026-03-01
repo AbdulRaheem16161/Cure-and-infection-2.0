@@ -48,6 +48,7 @@ public class ItemDefinition : ScriptableObject
 
 	public bool Tradable => tradable;
 	public InventorySlotType AllowedSlots => allowedSlots;
+	public EquipmentType AllowedEquipmentSlots => allowedEquipmentSlots;
 	public int StackLimit => stackLimit;
 	public float ItemWeight => itemWeight;
 

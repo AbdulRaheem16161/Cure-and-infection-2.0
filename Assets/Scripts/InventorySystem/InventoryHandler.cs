@@ -105,7 +105,7 @@ public class InventoryHandler : MonoBehaviour
 			switch (slot.equipmentType)
 			{
 				case EquipmentHandler.EquipmentType.backpack:
-				itemContainer.ModifySize((int)armourDefinition.InventorySlotsProvided);
+				itemContainer.ModifySize(-(int)armourDefinition.InventorySlotsProvided);
 				break;
 			}
 		}

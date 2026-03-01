@@ -106,8 +106,6 @@ public class InventoryContextUi : MonoBehaviour
 		int width = baseWidth + buttonWidth; // width is fixed
 		int height = baseHeight + (buttonHeight * buttonCount);
 
-		Debug.Log(buttonCount);
-
 		return new Vector2(width, height);
 	}
 	#endregion
@@ -202,9 +200,13 @@ public class InventoryContextUi : MonoBehaviour
 			EquipmentType equipmentType = kvp.Key;
 			InventorySlotType slotCategory = kvp.Value;
 
-			if (item.AllowedSlots.HasFlag(slotCategory))
+			if (item.AllowedSlots.HasFlag(slotCategory) && EquipmentTypeMatch(equipmentType, item))
 				yield return equipmentType;
 		}
+	}
+	private bool EquipmentTypeMatch(EquipmentType equipmentType, ItemDefinition item)
+	{
+		return (equipmentType & item.AllowedEquipmentSlots) != 0;
 	}
 	#endregion
 
@@ -228,12 +230,11 @@ public class InventoryContextUi : MonoBehaviour
 	}
 	private void UnEquipItem(InventorySlotUi slot)
 	{
-		slot.InventoryRef.EquipmentHandler.UnequipItem(slot.SlotEquipmentType);
+		slot.EquipmentRef.UnequipItem(slot.SlotEquipmentType);
 		HideContextPanel();
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
-		//handle splitting logic in inventory
 		slot.InventoryRef.SplitItem(slot.SlotIndex);
 		HideContextPanel();
 	}
