@@ -14,10 +14,9 @@ public class VehicleController : MonoBehaviour
     private float baseMaxSpeed;
     private float baseHandlingSpeed;
     private float baseMaxTurnAngle;
+    private float[] baseHeadLightIntensities;
     private float speedMultiplier = 1f;
     private float handlingMultiplier = 1f;
-    private float nextFlickerTime;
-    private bool flickerBurstActive;
     private bool engineOn = false;
     private bool isReverse = false;
 
@@ -32,7 +31,8 @@ public class VehicleController : MonoBehaviour
 
         baseMaxSpeed = data.maxSpeed;
         baseHandlingSpeed = data.handlingSpeed;
-        baseMaxTurnAngle = data.MaxTurnAngle;
+        baseMaxTurnAngle = data.maxTurnAngle;
+        CacheHeadLightIntensities();
 
 
         if (data == null) Debug.LogError("DATA IS NULL");
@@ -41,16 +41,6 @@ public class VehicleController : MonoBehaviour
     {
         // Input
         float forwardSpeed = transform.InverseTransformDirection(_rigidbody.linearVelocity).z;
-        float throttle = 0;
-        if (engineOn)
-        {
-            throttle = Input.GetAxis("Vertical"); 
-           //AudioManager.Instance.PlaySound(data.engineSfx);
-            if(throttle > 0.5f){
-                //AudioManager.Instance.PlaySound(data.revSfx);
-            }
-        }
-        
         float steer = Input.GetAxis("Horizontal");
         
         if(Input.GetKeyDown(KeyCode.E) && data.currentFuel > 0 && data.IsAlive())
@@ -60,6 +50,17 @@ public class VehicleController : MonoBehaviour
         if (data.currentFuel <= 0)
         {
             engineOn = false;
+        }
+        if (!data.IsAlive())
+        {
+            engineOn = false;
+        }
+
+        float throttle = engineOn ? Input.GetAxis("Vertical") : 0f;
+        //AudioManager.Instance.PlaySound(data.engineSfx);
+        if (throttle > 0.5f)
+        {
+            //AudioManager.Instance.PlaySound(data.revSfx);
         }
         // honking
         //if(Input.GetKeyDown(KeyCode.H)) AudioManager.Instance.PlaySound(data.hornSfx);
@@ -83,7 +84,7 @@ public class VehicleController : MonoBehaviour
 
         // braking
         Braking(forwardSpeed);
-        ApplyRandomLightFlicker();
+        ApplyDamageLightDimming();
 
         // Update wheel meshes
         foreach (VehicleData.Wheel wheel in data.wheels)
@@ -191,13 +192,64 @@ public class VehicleController : MonoBehaviour
 
         data.maxSpeed = baseMaxSpeed * speedMultiplier;
         data.handlingSpeed = baseHandlingSpeed * handlingMultiplier;
-        data.MaxTurnAngle = baseMaxTurnAngle * handlingMultiplier;
+        data.maxTurnAngle = baseMaxTurnAngle * handlingMultiplier;
 
         bool shouldSmoke = data.currentHealthState == VehicleData.HealthState.Smoking;
         bool shouldFire = data.currentHealthState == VehicleData.HealthState.Critical;
 
         ToggleEffect(data.smokeParticles, shouldSmoke);
         ToggleEffect(data.fireParticles, shouldFire);
+    }
+
+    private void CacheHeadLightIntensities()
+    {
+        if (data.headLights == null)
+        {
+            baseHeadLightIntensities = Array.Empty<float>();
+            return;
+        }
+
+        baseHeadLightIntensities = new float[data.headLights.Length];
+        for (int i = 0; i < data.headLights.Length; i++)
+        {
+            Light light = data.headLights[i];
+            baseHeadLightIntensities[i] = light != null ? light.intensity : 0f;
+        }
+    }
+
+    private void ApplyDamageLightDimming()
+    {
+        bool shouldDim = data.currentHealthState == VehicleData.HealthState.Smoking ||
+                         data.currentHealthState == VehicleData.HealthState.Critical;
+        float dimMultiplier = shouldDim ? 0.5f : 1f;
+
+        for (int i = 0; i < data.headLights.Length; i++)
+        {
+            Light light = data.headLights[i];
+            if (light == null)
+            {
+                continue;
+            }
+
+            float baseIntensity = i < baseHeadLightIntensities.Length ? baseHeadLightIntensities[i] : light.intensity;
+            light.intensity = baseIntensity * dimMultiplier;
+        }
+
+        foreach (Light light in data.brakeLights)
+        {
+            if (light != null)
+            {
+                light.intensity *= dimMultiplier;
+            }
+        }
+
+        foreach (Light light in data.reverseLights)
+        {
+            if (light != null)
+            {
+                light.intensity *= dimMultiplier;
+            }
+        }
     }
     private void ToggleEffect(ParticleSystem effect, bool shouldPlay)
     {
@@ -221,57 +273,11 @@ public class VehicleController : MonoBehaviour
             }
         }
     }
-    private void ApplyRandomLightFlicker()
-    {
-        bool shouldFlicker = engineOn &&
-            (data.currentHealthState == VehicleData.HealthState.Smoking ||
-             data.currentHealthState == VehicleData.HealthState.Critical);
 
-        if (!shouldFlicker)
-        {
-            return;
-        }
-
-        if (Time.time >= nextFlickerTime)
-        {
-            flickerBurstActive = UnityEngine.Random.value < 0.75f;
-            nextFlickerTime = Time.time + UnityEngine.Random.Range(0.1f, 1f);
-        }
-
-        if (!flickerBurstActive)
-        {
-            return;
-        }
-
-        ForEachVehicleLight(light =>
-        {
-            if (light != null && light.enabled && UnityEngine.Random.value < 0.5f)
-            {
-                light.enabled = false;
-            }
-        });
-    }
-    private void ForEachVehicleLight(Action<Light> action)
-    {
-        foreach (Light light in data.headLights)
-        {
-            action?.Invoke(light);
-        }
-
-        foreach (Light light in data.brakeLights)
-        {
-            action?.Invoke(light);
-        }
-
-        foreach (Light light in data.reverseLights)
-        {
-            action?.Invoke(light);
-        }
-    }
     private void WheelTurning(float steerInput)
     {
         float steerAngle = Mathf.Lerp
-            (data.wheels[0].wheelCollider.steerAngle, steerInput * data.MaxTurnAngle,
+            (data.wheels[0].wheelCollider.steerAngle, steerInput * data.maxTurnAngle,
             data.handlingSpeed * Time.deltaTime);
         
         foreach (VehicleData.Wheel wheel in data.wheels)
