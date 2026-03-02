@@ -204,9 +204,9 @@ public class NPCWeaponController : MonoBehaviour
         #endregion
     }
 
-    #endregion
+	#endregion
 
-    public void Shoot()
+	public void Shoot()
     {
         #region Shoot
 
