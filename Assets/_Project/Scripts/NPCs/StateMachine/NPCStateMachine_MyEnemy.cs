@@ -5,11 +5,14 @@ using UnityEngine.AI;
 using System.Collections;
 using UnityEngine.InputSystem.XR;
 using System.Collections.Generic;
+using System;
 
 namespace Game.MyNPC
 {
-    public class NPCStateMachine : StateMachine, IDamageable
+    public class NPCStateMachine : StateMachine
     {
+		public StatsHandler StatsHandler { get; private set; }
+
         #region General Values
         [Header("General Values")]
         public Animator Animator;
@@ -75,29 +78,18 @@ namespace Game.MyNPC
         [Space(10)]
         #endregion
 
-        #region Health
-        [Header("Health")]
-        public bool EnableHeatlh;
-        public int TotalHealth = 100;
-        public int CurrentHealth;
-        #endregion
+        ///<summery>
+        /// move respawn related logic into a higher level object for npc pooling and reusing at a later date
+        ///<summery>
 
-        #region Death
-        [Header("Death")]
-        public bool EnableDeath;
-        public bool isDead;
-        [Space(10)]
-        #endregion
-
-        #region Respawn
-        [Header("Respawn")]
-        public bool EnableRespawn;
+		#region Respawn
+		[Header("Respawn")]
         public Transform SpawnPoint;
-        public GameObject BodyParts;
-        public int WaitBeforeRespawn;
-        #endregion
+		#endregion
 
-        private void OnOff()
+		public static event Action<GameObject> OnDeathComplete;
+
+		private void OnOff()
         {
             #region Editor Refresh (throttled for performance)
 #if UNITY_EDITOR
@@ -132,19 +124,41 @@ namespace Game.MyNPC
 
         private void Awake()
         {
-            #region initializations
+            #region component initializations
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponent<Animator>();
-
-            CurrentHealth = TotalHealth;
-            #endregion
-
-            #region Transition to Default State
-            SwitchState(new NPCIdleState(this)); //
-            #endregion
+			#endregion
         }
 
-        private void LateUpdate()
+		public void InitilizeStateMachine(NpcController npcController)
+		{		
+            #region initilize state machine
+            StatsHandler = npcController.StatsHandler;
+			#endregion
+
+			#region set values from definition
+			RotationSpeed = npcController.NpcDefinition.RotationSpeed;
+            PatrolSpeed = npcController.NpcDefinition.PatrolSpeed;
+            ChaseSpeed = npcController.NpcDefinition.ChaseSpeed;
+			#endregion
+
+			#region sub to events
+			StatsHandler.OnDeath += HandleDeath;
+			#endregion
+
+			#region Transition to Default State
+			SwitchState(new NPCIdleState(this)); //
+			#endregion
+		}
+
+		private void OnDestroy()
+		{
+			#region unsub from events
+			StatsHandler.OnDeath -= HandleDeath;
+			#endregion
+		}
+
+		private void LateUpdate()
         {
             #region Functions
             UpdateStateName();
@@ -195,35 +209,14 @@ namespace Game.MyNPC
             #endregion
         }
 
-        public void RecieveDamage(int Damage, GameObject Attacker)
+        public void HandleDeath()
         {
-            #region Recieve Damage
-
-            CurrentHealth -= Damage;
-
-            DetectionRadius.EnableAlertMode(Attacker);
-            DetectionCone.EnableAlertMode(Attacker);
-
-            #endregion
-
-            #region Die
-
-            if (CurrentHealth <= 0)
-            {
-                StartCoroutine(Die());
-            }
-
-            #endregion
+            Debug.LogError("handling death");
+            StartCoroutine(Die());
         }
 
         public IEnumerator Die()
         {
-            #region Die
-
-            if (!EnableDeath) yield return null;
-
-            if (isDead) yield return null; else isDead = true;
-
             #region Disable Attack
 
             OpponentInMeleeAttackRange = false;
@@ -283,80 +276,7 @@ namespace Game.MyNPC
             }
             #endregion
 
-            #endregion
-
-            #region Respawn
-
-            if (EnableRespawn)
-            {
-                StartCoroutine(Respawn());
-            }
-            #endregion
+            OnDeathComplete?.Invoke(gameObject);
         }
-
-        public IEnumerator Respawn()
-        {
-            #region Respawn
-
-            yield return new WaitForSeconds(WaitBeforeRespawn);
-
-            isDead = false;
-
-            #region Change Tag
-            this.gameObject.tag = "Enemy";
-            #endregion
-
-            #region Teleport
-            transform.position = SpawnPoint.transform.position;
-            #endregion
-
-            #region ReEnable Movement
-            if (Agent != null)
-            {
-                Agent.isStopped = false;
-                Agent.enabled = true;
-            }
-
-            #endregion
-
-            #region Enable Colliders
-
-            Collider[] colliders;
-
-            colliders = GetComponentsInChildren<Collider>();
-
-            if (colliders != null)
-            {
-                foreach (var col in colliders)
-                {
-                    col.enabled = true;
-                }
-            }
-            #endregion
-
-            #region Animator
-            if (Animator != null)
-            {
-                Animator.SetTrigger("Respawn");
-            }
-            #endregion
-
-            #region Enable Scripts
-            MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-            foreach (MonoBehaviour script in scripts)
-            {
-                if (script != this)
-                {
-                    script.enabled = true;
-                }
-            }
-            #endregion
-
-            #region Reset Health
-            CurrentHealth = TotalHealth;
-            #endregion
-
-            #endregion
-        }
-    }
+	}
 }

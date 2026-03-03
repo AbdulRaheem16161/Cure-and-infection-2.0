@@ -14,7 +14,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.isDead) return;
+            if (stateMachine.StatsHandler.IsDead) return;
 
             #region State Transitions
 
@@ -42,7 +42,7 @@ namespace Game.MyNPC
             }
             #endregion
 
-            if (!stateMachine.isDead)
+            if (!stateMachine.StatsHandler.IsDead)
             {
                 stateMachine.CurrentFollowPoint = stateMachine.DetectionRadius.DetectedTarget.transform;
                 stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);

@@ -6,8 +6,10 @@ using UnityEngine;
 
 public class DetectionCone : MonoBehaviour
 {
-    #region Settings
-    [Header("General Settings")]
+	private StatsHandler StatsHandler;
+
+	#region Settings
+	[Header("General Settings")]
     public float viewAngle = 45f;
     public float viewDistance = 5f;
     public bool showGizmos = false;
@@ -18,7 +20,8 @@ public class DetectionCone : MonoBehaviour
     #region AlertMode Settings
     [Header("Alert Mode Settings")]
     public float HighAlertDuration = 3f;
-    public float ViewDistanceMultiplier = 2f;
+	public float ViewAngleMultiplier = 1.5f;
+	public float ViewDistanceMultiplier = 2f;
     public bool isInAlertMode;
     public Coroutine alertModeCoroutine;
     [Space(10)]
@@ -36,9 +39,22 @@ public class DetectionCone : MonoBehaviour
     [Header("Runtime Values")]
     [SerializeField, ReadOnly] public bool isTargetDetected;
     [SerializeField, ReadOnly] public GameObject DetectedTarget;
-    #endregion
+	#endregion
 
-    private void Update()
+	#region Initilize
+	public void Initilize(NpcController npcController)
+	{
+		StatsHandler = npcController.StatsHandler;
+
+		viewAngle = npcController.NpcDefinition.ViewAngle;
+		viewDistance = npcController.NpcDefinition.ViewDistance;
+		HighAlertDuration = npcController.NpcDefinition.HighAlertDuration;
+		ViewAngleMultiplier = npcController.NpcDefinition.ViewAngleMultiplier;
+		ViewDistanceMultiplier = npcController.NpcDefinition.ViewDistanceMultiplier;
+	}
+	#endregion
+
+	private void Update()
     {
         #region summary
         /// <summary>

@@ -181,11 +181,15 @@ GameObject:
   - component: {fileID: 2043431602576119713}
   - component: {fileID: 4063393921656050725}
   - component: {fileID: 8323173595102019015}
+  - component: {fileID: -5772089214708602261}
+  - component: {fileID: 2458076507582956389}
   - component: {fileID: 8904301891162826575}
+  - component: {fileID: -6753609607226209330}
+  - component: {fileID: -5542053669577002877}
   - component: {fileID: 7365555722533660067}
   - component: {fileID: 6230541340091151048}
   m_Layer: 0
-  m_Name: Zombie
+  m_Name: ZombieTest
   m_TagString: Team 3
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -299,6 +303,42 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &-5772089214708602261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b808c453afa2d041ad1c293b4333f4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NpcDefinition: {fileID: 0}
+  StatsHandler: {fileID: 0}
+  StateMachine: {fileID: 0}
+  InventoryHandler: {fileID: 0}
+  EquipmentHandler: {fileID: 0}
+--- !u!114 &2458076507582956389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnableDeath: 0
+  health: 0
+  water: 0
+  food: 0
+  stamina: 0
+  headProtection: 0
+  chestProtection: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,6 +382,51 @@ MonoBehaviour:
   WeaponHolder: {fileID: 0}
   RangedAttackRotSpeed: 0
   SpawnPoint: {fileID: 5204823297776222364}
+--- !u!114 &-6753609607226209330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edda677364658b744ba34b0e7a8ea499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentSlots: []
+  equippedItemsParent: {fileID: 0}
+  WeaponRangedPrefab: {fileID: 0}
+  WeaponMeleePrefab: {fileID: 0}
+  ArmourPrefab: {fileID: 0}
+  itemToEquip: {fileID: 0}
+  itemToEquipCount: 0
+  slotToEquipItemTo: 0
+  equipmentSlotToUnequip: 0
+  consumableSlotToUse: 0
+  equipItemFromSlot: 0
+--- !u!114 &-5542053669577002877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  money: 0
+  initialInventorySize: 0
+  itemContainer:
+    items: []
+  addMoney: 0
+  modifyInventorySizeByThis: 0
+  actionEffectsStack: 0
+  slotIndex: 0
+  itemToSpawn: {fileID: 0}
+  itemToSpawnCount: 0
 --- !u!114 &7365555722533660067
 MonoBehaviour:
   m_ObjectHideFlags: 0

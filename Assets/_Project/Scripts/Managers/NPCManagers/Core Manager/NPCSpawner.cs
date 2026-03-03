@@ -1,5 +1,5 @@
 /// <summary>
-/// This script has buttons for each kind of NPC. Each button spawns the relevant NPC,
+/// This script spawns an npc based on assigned NpcDefinition in the inspector using its linked prefab gameobject
 /// sets its parent to this (NPCSpawner) and its position to (0, 0, 0),
 /// it also instantiates 1 patrol, 1 random follow point and 1 spawn point along with the NPC
 /// and sets their parent and position same as the NPC.
@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.MyNPC;
-using NUnit.Framework.Internal.Filters;
 
 public class NPCSpawner : MonoBehaviour
 {
@@ -23,47 +22,50 @@ public class NPCSpawner : MonoBehaviour
     public GameObject SpawnPoint;
 
     public TrackGizmos TrackGizmos;
-    #endregion
+	#endregion
 
-    #region Enums
-    public enum Teams { Team1, Team2, Team3, Team4, Team5, Team6, Team7, Team8, FreeFighter }
+	[SerializeField] private List<NpcController> npcObjectPooling = new();
+
+	#region Enums
+	public enum Teams { Team1, Team2, Team3, Team4, Team5, Team6, Team7, Team8, FreeFighter }
     public Teams NPCsTeam;
 
     public WeaponsStruct.EnumWeaponType selectedWeapon;
 
-    #endregion
+    public NpcDefinition npcDefinitionToSpawn;
 
-    public void SpawnNPC(string NPCType)
+	#endregion
+
+	private void OnEnable()
+	{
+        NPCStateMachine.OnDeathComplete += HandleNpcDeath;
+	}
+	private void OnDisable()
+	{
+		NPCStateMachine.OnDeathComplete -= HandleNpcDeath;
+	}
+
+	public void SpawnNPC(NpcDefinition npcDefinition)
     {
         #region Determine NPC to Spawn
-        GameObject aiToSpawn = null;
-
-        switch (NPCType)
+        if (npcDefinition == null)
         {
-            case "TRex":
-                aiToSpawn = TRex;
-                break;
-            case "Guard":
-                aiToSpawn = Fighter;
-                break;
-            case "Zombie":
-                aiToSpawn = Zombie;
-                break;
-            default:
-                return;
+            Debug.LogError("NpcDefinition null assign a reference");
+            return;
         }
-        #endregion
+		#endregion
 
-        #region Instantiate NPC and Points
-        // Spawn NPC and set parent/position
-        GameObject NPCInstance = generateGameObjectInstance(aiToSpawn);
-        GameObject randomPointInstance = generateGameObjectInstance(RandomFollowPoint);
-        GameObject patrolPointInstance = generateGameObjectInstance(PatrolFollowPoint);
-        GameObject spawnPoint = generateGameObjectInstance(SpawnPoint);
+		#region Instantiate NPC and Points
+		// Spawn NPC and set parent/position
+		GameObject NPCInstance = GetNewNpc(npcDefinition);
+		GameObject randomPointInstance = GenerateWaypoints(RandomFollowPoint);
+        GameObject patrolPointInstance = GenerateWaypoints(PatrolFollowPoint);
+        GameObject spawnPoint = GenerateWaypoints(SpawnPoint);
         #endregion
 
         #region Assign NPCStateMachine References
-        NPCStateMachine stateMachine = NPCInstance.GetComponent<NPCStateMachine>();
+        NpcController npcController = NPCInstance.GetComponent<NpcController>();
+		NPCStateMachine stateMachine = npcController.StateMachine;
 
         // Assign follow points
         stateMachine.RandomFollowPoint = randomPointInstance.transform;
@@ -98,7 +100,7 @@ public class NPCSpawner : MonoBehaviour
         #endregion
 
         #region Set NPC's Weapon
-        if(aiToSpawn != Zombie)
+        if(!npcDefinition.IsZombie)
         {
             stateMachine.WeaponHolder.GetComponent<NPCWeaponController>().selectedWeapon = selectedWeapon; //  zombie dont have a Weapon so
         }
@@ -110,10 +112,14 @@ public class NPCSpawner : MonoBehaviour
         patrolPointInstance.GetComponent<PatrolFollowPoint>().TrackGizmos = TrackGizmos;
         #endregion
 
-        // Nothing to assign on RandomFollowPoint
-    }
+        #region initilize npc controller and sub components
+        npcController.InitilizeNpc(npcDefinitionToSpawn);
+		#endregion
 
-    private GameObject generateGameObjectInstance(GameObject GameObjectToSpawn)
+		// Nothing to assign on RandomFollowPoint
+	}
+
+	private GameObject GenerateWaypoints(GameObject GameObjectToSpawn)
     {
         #region Instantiate and Parent
         GameObject Instance = Instantiate(GameObjectToSpawn, transform.position, Quaternion.identity);
@@ -122,4 +128,34 @@ public class NPCSpawner : MonoBehaviour
         return Instance;
         #endregion
     }
+
+	#region get or instantiate new npc from pooling
+	private GameObject GetNewNpc(NpcDefinition npcDefinition)
+	{
+		GameObject Instance = TryGetNpcObjectFromPooling(npcDefinition);
+		Instance.transform.SetParent(transform);
+		Instance.transform.localPosition = Vector3.zero;
+		Instance.SetActive(true);
+		return Instance;
+	}
+
+	private GameObject TryGetNpcObjectFromPooling(NpcDefinition npcDefinition)
+    {
+        foreach (NpcController npcController in npcObjectPooling)
+        {
+            if (npcController.NpcDefinition.IsZombie == npcDefinition.IsZombie)
+                return npcController.gameObject;
+		}
+		return Instantiate(npcDefinition.gameObjectPrefab, transform.position, Quaternion.identity);
+	}
+	#endregion
+
+	#region handle npc deaths and adding to object pooling
+    private void HandleNpcDeath(GameObject gameObject)
+    {
+        gameObject.SetActive(false);
+        NpcController npcController = gameObject.GetComponent<NpcController>();
+        npcObjectPooling.Add(npcController);
+    }
+	#endregion
 }

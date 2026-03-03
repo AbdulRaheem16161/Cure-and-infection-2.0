@@ -20,7 +20,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.isDead) return;
+            if (stateMachine.StatsHandler.IsDead) return;
 
             Debug.Log("ranged attack state ticking");
             #region Update Attack Timer

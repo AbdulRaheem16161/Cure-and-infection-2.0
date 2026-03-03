@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class DetectionRadius : MonoBehaviour
 {
+    private StatsHandler StatsHandler;
+
     #region Settings
     [Header("General Settings")]
     public float viewAngle = 45f;
@@ -19,6 +21,7 @@ public class DetectionRadius : MonoBehaviour
     #region AlertMode Settings
     [Header("Alert Mode Settings")]
     public float HighAlertDuration = 3f;
+    public float ViewAngleMultiplier = 1.5f;
     public float ViewDistanceMultiplier = 2f;
     public bool isInAlertMode;
     public Coroutine alertModeCoroutine;
@@ -38,9 +41,22 @@ public class DetectionRadius : MonoBehaviour
     [SerializeField, ReadOnly] public bool isTargetDetected;
     [SerializeField, ReadOnly] public GameObject DetectedTarget;
 
-    #endregion
+	#endregion
 
-    private void Update()
+	#region Initilize
+	public void Initilize(NpcController npcController)
+    {
+		StatsHandler = npcController.StatsHandler;
+
+		viewAngle = npcController.NpcDefinition.ViewAngle;
+        viewDistance = npcController.NpcDefinition.ViewDistance;
+        HighAlertDuration = npcController.NpcDefinition.HighAlertDuration;
+        ViewAngleMultiplier = npcController.NpcDefinition.ViewAngleMultiplier;
+        ViewDistanceMultiplier = npcController.NpcDefinition.ViewDistanceMultiplier;
+    }
+	#endregion
+
+	private void Update()
     {
         #region summary
         /// <summary>

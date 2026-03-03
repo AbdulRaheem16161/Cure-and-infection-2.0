@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class InventoryHandler : MonoBehaviour
 {
-	public CharacterStatsTest CharacterStats { get; private set; }
+	public StatsHandler Stats { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 
 	#region inventory settings
@@ -32,11 +32,11 @@ public class InventoryHandler : MonoBehaviour
 	#region grab script refs on awake
 	private void Awake()
 	{
-		CharacterStats = GetComponent<CharacterStatsTest>();
+		Stats = GetComponent<StatsHandler>();
 
-		if (CharacterStats == null)
+		if (Stats == null)
 		{
-			Debug.LogError($"CharacterStats script not found on this gameobject: {gameObject.name}");
+			Debug.LogError($"StatsHandler script not found on this gameobject: {gameObject.name}");
 			return;
 		}
 
@@ -47,8 +47,6 @@ public class InventoryHandler : MonoBehaviour
 			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
 			return;
 		}
-
-		itemContainer = new(initialInventorySize);
 	}
 
 	private void OnEnable()
@@ -62,6 +60,11 @@ public class InventoryHandler : MonoBehaviour
 		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
 	}
 	#endregion
+
+	public void InitilizeInventoryHandler()
+	{
+		itemContainer = new(initialInventorySize);
+	}
 
 	#region modifying money
 	public bool HasEnoughMoney(int cost)

@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using static EquipmentHandler;
 using static ItemDefinition;
 
 public class EquipmentHandler : MonoBehaviour
 {
-	public CharacterStatsTest CharacterStats { get; private set; }
+	public StatsHandler Stats { get; private set; }
 	public InventoryHandler InventoryHandler { get; private set; }
 
 	#region equipment slots + dictionary lookup
@@ -81,11 +82,11 @@ public class EquipmentHandler : MonoBehaviour
 	#region initilize slots + grab script refs on awake
 	private void Awake()
 	{
-		CharacterStats = GetComponent<CharacterStatsTest>();
+		Stats = GetComponent<StatsHandler>();
 
-		if (CharacterStats == null)
+		if (Stats == null)
 		{
-			Debug.LogError($"CharacterStatsTest script not found on this gameobject: {gameObject.name}");
+			Debug.LogError($"StatsHandler script not found on this gameobject: {gameObject.name}");
 			return;
 		}
 
@@ -97,9 +98,9 @@ public class EquipmentHandler : MonoBehaviour
 			return;
 		}
 
-		InitilizeEquipmentSlots();
+		InitilizeEquipmentHandler();
 	}
-	private void InitilizeEquipmentSlots()
+	public void InitilizeEquipmentHandler()
 	{
 		equipmentSlots = new();
 		slotLookup = new();

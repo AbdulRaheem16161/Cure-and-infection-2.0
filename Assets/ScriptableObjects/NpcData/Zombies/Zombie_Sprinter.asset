@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac27273233fe9f341aa1732591f10740, type: 3}
+  m_Name: Zombie_Sprinter
+  m_EditorClassIdentifier: 
+  npcName: Sprinter Zombie
+  defaultNpcTeam: 8
+  isZombie: 1
+  maxHealth: 75
+  maxWater: 100
+  maxFood: 100
+  maxStamina: 100
+  patrolSpeed: 0.6
+  chaseSpeed: 5
+  rotationSpeed: 12
+  weaponOne: {fileID: 0}
+  weaponTwo: {fileID: 0}
+  meleeWeapon: {fileID: 0}
+  helmet: {fileID: 0}
+  chest: {fileID: 0}
+  backpack: {fileID: 0}
+  consumableOne: {fileID: 0}
+  consumableTwo: {fileID: 0}
+  consumableThree: {fileID: 0}
+  viewAngle: 60
+  viewDistance: 15
+  highAlertDuration: 5
+  viewAngleMultiplier: 1.25
+  viewDistanceMultiplier: 2
+  soundSensitivity: 0
+  gameObjectPrefab: {fileID: 4125029387023148961, guid: e4195ad6d3e19ff4695153d850c778cc, type: 3}

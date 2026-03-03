@@ -10,17 +10,21 @@ public class NPCSpawner_Editor : Editor
 
         NPCSpawner spawner = (NPCSpawner)target;
 
-        if (GUILayout.Button("Spawn T-Rex"))
+        if (GUILayout.Button("Spawn Npc Based On Definition"))
         {
-            spawner.SpawnNPC("TRex");
-        }
-        if (GUILayout.Button("Spawn Guard"))
-        {
-            spawner.SpawnNPC("Guard");
-        }
-        if (GUILayout.Button("Spawn Zombie"))
-        {
-            spawner.SpawnNPC("Zombie");
+            if (!ApplicationPlaying()) return;
+            spawner.SpawnNPC(spawner.npcDefinitionToSpawn);
         }
     }
+
+	private bool ApplicationPlaying()
+	{
+		if (!Application.isPlaying)
+		{
+			Debug.LogWarning("Must be in Play Mode");
+			return false;
+		}
+
+		return true;
+	}
 }

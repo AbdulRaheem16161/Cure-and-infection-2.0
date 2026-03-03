@@ -94,48 +94,6 @@ public class NPCStateMachineEditor : Editor
             EditorGUI.indentLevel--;
         }
 
-        EditorGUILayout.Space(10);
-
-        // ─────────────────────────────
-        // Health
-        EditorGUILayout.LabelField("Health Settings", EditorStyles.boldLabel);
-        npc.EnableHeatlh = EditorGUILayout.Toggle("Enable Health", npc.EnableHeatlh);
-        if (npc.EnableHeatlh)
-        {
-            EditorGUI.indentLevel++;
-            npc.TotalHealth = EditorGUILayout.IntField("Total Health", npc.TotalHealth);
-            npc.CurrentHealth = EditorGUILayout.IntField("Current Health", npc.CurrentHealth);
-            EditorGUI.indentLevel--;
-        }
-
-        EditorGUILayout.Space(10);
-
-        // ─────────────────────────────
-        // Death
-        EditorGUILayout.LabelField("Death Settings", EditorStyles.boldLabel);
-        npc.EnableDeath = EditorGUILayout.Toggle("Enable Death", npc.EnableDeath);
-        if (npc.EnableDeath)
-        {
-            EditorGUI.indentLevel++;
-            npc.isDead = EditorGUILayout.Toggle("Is Dead", npc.isDead);
-            EditorGUI.indentLevel--;
-        }
-
-        EditorGUILayout.Space(10);
-
-        // ─────────────────────────────
-        // Respawn
-        EditorGUILayout.LabelField("Respawn Settings", EditorStyles.boldLabel);
-        npc.EnableRespawn = EditorGUILayout.Toggle("Enable Respawn", npc.EnableRespawn);
-        if (npc.EnableRespawn)
-        {
-            EditorGUI.indentLevel++;
-            npc.SpawnPoint = (Transform)EditorGUILayout.ObjectField("Spawn Point", npc.SpawnPoint, typeof(Transform), true);
-            npc.BodyParts = (GameObject)EditorGUILayout.ObjectField("Body Parts", npc.BodyParts, typeof(GameObject), true);
-            npc.WaitBeforeRespawn = EditorGUILayout.IntField("Wait Before Respawn", npc.WaitBeforeRespawn);
-            EditorGUI.indentLevel--;
-        }
-
         if (GUI.changed)
         {
             EditorUtility.SetDirty(npc);
