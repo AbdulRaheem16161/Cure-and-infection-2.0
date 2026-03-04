@@ -209,6 +209,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1439162214015497929}
+  - {fileID: 5268223449941132217}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &850934402719902819
@@ -316,10 +317,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NpcDefinition: {fileID: 0}
-  StatsHandler: {fileID: 0}
-  StateMachine: {fileID: 0}
-  InventoryHandler: {fileID: 0}
-  EquipmentHandler: {fileID: 0}
 --- !u!114 &2458076507582956389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,13 +329,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnableDeath: 0
   health: 0
   water: 0
   food: 0
   stamina: 0
   headProtection: 0
   chestProtection: 0
+  showControls: 0
+  EnableDeath: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,7 +377,6 @@ MonoBehaviour:
   MaxWaitBeforeFreeMove: 7
   EnableRangedAttack: 0
   OpponentInRangedAttackRange: 0
-  WeaponHolder: {fileID: 0}
   RangedAttackRotSpeed: 0
   SpawnPoint: {fileID: 5204823297776222364}
 --- !u!114 &-6753609607226209330
@@ -395,10 +392,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   equipmentSlots: []
-  equippedItemsParent: {fileID: 0}
-  WeaponRangedPrefab: {fileID: 0}
-  WeaponMeleePrefab: {fileID: 0}
-  ArmourPrefab: {fileID: 0}
+  equippedItemsParent: {fileID: 8743914951711064300}
+  rangedWeaponInHands: {fileID: 0}
+  meleeWeaponInHands: {fileID: 0}
+  WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
+  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
+  ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
+  showControls: 0
   itemToEquip: {fileID: 0}
   itemToEquipCount: 0
   slotToEquipItemTo: 0
@@ -421,6 +421,7 @@ MonoBehaviour:
   initialInventorySize: 0
   itemContainer:
     items: []
+  showControls: 0
   addMoney: 0
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0
@@ -477,6 +478,37 @@ MonoBehaviour:
   colorAlpha: 0.25
   isTargetDetected: 0
   DetectedTarget: {fileID: 0}
+--- !u!1 &8743914951711064300
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5268223449941132217}
+  m_Layer: 0
+  m_Name: EquippedItems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5268223449941132217
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8743914951711064300}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 1.4, z: 0.4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7311903017040842917}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1001 &5742518660717373303
 PrefabInstance:
   m_ObjectHideFlags: 0

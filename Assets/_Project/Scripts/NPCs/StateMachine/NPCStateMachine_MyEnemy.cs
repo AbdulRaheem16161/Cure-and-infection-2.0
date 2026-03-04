@@ -12,6 +12,7 @@ namespace Game.MyNPC
     public class NPCStateMachine : StateMachine
     {
 		public StatsHandler StatsHandler { get; private set; }
+		public EquipmentHandler EquipmentHandler { get; private set; }
 
         #region General Values
         [Header("General Values")]
@@ -73,7 +74,6 @@ namespace Game.MyNPC
         [Header("Ranged Attack State")]
         public bool EnableRangedAttack;
         public bool OpponentInRangedAttackRange;
-        public GameObject WeaponHolder;
         public float RangedAttackRotSpeed;
         [Space(10)]
         #endregion
@@ -130,16 +130,17 @@ namespace Game.MyNPC
 			#endregion
         }
 
-		public void InitilizeStateMachine(NpcController npcController)
-		{		
-            #region initilize state machine
-            StatsHandler = npcController.StatsHandler;
+		public void InitializeStateMachine(StatsHandler statsHandler, EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
+		{
+			#region Initialize state machine
+			StatsHandler = statsHandler;
+            EquipmentHandler = equipmentHandler;
 			#endregion
 
 			#region set values from definition
-			RotationSpeed = npcController.NpcDefinition.RotationSpeed;
-            PatrolSpeed = npcController.NpcDefinition.PatrolSpeed;
-            ChaseSpeed = npcController.NpcDefinition.ChaseSpeed;
+			RotationSpeed = npcDefinition.RotationSpeed;
+            PatrolSpeed = npcDefinition.PatrolSpeed;
+            ChaseSpeed = npcDefinition.ChaseSpeed;
 			#endregion
 
 			#region sub to events
@@ -221,10 +222,6 @@ namespace Game.MyNPC
 
             OpponentInMeleeAttackRange = false;
 
-            #endregion
-
-            #region Remove Gun
-            WeaponHolder = null;
             #endregion
 
             #region Change Tag

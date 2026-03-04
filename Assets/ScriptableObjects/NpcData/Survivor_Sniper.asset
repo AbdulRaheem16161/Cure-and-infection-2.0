@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: Survivor_Sniper
   m_EditorClassIdentifier: 
   npcName: Survivor
-  defaultNpcTeam: 0
   isZombie: 0
-  maxHealth: 100
+  maxHealth: 80
   maxWater: 100
   maxFood: 100
   maxStamina: 100
-  patrolSpeed: 4
+  patrolSpeed: 3
   chaseSpeed: 4
   rotationSpeed: 10
-  weaponOne: {fileID: 0}
+  weaponOne: {fileID: 11400000, guid: dc9fd9e16f76de64c972458c75f76ddd, type: 2}
   weaponTwo: {fileID: 0}
-  meleeWeapon: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: a9fff7e107251f24aa8e897c12f7d775, type: 2}
   helmet: {fileID: 0}
   chest: {fileID: 0}
-  backpack: {fileID: 0}
-  consumableOne: {fileID: 0}
-  consumableTwo: {fileID: 0}
-  consumableThree: {fileID: 0}
+  backpack: {fileID: 11400000, guid: d82a1822482222f498f1e2b61206aec4, type: 2}
+  consumableOne: {fileID: 11400000, guid: fe64440df4181d04f9752fb76b8ca258, type: 2}
+  consumableTwo: {fileID: 11400000, guid: c4b470621a0c7f041b97fe02bd3e0fde, type: 2}
+  consumableThree: {fileID: 11400000, guid: 2439ce63286a12c44a2070d131b20313, type: 2}
   viewAngle: 80
   viewDistance: 20
   highAlertDuration: 10

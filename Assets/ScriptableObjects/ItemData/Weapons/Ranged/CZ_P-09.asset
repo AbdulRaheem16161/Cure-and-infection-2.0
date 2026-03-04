@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 3
   stackLimit: 1
   itemWeight: 2.2
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 100004, guid: b812e42521a5a27499e76cc5ed56e3ac, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 2
   damage: 25
@@ -47,7 +47,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   recoilRecoveryRate: 0
   ammoType: {fileID: 11400000, guid: 948da52156225bc4f8229e48462d7096, type: 2}
-  fireSFX: {fileID: 0}
+  fireSfx: {fileID: 0}
   reloadSfx: {fileID: 0}
   muzzleFlashVfx: {fileID: 0}
   impactVfx: {fileID: 0}

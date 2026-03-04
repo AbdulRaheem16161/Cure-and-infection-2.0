@@ -1,51 +1,53 @@
 using Game.MyNPC;
 using UnityEngine;
 
+[RequireComponent(typeof(StatsHandler))]
+[RequireComponent(typeof(NPCStateMachine))]
+[RequireComponent(typeof(InventoryHandler))]
+[RequireComponent(typeof(EquipmentHandler))]
+[RequireComponent(typeof(DetectionCone))]
+[RequireComponent(typeof(DetectionRadius))]
 public class NpcController : MonoBehaviour
 {
+	private bool _initialized = false;
+
 	public NpcDefinition NpcDefinition;
-	public StatsHandler StatsHandler;
-	public NPCStateMachine StateMachine;
-	public InventoryHandler InventoryHandler;
-	public EquipmentHandler EquipmentHandler;
-	public DetectionCone DetectionCone;
-	public DetectionRadius DetectionRadius;
+	public StatsHandler StatsHandler { get; private set; }
+	public NPCStateMachine StateMachine { get; private set; }
+	public InventoryHandler InventoryHandler { get; private set; }
+	public EquipmentHandler EquipmentHandler { get; private set; }
+	public DetectionCone DetectionCone { get; private set; }
+	public DetectionRadius DetectionRadius { get; private set; }
 
 	private void Awake()
 	{
-		StatsHandler = GetComponent<StatsHandler>();
-		if (StatsHandler == null)
-			Debug.LogError($"StatsHandler component null on {gameObject.name}");
+		AssignScriptReferences();
 
-		StateMachine = GetComponent<NPCStateMachine>();
-		if (StateMachine == null)
-			Debug.LogError($"NPCStateMachine component null on {gameObject.name}");
-
-		InventoryHandler = GetComponent<InventoryHandler>();
-		if (InventoryHandler == null)
-			Debug.LogError($"InventoryHandler component null on {gameObject.name}");
-
-		EquipmentHandler = GetComponent<EquipmentHandler>();
-		if (EquipmentHandler == null)
-			Debug.LogError($"EquipmentHandler component null on {gameObject.name}");
-
-		DetectionCone = GetComponent<DetectionCone>();
-		if (DetectionCone == null)
-			Debug.LogError($"DetectionCone component null on {gameObject.name}");
-
-		DetectionRadius = GetComponent<DetectionRadius>();
-		if (DetectionRadius == null)
-			Debug.LogError($"DetectionRadius component null on {gameObject.name}");
+		if (NpcDefinition != null && !_initialized)
+			InitializeNpc(NpcDefinition);
 	}
 
-	public void InitilizeNpc(NpcDefinition npcDefinition)
+	private void AssignScriptReferences()
+	{
+		StatsHandler = GetComponent<StatsHandler>();
+		StateMachine = GetComponent<NPCStateMachine>();
+		InventoryHandler = GetComponent<InventoryHandler>();
+		EquipmentHandler = GetComponent<EquipmentHandler>();
+		DetectionCone = GetComponent<DetectionCone>();
+		DetectionRadius = GetComponent<DetectionRadius>();
+	}
+
+	public void InitializeNpc(NpcDefinition npcDefinition)
 	{
 		NpcDefinition = npcDefinition;
-		StatsHandler.InitilizeStats(npcDefinition);
-		StateMachine.InitilizeStateMachine(this);
-		InventoryHandler.InitilizeInventoryHandler();
-		EquipmentHandler.InitilizeEquipmentHandler();
-		DetectionCone.Initilize(this);
-		DetectionRadius.Initilize(this);
+		StatsHandler.InitializeStats(EquipmentHandler, NpcDefinition);
+		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, NpcDefinition);
+		InventoryHandler.InitializeInventoryHandler(EquipmentHandler);
+		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, npcDefinition);
+		DetectionCone.Initialize(NpcDefinition);
+		DetectionRadius.Initialize(NpcDefinition);
+
+		gameObject.name = NpcDefinition.NpcName;
+		_initialized = true;
 	}
 }

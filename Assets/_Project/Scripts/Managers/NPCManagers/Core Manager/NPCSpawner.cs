@@ -30,8 +30,6 @@ public class NPCSpawner : MonoBehaviour
 	public enum Teams { Team1, Team2, Team3, Team4, Team5, Team6, Team7, Team8, FreeFighter }
     public Teams NPCsTeam;
 
-    public WeaponsStruct.EnumWeaponType selectedWeapon;
-
     public NpcDefinition npcDefinitionToSpawn;
 
 	#endregion
@@ -71,14 +69,12 @@ public class NPCSpawner : MonoBehaviour
         stateMachine.RandomFollowPoint = randomPointInstance.transform;
         stateMachine.PatrolFollowPoint = patrolPointInstance.transform;
         stateMachine.SpawnPoint = spawnPoint.transform;
-        #endregion
+		#endregion
 
-        #region Set NPC's Team
+		#region Set NPC's Team and Opponent Tags of the NPC
+		stateMachine.tag = NPCsTeam.ToString().Replace("Team", "Team "); // assign Team tag while changing Team(n) to Team (n)
 
-        stateMachine.tag = NPCsTeam.ToString().Replace("Team", "Team "); // assign Team tag while changing Team(n) to Team (n)
-
-        #region Assign Opponent Tags of the NPC
-        List<string> NPCsTargetTags = new List<string>();
+		List<string> NPCsTargetTags = new List<string>();
 
         foreach (Teams t in Enum.GetValues(typeof(Teams)))
         {
@@ -94,26 +90,15 @@ public class NPCSpawner : MonoBehaviour
         }
 
         stateMachine.TargetTags = NPCsTargetTags;
-
-        #endregion
-
-        #endregion
-
-        #region Set NPC's Weapon
-        if(!npcDefinition.IsZombie)
-        {
-            stateMachine.WeaponHolder.GetComponent<NPCWeaponController>().selectedWeapon = selectedWeapon; //  zombie dont have a Weapon so
-        }
-     
         #endregion
 
         #region Assign PatrolFollowPoint References
         patrolPointInstance.GetComponent<PatrolFollowPoint>().ItsFollower = NPCInstance;
         patrolPointInstance.GetComponent<PatrolFollowPoint>().TrackGizmos = TrackGizmos;
-        #endregion
+		#endregion
 
-        #region initilize npc controller and sub components
-        npcController.InitilizeNpc(npcDefinitionToSpawn);
+		#region Initialize npc controller and sub components
+		npcController.InitializeNpc(npcDefinitionToSpawn);
 		#endregion
 
 		// Nothing to assign on RandomFollowPoint

@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: Survivor_Assault
   m_EditorClassIdentifier: 
   npcName: Survivor
-  defaultNpcTeam: 0
   isZombie: 0
-  maxHealth: 100
+  maxHealth: 125
   maxWater: 100
   maxFood: 100
   maxStamina: 100
-  patrolSpeed: 4
+  patrolSpeed: 3
   chaseSpeed: 4
   rotationSpeed: 10
-  weaponOne: {fileID: 0}
+  weaponOne: {fileID: 11400000, guid: d8800095176a06b41a826c07338bbcea, type: 2}
   weaponTwo: {fileID: 0}
-  meleeWeapon: {fileID: 0}
-  helmet: {fileID: 0}
-  chest: {fileID: 0}
-  backpack: {fileID: 0}
-  consumableOne: {fileID: 0}
-  consumableTwo: {fileID: 0}
-  consumableThree: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: e7fdb8a2c482bf8418b945ab71324bdd, type: 2}
+  helmet: {fileID: 11400000, guid: a7285e4979e16094b8362f1f237fce64, type: 2}
+  chest: {fileID: 11400000, guid: 72d434a0b7f73814c8a452446378a1ca, type: 2}
+  backpack: {fileID: 11400000, guid: d82a1822482222f498f1e2b61206aec4, type: 2}
+  consumableOne: {fileID: 11400000, guid: fe64440df4181d04f9752fb76b8ca258, type: 2}
+  consumableTwo: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
+  consumableThree: {fileID: 11400000, guid: 16dc1019027ddd2479999bdee81ff0f2, type: 2}
   viewAngle: 80
   viewDistance: 20
   highAlertDuration: 10

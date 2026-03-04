@@ -22,13 +22,16 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.IsDead) return;
 
+			//need a better check, preferably wont enter ranged attack if it doesnt have a ranged weapon.
+			if (!stateMachine.EquipmentHandler.HasRangedWeaponInHands) return;
+
             Debug.Log("ranged attack state ticking");
             #region Update Attack Timer
             _attackDurationTimer += deltaTime;
             #endregion
 
             #region Shoot
-            stateMachine.WeaponHolder.GetComponent<NPCWeaponController>().Shoot();
+            stateMachine.EquipmentHandler.rangedWeaponInHands.Shoot();
             #endregion
 
             #region State Transitions 

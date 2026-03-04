@@ -4,15 +4,11 @@ using System;
 
 public class StatsHandler : MonoBehaviour, IDamageable
 {
-	private bool IsPlayer = false;
-	public NpcController NpcController { get; private set; }
-	public NPCStateMachine StateMachine { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
-	public InventoryHandler InventoryHandler { get; private set; }
+	private bool _Initialized = false;
 
-	public bool EnableDeath;
-	public bool IsDead { get; private set; }
-
+	#region stats
+	[Header("Stats")]
 	public int health;
 	public int water;
 	public int food;
@@ -20,32 +16,32 @@ public class StatsHandler : MonoBehaviour, IDamageable
 
 	public float headProtection;
 	public float chestProtection;
+	#endregion
 
+	public bool IsDead { get; private set; }
+	public bool IsPlayer { get; private set; }
+
+	#region events
 	public event Action OnHit;
 	public event Action OnDeath;
+	#endregion
 
-	#region set up and initilze
+	#region debug settings
+	[Header("Debug Settings")]
+	[HideInInspector] public bool showControls;
+	[HideInInspector] public bool EnableDeath;
+	#endregion
+
+	#region initialize stats
 	private void Awake()
 	{
-		NpcController = GetComponent<NpcController>();
-
-		if (NpcController == null)
-		{
-			Debug.LogError($"NpcController script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-
-		StateMachine = GetComponent<NPCStateMachine>();
-
-		if (StateMachine == null)
-		{
-			Debug.LogWarning($"NPCStateMachine script not found on this gameobject: {gameObject.name}, it may not be needed");
-			IsPlayer = false;
-		}
-		else
-			IsPlayer = true;
-
-		EquipmentHandler = GetComponent<EquipmentHandler>();
+		if (!_Initialized)
+			InitializeStats(GetComponent<EquipmentHandler>(), null);
+	}
+	public void InitializeStats(EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
+	{
+		_Initialized = true;
+		EquipmentHandler = equipmentHandler;
 
 		if (EquipmentHandler == null)
 		{
@@ -53,19 +49,10 @@ public class StatsHandler : MonoBehaviour, IDamageable
 			return;
 		}
 
-		InventoryHandler = GetComponent<InventoryHandler>();
-
-		if (InventoryHandler == null)
-		{
-			Debug.LogError($"InventoryHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-	}
-
-	public void InitilizeStats(NpcDefinition npcDefinition)
-	{
 		EnableDeath = true;
 		IsDead = false;
+
+		if (npcDefinition == null) return; //keep values in inspector
 
 		health = npcDefinition.MaxHealth;
 		water = npcDefinition.MaxWater;
@@ -95,7 +82,6 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	{
 		OnHit?.Invoke();
 		health -= damageAmount;
-		Debug.LogError("recieved damage");
 
 		if (!EnableDeath) return;
 		if (health <= 0 && !IsDead)

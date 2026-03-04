@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class DetectionCone : MonoBehaviour
 {
-	private StatsHandler StatsHandler;
-
 	#region Settings
 	[Header("General Settings")]
     public float viewAngle = 45f;
@@ -41,16 +39,14 @@ public class DetectionCone : MonoBehaviour
     [SerializeField, ReadOnly] public GameObject DetectedTarget;
 	#endregion
 
-	#region Initilize
-	public void Initilize(NpcController npcController)
+	#region Initialize
+	public void Initialize(NpcDefinition npcDefinition)
 	{
-		StatsHandler = npcController.StatsHandler;
-
-		viewAngle = npcController.NpcDefinition.ViewAngle;
-		viewDistance = npcController.NpcDefinition.ViewDistance;
-		HighAlertDuration = npcController.NpcDefinition.HighAlertDuration;
-		ViewAngleMultiplier = npcController.NpcDefinition.ViewAngleMultiplier;
-		ViewDistanceMultiplier = npcController.NpcDefinition.ViewDistanceMultiplier;
+		viewAngle = npcDefinition.ViewAngle;
+		viewDistance = npcDefinition.ViewDistance;
+		HighAlertDuration = npcDefinition.HighAlertDuration;
+		ViewAngleMultiplier = npcDefinition.ViewAngleMultiplier;
+		ViewDistanceMultiplier = npcDefinition.ViewDistanceMultiplier;
 	}
 	#endregion
 

@@ -12,6 +12,9 @@ public class EquipmentHandlerEditor : Editor
 
 		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+		equipment.showControls = EditorGUILayout.Toggle("Show Controls", equipment.showControls);
+
+		if (!equipment.showControls) return;
 
 		#region equip item buttons
 		GUILayout.Label("Equipping Items", EditorStyles.boldLabel);

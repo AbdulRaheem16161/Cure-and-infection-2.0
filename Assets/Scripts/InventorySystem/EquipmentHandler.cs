@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using temp;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using static EquipmentHandler;
@@ -7,8 +8,8 @@ using static ItemDefinition;
 
 public class EquipmentHandler : MonoBehaviour
 {
-	public StatsHandler Stats { get; private set; }
 	public InventoryHandler InventoryHandler { get; private set; }
+	private bool _Initialized = false;
 
 	#region equipment slots + dictionary lookup
 	[Header("Equipment Settings")]
@@ -24,6 +25,13 @@ public class EquipmentHandler : MonoBehaviour
 	public Dictionary<EquipmentType, Armour> equippedArmour = new();
 	#endregion
 
+	#region item in hands
+	public bool HasRangedWeaponInHands {  get; private set; }
+	public bool HasMeleeWeaponInHands {  get; private set; }
+	public WeaponRanged rangedWeaponInHands;
+	public WeaponMelee meleeWeaponInHands;
+	#endregion
+
 	#region item prefabs
 	[Header("Equipment Prefabs")]
 	public GameObject WeaponRangedPrefab;
@@ -33,6 +41,7 @@ public class EquipmentHandler : MonoBehaviour
 
 	#region debug settings
 	[Header("Debug Settings")]
+	[HideInInspector] public bool showControls;
 	[HideInInspector] public ItemDefinition itemToEquip;
 	[HideInInspector] public int itemToEquipCount;
 	[HideInInspector] public EquipmentType slotToEquipItemTo;
@@ -79,18 +88,16 @@ public class EquipmentHandler : MonoBehaviour
 	};
 	#endregion
 
-	#region initilize slots + grab script refs on awake
+	#region initialize equipment
 	private void Awake()
 	{
-		Stats = GetComponent<StatsHandler>();
-
-		if (Stats == null)
-		{
-			Debug.LogError($"StatsHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-
-		InventoryHandler = GetComponent<InventoryHandler>();
+		if (!_Initialized)
+			InitializeEquipmentHandler(GetComponent<InventoryHandler>(), null);
+	}
+	public void InitializeEquipmentHandler(InventoryHandler inventoryHandler, NpcDefinition npcDefinition)
+	{
+		_Initialized = true;
+		InventoryHandler = inventoryHandler;
 
 		if (InventoryHandler == null)
 		{
@@ -98,10 +105,6 @@ public class EquipmentHandler : MonoBehaviour
 			return;
 		}
 
-		InitilizeEquipmentHandler();
-	}
-	public void InitilizeEquipmentHandler()
-	{
 		equipmentSlots = new();
 		slotLookup = new();
 
@@ -109,6 +112,7 @@ public class EquipmentHandler : MonoBehaviour
 		{
 			if (!slotToInventoryType.TryGetValue(type, out var slotType))
 			{
+				if (slotType == InventorySlotType.none) continue;
 				Debug.LogWarning($"No InventorySlotType mapped for {type}, skipping.");
 				continue;
 			}
@@ -117,6 +121,43 @@ public class EquipmentHandler : MonoBehaviour
 			equipmentSlots.Add(newSlot);
 			slotLookup.Add(type, newSlot);
 		}
+
+		EquipNpcEquipment(npcDefinition);
+	}
+	#endregion
+
+	#region auto equip npc equipment
+	private void EquipNpcEquipment(NpcDefinition npcDefinition)
+	{
+		if (npcDefinition == null) return;
+
+		if (npcDefinition.MeleeWeapon != null) //auto equip melee to hands
+		{
+			EquipItem(npcDefinition.MeleeWeapon, npcDefinition.MeleeWeapon.StackLimit, EquipmentType.weaponMelee);
+			UnholsterWeapon(EquipmentType.weaponMelee);
+		}
+
+		if (npcDefinition.WeaponOne != null) //overwrite melee weapon (allows for melee only npcs)
+		{
+			EquipItem(npcDefinition.WeaponOne, npcDefinition.WeaponOne.StackLimit, EquipmentType.weaponOne);
+			UnholsterWeapon(EquipmentType.weaponOne);
+		}
+		if (npcDefinition.WeaponTwo != null)
+			EquipItem(npcDefinition.WeaponTwo, npcDefinition.WeaponTwo.StackLimit, EquipmentType.weaponTwo);
+
+		if (npcDefinition.Helmet != null)
+			EquipItem(npcDefinition.Helmet, npcDefinition.Helmet.StackLimit, EquipmentType.helmet);
+		if (npcDefinition.Chest != null)
+			EquipItem(npcDefinition.Chest, npcDefinition.Chest.StackLimit, EquipmentType.chest);
+		if (npcDefinition.Backpack != null)
+			EquipItem(npcDefinition.Backpack, npcDefinition.Backpack.StackLimit, EquipmentType.backpack);
+
+		if (npcDefinition.ConsumableOne != null)
+			EquipItem(npcDefinition.ConsumableOne, npcDefinition.ConsumableOne.StackLimit, EquipmentType.consumableOne);
+		if (npcDefinition.ConsumableTwo != null)
+			EquipItem(npcDefinition.ConsumableTwo, npcDefinition.ConsumableTwo.StackLimit, EquipmentType.consumableTwo);
+		if (npcDefinition.ConsumableThree != null)
+			EquipItem(npcDefinition.ConsumableThree, npcDefinition.ConsumableThree.StackLimit, EquipmentType.consumableThree);
 	}
 	#endregion
 
@@ -129,7 +170,6 @@ public class EquipmentHandler : MonoBehaviour
 		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
 		InventoryItem itemToEquip = new(item, stackCount);
 
-		//if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
 		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
 
 		HandleItemEquipping(itemToEquip, equipmentSlot);
@@ -151,7 +191,6 @@ public class EquipmentHandler : MonoBehaviour
 			return;
 		}
 
-		//if (!SlotAndItemTypeMatch(equipmentSlot, itemToEquip)) return;
 		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
 
 		if (equippedItem != null && returnItem) //return item
@@ -383,17 +422,70 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 
 	/// <summary>
-	/// need to add logic framework for holstering/unholstering weapons, play sfx/animation
+	/// will need updating with proper models and making them fit on a characters body and on there back/hip or in there hands better.
+	/// + way to store position/rotation of equipped/holstered items need to go to, eg: EquipmentSlot contains Transform of where to set them
 	/// </summary>
 	/// 
-	#region weapon holstering
-	public void HolsterWeapon(GameObject weaponObj)
+	#region weapon holstering/unholstering
+	public void HolsterWeapon()
 	{
+		GameObject weaponObject = null;
+		if (rangedWeaponInHands)
+		{
+			HasRangedWeaponInHands = false;
+			weaponObject = rangedWeaponInHands.gameObject;
+			rangedWeaponInHands = null;
+		}
+		if (meleeWeaponInHands)
+		{
+			HasMeleeWeaponInHands = false;
+			weaponObject = meleeWeaponInHands.gameObject;
+			meleeWeaponInHands = null;
+		}
 
+		if (weaponObject == null) //no weapon obj to move
+			return;
+
+		//move model to back/side etc, play any animation + sfx
+		weaponObject.transform.SetLocalPositionAndRotation(new(0, 0, 0.55f), Quaternion.Euler(-90, 0, -90)); //atm just glue to char back
 	}
-	public void UnholsterWeapon(GameObject weaponObj)
+	public void UnholsterWeapon(EquipmentType equipmentType)
 	{
+		HolsterWeapon(); //holster current weapon if any and wait
 
+		Debug.LogError("unholster weapon");
+
+		GameObject weaponObject;
+		if (equipmentType == EquipmentType.weaponOne || equipmentType == EquipmentType.weaponTwo)
+		{
+			if (equippedRangedWeapons.TryGetValue(equipmentType, out var weapon))
+			{
+				rangedWeaponInHands = weapon;
+				HasRangedWeaponInHands = true;
+				weaponObject = rangedWeaponInHands.gameObject;
+				Debug.LogError($"unholster weapon {rangedWeaponInHands.name}");
+			}
+			else
+				return;
+		}
+		else if (equipmentType == EquipmentType.weaponMelee)
+		{
+			if (equippedMeleeWeapon.TryGetValue(equipmentType, out var weapon))
+			{
+				meleeWeaponInHands = weapon;
+				HasMeleeWeaponInHands = true;
+				weaponObject = meleeWeaponInHands.gameObject;
+				Debug.LogError($"unholster weapon {meleeWeaponInHands.name}");
+			}
+			else
+				return;
+		}
+		else
+			return; //wrong equipment type
+
+		//move model to hands, play any animation + sfx
+		weaponObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0)); //atm just float infront of char model
+		Debug.LogError($"set unholster weapon pos/rot");
 	}
 	#endregion
 

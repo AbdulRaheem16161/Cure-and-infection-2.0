@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 [CustomEditor(typeof(InventoryHandler))]
@@ -13,6 +14,9 @@ public class InventoryHandlerEditor : Editor
 
 		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+		inventory.showControls = EditorGUILayout.Toggle("Show Controls", inventory.showControls);
+
+		if (!inventory.showControls) return;
 
 		#region modifying money buttons
 		GUILayout.Label("Debug money", EditorStyles.boldLabel);

@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 4
   stackLimit: 1
   itemWeight: 4.5
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 2441058836130299858, guid: 72632788486754f8caaf97b85bf5dbf6, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 1
   damage: 65

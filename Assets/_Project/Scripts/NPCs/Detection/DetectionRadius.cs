@@ -43,17 +43,15 @@ public class DetectionRadius : MonoBehaviour
 
 	#endregion
 
-	#region Initilize
-	public void Initilize(NpcController npcController)
-    {
-		StatsHandler = npcController.StatsHandler;
-
-		viewAngle = npcController.NpcDefinition.ViewAngle;
-        viewDistance = npcController.NpcDefinition.ViewDistance;
-        HighAlertDuration = npcController.NpcDefinition.HighAlertDuration;
-        ViewAngleMultiplier = npcController.NpcDefinition.ViewAngleMultiplier;
-        ViewDistanceMultiplier = npcController.NpcDefinition.ViewDistanceMultiplier;
-    }
+	#region Initialize
+	public void Initialize(NpcDefinition npcDefinition)
+	{
+		viewAngle = npcDefinition.ViewAngle;
+		viewDistance = npcDefinition.ViewDistance;
+		HighAlertDuration = npcDefinition.HighAlertDuration;
+		ViewAngleMultiplier = npcDefinition.ViewAngleMultiplier;
+		ViewDistanceMultiplier = npcDefinition.ViewDistanceMultiplier;
+	}
 	#endregion
 
 	private void Update()

@@ -13,21 +13,22 @@ public class StatsHandlerEditor : Editor
 
 		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+		stats.showControls = EditorGUILayout.Toggle("Show Controls", stats.showControls);
 
-		
+		if (!stats.showControls) return;
 
 		#region deal damage and kill 
-		if (GUILayout.Button("Damage Npc (25% of health)"))
+		if (GUILayout.Button("Damage Npc (25)"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(stats.NpcController.NpcDefinition.MaxHealth / 4);
+			stats.RecieveDamage(25);
 		}
 		if (GUILayout.Button("Kill Npc"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(stats.NpcController.NpcDefinition.MaxHealth + 1);
+			stats.RecieveDamage(stats.health + 1);
 		}
 		#endregion
 	}

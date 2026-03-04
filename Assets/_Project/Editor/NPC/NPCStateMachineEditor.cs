@@ -88,7 +88,6 @@ public class NPCStateMachineEditor : Editor
         if (npc.EnableRangedAttack)
         {
             EditorGUI.indentLevel++;
-            npc.WeaponHolder = (GameObject)EditorGUILayout.ObjectField("Weapon Holder", npc.WeaponHolder, typeof(GameObject), true);
             npc.OpponentInRangedAttackRange = EditorGUILayout.Toggle("Opponent In Ranged Attack Range", npc.OpponentInRangedAttackRange);
             npc.RangedAttackRotSpeed = EditorGUILayout.FloatField("Ranged Attack RotSpeed", npc.RangedAttackRotSpeed);
             EditorGUI.indentLevel--;

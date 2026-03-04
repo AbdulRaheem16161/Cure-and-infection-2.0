@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class InventoryHandler : MonoBehaviour
 {
-	public StatsHandler Stats { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
+	private bool _Initialized = false;
 
 	#region inventory settings
 	[Header("Inventory Settings")]
@@ -21,6 +21,7 @@ public class InventoryHandler : MonoBehaviour
 
 	#region debug settings
 	[Header("Debug Settings")]
+	[HideInInspector] public bool showControls;
 	[HideInInspector] public int addMoney;
 	[HideInInspector] public int modifyInventorySizeByThis;
 	[HideInInspector] public bool actionEffectsStack = false;
@@ -29,26 +30,28 @@ public class InventoryHandler : MonoBehaviour
 	[HideInInspector] public int itemToSpawnCount;
 	#endregion
 
-	#region grab script refs on awake
+	#region initialize inventory
 	private void Awake()
 	{
-		Stats = GetComponent<StatsHandler>();
-
-		if (Stats == null)
-		{
-			Debug.LogError($"StatsHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-
-		EquipmentHandler = GetComponent<EquipmentHandler>();
+		if (!_Initialized)
+			InitializeInventoryHandler(GetComponent<EquipmentHandler>());
+	}
+	public void InitializeInventoryHandler(EquipmentHandler equipmentHandler)
+	{
+		_Initialized = true;
+		EquipmentHandler = equipmentHandler;
 
 		if (EquipmentHandler == null)
 		{
 			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
 			return;
 		}
-	}
 
+		itemContainer = new(initialInventorySize);
+	}
+	#endregion
+
+	#region event sub/unsub
 	private void OnEnable()
 	{
 		EquipmentHandler.OnItemEquip += OnItemEquipped;
@@ -60,11 +63,6 @@ public class InventoryHandler : MonoBehaviour
 		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
 	}
 	#endregion
-
-	public void InitilizeInventoryHandler()
-	{
-		itemContainer = new(initialInventorySize);
-	}
 
 	#region modifying money
 	public bool HasEnoughMoney(int cost)

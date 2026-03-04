@@ -21,7 +21,6 @@ public class NpcDefinition : ScriptableObject
 	#region npc info
 	[Header("Npc Info")]
 	[SerializeField] private string npcName;
-	[SerializeField] private Teams defaultNpcTeam;
 	[SerializeField] private bool isZombie;
 	#endregion
 
@@ -83,7 +82,6 @@ public class NpcDefinition : ScriptableObject
 
 	#region read only
 	public string NpcName => npcName;
-	public Teams DefaultNpcTeam => defaultNpcTeam;
 	public bool IsZombie => isZombie;
 
 	public int MaxHealth => maxHealth;
