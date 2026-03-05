@@ -1,5 +1,6 @@
 using Game.MyNPC;
 using UnityEngine;
+using static NPCSpawner;
 
 [RequireComponent(typeof(StatsHandler))]
 [RequireComponent(typeof(NPCStateMachine))]
@@ -24,7 +25,7 @@ public class NpcController : MonoBehaviour
 		AssignScriptReferences();
 
 		if (NpcDefinition != null && !_initialized)
-			InitializeNpc(NpcDefinition);
+			InitializeNpc(NpcDefinition, Teams.FreeFighter); //set default team to freedom fighter
 	}
 
 	private void AssignScriptReferences()
@@ -37,13 +38,13 @@ public class NpcController : MonoBehaviour
 		DetectionRadius = GetComponent<DetectionRadius>();
 	}
 
-	public void InitializeNpc(NpcDefinition npcDefinition)
+	public void InitializeNpc(NpcDefinition npcDefinition, Teams team)
 	{
 		NpcDefinition = npcDefinition;
 		StatsHandler.InitializeStats(EquipmentHandler, NpcDefinition);
-		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, NpcDefinition);
 		InventoryHandler.InitializeInventoryHandler(EquipmentHandler);
-		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, npcDefinition);
+		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, NpcDefinition);
+		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcDefinition, team);
 		DetectionCone.Initialize(NpcDefinition);
 		DetectionRadius.Initialize(NpcDefinition);
 

@@ -18,18 +18,13 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public float chestProtection;
 	#endregion
 
+	[HideInInspector] public bool EnableDeath;
 	public bool IsDead { get; private set; }
 	public bool IsPlayer { get; private set; }
 
 	#region events
 	public event Action OnHit;
 	public event Action OnDeath;
-	#endregion
-
-	#region debug settings
-	[Header("Debug Settings")]
-	[HideInInspector] public bool showControls;
-	[HideInInspector] public bool EnableDeath;
 	#endregion
 
 	#region initialize stats

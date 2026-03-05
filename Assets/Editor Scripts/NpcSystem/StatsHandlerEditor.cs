@@ -5,6 +5,8 @@ using UnityEngine;
 [CustomEditor(typeof(StatsHandler))]
 public class StatsHandlerEditor : Editor
 {
+	private bool showDebugControls;
+
 	public override void OnInspectorGUI()
 	{
 		DrawDefaultInspector();
@@ -13,9 +15,9 @@ public class StatsHandlerEditor : Editor
 
 		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
-		stats.showControls = EditorGUILayout.Toggle("Show Controls", stats.showControls);
+		showDebugControls = EditorGUILayout.Toggle("Show Debug Controls", showDebugControls);
 
-		if (!stats.showControls) return;
+		if (!showDebugControls) return;
 
 		#region deal damage and kill 
 		if (GUILayout.Button("Damage Npc (25)"))

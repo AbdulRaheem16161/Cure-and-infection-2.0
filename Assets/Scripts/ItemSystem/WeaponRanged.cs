@@ -1,14 +1,30 @@
+using Game.Core;
+using Game.MyNPC;
+using Game.MyPlayer;
+using System.Collections;
+using temp;
 using UnityEngine;
 
 public class WeaponRanged : Item<WeaponRangedDefinition>
 {
 	[SerializeField] private WeaponRangedDefinition weaponDefinition;
-
 	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
 
-	private int currentMagazineAmmo; //track mag ammo count at runtime
+	public bool IsReloading { get; private set; }
+	public bool MagazineFull => currentMagazineAmmo == WeaponDefinition.MagazineSize;
+	public bool MagazineEmpty => currentMagazineAmmo <= 0;
+	public int currentMagazineAmmo; //track mag ammo count at runtime
+
+	public float FireRateCooldown;
+	public float fireRateCooldownTimer;
+
+	private Vector3 LastHitPoint;
+	private float NextFireTime;
+
 	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
+
+	public WeaponView WeaponView { get; private set; }
 
 	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
 	{
@@ -16,11 +32,14 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		weaponDefinition = definition;
 
 		//weapon-specific setup here
+		WeaponView = modelParent.GetComponentInChildren<WeaponView>();
+		FireRateCooldown = 60 / WeaponDefinition.FireRateRPM;
 	}
 
 	public void EquipWeapon()
 	{
 		//hold in hands
+		currentMagazineAmmo = WeaponDefinition.MagazineSize;
 	}
 
 	public void UnEquipWeapon()
@@ -33,16 +52,38 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		//ads and modify accuracy and move speed etc...
 	}
 
-	//example method behaviours
-	public void Shoot()
+	#region weapon shooting (TODO add sfx, vfx and animations + recoil and accuracy adjustments)
+	public void Shoot(string[] HitableTags)
 	{
-		///<summery>
-		/// check if can shoot
-		/// shoot gun adjust recoil and accuracy based on weapon definition,
-		/// lower mag ammo, 
-		/// create relevent sfx and vfx
-		///<summery>
+		if (MagazineEmpty) return;
+		if (IsReloading) return;
+
+		#region Fire Rate
+		fireRateCooldownTimer -= Time.deltaTime;
+
+		if (fireRateCooldownTimer > 0f) return;
+
+		fireRateCooldownTimer = FireRateCooldown;
+		#endregion
+
+		currentMagazineAmmo--;
+
+		Vector3 origin = WeaponView.MuzzlePoint.position;
+		Vector3 direction = WeaponView.MuzzlePoint.forward;
+
+		if (TryGetAccurateHit(origin, direction, HitableTags, out RaycastHit hit))
+		{
+			LastHitPoint = hit.point;
+
+			if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+				damageable.RecieveDamage(weaponDefinition.Damage);
+		}
+		else
+		{
+			LastHitPoint = origin + direction * weaponDefinition.EffectiveRange;
+		}
 	}
+	#endregion
 
 	public void AdjustRecoil()
 	{
@@ -54,25 +95,112 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		//update accuracy while firing
 	}
 
-	public void Reload()
+	#region reloading (TODO add sfx, vfx and animations)
+	public void Reload(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
 	{
-		///<summery>
-		/// refil mag, wait for reload time
-		/// create relevent sfx and vfx
-		///<summery>
+		if (MagazineFull) return;
+		if (IsReloading) return;
+
+		if (!hasUnlimitedAmmo && !ammoGiver.AmmoAvailable(weaponDefinition.AmmoType)) return; //no ammo in inventory
+
+		StartCoroutine(ReloadAmmo(ammoGiver, hasUnlimitedAmmo));
 	}
 
-	public bool HasAmmo()
+	private IEnumerator ReloadAmmo(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
 	{
-		//check for ammo in inventory etc for reloading
-		return true;
-	}
+		#region ReloadAmmo
+		IsReloading = true;
+		yield return new WaitForSeconds(WeaponDefinition.ReloadTime);
 
-	public bool HasAmmoInMagazine()
-	{
-		if (currentMagazineAmmo == 0)
-			return false;
+		if (hasUnlimitedAmmo)
+			currentMagazineAmmo = ammoGiver.GetAmmo(WeaponDefinition.AmmoType, weaponDefinition.MagazineSize);
 		else
-			return true;
+			currentMagazineAmmo = ammoGiver.TakeAmmo(WeaponDefinition.AmmoType, weaponDefinition.MagazineSize);
+
+		IsReloading = false;
+		#endregion
 	}
+	#endregion
+
+	#region try get accurate hit
+	private bool TryGetAccurateHit(Vector3 origin, Vector3 direction, string[] hitableTags, out RaycastHit finalHit)
+	{
+		#region Summary
+		/// <summary>
+		/// Uses Raycast first for accuracy,
+		/// then SphereCast as fallback aim assist
+		/// </summary>
+		#endregion
+
+		#region TryGetAccurateHit
+
+		finalHit = new RaycastHit();
+
+		#region Raycast
+		if (Physics.Raycast(origin, direction, out RaycastHit rayHit, weaponDefinition.EffectiveRange))
+		{
+			if (IsValidTarget(rayHit.collider, hitableTags))
+			{
+				finalHit = rayHit;
+				return true;
+			}
+		}
+		#endregion
+
+		#region SphereCast
+		RaycastHit[] hits = Physics.SphereCastAll(
+			origin,
+			weaponDefinition.BeamRadius,
+			direction,
+			WeaponDefinition.EffectiveRange
+		);
+
+		float closestDistance = float.MaxValue;
+		bool hitFound = false;
+
+		for (int i = 0; i < hits.Length; i++)
+		{
+			RaycastHit hit = hits[i];
+
+			if (!IsValidTarget(hit.collider, hitableTags))
+				continue;
+
+			float distance = Vector3.Distance(origin, hit.point);
+
+			if (distance >= closestDistance)
+				continue;
+
+			closestDistance = distance;
+			finalHit = hit;
+			hitFound = true;
+		}
+
+		return hitFound;
+		#endregion
+
+		#endregion
+	}
+	#endregion
+
+	#region valid target check
+	private bool IsValidTarget(Collider collider, string[] hitableTags)
+	{
+		#region Summary
+		/// <summary>
+		/// Checks if the collider matches any allowed target tags
+		/// </summary>
+		#endregion
+
+		#region IsValidTarget
+
+		for (int i = 0; i < hitableTags.Length; i++)
+		{
+			if (collider.CompareTag(hitableTags[i]))
+				return true;
+		}
+
+		return false;
+		#endregion
+	}
+	#endregion
 }

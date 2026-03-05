@@ -40,6 +40,8 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private float spreadIncreasePerShot;
 	[SerializeField] private float spreadRecoveryRate;
 	[SerializeField] private float maxSpread;
+
+	[SerializeField] private float beamRadius;
 	#endregion
 
 	#region weapon recoil
@@ -52,6 +54,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	#region weapon projectile properties
 	[Header("Projectile Properties")]
 	[SerializeField] private ProjectileDefinition ammoType; //can be modified to reference a ProjectileDefinition
+	private float bulletVisualSpeed;
 	#endregion
 
 	#region weapon vfx/sfx
@@ -85,6 +88,8 @@ public class WeaponRangedDefinition : ItemDefinition
 	public float SpreadRecoveryRate => spreadRecoveryRate;
 	public float MaxSpread => maxSpread;
 
+	public float BeamRadius => beamRadius;
+
 	//recoil
 	public Vector2 RecoilPerShot => recoilPerShot;
 	public AnimationCurve RecoilPattern => recoilPattern;
@@ -98,6 +103,7 @@ public class WeaponRangedDefinition : ItemDefinition
 
 	//projectile
 	public ProjectileDefinition AmmoType => ammoType;
+	public float BulletVisualSpeed => bulletVisualSpeed;
 	#endregion
 
 	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)

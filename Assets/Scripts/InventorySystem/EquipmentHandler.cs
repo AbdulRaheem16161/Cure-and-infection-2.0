@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using temp;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using static EquipmentHandler;
 using static ItemDefinition;
@@ -41,7 +39,6 @@ public class EquipmentHandler : MonoBehaviour
 
 	#region debug settings
 	[Header("Debug Settings")]
-	[HideInInspector] public bool showControls;
 	[HideInInspector] public ItemDefinition itemToEquip;
 	[HideInInspector] public int itemToEquipCount;
 	[HideInInspector] public EquipmentType slotToEquipItemTo;
@@ -434,12 +431,14 @@ public class EquipmentHandler : MonoBehaviour
 		{
 			HasRangedWeaponInHands = false;
 			weaponObject = rangedWeaponInHands.gameObject;
+			rangedWeaponInHands.UnEquipWeapon();
 			rangedWeaponInHands = null;
 		}
 		if (meleeWeaponInHands)
 		{
 			HasMeleeWeaponInHands = false;
 			weaponObject = meleeWeaponInHands.gameObject;
+			meleeWeaponInHands.UnEquipWeapon();
 			meleeWeaponInHands = null;
 		}
 
@@ -453,17 +452,15 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		HolsterWeapon(); //holster current weapon if any and wait
 
-		Debug.LogError("unholster weapon");
-
 		GameObject weaponObject;
 		if (equipmentType == EquipmentType.weaponOne || equipmentType == EquipmentType.weaponTwo)
 		{
 			if (equippedRangedWeapons.TryGetValue(equipmentType, out var weapon))
 			{
 				rangedWeaponInHands = weapon;
+				rangedWeaponInHands.EquipWeapon();
 				HasRangedWeaponInHands = true;
 				weaponObject = rangedWeaponInHands.gameObject;
-				Debug.LogError($"unholster weapon {rangedWeaponInHands.name}");
 			}
 			else
 				return;
@@ -473,9 +470,9 @@ public class EquipmentHandler : MonoBehaviour
 			if (equippedMeleeWeapon.TryGetValue(equipmentType, out var weapon))
 			{
 				meleeWeaponInHands = weapon;
+				meleeWeaponInHands.EquipWeapon();
 				HasMeleeWeaponInHands = true;
 				weaponObject = meleeWeaponInHands.gameObject;
-				Debug.LogError($"unholster weapon {meleeWeaponInHands.name}");
 			}
 			else
 				return;
@@ -485,7 +482,6 @@ public class EquipmentHandler : MonoBehaviour
 
 		//move model to hands, play any animation + sfx
 		weaponObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0)); //atm just float infront of char model
-		Debug.LogError($"set unholster weapon pos/rot");
 	}
 	#endregion
 

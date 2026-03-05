@@ -2,7 +2,7 @@ using System;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
-public class InventoryHandler : MonoBehaviour
+public class InventoryHandler : MonoBehaviour, IAmmoGiver
 {
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
@@ -21,7 +21,6 @@ public class InventoryHandler : MonoBehaviour
 
 	#region debug settings
 	[Header("Debug Settings")]
-	[HideInInspector] public bool showControls;
 	[HideInInspector] public int addMoney;
 	[HideInInspector] public int modifyInventorySizeByThis;
 	[HideInInspector] public bool actionEffectsStack = false;
@@ -110,6 +109,21 @@ public class InventoryHandler : MonoBehaviour
 				break;
 			}
 		}
+	}
+	#endregion
+
+	#region ammo container interface methods
+	public int GetAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+	{
+		return ItemContainer.GetAmmo(projectileDefinition, amountNeeded);
+	}
+	public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+	{
+		return ItemContainer.TakeAmmo(projectileDefinition, amountNeeded);
+	}
+	public bool AmmoAvailable(ProjectileDefinition projectileDefinition)
+	{
+		return itemContainer.AmmoAvailable(projectileDefinition);
 	}
 	#endregion
 

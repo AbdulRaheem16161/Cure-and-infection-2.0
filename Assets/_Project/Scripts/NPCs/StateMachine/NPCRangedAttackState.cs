@@ -31,7 +31,10 @@ namespace Game.MyNPC
             #endregion
 
             #region Shoot
-            stateMachine.EquipmentHandler.rangedWeaponInHands.Shoot();
+            if (stateMachine.EquipmentHandler.rangedWeaponInHands.MagazineEmpty)
+                stateMachine.EquipmentHandler.rangedWeaponInHands.Reload(stateMachine.InventoryHandler, true);
+            else
+                stateMachine.EquipmentHandler.rangedWeaponInHands.Shoot(stateMachine.TargetTags.ToArray());
             #endregion
 
             #region State Transitions 
@@ -77,6 +80,6 @@ namespace Game.MyNPC
         {
             
         }
-    }
+	}
 }
 

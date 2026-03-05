@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 3
   stackLimit: 1
   itemWeight: 2.2
-  itemPrefab: {fileID: 100004, guid: b812e42521a5a27499e76cc5ed56e3ac, type: 3}
+  itemPrefab: {fileID: 1694449805434718, guid: 6f1a7354265853f44b0ed5e2e43676ad, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 2
   damage: 25
@@ -38,6 +38,7 @@ MonoBehaviour:
   spreadIncreasePerShot: 0
   spreadRecoveryRate: 0
   maxSpread: 0
+  beamRadius: 0
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2

@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class ItemContainer
+public class ItemContainer : IAmmoGiver
 {
 	[SerializeField] private InventoryItem[] items;
 
@@ -12,11 +13,14 @@ public class ItemContainer
 	public event Action<int> OnContainerSizeChanged;
 	public event Action<int, InventoryItem> OnContainerItemChanged;
 
+	private Dictionary<ProjectileDefinition, int> ammoCounts = new();
+	public Dictionary<ProjectileDefinition, int> AmmoCounts => ammoCounts;
 
 	#region constructor
 	public ItemContainer(int initialSize)
 	{
 		items = new InventoryItem[initialSize];
+		OnContainerItemChanged += RecalculateAmmoCounts;
 	}
 	#endregion
 
@@ -56,6 +60,69 @@ public class ItemContainer
 		}
 
 		items = newInventory;
+	}
+	#endregion
+
+	#region ammo counting + checking
+	private void RecalculateAmmoCounts(int _, InventoryItem item)
+	{
+		if (!ItemExists(item)) return;
+		if (item.ItemDefinition is not ProjectileDefinition _) return;
+
+		ammoCounts.Clear();
+
+		foreach (InventoryItem inventoryItem in items)
+		{
+			if (!ItemExists(inventoryItem)) continue;
+
+			if (inventoryItem.ItemDefinition is ProjectileDefinition projectileDef)
+			{
+				if (ammoCounts.ContainsKey(projectileDef))
+					ammoCounts[projectileDef] += inventoryItem.CurrentStack;
+				else
+					ammoCounts[projectileDef] = inventoryItem.CurrentStack;
+			}
+		}
+	}
+	#endregion
+
+	#region ammo interface methods
+	public int GetAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+	{
+		return amountNeeded;
+	}
+	public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+	{
+		int ammoFound = 0;
+
+		foreach (var item in Items) //collect ammo needed
+		{
+			if (item == null) continue;
+			if (item.ItemDefinition is not ProjectileDefinition pd) continue;
+			if (pd != projectileDefinition) continue;
+
+			int remainingNeeded = amountNeeded - ammoFound;
+
+			if (item.CurrentStack <= remainingNeeded)
+			{
+				ammoFound += item.CurrentStack;
+				item.RemoveItemStack(item.CurrentStack);
+			}
+			else
+			{
+				ammoFound += remainingNeeded;
+				item.RemoveItemStack(remainingNeeded);
+			}
+
+			if (ammoFound >= amountNeeded)
+				break;
+		}
+
+		return ammoFound;
+	}
+	public bool AmmoAvailable(ProjectileDefinition projectileDefinition)
+	{
+		return AmmoCounts.TryGetValue(projectileDefinition, out int count) && count > 0;
 	}
 	#endregion
 
@@ -317,6 +384,21 @@ public class ItemContainer
 			OnContainerItemChanged?.Invoke(slot, Items[slot]);
 			Debug.Log($"unstacked item: {item.ItemDefinition.ItemName} to {item.CurrentStack}");
 		}
+	}
+	#endregion
+
+	#region look for item
+	/// <summary>
+	/// look for item via definition, optionally include looking for amount
+	/// </summary>
+	public InventoryItem LookForItem(ItemDefinition itemDef)
+	{
+		foreach (InventoryItem item in Items)
+		{
+			if (!ItemDefinitionMatches(item, new(itemDef, 1))) continue;
+			return item;
+		}
+		return null;
 	}
 	#endregion
 

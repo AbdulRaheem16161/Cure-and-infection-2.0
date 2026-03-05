@@ -37,6 +37,7 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 
 		//if same item model doesnt need replacing
 		if (modelReference != null && modelReference == definition.ItemPrefab) return;
+
 		GameObject modelRef = Instantiate(definition.ItemPrefab, transform);
 		modelRef.transform.SetParent(modelParent.transform);
 		modelRef.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);

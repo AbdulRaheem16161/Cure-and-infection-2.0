@@ -1,3 +1,6 @@
+using Game.Core;
+using Game.MyNPC;
+using Game.MyPlayer;
 using UnityEngine;
 
 public class WeaponMelee : Item<WeaponMeleeDefinition>
@@ -5,6 +8,9 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	[SerializeField] private WeaponMeleeDefinition weaponDefinition;
 
 	public WeaponMeleeDefinition WeaponDefinition => weaponDefinition;
+
+	private StateMachine StateMachine;
+	private string[] HitableTags = new string[0];
 
 	private bool CanSwing => swingCooldownTimer <= 0;
 	private float swingCooldownTimer;
@@ -15,6 +21,16 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		weaponDefinition = definition;
 
 		//weapon-specific setup here
+	}
+
+	public void EquipWeapon()
+	{
+		//hold in hands
+	}
+
+	public void UnEquipWeapon()
+	{
+		//holster
 	}
 
 	public void LightAttack()

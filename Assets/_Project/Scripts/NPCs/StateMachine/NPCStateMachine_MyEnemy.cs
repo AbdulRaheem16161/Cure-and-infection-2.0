@@ -1,11 +1,11 @@
 using Game.Core;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections;
-using UnityEngine.InputSystem.XR;
-using System.Collections.Generic;
-using System;
+using static NPCSpawner;
 
 namespace Game.MyNPC
 {
@@ -13,6 +13,7 @@ namespace Game.MyNPC
     {
 		public StatsHandler StatsHandler { get; private set; }
 		public EquipmentHandler EquipmentHandler { get; private set; }
+		public InventoryHandler InventoryHandler { get; private set; }
 
         #region General Values
         [Header("General Values")]
@@ -130,17 +131,40 @@ namespace Game.MyNPC
 			#endregion
         }
 
-		public void InitializeStateMachine(StatsHandler statsHandler, EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
+		public void InitializeStateMachine(
+            StatsHandler statsHandler, EquipmentHandler equipmentHandler, InventoryHandler inventoryHandler, NpcDefinition npcDefinition, Teams NPCsTeam)
 		{
 			#region Initialize state machine
 			StatsHandler = statsHandler;
             EquipmentHandler = equipmentHandler;
+            InventoryHandler = inventoryHandler;
 			#endregion
 
 			#region set values from definition
 			RotationSpeed = npcDefinition.RotationSpeed;
             PatrolSpeed = npcDefinition.PatrolSpeed;
             ChaseSpeed = npcDefinition.ChaseSpeed;
+			#endregion
+
+			#region Set NPC's Team and Opponent Tags of the NPC
+			tag = NPCsTeam.ToString().Replace("Team", "Team "); // assign Team tag while changing Team(n) to Team (n)
+
+			List<string> NPCsTargetTags = new List<string>();
+
+			foreach (Teams t in Enum.GetValues(typeof(Teams)))
+			{
+				// add all the teams of the Enum "Teams" in the TargetTags list except for its own team
+
+				if (t == NPCsTeam && NPCsTeam != Teams.FreeFighter) // if its not a free fighter then skip its own tag
+					continue;
+
+				string teamName = t.ToString();
+				teamName = teamName.Replace("Team", "Team "); // change Team(n) to Team (n)
+
+				NPCsTargetTags.Add(teamName);
+			}
+
+			TargetTags = NPCsTargetTags;
 			#endregion
 
 			#region sub to events
@@ -212,7 +236,6 @@ namespace Game.MyNPC
 
         public void HandleDeath()
         {
-            Debug.LogError("handling death");
             StartCoroutine(Die());
         }
 

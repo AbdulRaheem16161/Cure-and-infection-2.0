@@ -71,34 +71,13 @@ public class NPCSpawner : MonoBehaviour
         stateMachine.SpawnPoint = spawnPoint.transform;
 		#endregion
 
-		#region Set NPC's Team and Opponent Tags of the NPC
-		stateMachine.tag = NPCsTeam.ToString().Replace("Team", "Team "); // assign Team tag while changing Team(n) to Team (n)
-
-		List<string> NPCsTargetTags = new List<string>();
-
-        foreach (Teams t in Enum.GetValues(typeof(Teams)))
-        {
-            // add all the teams of the Enum "Teams" in the TargetTags list except for its own team
-
-            if (t == NPCsTeam && NPCsTeam != Teams.FreeFighter) // if its not a free fighter then skip its own tag
-                continue;
-
-            string teamName = t.ToString();  
-            teamName = teamName.Replace("Team", "Team "); // change Team(n) to Team (n)
-
-            NPCsTargetTags.Add(teamName);
-        }
-
-        stateMachine.TargetTags = NPCsTargetTags;
-        #endregion
-
         #region Assign PatrolFollowPoint References
         patrolPointInstance.GetComponent<PatrolFollowPoint>().ItsFollower = NPCInstance;
         patrolPointInstance.GetComponent<PatrolFollowPoint>().TrackGizmos = TrackGizmos;
 		#endregion
 
 		#region Initialize npc controller and sub components
-		npcController.InitializeNpc(npcDefinitionToSpawn);
+		npcController.InitializeNpc(npcDefinitionToSpawn, NPCsTeam);
 		#endregion
 
 		// Nothing to assign on RandomFollowPoint
