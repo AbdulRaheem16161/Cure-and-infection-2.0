@@ -39,6 +39,8 @@ public class WeaponRangedDefinitionEditor : ItemDefinitionEditor
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("recoilRecoveryRate"));
 
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("ammoType"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletPrefab"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("bulletVisualSpeed"));
 
 		EditorGUILayout.Space();
 

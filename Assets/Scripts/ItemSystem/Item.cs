@@ -6,7 +6,6 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 
 	public int CurrentItemStack{ get; private set; }
 
-	public GameObject modelParent;
 	[HideInInspector] protected GameObject modelReference;
 
 	#region initialize item
@@ -23,24 +22,18 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 	#region update/instantiate item model from item definition
 	private void UpdateItemModel(T definition)
 	{
-		if (modelParent == null)
-		{
-			Debug.LogError($"modelParent reference null on {gameObject.name}, assign it in inspector");
-			return;
-		}
-
 		if (definition.ItemPrefab == null)
 		{
 			Debug.LogWarning("item definitions model prefab is null");
 			return;
 		}
 
-		//if same item model doesnt need replacing
-		if (modelReference != null && modelReference == definition.ItemPrefab) return;
+		//remove old model
+		if (modelReference != null)
+			Destroy(modelReference);
 
 		GameObject modelRef = Instantiate(definition.ItemPrefab, transform);
-		modelRef.transform.SetParent(modelParent.transform);
-		modelRef.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+		modelRef.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		modelReference = modelRef;
 	}
 	#endregion

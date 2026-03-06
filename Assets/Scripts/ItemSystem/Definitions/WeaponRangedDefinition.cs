@@ -9,7 +9,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private WeaponType weaponType;
 	public enum WeaponType
 	{
-		unset, melee, handgun, smg, assaultRifle, marksmanRifle, boltActionRifle
+		unset, melee, handgun, shotgun, smg, assaultRifle, marksmanRifle, boltActionRifle
 	}
 
 	[SerializeField] private int damage;
@@ -54,7 +54,8 @@ public class WeaponRangedDefinition : ItemDefinition
 	#region weapon projectile properties
 	[Header("Projectile Properties")]
 	[SerializeField] private ProjectileDefinition ammoType; //can be modified to reference a ProjectileDefinition
-	private float bulletVisualSpeed;
+	[SerializeField] private GameObject bulletPrefab;
+	[SerializeField] private float bulletVisualSpeed;
 	#endregion
 
 	#region weapon vfx/sfx
@@ -103,6 +104,7 @@ public class WeaponRangedDefinition : ItemDefinition
 
 	//projectile
 	public ProjectileDefinition AmmoType => ammoType;
+	public GameObject BulletPrefab => bulletPrefab;
 	public float BulletVisualSpeed => bulletVisualSpeed;
 	#endregion
 

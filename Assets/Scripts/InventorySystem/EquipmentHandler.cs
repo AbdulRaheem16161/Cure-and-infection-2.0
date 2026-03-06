@@ -273,6 +273,7 @@ public class EquipmentHandler : MonoBehaviour
 
 	/// <summary>
 	/// will need updating to play any equip/unequip sfxs, linking with any animations and vfxs when equipping weapons, armour and using consumables
+	/// + proper pos/rot setting to visually be on characters back etc..
 	/// </summary>
 
 	#region equipping world items and equipment slots
@@ -295,7 +296,7 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	#endregion
 
-	#region equipping/unequipping ranged weapon objects
+	#region equipping/unequipping ranged weapon objects (TODO prob need to give player ammo back in magazine when unequipping)
 	public void EquipRangedWeapon(EquipmentSlot slot)
 	{
 		//get or create the world weapon instance
@@ -307,6 +308,7 @@ public class EquipmentHandler : MonoBehaviour
 
 		weaponInstance.gameObject.SetActive(true);
 		weaponInstance.InitializeItem((WeaponRangedDefinition)slot.item.ItemDefinition, slot.item.CurrentStack);
+		weaponInstance.transform.SetLocalPositionAndRotation(new(0, 0, 0.55f), Quaternion.Euler(-90, 0, -90)); //atm just glue to char back
 	}
 
 	public void UnEquipRangedWeapon(EquipmentSlot slot)
@@ -332,7 +334,9 @@ public class EquipmentHandler : MonoBehaviour
 
 		weaponInstance.gameObject.SetActive(true);
 		weaponInstance.InitializeItem((WeaponMeleeDefinition)slot.item.ItemDefinition, slot.item.CurrentStack);
+		weaponInstance.transform.SetLocalPositionAndRotation(new(0, 0, 0.55f), Quaternion.Euler(-90, 0, -90)); //atm just glue to char back
 	}
+
 
 	public void UnEquipMeleeWeapon(EquipmentSlot slot)
 	{
@@ -357,6 +361,7 @@ public class EquipmentHandler : MonoBehaviour
 
 		armourInstance.gameObject.SetActive(true);
 		armourInstance.InitializeItem((ArmourDefinition)slot.item.ItemDefinition, slot.item.CurrentStack);
+		armourInstance.transform.SetLocalPositionAndRotation(new(0, 0, 0.55f), Quaternion.Euler(-90, 0, -90)); //atm just glue to char back
 	}
 
 	public void UnEquipArmour(EquipmentSlot slot)

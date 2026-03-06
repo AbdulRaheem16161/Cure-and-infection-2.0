@@ -15,6 +15,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public bool MagazineEmpty => currentMagazineAmmo <= 0;
 	public int currentMagazineAmmo; //track mag ammo count at runtime
 
+	public bool CanShoot => fireRateCooldownTimer <= 0;
 	public float FireRateCooldown;
 	public float fireRateCooldownTimer;
 
@@ -32,8 +33,13 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		weaponDefinition = definition;
 
 		//weapon-specific setup here
-		WeaponView = modelParent.GetComponentInChildren<WeaponView>();
+		WeaponView = GetComponentInChildren<WeaponView>();
 		FireRateCooldown = 60 / WeaponDefinition.FireRateRPM;
+	}
+
+	private void Update()
+	{
+		HandleFireRate();
 	}
 
 	public void EquipWeapon()
@@ -57,14 +63,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	{
 		if (MagazineEmpty) return;
 		if (IsReloading) return;
-
-		#region Fire Rate
-		fireRateCooldownTimer -= Time.deltaTime;
-
-		if (fireRateCooldownTimer > 0f) return;
-
-		fireRateCooldownTimer = FireRateCooldown;
-		#endregion
+		if (!CanShoot) return;
 
 		currentMagazineAmmo--;
 
@@ -82,6 +81,19 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		{
 			LastHitPoint = origin + direction * weaponDefinition.EffectiveRange;
 		}
+
+		SpawnVisualBullet(LastHitPoint);
+	}
+	#endregion
+
+	#region handle fire rate
+	private void HandleFireRate()
+	{
+		if (CanShoot) return;
+
+		fireRateCooldownTimer -= Time.deltaTime;
+		if (fireRateCooldownTimer > 0f) return;
+		fireRateCooldownTimer = FireRateCooldown;
 	}
 	#endregion
 
@@ -200,6 +212,57 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		}
 
 		return false;
+		#endregion
+	}
+	#endregion
+
+	#region visual bullet spawning + moving
+	private void SpawnVisualBullet(Vector3 hitPoint)
+	{
+		#region Summary
+		/// <summary>
+		/// Spawns and animates a visual bullet toward the hit point
+		/// </summary>
+		#endregion
+
+		#region SpawnVisualBullet
+
+		GameObject bullet = Instantiate(WeaponDefinition.BulletPrefab, 
+			WeaponView.MuzzlePoint.position, Quaternion.LookRotation(hitPoint - WeaponView.MuzzlePoint.position));
+
+		StartCoroutine(MoveBullet(bullet, hitPoint));
+		#endregion
+	}
+
+	private IEnumerator MoveBullet(GameObject bullet, Vector3 hitPoint)
+	{
+		#region Summary
+		/// <summary>
+		/// Smoothly moves the bullet toward the target point
+		/// </summary>
+		#endregion
+
+		#region MoveBullet
+
+		Vector3 startPos = bullet.transform.position;
+		float distance = Vector3.Distance(startPos, hitPoint);
+		float travelTime = distance / WeaponDefinition.BulletVisualSpeed;
+
+		float t = 0f;
+
+		while (t < 1f)
+		{
+			if (bullet == null)
+				yield break;
+
+			bullet.transform.position = Vector3.Lerp(startPos, hitPoint, t);
+			t += Time.deltaTime / travelTime;
+
+			yield return null;
+		}
+
+		if (bullet != null)
+			Destroy(bullet);
 		#endregion
 	}
 	#endregion

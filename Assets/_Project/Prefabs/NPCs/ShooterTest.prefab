@@ -611,7 +611,6 @@ MonoBehaviour:
   stamina: 0
   headProtection: 0
   chestProtection: 0
-  showControls: 0
   EnableDeath: 0
 --- !u!114 &1864734135541436750
 MonoBehaviour:
@@ -672,9 +671,8 @@ MonoBehaviour:
   rangedWeaponInHands: {fileID: 0}
   meleeWeaponInHands: {fileID: 0}
   WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
-  WeaponMeleePrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
+  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
   ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
-  showControls: 0
   itemToEquip: {fileID: 0}
   itemToEquipCount: 0
   slotToEquipItemTo: 0
@@ -697,7 +695,6 @@ MonoBehaviour:
   initialInventorySize: 12
   itemContainer:
     items: []
-  showControls: 0
   addMoney: 0
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0

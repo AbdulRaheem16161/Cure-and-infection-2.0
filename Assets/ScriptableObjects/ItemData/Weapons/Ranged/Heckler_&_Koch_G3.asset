@@ -39,6 +39,7 @@ MonoBehaviour:
   spreadIncreasePerShot: 0
   spreadRecoveryRate: 0
   maxSpread: 0
+  beamRadius: 0
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2
@@ -48,6 +49,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   recoilRecoveryRate: 0
   ammoType: {fileID: 11400000, guid: 59d1cd775a2090d40b4dd1cbc3fb5036, type: 2}
+  bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
+  bulletVisualSpeed: 25
   fireSfx: {fileID: 0}
   reloadSfx: {fileID: 0}
   muzzleFlashVfx: {fileID: 0}
