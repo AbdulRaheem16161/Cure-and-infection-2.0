@@ -45,42 +45,36 @@ public class NPCSpawner : MonoBehaviour
 
 	public void SpawnNPC(NpcDefinition npcDefinition)
     {
-        #region Determine NPC to Spawn
         if (npcDefinition == null)
         {
             Debug.LogError("NpcDefinition null assign a reference");
             return;
         }
-		#endregion
 
-		#region Instantiate NPC and Points
-		// Spawn NPC and set parent/position
+		#region get new npc and its refs
 		GameObject NPCInstance = GetNewNpc(npcDefinition);
-		GameObject randomPointInstance = GenerateWaypoints(RandomFollowPoint);
-        GameObject patrolPointInstance = GenerateWaypoints(PatrolFollowPoint);
-        GameObject spawnPoint = GenerateWaypoints(SpawnPoint);
-        #endregion
-
-        #region Assign NPCStateMachine References
-        NpcController npcController = NPCInstance.GetComponent<NpcController>();
+		NpcController npcController = NPCInstance.GetComponent<NpcController>();
 		NPCStateMachine stateMachine = npcController.StateMachine;
-
-        // Assign follow points
-        stateMachine.RandomFollowPoint = randomPointInstance.transform;
-        stateMachine.PatrolFollowPoint = patrolPointInstance.transform;
-        stateMachine.SpawnPoint = spawnPoint.transform;
 		#endregion
 
-        #region Assign PatrolFollowPoint References
-        patrolPointInstance.GetComponent<PatrolFollowPoint>().ItsFollower = NPCInstance;
-        patrolPointInstance.GetComponent<PatrolFollowPoint>().TrackGizmos = TrackGizmos;
+		#region assign new points if null or re-enable
+		if (stateMachine.RandomFollowPoint == null)
+            stateMachine.AssignFollowPoint(GenerateWaypoints(RandomFollowPoint));
+		else
+			stateMachine.RandomFollowPoint.SetActive(true);
+
+		if (stateMachine.PatrolFollowPoint == null)
+			stateMachine.AssignPatrolPoint(GenerateWaypoints(PatrolFollowPoint), TrackGizmos);
+		else
+			stateMachine.PatrolFollowPoint.SetActive(true);
+
+        if (stateMachine.SpawnPoint == null)
+            stateMachine.AssignSpawnPoint(GenerateWaypoints(SpawnPoint));
+		else
+			stateMachine.SpawnPoint.SetActive(true);
 		#endregion
 
-		#region Initialize npc controller and sub components
 		npcController.InitializeNpc(npcDefinitionToSpawn, NPCsTeam);
-		#endregion
-
-		// Nothing to assign on RandomFollowPoint
 	}
 
 	private GameObject GenerateWaypoints(GameObject GameObjectToSpawn)
@@ -119,7 +113,13 @@ public class NPCSpawner : MonoBehaviour
     {
         gameObject.SetActive(false);
         NpcController npcController = gameObject.GetComponent<NpcController>();
-        npcObjectPooling.Add(npcController);
+        NPCStateMachine stateMachine = npcController.StateMachine;
+
+		stateMachine.RandomFollowPoint.SetActive(false);
+		stateMachine.PatrolFollowPoint.SetActive(false);
+		stateMachine.SpawnPoint.SetActive(false);
+
+		npcObjectPooling.Add(npcController);
     }
 	#endregion
 }

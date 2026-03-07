@@ -52,14 +52,14 @@ namespace Game.MyNPC
             #region State Transitions 
 
             // ----------- Attack to Chase -------------
-            if (!stateMachine.OpponentInRangedAttackRange || !stateMachine.EnableRangedAttack)
+            if (!stateMachine.OpponentInRangedAttackRange || !stateMachine.HasEquippedRangedWeapon || !stateMachine.EnableRangedAttack)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;
             }
 
             // ----------- Ranged Attack to Melee Attack -------------
-            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.EnableMeleeAttack)
+            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
             {
                 stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
                 return;

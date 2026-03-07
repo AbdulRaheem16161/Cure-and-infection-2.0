@@ -54,7 +54,7 @@ namespace Game.MyNPC
             // Patrol if MoveOnStraightPath is Selected in the EnemyStateMachine
             if (stateMachine.moveOnPatrolPath && stateMachine.PatrolFollowPoint != null)
             {
-                stateMachine.CurrentFollowPoint = stateMachine.PatrolFollowPoint;
+                stateMachine.CurrentFollowPoint = stateMachine.PatrolFollowPoint.transform;
                 stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
                 return;
             }
@@ -62,7 +62,7 @@ namespace Game.MyNPC
             // Do Random Movement if MoveOnRandomPath is Selected in the EnemyStateMachine
             if (stateMachine.moveOnRandomPath && stateMachine.RandomFollowPoint != null)
             {
-                stateMachine.CurrentFollowPoint = stateMachine.RandomFollowPoint;
+                stateMachine.CurrentFollowPoint = stateMachine.RandomFollowPoint.transform;
                 stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
                 return;
             }

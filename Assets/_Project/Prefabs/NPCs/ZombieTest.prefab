@@ -335,7 +335,6 @@ MonoBehaviour:
   stamina: 0
   headProtection: 0
   chestProtection: 0
-  showControls: 0
   EnableDeath: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
@@ -355,16 +354,6 @@ MonoBehaviour:
   CurrentStateName: 
   CurrentFollowPoint: {fileID: 0}
   RotationSpeed: 10
-  EnableFreeMove: 1
-  PatrolFollowPoint: {fileID: 0}
-  RandomFollowPoint: {fileID: 0}
-  moveOnPatrolPath: 1
-  moveOnRandomPath: 1
-  PatrolSpeed: 0.3
-  EnableChase: 1
-  DetectionCone: {fileID: 7365555722533660067}
-  DetectionRadius: {fileID: 6230541340091151048}
-  ChaseSpeed: 3.3
   targetTags: []
   EnableMeleeAttack: 1
   Hitbox: {fileID: 2420777708771270843}
@@ -378,6 +367,20 @@ MonoBehaviour:
   EnableRangedAttack: 0
   OpponentInRangedAttackRange: 0
   RangedAttackRotSpeed: 0
+  EnableChase: 1
+  DetectionCone: {fileID: 7365555722533660067}
+  DetectionRadius: {fileID: 6230541340091151048}
+  ChaseSpeed: 3.3
+  EnableInvestigate: 0
+  HasLocationToInvestigate: 0
+  HasInvestigatedLocation: 0
+  EnableFreeMove: 1
+  moveOnRandomPath: 1
+  RandomFollowPoint: {fileID: 0}
+  moveOnPatrolPath: 1
+  PatrolFollowPoint: {fileID: 0}
+  currentPatrolPoint: 0
+  PatrolSpeed: 0.3
   SpawnPoint: {fileID: 5204823297776222364}
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
@@ -398,7 +401,6 @@ MonoBehaviour:
   WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
   WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
   ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
-  showControls: 0
   itemToEquip: {fileID: 0}
   itemToEquipCount: 0
   slotToEquipItemTo: 0
@@ -421,7 +423,6 @@ MonoBehaviour:
   initialInventorySize: 0
   itemContainer:
     items: []
-  showControls: 0
   addMoney: 0
   modifyInventorySizeByThis: 0
   actionEffectsStack: 0

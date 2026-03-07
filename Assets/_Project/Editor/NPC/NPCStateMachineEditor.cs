@@ -29,8 +29,8 @@ public class NPCStateMachineEditor : Editor
         if (npc.EnableFreeMove)
         {
             EditorGUI.indentLevel++;
-            npc.PatrolFollowPoint = (Transform)EditorGUILayout.ObjectField("Patrol Follow Point", npc.PatrolFollowPoint, typeof(Transform), true);
-            npc.RandomFollowPoint = (Transform)EditorGUILayout.ObjectField("Random Follow Point", npc.RandomFollowPoint, typeof(Transform), true);
+            npc.PatrolFollowPoint = (GameObject)EditorGUILayout.ObjectField("Patrol Follow Point", npc.PatrolFollowPoint, typeof(GameObject), true);
+            npc.RandomFollowPoint = (GameObject)EditorGUILayout.ObjectField("Random Follow Point", npc.RandomFollowPoint, typeof(GameObject), true);
             npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
             npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
             npc.PatrolSpeed = EditorGUILayout.FloatField("Patrol Speed", npc.PatrolSpeed);

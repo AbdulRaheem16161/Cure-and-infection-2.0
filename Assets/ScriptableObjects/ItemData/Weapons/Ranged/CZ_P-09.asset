@@ -27,7 +27,7 @@ MonoBehaviour:
   damage: 25
   magazineSize: 19
   fireMode: 2
-  fireRateRPM: 40
+  fireRateRPM: 400
   reloadTime: 1.5
   effectiveRange: 100
   aimTime: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   recoilRecoveryRate: 0
   ammoType: {fileID: 11400000, guid: 948da52156225bc4f8229e48462d7096, type: 2}
   bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
-  bulletVisualSpeed: 25
+  bulletVisualSpeed: 50
   fireSfx: {fileID: 0}
   reloadSfx: {fileID: 0}
   muzzleFlashVfx: {fileID: 0}

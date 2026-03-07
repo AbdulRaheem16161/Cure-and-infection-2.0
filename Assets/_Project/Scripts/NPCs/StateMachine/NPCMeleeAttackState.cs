@@ -42,7 +42,7 @@ namespace Game.MyNPC
             // ----------- Attack to Idle -------------
 
             // Otherwise, return to Chase state
-            if (_attackDurationTimer >= stateMachine.AttackDuration)
+            if (_attackDurationTimer >= stateMachine.AttackDuration || !stateMachine.HasEquippedMeleeWeapon)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;

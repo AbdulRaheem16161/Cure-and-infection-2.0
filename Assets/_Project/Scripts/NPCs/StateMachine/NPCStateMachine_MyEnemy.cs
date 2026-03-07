@@ -24,59 +24,73 @@ namespace Game.MyNPC
         public Transform CurrentFollowPoint;
         public float RotationSpeed;
         [Space(20)]
+		#endregion
+
+		#region Attack (General)
+		[SerializeField] private List<string> targetTags = new List<string>();
+		public override List<string> TargetTags
+		{
+			get { return targetTags; }
+			set { targetTags = value; }
+		}
+
+		[Space(10)]
+		#endregion
+
+		#region Melee Attack State
+		[Header("Melee Attack State")]
+		public bool EnableMeleeAttack;
+		public GameObject Hitbox;
+		public GameObject AttackRangeTrigger;
+		public int Damage = 5;
+		public bool OpponentInMeleeAttackRange;
+		public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
+		public float AttackDuration;
+		public float HitboxActivationDelay;
+		public float MinWaitBeforeFreeMove;
+		public float MaxWaitBeforeFreeMove;
+		[Space(10)]
+		#endregion
+
+		#region Ranged Attack State
+		[Header("Ranged Attack State")]
+		public bool EnableRangedAttack;
+		public bool OpponentInRangedAttackRange;
+        public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
+		public float RangedAttackRotSpeed;
+		[Space(10)]
+		#endregion
+
+		#region Chase State
+		[Header("Chase State")]
+		public bool EnableChase;
+		public DetectionCone DetectionCone;
+		public DetectionRadius DetectionRadius;
+		public float ChaseSpeed;
+        [Space(10)]
         #endregion
 
-        #region FreeMove Settings
-        [Header("FreeMove Settings")]
+        #region Investigate State
+        [Header("Investigate State")]
+        public bool EnableInvestigate;
+        public bool HasLocationToInvestigate;
+		public bool HasInvestigatedLocation;
+		#endregion
+
+		#region FreeMove Settings
+		[Header("FreeMove Settings")]
         public bool EnableFreeMove;
-        public Transform PatrolFollowPoint;
-        public Transform RandomFollowPoint;
-        public bool moveOnPatrolPath = true;
-        public bool moveOnRandomPath = false;
-        public float PatrolSpeed;
-        [Space(10)]
-        #endregion
 
-        #region Chase State
-        [Header("Chase State")]
-        public bool EnableChase;
-        public DetectionCone DetectionCone;
-        public DetectionRadius DetectionRadius;
-        public float ChaseSpeed;
-        [Space(10)]
-        #endregion
+        [Header("Random Move Settings")]
+		public bool moveOnRandomPath = false;
+		public GameObject RandomFollowPoint;
 
-        #region Attack (General)
-        [SerializeField] private List<string> targetTags = new List<string>();
-        public override List<string> TargetTags
-        {
-            get { return targetTags; }
-            set { targetTags = value; }
-        }
+		[Header("Patrol Move Settings")]
+		public bool moveOnPatrolPath = false;
+        public GameObject PatrolFollowPoint;
+		public float PatrolSpeed;
 
-        [Space(10)]
-        #endregion
-
-        #region Melee Attack State
-        [Header("Melee Attack State")]
-        public bool EnableMeleeAttack;
-        public GameObject Hitbox;
-        public GameObject AttackRangeTrigger;
-        public int Damage = 5;
-        public bool OpponentInMeleeAttackRange;
-        public float AttackDuration;
-        public float HitboxActivationDelay;
-        public float MinWaitBeforeFreeMove;
-        public float MaxWaitBeforeFreeMove;
-        [Space(10)]
-        #endregion
-
-        #region Ranged Attack State
-        [Header("Ranged Attack State")]
-        public bool EnableRangedAttack;
-        public bool OpponentInRangedAttackRange;
-        public float RangedAttackRotSpeed;
-        [Space(10)]
+		[Space(10)]
         #endregion
 
         ///<summery>
@@ -85,7 +99,7 @@ namespace Game.MyNPC
 
 		#region Respawn
 		[Header("Respawn")]
-        public Transform SpawnPoint;
+        public GameObject SpawnPoint;
 		#endregion
 
 		public static event Action<GameObject> OnDeathComplete;
@@ -174,7 +188,57 @@ namespace Game.MyNPC
 			#region Transition to Default State
 			SwitchState(new NPCIdleState(this)); //
 			#endregion
+
+			#region Enable Movement
+			Agent.enabled = true;
+			#endregion
+
+			#region Enable Scripts
+			MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+			foreach (MonoBehaviour script in scripts)
+			{
+				if (script != this)
+				{
+					script.enabled = true;
+				}
+			}
+			#endregion
+
+			#region Enable Colliders
+
+			Collider[] colliders;
+
+			colliders = GetComponentsInChildren<Collider>();
+
+			if (colliders != null)
+			{
+				foreach (var col in colliders)
+				{
+					col.enabled = true;
+				}
+			}
+			#endregion
 		}
+
+		#region assign follow/patrol/spawn points
+		public void AssignFollowPoint(GameObject followPoint)
+        {
+            moveOnRandomPath = true;
+            RandomFollowPoint = followPoint;
+		}
+        public void AssignPatrolPoint(GameObject patrolPoint, TrackGizmos trackGizmos)
+        {
+            moveOnRandomPath = false;
+            moveOnPatrolPath = true;
+            PatrolFollowPoint = patrolPoint;
+			PatrolFollowPoint.GetComponent<PatrolFollowPoint>().ItsFollower = gameObject;
+			PatrolFollowPoint.GetComponent<PatrolFollowPoint>().TrackGizmos = trackGizmos;
+		}
+        public void AssignSpawnPoint(GameObject spawnPoint)
+        {
+            SpawnPoint = spawnPoint;
+        }
+		#endregion
 
 		private void OnDestroy()
 		{
@@ -279,7 +343,7 @@ namespace Game.MyNPC
             }
             #endregion
 
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(3f);
 
             #region Disable Colliders
 

@@ -27,7 +27,7 @@ namespace Game.MyNPC
             }
             // ----------- Chase to Melee Attack -------------
 
-            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.EnableMeleeAttack)
+            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
             {
                 stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
                 return;
@@ -35,7 +35,7 @@ namespace Game.MyNPC
 
             // ----------- Idle to Ranged Attack -------------
 
-            if (stateMachine.OpponentInRangedAttackRange && stateMachine.EnableRangedAttack)
+            if (stateMachine.OpponentInRangedAttackRange && stateMachine.HasEquippedRangedWeapon && stateMachine.EnableRangedAttack)
             {
                 stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
                 return;

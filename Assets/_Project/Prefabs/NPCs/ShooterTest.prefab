@@ -630,16 +630,6 @@ MonoBehaviour:
   CurrentStateName: 
   CurrentFollowPoint: {fileID: 0}
   RotationSpeed: 10
-  EnableFreeMove: 1
-  PatrolFollowPoint: {fileID: 0}
-  RandomFollowPoint: {fileID: 0}
-  moveOnPatrolPath: 1
-  moveOnRandomPath: 1
-  PatrolSpeed: 4
-  EnableChase: 1
-  DetectionCone: {fileID: 8765459242991121381}
-  DetectionRadius: {fileID: 7545542124720537260}
-  ChaseSpeed: 4
   targetTags: []
   EnableMeleeAttack: 1
   Hitbox: {fileID: 1432305591146941451}
@@ -653,6 +643,20 @@ MonoBehaviour:
   EnableRangedAttack: 1
   OpponentInRangedAttackRange: 0
   RangedAttackRotSpeed: 0
+  EnableChase: 1
+  DetectionCone: {fileID: 8765459242991121381}
+  DetectionRadius: {fileID: 7545542124720537260}
+  ChaseSpeed: 4
+  EnableInvestigate: 0
+  HasLocationToInvestigate: 0
+  HasInvestigatedLocation: 0
+  EnableFreeMove: 1
+  moveOnRandomPath: 1
+  RandomFollowPoint: {fileID: 0}
+  moveOnPatrolPath: 1
+  PatrolFollowPoint: {fileID: 0}
+  currentPatrolPoint: 0
+  PatrolSpeed: 4
   SpawnPoint: {fileID: 0}
 --- !u!114 &417494239959303289
 MonoBehaviour:

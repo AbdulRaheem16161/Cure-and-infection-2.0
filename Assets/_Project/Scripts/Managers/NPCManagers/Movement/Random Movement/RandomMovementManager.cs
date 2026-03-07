@@ -42,8 +42,11 @@ public class RandomMovementManager : MonoBehaviour
     }
 
     private IEnumerator TeleportRandomFollowPoint(GameObject point)
-    {
-       while(true)
+	{
+		if (point == null)
+			RestartTeleportationCoroutines();
+
+		while (true && point.activeInHierarchy)
        {
             float randomDuration = Random.Range(MinDuration, MaxDuration);
             point.transform.position = TeleportPosition();
