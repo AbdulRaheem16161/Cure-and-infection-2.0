@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class NPCInvestigateState : NPCBaseState
 {
-	public Vector3 locationToInvestigate;
-
 	public NPCInvestigateState(NPCStateMachine stateMachine) : base(stateMachine) { }
+
+	private bool LocationReached => ReachedInvestigationLocation();
 
 	public override void Enter()
 	{
@@ -26,7 +26,7 @@ public class NPCInvestigateState : NPCBaseState
 
 		// ----------- Investigate to idle -------------
 
-		if (stateMachine.HasInvestigatedLocation)
+		if (LocationReached)
 		{
 			stateMachine.SwitchState(new NPCIdleState(stateMachine));
 			return;
@@ -43,9 +43,17 @@ public class NPCInvestigateState : NPCBaseState
 		// Do Random Movement if MoveOnRandomPath is Selected in the EnemyStateMachine
 		if (stateMachine.HasLocationToInvestigate && !stateMachine.HasInvestigatedLocation)
 		{
-			stateMachine.CurrentFollowPoint = stateMachine.RandomFollowPoint.transform;
-			stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
+			stateMachine.Agent.SetDestination(stateMachine.locationToInvestigate);
 			return;
 		}
+	}
+
+	private bool ReachedInvestigationLocation()
+	{
+		float distanceToLocation = Vector3.Distance(stateMachine.transform.position, stateMachine.locationToInvestigate);
+		if (distanceToLocation < 2f)
+			return true;
+		else
+			return false;
 	}
 }

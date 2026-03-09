@@ -75,6 +75,7 @@ namespace Game.MyNPC
         public bool EnableInvestigate;
         public bool HasLocationToInvestigate;
 		public bool HasInvestigatedLocation;
+        public Vector3 locationToInvestigate;
 		#endregion
 
 		#region FreeMove Settings
@@ -297,6 +298,15 @@ namespace Game.MyNPC
             Animator.SetFloat("Speed", CurrentSpeed);
             #endregion
         }
+
+        public void DetectSound(Vector3 soundPosition)
+        {
+            locationToInvestigate = soundPosition;
+
+            //ignore if doing more important things
+            if (currentState is NPCRangedAttackState || currentState is NPCMeleeAttackState || currentState is NPCChaseState) return;
+			SwitchState(new NPCInvestigateState(this));
+		}
 
         public void HandleDeath()
         {
