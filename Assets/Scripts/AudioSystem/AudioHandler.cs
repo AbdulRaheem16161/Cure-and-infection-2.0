@@ -1,8 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.UI.Image;
+using UnityEngine.Audio;
+using static Unity.VisualScripting.Member;
+using static UnityEngine.GraphicsBuffer;
 
 
 /// <summary>
@@ -28,8 +28,6 @@ public class AudioHandler : MonoBehaviour
 
 	private Collider[] npcColliders = new Collider[100];
 
-	private float radius = 30;
-
 	private void Awake()
 	{
 		primaryAudioSource = GetComponent<AudioSource>();
@@ -42,9 +40,9 @@ public class AudioHandler : MonoBehaviour
 	/// <summary>
 	/// play audio and replace existing audio clip
 	/// </summary>
-	public void PlayAudio(AudioClip clip)
+	public void PlayAudio(AudioClip audioClip)
 	{
-		primaryAudioSource.clip = clip;
+		primaryAudioSource.clip = audioClip;
 		primaryAudioSource.Play();
 		NotifyNpcsOfSound();
 		StartCoroutine(CleanUpAudio());
@@ -52,10 +50,42 @@ public class AudioHandler : MonoBehaviour
 
 	#endregion
 
+	/// <summary>
+	/// region below works okay for now but needs to be changed for final (footsteps and gunshots are heard at the same distance currently)
+	/// to do that easiest way would be a SoundDefinition scriptable object storing the audioClip + max distance (any other variables if needed)
+	/// 
+	/// public class : SoundDefinition : ScriptableObjects
+	/// {
+	///		public AudioClip audioClip;
+	///		public int priority;
+	///		public float spacialBlend;
+	///		etc...
+	/// }
+	/// 
+	/// public void PlayAudio(SoundDefinition soundDefinition)
+	///	{
+	///		primaryAudioSource.clip = soundDefinition.audioClip;
+	///		primaryAudioSource.maxDistance = soundDefinition.maxDistance;
+	///		primaryAudioSource.Play();
+	///		NotifyNpcsOfSound();
+	///		StartCoroutine(CleanUpAudio());
+	///	}
+	///	
+	/// for more control and tuning same as above but make a simple prefab containing an AudioSource for each sound definition.
+	/// tweak values there instead so SoundDefinition is just
+	/// public class : SoundDefinition : ScriptableObjects
+	/// {
+	///		public GameObject audioSource;
+	/// }
+	/// </summary>
 	#region tell npcs about this sound
+	/// <summary>
+	/// find all npcs within audio sources maxDistance, call detect sound for npc investigate state
+	/// </summary>
+
 	private void NotifyNpcsOfSound()
 	{
-		int foundNpcs = Physics.OverlapSphereNonAlloc(transform.position, radius, npcColliders);
+		int foundNpcs = Physics.OverlapSphereNonAlloc(transform.position, primaryAudioSource.maxDistance, npcColliders);
 
 		for (int i = 0; i < foundNpcs; i++)
 		{

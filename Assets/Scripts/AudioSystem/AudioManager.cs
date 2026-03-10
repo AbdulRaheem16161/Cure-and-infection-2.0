@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
+	/// <summary>
+	/// if switching to SoundDefinition, object pooling will need updating to dictionary, key = SoundDefinition, value =  Queue<GameObject>
+	/// to group similar objects by sound definition so audioSources dont need instantiating and destroying on one shot sound objects.
+	/// private Dictionary<SoundDefinition, Queue<GameObject>> pooledObjectsByDefinition = new Dictionary<SoundDefinition, Queue<GameObject>>();
+	/// </summary>
+
 	public GameObject audioPrefab;
 	public static AudioManager Instance { get; private set; }
 
