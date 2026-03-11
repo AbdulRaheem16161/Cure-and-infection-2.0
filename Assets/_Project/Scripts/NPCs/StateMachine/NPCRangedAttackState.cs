@@ -68,9 +68,9 @@ namespace Game.MyNPC
 
             #region Rotate Towards Follow Point
 
-            if (stateMachine.DetectionRadius.DetectedTarget != null)
+            if (stateMachine.NpcPerception.DetectedTarget != null)
             {
-                stateMachine.CurrentFollowPoint = stateMachine.DetectionRadius.DetectedTarget.transform;
+                stateMachine.CurrentFollowPoint = stateMachine.NpcPerception.DetectedTarget.transform;
             }
             stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
 

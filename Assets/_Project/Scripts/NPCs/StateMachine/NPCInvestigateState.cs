@@ -33,7 +33,7 @@ public class NPCInvestigateState : NPCBaseState
 		}
 		// ----------- Investigate to Chase -------------
 
-		if (stateMachine.DetectionRadius.isTargetDetected || stateMachine.DetectionCone.isTargetDetected)
+		if (stateMachine.NpcPerception.isTargetDetected)
 		{
 			stateMachine.SwitchState(new NPCChaseState(stateMachine));
 			return;

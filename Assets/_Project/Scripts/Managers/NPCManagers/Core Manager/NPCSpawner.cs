@@ -6,6 +6,24 @@
 /// Lastly, it assigns the instantiated patrol, random and spawn points to the spawned NPC.NPCStateMachine
 /// </summary>
 
+/// <summary> TODO:
+/// set triggers to spawn enemies when player gets close enough + despawn when they get too far away (use object pooling)
+/// set triggers to stop the spawning of enemies when player is too close (stops things spawning infront of player)
+/// add toggle to set spawning to center of spawner or be random within npcs wander area.
+/// 
+/// this works extremely well for making patrol paths and managing enemies in map sections. but needs more customization eg:
+/// list of NpcDefinitions to spawn, weather or not they will spawn with patrols paths or random paths with a bool. scenario one example:
+/// spawner at center of a survivor camp, assign a list of 10 npcs. 
+/// 5 of those toggled to use 1 of 3 random patrol paths (possible option to specify a patrol path)
+/// the other 5 will randomly wander within a the given area.
+/// 
+/// spawner in the wilderness/edge of town: these spawners can have some random wander area overlap with others and have larger areas
+/// limit of spawning 20 over the area. all set to random spawn in the area + randomly wander within the area.
+/// 
+/// spawner in towns cities: these spawners can have some random wander area overlap with others, have smaller areas
+/// esentially same as spawner above
+/// </summary>
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;

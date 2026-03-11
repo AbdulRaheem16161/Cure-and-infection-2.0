@@ -26,7 +26,7 @@ namespace Game.MyNPC
 
             // ----------- Free Move to Chase -------------
 
-            if (stateMachine.DetectionCone.isTargetDetected && stateMachine.EnableChase)
+            if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;

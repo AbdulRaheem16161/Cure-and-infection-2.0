@@ -167,8 +167,8 @@ public class DetectionCone : MonoBehaviour
         DetectedTarget = Attacker;
         isTargetDetected = true;
 
-        viewAngle = 360;
-        viewDistance = viewDistance * ViewDistanceMultiplier;
+        viewAngle *= viewAngle;
+        viewDistance *= ViewDistanceMultiplier;
         yield return new WaitForSeconds(HighAlertDuration);
 
         viewAngle = defaultViewAngle;

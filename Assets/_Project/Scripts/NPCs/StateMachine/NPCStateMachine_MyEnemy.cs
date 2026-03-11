@@ -11,12 +11,13 @@ namespace Game.MyNPC
 {
     public class NPCStateMachine : StateMachine
     {
-		public StatsHandler StatsHandler { get; private set; }
-		public EquipmentHandler EquipmentHandler { get; private set; }
-		public InventoryHandler InventoryHandler { get; private set; }
+        public StatsHandler StatsHandler { get; private set; }
+        public EquipmentHandler EquipmentHandler { get; private set; }
+        public InventoryHandler InventoryHandler { get; private set; }
+		public NpcPerception NpcPerception { get; private set; }
 
-        #region General Values
-        [Header("General Values")]
+		#region General Values
+		[Header("General Values")]
         public Animator Animator;
         public NavMeshAgent Agent;
         public float CurrentSpeed;
@@ -24,48 +25,46 @@ namespace Game.MyNPC
         public Transform CurrentFollowPoint;
         public float RotationSpeed;
         [Space(20)]
-		#endregion
+        #endregion
 
-		#region Attack (General)
-		[SerializeField] private List<string> targetTags = new List<string>();
-		public override List<string> TargetTags
-		{
-			get { return targetTags; }
-			set { targetTags = value; }
-		}
+        #region Attack (General)
+        [SerializeField] private List<string> targetTags = new List<string>();
+        public override List<string> TargetTags
+        {
+            get { return targetTags; }
+            set { targetTags = value; }
+        }
 
-		[Space(10)]
-		#endregion
+        [Space(10)]
+        #endregion
 
-		#region Melee Attack State
-		[Header("Melee Attack State")]
-		public bool EnableMeleeAttack;
-		public GameObject Hitbox;
-		public GameObject AttackRangeTrigger;
-		public int Damage = 5;
-		public bool OpponentInMeleeAttackRange;
-		public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
-		public float AttackDuration;
-		public float HitboxActivationDelay;
-		public float MinWaitBeforeFreeMove;
-		public float MaxWaitBeforeFreeMove;
-		[Space(10)]
-		#endregion
+        #region Melee Attack State
+        [Header("Melee Attack State")]
+        public bool EnableMeleeAttack;
+        public GameObject Hitbox;
+        public GameObject AttackRangeTrigger;
+        public int Damage = 5;
+        public bool OpponentInMeleeAttackRange;
+        public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
+        public float AttackDuration;
+        public float HitboxActivationDelay;
+        public float MinWaitBeforeFreeMove;
+        public float MaxWaitBeforeFreeMove;
+        [Space(10)]
+        #endregion
 
-		#region Ranged Attack State
-		[Header("Ranged Attack State")]
-		public bool EnableRangedAttack;
-		public bool OpponentInRangedAttackRange;
+        #region Ranged Attack State
+        [Header("Ranged Attack State")]
+        public bool EnableRangedAttack;
+        public bool OpponentInRangedAttackRange;
         public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
-		public float RangedAttackRotSpeed;
-		[Space(10)]
-		#endregion
+        public float RangedAttackRotSpeed;
+        [Space(10)]
+        #endregion
 
-		#region Chase State
-		[Header("Chase State")]
-		public bool EnableChase;
-		public DetectionCone DetectionCone;
-		public DetectionRadius DetectionRadius;
+        #region Chase State
+        [Header("Chase State")]
+        public bool EnableChase;
 		public float ChaseSpeed;
         [Space(10)]
         #endregion
@@ -125,11 +124,8 @@ namespace Game.MyNPC
             #endregion
 
             #region ON/OFF
-            if (DetectionCone != null)
-                DetectionCone.enabled = EnableChase;
-
-            if (DetectionRadius != null)
-                DetectionRadius.enabled = EnableChase;
+            if (NpcPerception != null)
+				NpcPerception.enabled = EnableChase;
 
             if (Hitbox != null)
 
@@ -146,13 +142,14 @@ namespace Game.MyNPC
 			#endregion
         }
 
-		public void InitializeStateMachine(
-            StatsHandler statsHandler, EquipmentHandler equipmentHandler, InventoryHandler inventoryHandler, NpcDefinition npcDefinition, Teams NPCsTeam)
+		public void InitializeStateMachine(StatsHandler statsHandler, EquipmentHandler equipmentHandler, InventoryHandler inventoryHandler, 
+            NpcPerception npcPerception, NpcDefinition npcDefinition, Teams NPCsTeam)
 		{
 			#region Initialize state machine
 			StatsHandler = statsHandler;
             EquipmentHandler = equipmentHandler;
             InventoryHandler = inventoryHandler;
+            NpcPerception = npcPerception;
 			#endregion
 
 			#region set values from definition
@@ -194,30 +191,8 @@ namespace Game.MyNPC
 			Agent.enabled = true;
 			#endregion
 
-			#region Enable Scripts
-			MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-			foreach (MonoBehaviour script in scripts)
-			{
-				if (script != this)
-				{
-					script.enabled = true;
-				}
-			}
-			#endregion
-
-			#region Enable Colliders
-
-			Collider[] colliders;
-
-			colliders = GetComponentsInChildren<Collider>();
-
-			if (colliders != null)
-			{
-				foreach (var col in colliders)
-				{
-					col.enabled = true;
-				}
-			}
+			#region enable scripts and colliders
+			EnableComponents(true);
 			#endregion
 		}
 
@@ -262,7 +237,7 @@ namespace Game.MyNPC
         private void UpdateStateName()
         {
             #region Current State Name
-            CurrentStateName = base.currentState != null ? base.currentState.GetType().Name : "No State"; //
+            CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
             #endregion
         }
 
@@ -299,15 +274,6 @@ namespace Game.MyNPC
             #endregion
         }
 
-        public void DetectSound(Vector3 soundPosition)
-        {
-            locationToInvestigate = soundPosition;
-
-            //ignore if doing more important things
-            if (currentState is NPCRangedAttackState || currentState is NPCMeleeAttackState || currentState is NPCChaseState) return;
-			SwitchState(new NPCInvestigateState(this));
-		}
-
         public void HandleDeath()
         {
             StartCoroutine(Die());
@@ -316,13 +282,11 @@ namespace Game.MyNPC
         public IEnumerator Die()
         {
             #region Disable Attack
-
             OpponentInMeleeAttackRange = false;
-
             #endregion
 
             #region Change Tag
-            this.gameObject.tag = "Dead";
+            gameObject.tag = "Dead";
             #endregion
 
             #region Stop Movement
@@ -342,35 +306,43 @@ namespace Game.MyNPC
             }
             #endregion
 
-            #region Disable Scripts
-            MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-            foreach (MonoBehaviour script in scripts)
-            {
-                if (script != this)
-                {
-                    script.enabled = false;
-                }
-            }
-            #endregion
+            #region disable scripts and colliders
+            EnableComponents(false);
+			#endregion
 
-            yield return new WaitForSeconds(3f);
+			yield return new WaitForSeconds(3f);
 
-            #region Disable Colliders
+            if (!StatsHandler.EnableZombification && StatsHandler.EnableRespawn)
+				OnDeathComplete?.Invoke(gameObject);
+		}
 
-            Collider[] colliders;
+        private void EnableComponents(bool enable)
+        {
+			#region update scripts
+			MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+			foreach (MonoBehaviour script in scripts)
+			{
+				if (script != this)
+				{
+					script.enabled = enable;
+				}
+			}
+			#endregion
 
-            colliders = GetComponentsInChildren<Collider>();
+			#region update colliders
 
-            if (colliders != null)
-            {
-                foreach (var col in colliders)
-                {
-                    col.enabled = false;
-                }
-            }
-            #endregion
+			Collider[] colliders;
 
-            OnDeathComplete?.Invoke(gameObject);
-        }
+			colliders = GetComponentsInChildren<Collider>();
+
+			if (colliders != null)
+			{
+				foreach (var col in colliders)
+				{
+					col.enabled = enable;
+				}
+			}
+			#endregion
+		}
 	}
 }

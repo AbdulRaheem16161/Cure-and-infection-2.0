@@ -46,17 +46,30 @@ public class NPCStateMachineEditor : Editor
         if (npc.EnableChase)
         {
             EditorGUI.indentLevel++;
-            npc.DetectionCone = (DetectionCone)EditorGUILayout.ObjectField("Detection Cone", npc.DetectionCone, typeof(DetectionCone), true);
-            npc.DetectionRadius = (DetectionRadius)EditorGUILayout.ObjectField("Detection Radius", npc.DetectionRadius, typeof(DetectionRadius), true);
             npc.ChaseSpeed = EditorGUILayout.FloatField("Chase Speed", npc.ChaseSpeed);
             EditorGUI.indentLevel--;
         }
 
         EditorGUILayout.Space(10);
 
-        // ─────────────────────────────
-        // Attack (General)
-        EditorGUILayout.LabelField("Attack Settings", EditorStyles.boldLabel);
+		// ─────────────────────────────
+		// Investigate
+		EditorGUILayout.LabelField("Investigate State", EditorStyles.boldLabel);
+		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
+		if (npc.EnableInvestigate)
+		{
+			EditorGUI.indentLevel++;
+			npc.HasLocationToInvestigate = EditorGUILayout.Toggle("Has Location To Investigate", npc.HasLocationToInvestigate);
+			npc.HasInvestigatedLocation = EditorGUILayout.Toggle("Has Investigated Location", npc.HasInvestigatedLocation);
+			npc.locationToInvestigate = EditorGUILayout.Vector3Field("location To Investigate", npc.locationToInvestigate);
+			EditorGUI.indentLevel--;
+		}
+
+		EditorGUILayout.Space(10);
+
+		// ─────────────────────────────
+		// Attack (General)
+		EditorGUILayout.LabelField("Attack Settings", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("targetTags"), true);
 
         EditorGUILayout.Space(10);

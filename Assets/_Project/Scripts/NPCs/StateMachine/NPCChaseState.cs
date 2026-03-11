@@ -20,7 +20,7 @@ namespace Game.MyNPC
 
             // ----------- Chase to idle -------------
 
-            if (!stateMachine.DetectionRadius.isTargetDetected && !stateMachine.DetectionCone.isTargetDetected)
+            if (!stateMachine.NpcPerception.isTargetDetected)
             {
                 stateMachine.SwitchState(new NPCIdleState(stateMachine));
                 return;
@@ -44,7 +44,7 @@ namespace Game.MyNPC
 
             if (!stateMachine.StatsHandler.IsDead)
             {
-                stateMachine.CurrentFollowPoint = stateMachine.DetectionRadius.DetectedTarget.transform;
+                stateMachine.CurrentFollowPoint = stateMachine.NpcPerception.DetectedTarget.transform;
                 stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
             }
         }

@@ -89,9 +89,9 @@ public class AudioHandler : MonoBehaviour
 
 		for (int i = 0; i < foundNpcs; i++)
 		{
-			if (npcColliders[i].TryGetComponent(out NpcController npc))
+			if (npcColliders[i].TryGetComponent(out NpcPerception npc))
 			{
-				npc.StateMachine.DetectSound(transform.position);
+				npc.InvestigateSound(transform.position);
 			}
 		}
 	}

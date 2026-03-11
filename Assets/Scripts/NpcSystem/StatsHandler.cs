@@ -19,6 +19,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#endregion
 
 	[HideInInspector] public bool EnableDeath;
+	[HideInInspector] public bool EnableRespawn;
+	[HideInInspector] public bool EnableZombification;
 	public bool IsDead { get; private set; }
 	public bool IsPlayer { get; private set; }
 

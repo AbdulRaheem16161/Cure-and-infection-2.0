@@ -7,8 +7,9 @@ namespace Game.Core
     public abstract class StateMachine : MonoBehaviour
     {
         protected State currentState;
+		public State CurrentState => currentState;
 
-        public abstract List<string> TargetTags { get; set; }
+		public abstract List<string> TargetTags { get; set; }
 
         public void SwitchState(State newState)
         {

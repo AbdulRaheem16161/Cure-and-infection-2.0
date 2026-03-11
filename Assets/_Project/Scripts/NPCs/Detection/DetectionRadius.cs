@@ -151,7 +151,7 @@ public class DetectionRadius : MonoBehaviour
         isTargetDetected = true;
 
         viewAngle = 360;
-        viewDistance = viewDistance * ViewDistanceMultiplier;
+        viewDistance *= viewDistance;
         yield return new WaitForSeconds(HighAlertDuration);
 
         viewAngle = defaultViewAngle;

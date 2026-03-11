@@ -6,8 +6,7 @@ using static NPCSpawner;
 [RequireComponent(typeof(NPCStateMachine))]
 [RequireComponent(typeof(InventoryHandler))]
 [RequireComponent(typeof(EquipmentHandler))]
-[RequireComponent(typeof(DetectionCone))]
-[RequireComponent(typeof(DetectionRadius))]
+[RequireComponent(typeof(NpcPerception))]
 public class NpcController : MonoBehaviour
 {
 	private bool _initialized = false;
@@ -17,8 +16,7 @@ public class NpcController : MonoBehaviour
 	public NPCStateMachine StateMachine { get; private set; }
 	public InventoryHandler InventoryHandler { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
-	public DetectionCone DetectionCone { get; private set; }
-	public DetectionRadius DetectionRadius { get; private set; }
+	public NpcPerception NpcPerception { get; private set; }
 
 	private void Awake()
 	{
@@ -34,8 +32,7 @@ public class NpcController : MonoBehaviour
 		StateMachine = GetComponent<NPCStateMachine>();
 		InventoryHandler = GetComponent<InventoryHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
-		DetectionCone = GetComponent<DetectionCone>();
-		DetectionRadius = GetComponent<DetectionRadius>();
+		NpcPerception = GetComponent<NpcPerception>();
 	}
 
 	public void InitializeNpc(NpcDefinition npcDefinition, Teams team)
@@ -44,9 +41,8 @@ public class NpcController : MonoBehaviour
 		StatsHandler.InitializeStats(EquipmentHandler, NpcDefinition);
 		InventoryHandler.InitializeInventoryHandler(EquipmentHandler);
 		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, NpcDefinition);
-		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcDefinition, team);
-		DetectionCone.Initialize(NpcDefinition);
-		DetectionRadius.Initialize(NpcDefinition);
+		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcPerception, NpcDefinition, team);
+		NpcPerception.Initialize(NpcDefinition, StateMachine);
 
 		gameObject.name = NpcDefinition.NpcName;
 		_initialized = true;

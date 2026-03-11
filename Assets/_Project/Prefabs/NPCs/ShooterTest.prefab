@@ -462,8 +462,7 @@ GameObject:
   - component: {fileID: 1864734135541436750}
   - component: {fileID: 417494239959303289}
   - component: {fileID: 1585906986943235660}
-  - component: {fileID: 8765459242991121381}
-  - component: {fileID: 7545542124720537260}
+  - component: {fileID: 3271726425788272760}
   m_Layer: 0
   m_Name: ShooterTest
   m_TagString: Team 2
@@ -612,6 +611,8 @@ MonoBehaviour:
   headProtection: 0
   chestProtection: 0
   EnableDeath: 0
+  EnableRespawn: 0
+  EnableZombification: 0
 --- !u!114 &1864734135541436750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -644,18 +645,16 @@ MonoBehaviour:
   OpponentInRangedAttackRange: 0
   RangedAttackRotSpeed: 0
   EnableChase: 1
-  DetectionCone: {fileID: 8765459242991121381}
-  DetectionRadius: {fileID: 7545542124720537260}
   ChaseSpeed: 4
-  EnableInvestigate: 0
+  EnableInvestigate: 1
   HasLocationToInvestigate: 0
   HasInvestigatedLocation: 0
+  locationToInvestigate: {x: 0, y: 0, z: 0}
   EnableFreeMove: 1
   moveOnRandomPath: 1
   RandomFollowPoint: {fileID: 0}
   moveOnPatrolPath: 1
   PatrolFollowPoint: {fileID: 0}
-  currentPatrolPoint: 0
   PatrolSpeed: 4
   SpawnPoint: {fileID: 0}
 --- !u!114 &417494239959303289
@@ -705,7 +704,7 @@ MonoBehaviour:
   slotIndex: 0
   itemToSpawn: {fileID: 0}
   itemToSpawnCount: 0
---- !u!114 &8765459242991121381
+--- !u!114 &3271726425788272760
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -714,47 +713,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 837096600775374618}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a8f24c49972f944c92027baa78c7596, type: 3}
+  m_Script: {fileID: 11500000, guid: 5395a13c361ec294086a798047f3e532, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewAngle: 80
-  viewDistance: 20
+  viewAngle: 45
+  viewDistance: 5
   showGizmos: 0
-  stateMachine: {fileID: 1864734135541436750}
   HighAlertDuration: 3
   ViewAngleMultiplier: 1.5
   ViewDistanceMultiplier: 2
   isInAlertMode: 0
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 0, g: 1, b: 0, a: 1}
   detectedColor: {r: 1, g: 0, b: 0, a: 1}
   colorAlpha: 0.25
   isTargetDetected: 0
   DetectedTarget: {fileID: 0}
---- !u!114 &7545542124720537260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 837096600775374618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbdd006ca2a85a045872b0c04f3f10ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewAngle: 360
-  viewDistance: 28
-  showGizmos: 0
-  stateMachine: {fileID: 1864734135541436750}
-  HighAlertDuration: 3
-  ViewAngleMultiplier: 1.5
-  ViewDistanceMultiplier: 2
-  isInAlertMode: 0
-  normalColor: {r: 0, g: 0, b: 0, a: 1}
-  detectedColor: {r: 0.11764706, g: 0, b: 0, a: 1}
-  colorAlpha: 0.25
-  isTargetDetected: 0
-  DetectedTarget: {fileID: 0}
+  detectTargetCooldown: 0.1
+  detectTargetTimer: 0
 --- !u!1 &978393333062714387
 GameObject:
   m_ObjectHideFlags: 0

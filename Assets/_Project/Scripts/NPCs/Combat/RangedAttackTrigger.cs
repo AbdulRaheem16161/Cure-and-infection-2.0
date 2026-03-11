@@ -20,7 +20,7 @@ public class RangedAttackTrigger : MonoBehaviour
 
         Range = stateMachine.EquipmentHandler.rangedWeaponInHands.WeaponDefinition.EffectiveRange; // Trigger's range equal weapon
 
-        if (stateMachine.DetectionRadius.DetectedTarget == null)
+        if (stateMachine.NpcPerception.DetectedTarget == null)
         {
             stateMachine.OpponentInRangedAttackRange = false;
             return;
@@ -31,13 +31,13 @@ public class RangedAttackTrigger : MonoBehaviour
 
     private void CheckIfOpponentInRange()
     {
-        if (stateMachine.DetectionRadius.DetectedTarget == null)
+        if (stateMachine.NpcPerception.DetectedTarget == null)
         {
             stateMachine.OpponentInRangedAttackRange = false;
             return;
         }
 
-        Vector3 directionToTarget = stateMachine.DetectionRadius.DetectedTarget.transform.position - transform.position;
+        Vector3 directionToTarget = stateMachine.NpcPerception.DetectedTarget.transform.position - transform.position;
         distance = directionToTarget.magnitude;
 
         if (distance <= Range)

@@ -56,8 +56,7 @@ public class WeaponSound : MonoBehaviour
                 continue;
 
             // Trigger alert mode
-            otherStateMachine.DetectionRadius.EnableAlertMode(stateMachine.gameObject);
-            otherStateMachine.DetectionCone.EnableAlertMode(stateMachine.gameObject);
+            otherStateMachine.NpcPerception.InvestigateSound(gameObject.transform.position);
 
             targetDetected = true;
         }

@@ -14,6 +14,12 @@ public class StatsHandlerEditor : Editor
 		StatsHandler stats = (StatsHandler)target;
 
 		GUILayout.Space(10);
+
+		stats.EnableDeath = EditorGUILayout.Toggle("Enable Death", stats.EnableDeath);
+		stats.EnableRespawn = EditorGUILayout.Toggle("Enable Respawn", stats.EnableRespawn);
+		stats.EnableZombification = EditorGUILayout.Toggle("Enable Zombification", stats.EnableZombification);
+
+		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
 		showDebugControls = EditorGUILayout.Toggle("Show Debug Controls", showDebugControls);
 
