@@ -31,48 +31,62 @@ using Game.MyNPC;
 
 public class NPCSpawner : MonoBehaviour
 {
-    #region References
-    public GameObject TRex;
-    public GameObject Fighter;
-    public GameObject Zombie;
+	#region prefab references
+	[Header("Prefab references")]
     public GameObject RandomFollowPoint;
     public GameObject PatrolFollowPoint;
-    public GameObject SpawnPoint;
 
     public TrackGizmos TrackGizmos;
 	#endregion
 
+	[Header("Npc Definition List")]
+	public List<NpcDefinition> npcSpawns = new();
+
+	[Header("Zombie Npc Definition List")]
+	public List<NpcDefinition> zombieNpcSpawns = new();
+
+	[Header("object pooling list")]
 	[SerializeField] private List<NpcController> npcObjectPooling = new();
 
 	#region Enums
 	public enum Teams { Team1, Team2, Team3, Team4, Team5, Team6, Team7, Team8, FreeFighter }
-    public Teams NPCsTeam;
-
-    public NpcDefinition npcDefinitionToSpawn;
-
+    [HideInInspector] public Teams NPCsTeam;
 	#endregion
+
+	[HideInInspector] public NpcDefinition npcDefinitionToSpawn;
+
+	private readonly System.Random systemRandom = new();
 
 	private void OnEnable()
 	{
         NPCStateMachine.OnDeathComplete += HandleNpcDeath;
+		NPCStateMachine.OnZombificationComplete += HandleNpcZombification;
 	}
 	private void OnDisable()
 	{
 		NPCStateMachine.OnDeathComplete -= HandleNpcDeath;
+		NPCStateMachine.OnZombificationComplete -= HandleNpcZombification;
 	}
 
-	public void SpawnNPC(NpcDefinition npcDefinition)
-    {
-        if (npcDefinition == null)
+	public void SpawnNPC(NpcDefinition npcDefinition, Vector3? spawnPosition = null)
+	{
+		#region null definition check
+		if (npcDefinition == null)
         {
             Debug.LogError("NpcDefinition null assign a reference");
             return;
         }
+		#endregion
 
 		#region get new npc and its refs
-		GameObject NPCInstance = GetNewNpc(npcDefinition);
+		GameObject NPCInstance = GetNpcObject(npcDefinition);
 		NpcController npcController = NPCInstance.GetComponent<NpcController>();
 		NPCStateMachine stateMachine = npcController.StateMachine;
+		#endregion
+
+		#region set spawn position
+		Vector3 position = spawnPosition ?? transform.position;
+		NPCInstance.transform.position = position;
 		#endregion
 
 		#region assign new points if null or re-enable
@@ -85,19 +99,27 @@ public class NPCSpawner : MonoBehaviour
 			stateMachine.AssignPatrolPoint(GenerateWaypoints(PatrolFollowPoint), TrackGizmos);
 		else
 			stateMachine.PatrolFollowPoint.SetActive(true);
-
-        if (stateMachine.SpawnPoint == null)
-            stateMachine.AssignSpawnPoint(GenerateWaypoints(SpawnPoint));
-		else
-			stateMachine.SpawnPoint.SetActive(true);
 		#endregion
 
 		npcController.InitializeNpc(npcDefinitionToSpawn, NPCsTeam);
 	}
+	public void SpawnRandomNPC(bool spawnZombie, Vector3? spawnPosition = null)
+	{
+		#region get random definition, call SpawnNpc method
+		NpcDefinition npcDefinition;
+
+		if (spawnZombie)
+			npcDefinition = zombieNpcSpawns[systemRandom.Next(0, zombieNpcSpawns.Count + 1)];
+		else
+			npcDefinition = npcSpawns[systemRandom.Next(0, npcSpawns.Count + 1)];
+
+		SpawnNPC(npcDefinition, spawnPosition);
+		#endregion
+	}
 
 	private GameObject GenerateWaypoints(GameObject GameObjectToSpawn)
     {
-        #region Instantiate and Parent
+        #region Instantiate and Parent waypoint object
         GameObject Instance = Instantiate(GameObjectToSpawn, transform.position, Quaternion.identity);
         Instance.transform.SetParent(transform);
         Instance.transform.localPosition = Vector3.zero;
@@ -105,39 +127,55 @@ public class NPCSpawner : MonoBehaviour
         #endregion
     }
 
-	#region get or instantiate new npc from pooling
-	private GameObject GetNewNpc(NpcDefinition npcDefinition)
-	{
-		GameObject Instance = TryGetNpcObjectFromPooling(npcDefinition);
-		Instance.transform.SetParent(transform);
-		Instance.transform.localPosition = Vector3.zero;
-		Instance.SetActive(true);
-		return Instance;
-	}
-
-	private GameObject TryGetNpcObjectFromPooling(NpcDefinition npcDefinition)
+	private GameObject GetNpcObject(NpcDefinition npcDefinition)
     {
-        foreach (NpcController npcController in npcObjectPooling)
-        {
-            if (npcController.NpcDefinition.IsZombie == npcDefinition.IsZombie)
-                return npcController.gameObject;
+		#region get matching npc from pool. or instantiate new one if no match
+		GameObject npcObject = null;
+
+		for (int i = 0; i < npcObjectPooling.Count; i++)
+		{
+			var npcController = npcObjectPooling[i];
+
+			if (npcController.NpcDefinition.IsZombie == npcDefinition.IsZombie)
+			{
+				npcObject = npcController.gameObject;
+				npcObjectPooling.RemoveAt(i);
+				break;
+			}
 		}
-		return Instantiate(npcDefinition.gameObjectPrefab, transform.position, Quaternion.identity);
-	}
-	#endregion
 
-	#region handle npc deaths and adding to object pooling
-    private void HandleNpcDeath(GameObject gameObject)
+		if (npcObject == null)
+			npcObject = Instantiate(npcDefinition.gameObjectPrefab, transform.position, Quaternion.identity);
+		#endregion
+
+		#region set transforms and return
+		npcObject.transform.SetParent(transform);
+		npcObject.transform.localPosition = Vector3.zero;
+		npcObject.SetActive(true);
+
+		return npcObject;
+		#endregion
+	}
+
+	private void HandleNpcDeath(GameObject gameObject)
     {
-        gameObject.SetActive(false);
+		#region disable objects + follow points and add to pool
+		gameObject.SetActive(false);
         NpcController npcController = gameObject.GetComponent<NpcController>();
         NPCStateMachine stateMachine = npcController.StateMachine;
 
 		stateMachine.RandomFollowPoint.SetActive(false);
 		stateMachine.PatrolFollowPoint.SetActive(false);
-		stateMachine.SpawnPoint.SetActive(false);
 
 		npcObjectPooling.Add(npcController);
-    }
-	#endregion
+		#endregion
+	}
+
+	private void HandleNpcZombification(GameObject gameObject)
+	{
+		#region call HandleNpcDeath, spawn random zombie npc at death position
+		HandleNpcDeath(gameObject);
+		SpawnRandomNPC(true, gameObject.transform.position);
+		#endregion
+	}
 }

@@ -22,6 +22,8 @@ public class NPCInvestigateState : NPCBaseState
 
 	public override void Tick(float deltaTime)
 	{
+		if (stateMachine.StatsHandler.IsDead) return;
+
 		#region State Transitions
 
 		// ----------- Investigate to idle -------------

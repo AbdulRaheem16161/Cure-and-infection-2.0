@@ -7,15 +7,16 @@ using UnityEngine;
 
 public class NpcPerception : MonoBehaviour
 {
-	private float baseViewAngle;
-	private float baseviewDistance;
+	public NPCStateMachine StateMachine { get; private set; }
 
 	#region Settings
 	[Header("General Settings")]
+	private float baseViewAngle;
+	private float baseviewDistance;
 	public float viewAngle = 45f;
 	public float viewDistance = 5f;
 	public bool showGizmos = false;
-	public NPCStateMachine StateMachine { get; private set; }
+	private bool isZombie;
 	[Space(10)]
 	#endregion
 
@@ -42,6 +43,9 @@ public class NpcPerception : MonoBehaviour
 	private readonly Collider[] ColliderHits = new Collider[100];
 	[SerializeField, ReadOnly] public bool isTargetDetected;
 	[SerializeField, ReadOnly] public GameObject DetectedTarget;
+
+	[SerializeField, ReadOnly] public bool isEatableTargetDetected;
+	[SerializeField, ReadOnly] public GameObject EatableTarget;
 	#endregion
 
 	#region detect target timer
@@ -49,10 +53,16 @@ public class NpcPerception : MonoBehaviour
 	public float detectTargetTimer;
 	#endregion
 
+	#region detect eatable target timer
+	public float detectEatableTargetCooldown = 0.5f;
+	public float detectEatableTargetTimer;
+	#endregion
+
 	public void Initialize(NpcDefinition npcDefinition, NPCStateMachine stateMachine)
 	{
 		#region Initialize
 		StateMachine = stateMachine;
+		isZombie = npcDefinition.IsZombie;
 		baseViewAngle = npcDefinition.ViewAngle;
 		baseviewDistance = npcDefinition.ViewDistance;
 
@@ -69,32 +79,23 @@ public class NpcPerception : MonoBehaviour
 
 	private void Update()
 	{
-		#region summary
-		/// <summary>
-		/// find closest valid target
-		/// inside the vision cone and update detection state.
-		/// Clears detection when nothing valid is found.
-		/// </summary>
-		#endregion
+		if (StateMachine.StatsHandler.IsDead) return;
 
 		#region search for targets
-		if (isInAlertMode)
-		{
-			SearchForClosestTarget();
-		}
-		else
-		{
-			SearchForClosestTarget();
-		}
+		SearchForClosestTarget();
+		#endregion
+
+		#region search for eatable targets
+		if (isZombie)
+			SearchForEatableTarget();
 		#endregion
 	}
 
 	private void SearchForClosestTarget()
-	{		
+	{
 		#region summary
 		/// <summary>
-		/// timer delays searching every frame to a set value
-		/// based on target either set new one, or investigate position of where enemy was last seen
+		/// search for targets based on timer, either set new target if found, or investigate position of where one was last seen
 		/// </summary>
 		#endregion
 
@@ -138,7 +139,7 @@ public class NpcPerception : MonoBehaviour
 		#endregion
 
 		#region GetClosestTarget
-		float closestDistance = float.MaxValue;
+		float closestDistance = viewDistance;
 		GameObject closestTarget = null;
 
 		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits); i++)
@@ -146,6 +147,75 @@ public class NpcPerception : MonoBehaviour
 			var hit = ColliderHits[i];
 
 			if (!StateMachine.TargetTags.Contains(hit.tag) || hit.gameObject == gameObject)
+				continue;
+
+			Vector3 dirToTarget = (hit.transform.position - transform.position).normalized;
+			float angle = Vector3.Angle(transform.forward, dirToTarget);
+
+			// Cone check
+			if (angle > viewAngle * 0.5f) // Half-angle used because Vector3.Angle measures from center, not edges
+				continue;
+
+			float distance = Vector3.Distance(transform.position, hit.transform.position);
+
+			if (distance < closestDistance)
+			{
+				closestDistance = distance;
+				closestTarget = hit.gameObject;
+			}
+		}
+
+		return closestTarget;
+		#endregion
+	}
+	private void SearchForEatableTarget()
+	{
+		#region summary
+		/// <summary>
+		/// search for eatable targets if zombie based on timer, either set new target if found, or set null
+		/// </summary>
+		#endregion
+
+		#region timer
+		detectEatableTargetTimer -= Time.deltaTime;
+		if (detectEatableTargetTimer > 0) return;
+		detectEatableTargetTimer = detectEatableTargetCooldown;
+		#endregion
+
+		#region Update Eatable Target
+		GameObject closestTarget = GetEatableTargetInCone();
+
+		if (closestTarget != null)
+		{
+			EatableTarget = closestTarget;
+			isEatableTargetDetected = true;
+		}
+		else
+		{
+			EatableTarget = null;
+			isEatableTargetDetected = false;
+		}
+		#endregion
+	}
+	private GameObject GetEatableTargetInCone()
+	{
+		#region summary
+		/// <summary>
+		/// Checks all colliders within view distance and filters
+		/// only those inside the vision cone.
+		/// Returns the nearest valid target found.
+		/// </summary>
+		#endregion
+
+		#region get closest dead and eatable target
+		float closestDistance = viewDistance;
+		GameObject closestTarget = null;
+
+		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits); i++)
+		{
+			var hit = ColliderHits[i];
+
+			if (!hit.CompareTag("Dead") || hit.gameObject == gameObject)
 				continue;
 
 			Vector3 dirToTarget = (hit.transform.position - transform.position).normalized;
@@ -183,7 +253,7 @@ public class NpcPerception : MonoBehaviour
 
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
-		#region
+		#region summary
 		/// <summary>
 		/// if detected enemy no longer detected and no other enemies are detected, investigate last seen enemies position
 		/// </summary>
@@ -250,15 +320,13 @@ public class NpcPerception : MonoBehaviour
 	{
 		#region Start Alert mode
 		isInAlertMode = true;
-		float defaultViewAngle = viewAngle;
-		float defaultViewDistance = viewDistance;
 
 		viewAngle *= ViewAngleMultiplier;
 		viewDistance *= ViewDistanceMultiplier;
 		yield return new WaitForSeconds(HighAlertDuration);
 
-		viewAngle = defaultViewAngle;
-		viewDistance = defaultViewDistance;
+		viewAngle = baseViewAngle;
+		viewDistance = baseviewDistance;
 		isInAlertMode = false;
 		#endregion
 	}

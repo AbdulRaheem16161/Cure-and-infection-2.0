@@ -22,11 +22,22 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.IsDead) return;
 
-            #region State Transitions
+            if (!stateMachine.EnableFreeMove)
+                stateMachine.SwitchState(new NPCIdleState(stateMachine));
 
-            // ----------- Free Move to Chase -------------
+			#region State Transitions
 
-            if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
+			// ----------- Free Move to Eat Corpse -------------
+
+			if (stateMachine.NpcPerception.isEatableTargetDetected && stateMachine.EnableEatCorpseState)
+			{
+				stateMachine.SwitchState(new NPCEatCorpseState(stateMachine));
+				return;
+			}
+
+			// ----------- Free Move to Chase -------------
+
+			if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;

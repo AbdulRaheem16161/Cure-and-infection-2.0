@@ -7,6 +7,8 @@ public class MusicAudioHandler : AudioHandler
 	private readonly float maxVolume = 0.25f;
 	private readonly float fadeTime = 5f;
 
+	public bool disable;
+
 	[Header("Track One")]
 	public AudioSource musicTrackOne;
 
@@ -29,6 +31,7 @@ public class MusicAudioHandler : AudioHandler
 
 	private void Start()
 	{
+		if (disable) return;
 		StartCoroutine(PlayTrackCoroutine(musicTrackOne, musicTrackTwo));
 	}
 

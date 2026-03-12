@@ -358,15 +358,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dad04fe66dbc27242a8edc451be2aca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TRex: {fileID: 4125029387023148961, guid: 117a5d3b0f9b7764bb7972aa45052aea, type: 3}
-  Fighter: {fileID: 837096600775374618, guid: a1c953dd24bac544381276d6ae49c88b, type: 3}
-  Zombie: {fileID: 4125029387023148961, guid: 975e17cc457d5ec4cb1e7e28e7d16d46, type: 3}
   RandomFollowPoint: {fileID: 3835863379665885365, guid: d02f420b4bc9a534bbb5bf1f350c92e1, type: 3}
   PatrolFollowPoint: {fileID: 5763262658595624350, guid: 3a2d5a53286ca144cb9471658e2171bf, type: 3}
-  SpawnPoint: {fileID: 6793302210893672624, guid: 1dccd2f52ae65b442870cb1f48cb477a, type: 3}
   TrackGizmos: {fileID: 4270701735427954894}
+  npcSpawns:
+  - {fileID: 11400000, guid: ea717fe8b586a464ab3581a477b1165d, type: 2}
+  - {fileID: 11400000, guid: 4abe508b91cc1ae47b9e3882cf5ffae4, type: 2}
+  - {fileID: 11400000, guid: 674a7f0b80afafc479f6441cda267078, type: 2}
+  - {fileID: 11400000, guid: 55097276ec1d41f47a8a15e2fafdd5cc, type: 2}
+  zombieNpcSpawns:
+  - {fileID: 11400000, guid: c71c26cc173d3c8429dcaff582f657e1, type: 2}
+  - {fileID: 11400000, guid: 2b254af504bbd7b48ac8c0a381ff5598, type: 2}
+  - {fileID: 11400000, guid: 357cc3d8d46d4e34587a7c42c554b06c, type: 2}
+  npcObjectPooling: []
   NPCsTeam: 2
-  selectedWeapon: 10
+  npcDefinitionToSpawn: {fileID: 0}
 --- !u!1 &4606925889027570926
 GameObject:
   m_ObjectHideFlags: 0

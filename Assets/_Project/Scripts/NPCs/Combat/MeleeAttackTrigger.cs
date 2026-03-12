@@ -22,7 +22,7 @@ public class MeleeAttackTrigger : MonoBehaviour
         {
             stateMachine.OpponentInMeleeAttackRange = true;
         }
-        else if (other.tag == DeadOpponentTag)
+        else if (other.CompareTag(DeadOpponentTag))
         {
             stateMachine.OpponentInMeleeAttackRange = false;
         }

@@ -184,9 +184,9 @@ GameObject:
   - component: {fileID: -5772089214708602261}
   - component: {fileID: 2458076507582956389}
   - component: {fileID: 8904301891162826575}
+  - component: {fileID: 2656706438221597951}
   - component: {fileID: -6753609607226209330}
   - component: {fileID: -5542053669577002877}
-  - component: {fileID: 2656706438221597951}
   m_Layer: 0
   m_Name: ZombieTest
   m_TagString: Team 3
@@ -334,8 +334,8 @@ MonoBehaviour:
   stamina: 0
   headProtection: 0
   chestProtection: 0
-  EnableDeath: 0
-  EnableRespawn: 0
+  EnableDeath: 1
+  EnableRespawn: 1
   EnableZombification: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
@@ -355,6 +355,19 @@ MonoBehaviour:
   CurrentStateName: 
   CurrentFollowPoint: {fileID: 0}
   RotationSpeed: 10
+  EnableFreeMove: 1
+  moveOnRandomPath: 1
+  RandomFollowPoint: {fileID: 0}
+  moveOnPatrolPath: 1
+  PatrolFollowPoint: {fileID: 0}
+  PatrolSpeed: 0.3
+  EnableEatCorpseState: 1
+  EnableInvestigate: 1
+  HasLocationToInvestigate: 0
+  HasInvestigatedLocation: 0
+  locationToInvestigate: {x: 0, y: 0, z: 0}
+  EnableChase: 1
+  ChaseSpeed: 3.3
   targetTags: []
   EnableMeleeAttack: 1
   Hitbox: {fileID: 2420777708771270843}
@@ -368,19 +381,36 @@ MonoBehaviour:
   EnableRangedAttack: 0
   OpponentInRangedAttackRange: 0
   RangedAttackRotSpeed: 0
-  EnableChase: 1
-  ChaseSpeed: 3.3
-  EnableInvestigate: 1
-  HasLocationToInvestigate: 0
-  HasInvestigatedLocation: 0
-  locationToInvestigate: {x: 0, y: 0, z: 0}
-  EnableFreeMove: 1
-  moveOnRandomPath: 1
-  RandomFollowPoint: {fileID: 0}
-  moveOnPatrolPath: 1
-  PatrolFollowPoint: {fileID: 0}
-  PatrolSpeed: 0.3
-  SpawnPoint: {fileID: 5204823297776222364}
+--- !u!114 &2656706438221597951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5395a13c361ec294086a798047f3e532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewAngle: 45
+  viewDistance: 5
+  showGizmos: 0
+  HighAlertDuration: 3
+  ViewAngleMultiplier: 1.5
+  ViewDistanceMultiplier: 2
+  isInAlertMode: 0
+  normalColor: {r: 0, g: 1, b: 0, a: 1}
+  detectedColor: {r: 1, g: 0, b: 0, a: 1}
+  colorAlpha: 0.25
+  isTargetDetected: 0
+  DetectedTarget: {fileID: 0}
+  isEatableTargetDetected: 0
+  EatableTarget: {fileID: 0}
+  detectTargetCooldown: 0.1
+  detectTargetTimer: 0
+  detectEatableTargetCooldown: 0.5
+  detectEatableTargetTimer: 0
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,32 +458,6 @@ MonoBehaviour:
   slotIndex: 0
   itemToSpawn: {fileID: 0}
   itemToSpawnCount: 0
---- !u!114 &2656706438221597951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4125029387023148961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5395a13c361ec294086a798047f3e532, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewAngle: 45
-  viewDistance: 5
-  showGizmos: 0
-  HighAlertDuration: 3
-  ViewAngleMultiplier: 1.5
-  ViewDistanceMultiplier: 2
-  isInAlertMode: 0
-  normalColor: {r: 0, g: 1, b: 0, a: 1}
-  detectedColor: {r: 1, g: 0, b: 0, a: 1}
-  colorAlpha: 0.25
-  isTargetDetected: 0
-  DetectedTarget: {fileID: 0}
-  detectTargetCooldown: 0.1
-  detectTargetTimer: 0
 --- !u!1 &8743914951711064300
 GameObject:
   m_ObjectHideFlags: 0

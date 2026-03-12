@@ -32,7 +32,7 @@ namespace Game.MyNPC
             if (_attackDurationTimer >= stateMachine.HitboxActivationDelay)
             {
                 if (stateMachine.Hitbox != null)
-                    stateMachine.Hitbox.gameObject.SetActive(true);
+                    stateMachine.Hitbox.SetActive(true);
             }
 
             #endregion

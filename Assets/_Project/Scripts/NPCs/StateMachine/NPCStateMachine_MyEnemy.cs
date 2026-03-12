@@ -25,10 +25,45 @@ namespace Game.MyNPC
         public Transform CurrentFollowPoint;
         public float RotationSpeed;
         [Space(20)]
-        #endregion
+		#endregion
 
-        #region Attack (General)
-        [SerializeField] private List<string> targetTags = new List<string>();
+		#region FreeMove Settings
+		[Header("FreeMove Settings")]
+		public bool EnableFreeMove;
+
+		[Header("Random Move Settings")]
+		public bool moveOnRandomPath = false;
+		public GameObject RandomFollowPoint;
+
+		[Header("Patrol Move Settings")]
+		public bool moveOnPatrolPath = false;
+		public GameObject PatrolFollowPoint;
+		public float PatrolSpeed;
+
+		[Space(10)]
+		#endregion
+
+		#region Eat Corpse State
+		public bool EnableEatCorpseState;
+		#endregion
+
+		#region Investigate State
+		[Header("Investigate State")]
+		public bool EnableInvestigate;
+		public bool HasLocationToInvestigate;
+		public bool HasInvestigatedLocation;
+		public Vector3 locationToInvestigate;
+		#endregion
+
+		#region Chase State
+		[Header("Chase State")]
+		public bool EnableChase;
+		public float ChaseSpeed;
+		[Space(10)]
+		#endregion
+
+		#region Attack (General)
+		[SerializeField] private List<string> targetTags = new List<string>();
         public override List<string> TargetTags
         {
             get { return targetTags; }
@@ -59,80 +94,14 @@ namespace Game.MyNPC
         public bool OpponentInRangedAttackRange;
         public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
         public float RangedAttackRotSpeed;
-        [Space(10)]
-        #endregion
-
-        #region Chase State
-        [Header("Chase State")]
-        public bool EnableChase;
-		public float ChaseSpeed;
-        [Space(10)]
-        #endregion
-
-        #region Investigate State
-        [Header("Investigate State")]
-        public bool EnableInvestigate;
-        public bool HasLocationToInvestigate;
-		public bool HasInvestigatedLocation;
-        public Vector3 locationToInvestigate;
-		#endregion
-
-		#region FreeMove Settings
-		[Header("FreeMove Settings")]
-        public bool EnableFreeMove;
-
-        [Header("Random Move Settings")]
-		public bool moveOnRandomPath = false;
-		public GameObject RandomFollowPoint;
-
-		[Header("Patrol Move Settings")]
-		public bool moveOnPatrolPath = false;
-        public GameObject PatrolFollowPoint;
-		public float PatrolSpeed;
-
-		[Space(10)]
         #endregion
 
         ///<summery>
         /// move respawn related logic into a higher level object for npc pooling and reusing at a later date
         ///<summery>
 
-		#region Respawn
-		[Header("Respawn")]
-        public GameObject SpawnPoint;
-		#endregion
-
 		public static event Action<GameObject> OnDeathComplete;
-
-		private void OnOff()
-        {
-            #region Editor Refresh (throttled for performance)
-#if UNITY_EDITOR
-            // Only refresh in edit mode, and not every frame (every ~0.5s)
-            if (!Application.isPlaying && Time.frameCount % 30 == 0)
-            {
-                EditorApplication.QueuePlayerLoopUpdate();
-                SceneView.RepaintAll();
-            }
-#endif
-            #endregion
-
-            #region Free Move Modes
-            // Fix your logic (your previous code made them fight each other endlessly)
-            if (moveOnPatrolPath) moveOnRandomPath = false;
-            if (moveOnRandomPath) moveOnPatrolPath = false;
-            #endregion
-
-            #region ON/OFF
-            if (NpcPerception != null)
-				NpcPerception.enabled = EnableChase;
-
-            if (Hitbox != null)
-
-                if (AttackRangeTrigger != null)
-                    AttackRangeTrigger.SetActive(EnableMeleeAttack);
-            #endregion
-        }
+		public static event Action<GameObject> OnZombificationComplete;
 
         private void Awake()
         {
@@ -150,10 +119,10 @@ namespace Game.MyNPC
             EquipmentHandler = equipmentHandler;
             InventoryHandler = inventoryHandler;
             NpcPerception = npcPerception;
-			#endregion
+            #endregion
 
-			#region set values from definition
-			RotationSpeed = npcDefinition.RotationSpeed;
+            #region set values from definition
+            RotationSpeed = npcDefinition.RotationSpeed;
             PatrolSpeed = npcDefinition.PatrolSpeed;
             ChaseSpeed = npcDefinition.ChaseSpeed;
 			#endregion
@@ -190,10 +159,6 @@ namespace Game.MyNPC
 			#region Enable Movement
 			Agent.enabled = true;
 			#endregion
-
-			#region enable scripts and colliders
-			EnableComponents(true);
-			#endregion
 		}
 
 		#region assign follow/patrol/spawn points
@@ -207,13 +172,10 @@ namespace Game.MyNPC
             moveOnRandomPath = false;
             moveOnPatrolPath = true;
             PatrolFollowPoint = patrolPoint;
-			PatrolFollowPoint.GetComponent<PatrolFollowPoint>().ItsFollower = gameObject;
-			PatrolFollowPoint.GetComponent<PatrolFollowPoint>().TrackGizmos = trackGizmos;
+			var patrol = PatrolFollowPoint.GetComponent<PatrolFollowPoint>();
+			patrol.ItsFollower = gameObject;
+			patrol.TrackGizmos = trackGizmos;
 		}
-        public void AssignSpawnPoint(GameObject spawnPoint)
-        {
-            SpawnPoint = spawnPoint;
-        }
 		#endregion
 
 		private void OnDestroy()
@@ -230,7 +192,6 @@ namespace Game.MyNPC
             RotateTowardsDestination();
             SingleLineUpdates();
             UpdateAnimations();
-            OnOff();
             #endregion
         }
 
@@ -263,7 +224,8 @@ namespace Game.MyNPC
         {
             #region Current Speed
             float smoothTime = 0.2f;
-            CurrentSpeed = Mathf.Lerp(CurrentSpeed, Agent.velocity.magnitude, Time.deltaTime / smoothTime);
+			if (Agent != null && Agent.enabled)
+				CurrentSpeed = Mathf.Lerp(CurrentSpeed, Agent.velocity.magnitude, Time.deltaTime / smoothTime);
             #endregion
         }
 
@@ -274,7 +236,12 @@ namespace Game.MyNPC
             #endregion
         }
 
-        public void HandleDeath()
+		public void CompleteZombification()
+		{
+            OnZombificationComplete?.Invoke(gameObject);
+		}
+
+		public void HandleDeath()
         {
             StartCoroutine(Die());
         }
@@ -306,43 +273,10 @@ namespace Game.MyNPC
             }
             #endregion
 
-            #region disable scripts and colliders
-            EnableComponents(false);
-			#endregion
-
 			yield return new WaitForSeconds(3f);
 
             if (!StatsHandler.EnableZombification && StatsHandler.EnableRespawn)
 				OnDeathComplete?.Invoke(gameObject);
-		}
-
-        private void EnableComponents(bool enable)
-        {
-			#region update scripts
-			MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-			foreach (MonoBehaviour script in scripts)
-			{
-				if (script != this)
-				{
-					script.enabled = enable;
-				}
-			}
-			#endregion
-
-			#region update colliders
-
-			Collider[] colliders;
-
-			colliders = GetComponentsInChildren<Collider>();
-
-			if (colliders != null)
-			{
-				foreach (var col in colliders)
-				{
-					col.enabled = enable;
-				}
-			}
-			#endregion
 		}
 	}
 }

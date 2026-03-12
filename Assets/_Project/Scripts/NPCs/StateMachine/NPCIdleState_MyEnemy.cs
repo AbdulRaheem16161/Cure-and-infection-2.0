@@ -47,9 +47,17 @@ namespace Game.MyNPC
                 return;
             }
 
-            // ----------- Idle to Chase -------------
+			// ----------- Free Move to Eat Corpse -------------
 
-            if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
+			if (stateMachine.NpcPerception.isEatableTargetDetected && stateMachine.EnableEatCorpseState)
+			{
+				stateMachine.SwitchState(new NPCEatCorpseState(stateMachine));
+				return;
+			}
+
+			// ----------- Idle to Chase -------------
+
+			if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;

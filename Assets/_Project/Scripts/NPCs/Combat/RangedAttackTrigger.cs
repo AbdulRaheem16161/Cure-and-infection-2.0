@@ -17,6 +17,7 @@ public class RangedAttackTrigger : MonoBehaviour
     private void Update()
     {
         if (stateMachine.StatsHandler.IsDead) return;
+        if (!stateMachine.EquipmentHandler.HasRangedWeaponInHands) return;
 
         Range = stateMachine.EquipmentHandler.rangedWeaponInHands.WeaponDefinition.EffectiveRange; // Trigger's range equal weapon
 

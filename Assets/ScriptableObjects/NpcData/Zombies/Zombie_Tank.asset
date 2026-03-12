@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Zombie_Tank
   m_EditorClassIdentifier: 
   npcName: Tank Zombie
-  defaultNpcTeam: 8
   isZombie: 1
   maxHealth: 200
   maxWater: 100
@@ -31,7 +30,7 @@ MonoBehaviour:
   consumableOne: {fileID: 0}
   consumableTwo: {fileID: 0}
   consumableThree: {fileID: 0}
-  viewAngle: 30
+  viewAngle: 60
   viewDistance: 12
   highAlertDuration: 5
   viewAngleMultiplier: 1.25

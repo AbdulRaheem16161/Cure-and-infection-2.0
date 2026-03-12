@@ -46,10 +46,16 @@ public class StatsHandler : MonoBehaviour, IDamageable
 			return;
 		}
 
-		EnableDeath = true;
 		IsDead = false;
+		EnableDeath = true;
+		EnableRespawn = false;
 
 		if (npcDefinition == null) return; //keep values in inspector
+
+		if (npcDefinition.IsZombie)
+			EnableZombification = false;
+		else
+			EnableZombification = true;
 
 		health = npcDefinition.MaxHealth;
 		water = npcDefinition.MaxWater;

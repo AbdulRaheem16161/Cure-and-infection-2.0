@@ -39,22 +39,16 @@ public class NPCStateMachineEditor : Editor
 
         EditorGUILayout.Space(10);
 
-        // ─────────────────────────────
-        // Chase
-        EditorGUILayout.LabelField("Chase State", EditorStyles.boldLabel);
-        npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
-        if (npc.EnableChase)
-        {
-            EditorGUI.indentLevel++;
-            npc.ChaseSpeed = EditorGUILayout.FloatField("Chase Speed", npc.ChaseSpeed);
-            EditorGUI.indentLevel--;
-        }
+		// ─────────────────────────────
+		// Eat Corpse
+		EditorGUILayout.LabelField("Eat Corpse Settings", EditorStyles.boldLabel);
+		npc.EnableEatCorpseState = EditorGUILayout.Toggle("Enable Eat Corpse", npc.EnableEatCorpseState);
 
-        EditorGUILayout.Space(10);
+		EditorGUILayout.Space(10);
 
 		// ─────────────────────────────
 		// Investigate
-		EditorGUILayout.LabelField("Investigate State", EditorStyles.boldLabel);
+		EditorGUILayout.LabelField("Investigate Settings", EditorStyles.boldLabel);
 		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
 		if (npc.EnableInvestigate)
 		{
@@ -66,6 +60,19 @@ public class NPCStateMachineEditor : Editor
 		}
 
 		EditorGUILayout.Space(10);
+
+		// ─────────────────────────────
+		// Chase
+		EditorGUILayout.LabelField("Chase Settings", EditorStyles.boldLabel);
+        npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
+        if (npc.EnableChase)
+        {
+            EditorGUI.indentLevel++;
+            npc.ChaseSpeed = EditorGUILayout.FloatField("Chase Speed", npc.ChaseSpeed);
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space(10);
 
 		// ─────────────────────────────
 		// Attack (General)
@@ -106,7 +113,7 @@ public class NPCStateMachineEditor : Editor
             EditorGUI.indentLevel--;
         }
 
-        if (GUI.changed)
+		if (GUI.changed)
         {
             EditorUtility.SetDirty(npc);
         }

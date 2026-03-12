@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Zombie_Sprinter
   m_EditorClassIdentifier: 
   npcName: Sprinter Zombie
-  defaultNpcTeam: 8
   isZombie: 1
   maxHealth: 75
   maxWater: 100
@@ -31,7 +30,7 @@ MonoBehaviour:
   consumableOne: {fileID: 0}
   consumableTwo: {fileID: 0}
   consumableThree: {fileID: 0}
-  viewAngle: 60
+  viewAngle: 100
   viewDistance: 15
   highAlertDuration: 5
   viewAngleMultiplier: 1.25
