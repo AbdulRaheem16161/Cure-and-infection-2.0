@@ -43,7 +43,7 @@ namespace Game.MyNPC
             // Wait until random time is over
             if (timer >= WaitBeforeFreeMove && stateMachine.EnableFreeMove) 
             {
-                stateMachine.SwitchState(new NPCFreeMoveState(stateMachine));
+                stateMachine.SwitchState(new NPCMoveState(stateMachine));
                 return;
             }
 

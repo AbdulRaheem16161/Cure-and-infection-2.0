@@ -1,19 +1,4 @@
-using Game.MyNPC;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
-using static NPCSpawner;
-
-/// <summary>
-/// plan summery
-/// finish this script so making new npcs will be simpler.
-/// 
-/// repalce weaponholder scripts etc... with EquipmentHandler + inventoryHandler scripts
-/// update them to now instantiate and destroy game objects in world.
-/// update EquipmentHandler to support currently unholstered weapon (Gameobject currentWeaponObj or EquipmentType currentWeapon)
-/// 
-/// consider any big changes needed to current state machine for npcs
-/// </summary>
 
 [CreateAssetMenu(fileName = "Npc", menuName = "ScriptableObjects/Npc")]
 public class NpcDefinition : ScriptableObject
@@ -22,6 +7,7 @@ public class NpcDefinition : ScriptableObject
 	[Header("Npc Info")]
 	[SerializeField] private string npcName;
 	[SerializeField] private bool isZombie;
+	[SerializeField] private bool supportsEquipmentModels;
 	#endregion
 
 	#region npc stats
@@ -44,7 +30,6 @@ public class NpcDefinition : ScriptableObject
 	/// <summary>
 	/// for zombie ranged attacks we can create a unique WeaponRangedDefinition ZombieSpit as they should work fine if set up like a single shot gun
 	/// for zombie melee attacks we can create a unique WeaponMeleeDefinition that will do the same as above
-	/// equipment here should be auto equipped via EquipmentHandler if not null
 	/// </summary>
 	[SerializeField] private WeaponRangedDefinition weaponOne;
 	[SerializeField] private WeaponRangedDefinition weaponTwo;
@@ -70,8 +55,6 @@ public class NpcDefinition : ScriptableObject
 
 	#region npc sound detection
 	[Header("NPC Sound Detection")]
-	/// <summary>
-	/// </summary>
 	[SerializeField] private float soundSensitivity; //percentage chance divided by distance to sound source or something
 	#endregion
 
@@ -83,6 +66,7 @@ public class NpcDefinition : ScriptableObject
 	#region read only
 	public string NpcName => npcName;
 	public bool IsZombie => isZombie;
+	public bool SupportsEquipmentModels => supportsEquipmentModels;
 
 	public int MaxHealth => maxHealth;
 	public int MaxWater => maxWater;

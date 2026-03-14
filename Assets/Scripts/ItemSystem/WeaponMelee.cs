@@ -9,18 +9,31 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 
 	public WeaponMeleeDefinition WeaponDefinition => weaponDefinition;
 
-	private StateMachine StateMachine;
-	private string[] HitableTags = new string[0];
+	public MeleeWeaponView WeaponView { get; private set; }
 
 	private bool CanSwing => swingCooldownTimer <= 0;
-	private float swingCooldownTimer;
+	private bool CurrentlySwinging;
+
+	public float swingTimer;
+	public float swingCooldownTimer;
 
 	public override void InitializeItem(WeaponMeleeDefinition definition, int itemStack)
 	{
 		base.InitializeItem(definition, itemStack);
 		weaponDefinition = definition;
 
-		//weapon-specific setup here
+		WeaponView = GetComponentInChildren<MeleeWeaponView>();
+		WeaponView.DisableHitCollider();
+
+		CurrentlySwinging = false;
+		swingTimer = 0;
+		swingCooldownTimer = 0;
+	}
+
+	private void Update()
+	{
+		HandleSwingCooldownTimer();
+		HandleSwingTimer();
 	}
 
 	public void EquipWeapon()
@@ -35,18 +48,61 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 
 	public void LightAttack()
 	{
+		if (!CanSwing) return;
+		if (CurrentlySwinging) return;
+
+		CurrentlySwinging = true;
+		WeaponView.EnableHitCollider(this);
+
+		swingTimer = WeaponDefinition.LightSwingSpeed;
+		swingCooldownTimer = swingTimer + WeaponDefinition.LightSwingCooldown;
+
 		///<summery>
-		/// check if can swing, swing weapon
+		/// swing weapon, if something gets hit damage it and disable hit collider
 		/// create relevent sfx and vfx
 		///<summery>
 	}
 	public void HeavyAttack()
 	{
+		if (!CanSwing) return;
+		if (CurrentlySwinging) return;
 
+		CurrentlySwinging = true;
+		WeaponView.EnableHitCollider(this);
+
+		swingTimer = WeaponDefinition.HeavySwingSpeed;
+		swingCooldownTimer = swingTimer + WeaponDefinition.HeavySwingCooldown;
 	}
 
-	public void SwingCooldown()
+	public void OnColliderHit(Collider other)
 	{
-		//read attackspeed from definition, set swing cooldown to attack speed then tick down to 0
+		if (other.TryGetComponent(out IDamageable damageable))
+		{
+			damageable.RecieveDamage(WeaponDefinition.Damage);
+			WeaponView.DisableHitCollider(); //disable hitting once something to hit is found
+		}
 	}
+
+	#region handle swing timer and auto disable collider if nothing hit
+	private void HandleSwingTimer()
+	{
+		if (swingCooldownTimer > 0)
+		{
+			swingCooldownTimer -= Time.deltaTime;
+			if (swingCooldownTimer <= 0)
+				WeaponView.DisableHitCollider();
+		}
+		if (swingCooldownTimer <= 0f) return;
+	}
+	#endregion
+
+	#region handle swing cooldown timer
+	private void HandleSwingCooldownTimer()
+	{
+		if (CanSwing) return;
+
+		swingCooldownTimer -= Time.deltaTime;
+		if (swingCooldownTimer > 0f) return;
+	}
+	#endregion
 }

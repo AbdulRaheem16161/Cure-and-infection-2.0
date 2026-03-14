@@ -4,9 +4,9 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Game.MyNPC
 {
-    public class NPCFreeMoveState : NPCBaseState
+    public class NPCMoveState : NPCBaseState
     {
-        public NPCFreeMoveState(NPCStateMachine stateMachine) : base(stateMachine) { }
+        public NPCMoveState(NPCStateMachine stateMachine) : base(stateMachine) { }
         public override void Enter()
         {
             stateMachine.Agent.speed = stateMachine.PatrolSpeed;

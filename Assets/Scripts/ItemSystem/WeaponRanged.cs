@@ -10,6 +10,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	[SerializeField] private WeaponRangedDefinition weaponDefinition;
 	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
 
+	public RangedWeaponView WeaponView { get; private set; }
+
 	public bool IsReloading { get; private set; }
 	public bool MagazineFull => currentMagazineAmmo == WeaponDefinition.MagazineSize;
 	public bool MagazineEmpty => currentMagazineAmmo <= 0;
@@ -25,15 +27,13 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
 
-	public WeaponView WeaponView { get; private set; }
-
 	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
 	{
 		base.InitializeItem(definition, itemStack);
 		weaponDefinition = definition;
 
 		//weapon-specific setup here
-		WeaponView = GetComponentInChildren<WeaponView>();
+		WeaponView = GetComponentInChildren<RangedWeaponView>();
 		FireRateCooldown = 60 / WeaponDefinition.FireRateRPM;
 	}
 

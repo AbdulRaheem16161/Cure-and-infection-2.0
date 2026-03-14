@@ -13,13 +13,29 @@ public class WeaponMeleeDefinition : ItemDefinition
 	}
 
 	[SerializeField] private int damage;
-	[SerializeField] private float attackSpeed;
+
+	[Header("Swing Behaviour")]
+	[Tooltip("How quick the swing is")]
+	[SerializeField] private float lightSwingSpeed;
+	[Tooltip("How long till you can swing again after swingSpeed")]
+	[SerializeField] private float lightSwingCooldown;
+
+	[Tooltip("How quick the swing is")]
+	[SerializeField] private float heavySwingSpeed;
+	[Tooltip("How long till you can swing again after swingSpeed")]
+	[SerializeField] private float heavySwingCooldown;
 	#endregion
 
 	#region readonly properties
 	public WeaponType Weapon => weaponType;
 	public int Damage => damage;
-	public float AttackSpeed => attackSpeed;
+
+	//swing behaviour
+	public float LightSwingSpeed => lightSwingSpeed;
+	public float LightSwingCooldown => lightSwingCooldown;
+
+	public float HeavySwingSpeed => heavySwingSpeed;
+	public float HeavySwingCooldown => heavySwingCooldown;
 	#endregion
 
 	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)

@@ -7,10 +7,16 @@ namespace Game.MyNPC
     {
         #region Constructor
         public NPCMeleeAttackState(NPCStateMachine stateMachine) : base(stateMachine) { }
-        #endregion
+		#endregion
 
-        #region Fields
-        private float _attackDurationTimer;
+		private WeaponMelee EquippedWeapon => stateMachine.EquipmentHandler.meleeWeaponInHands;
+
+		private float randomSwingDelay;
+
+		private readonly System.Random systemRandom = new();
+
+		#region Fields
+		private float _attackDurationTimer;
         #endregion
 
         public override void Enter()
@@ -24,8 +30,16 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.IsDead) return;
 
-            #region Update Attack Timer
-            _attackDurationTimer += deltaTime;
+			if (!stateMachine.EquipmentHandler.HasMeleeWeaponInHands) return;
+
+			randomSwingDelay -= deltaTime;
+			if (randomSwingDelay > 0f)
+				return;
+
+
+
+			#region Update Attack Timer
+			_attackDurationTimer += deltaTime;
             #endregion
 
             #region Enable Hitbox
@@ -38,8 +52,6 @@ namespace Game.MyNPC
             #endregion
 
             #region State Transitions 
-
-            // ----------- Attack to Idle -------------
 
             // Otherwise, return to Chase state
             if (_attackDurationTimer >= stateMachine.AttackDuration || !stateMachine.HasEquippedMeleeWeapon)
@@ -57,6 +69,14 @@ namespace Game.MyNPC
                 stateMachine.Hitbox.gameObject.SetActive(false);
             #endregion
         }
-    }
+
+		private float GetRandomSwingDelay()
+		{
+			float minFireDelay = 0.1f;
+			float maxFireDelay = 0.25f;
+
+			return (float)(systemRandom.NextDouble() * (maxFireDelay - minFireDelay) + minFireDelay);
+		}
+	}
 }
 
