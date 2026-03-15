@@ -25,4 +25,7 @@ MonoBehaviour:
   itemUiIcon: {fileID: 0}
   weaponType: 1
   damage: 50
-  attackSpeed: 2.3
+  lightSwingSpeed: 1
+  lightSwingCooldown: 1
+  heavySwingSpeed: 1
+  heavySwingCooldown: 2

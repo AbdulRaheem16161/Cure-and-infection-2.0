@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   npcName: Tank Zombie
   isZombie: 1
+  supportsEquipmentModels: 0
   maxHealth: 200
   maxWater: 100
   maxFood: 100
@@ -23,7 +24,7 @@ MonoBehaviour:
   rotationSpeed: 5
   weaponOne: {fileID: 0}
   weaponTwo: {fileID: 0}
-  meleeWeapon: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: 0a034dc203bf43f46b5e2febc954dbb3, type: 2}
   helmet: {fileID: 0}
   chest: {fileID: 0}
   backpack: {fileID: 0}
