@@ -35,7 +35,7 @@ public class NPCInvestigateState : NPCBaseState
 		}
 		// ----------- Investigate to Chase -------------
 
-		if (stateMachine.NpcPerception.isTargetDetected)
+		if (stateMachine.NpcPerception.IsTargetDetected)
 		{
 			stateMachine.SwitchState(new NPCChaseState(stateMachine));
 			return;

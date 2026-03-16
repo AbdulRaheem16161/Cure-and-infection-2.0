@@ -47,6 +47,7 @@ public class WeaponSound : MonoBehaviour
 
         foreach (Collider hit in hits)
         {
+            /*
             // Skip if tag is not in target list
             if (!stateMachine.TargetTags.Contains(hit.tag))
                 continue;
@@ -59,6 +60,7 @@ public class WeaponSound : MonoBehaviour
             otherStateMachine.NpcPerception.InvestigateSound(gameObject.transform.position);
 
             targetDetected = true;
+            */
         }
 
         yield return new WaitForSeconds(soundDuration);

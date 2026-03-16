@@ -22,6 +22,8 @@ MonoBehaviour:
   patrolSpeed: 3
   chaseSpeed: 4
   rotationSpeed: 10
+  minIdleTime: 1
+  maxIdleTime: 3
   weaponOne: {fileID: 11400000, guid: 891c4fb4191ce7c479c3aa2c2a088c45, type: 2}
   weaponTwo: {fileID: 0}
   meleeWeapon: {fileID: 0}

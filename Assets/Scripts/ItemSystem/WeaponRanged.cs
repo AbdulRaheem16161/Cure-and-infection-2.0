@@ -59,7 +59,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	}
 
 	#region weapon shooting (TODO add sfx, vfx and animations + recoil and accuracy adjustments)
-	public void Shoot(string[] HitableTags)
+	public void Shoot()
 	{
 		if (MagazineEmpty) return;
 		if (IsReloading) return;
@@ -70,7 +70,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		Vector3 origin = WeaponView.MuzzlePoint.position;
 		Vector3 direction = WeaponView.MuzzlePoint.forward;
 
-		if (TryGetAccurateHit(origin, direction, HitableTags, out RaycastHit hit))
+		if (TryGetAccurateHit(origin, direction, out RaycastHit hit))
 		{
 			LastHitPoint = hit.point;
 
@@ -135,7 +135,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	#endregion
 
 	#region try get accurate hit
-	private bool TryGetAccurateHit(Vector3 origin, Vector3 direction, string[] hitableTags, out RaycastHit finalHit)
+	private bool TryGetAccurateHit(Vector3 origin, Vector3 direction, out RaycastHit finalHit)
 	{
 		#region Summary
 		/// <summary>
@@ -147,17 +147,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		#region TryGetAccurateHit
 
 		finalHit = new RaycastHit();
-
-		#region Raycast
-		if (Physics.Raycast(origin, direction, out RaycastHit rayHit, weaponDefinition.EffectiveRange))
-		{
-			if (IsValidTarget(rayHit.collider, hitableTags))
-			{
-				finalHit = rayHit;
-				return true;
-			}
-		}
-		#endregion
 
 		#region SphereCast
 		RaycastHit[] hits = Physics.SphereCastAll(
@@ -174,9 +163,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		{
 			RaycastHit hit = hits[i];
 
-			if (!IsValidTarget(hit.collider, hitableTags))
-				continue;
-
 			float distance = Vector3.Distance(origin, hit.point);
 
 			if (distance >= closestDistance)
@@ -190,28 +176,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		return hitFound;
 		#endregion
 
-		#endregion
-	}
-	#endregion
-
-	#region valid target check
-	private bool IsValidTarget(Collider collider, string[] hitableTags)
-	{
-		#region Summary
-		/// <summary>
-		/// Checks if the collider matches any allowed target tags
-		/// </summary>
-		#endregion
-
-		#region IsValidTarget
-
-		for (int i = 0; i < hitableTags.Length; i++)
-		{
-			if (collider.CompareTag(hitableTags[i]))
-				return true;
-		}
-
-		return false;
 		#endregion
 	}
 	#endregion

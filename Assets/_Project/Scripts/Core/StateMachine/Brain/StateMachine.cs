@@ -9,8 +9,6 @@ namespace Game.Core
         protected State currentState;
 		public State CurrentState => currentState;
 
-		public abstract List<string> TargetTags { get; set; }
-
         public void SwitchState(State newState)
         {
             currentState?.Exit();

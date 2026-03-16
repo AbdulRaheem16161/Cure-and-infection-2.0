@@ -23,6 +23,8 @@ public class NpcDefinition : ScriptableObject
 	[SerializeField] private float patrolSpeed;
 	[SerializeField] private float chaseSpeed;
 	[SerializeField] private float rotationSpeed;
+	[SerializeField] private float minIdleTime;
+	[SerializeField] private float maxIdleTime;
 	#endregion
 
 	#region npc equipment
@@ -76,6 +78,8 @@ public class NpcDefinition : ScriptableObject
 	public float PatrolSpeed => patrolSpeed;
 	public float ChaseSpeed => chaseSpeed;
 	public float RotationSpeed => rotationSpeed;
+	public float MinIdleTime => minIdleTime;
+	public float MaxIdleTime => maxIdleTime;
 
 	public WeaponRangedDefinition WeaponOne => weaponOne;
 	public WeaponRangedDefinition WeaponTwo => weaponTwo;

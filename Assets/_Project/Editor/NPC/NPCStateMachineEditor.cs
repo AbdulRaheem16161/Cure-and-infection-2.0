@@ -5,6 +5,11 @@ using Game.MyNPC;
 [CustomEditor(typeof(NPCStateMachine))]
 public class NPCStateMachineEditor : Editor
 {
+	public override bool RequiresConstantRepaint()
+	{
+		return Application.isPlaying;
+	}
+
     public override void OnInspectorGUI()
     {
         var npc = (NPCStateMachine)target;
@@ -77,7 +82,6 @@ public class NPCStateMachineEditor : Editor
 		// ─────────────────────────────
 		// Attack (General)
 		EditorGUILayout.LabelField("Attack Settings", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("targetTags"), true);
 
         EditorGUILayout.Space(10);
 
@@ -87,16 +91,10 @@ public class NPCStateMachineEditor : Editor
         npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
         if (npc.EnableMeleeAttack)
         {
-            EditorGUI.indentLevel++;
-            npc.Hitbox = (GameObject)EditorGUILayout.ObjectField("Hitbox", npc.Hitbox, typeof(GameObject), true);
-            npc.AttackRangeTrigger = (GameObject)EditorGUILayout.ObjectField("Attack Range Trigger", npc.AttackRangeTrigger, typeof(GameObject), true);
-            npc.Damage = EditorGUILayout.IntField("Damage", npc.Damage);
-            npc.OpponentInMeleeAttackRange = EditorGUILayout.Toggle("Player In Melee Range", npc.OpponentInMeleeAttackRange);
-            npc.AttackDuration = EditorGUILayout.FloatField("Attack Duration", npc.AttackDuration);
-            npc.HitboxActivationDelay = EditorGUILayout.FloatField("Hitbox Activation Delay", npc.HitboxActivationDelay);
-            npc.MinWaitBeforeFreeMove = EditorGUILayout.FloatField("Min Wait Before Free Move", npc.MinWaitBeforeFreeMove);
-            npc.MaxWaitBeforeFreeMove = EditorGUILayout.FloatField("Max Wait Before Free Move", npc.MaxWaitBeforeFreeMove);
-            EditorGUI.indentLevel--;
+			EditorGUI.indentLevel++;
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("hasEquippedMeleeWeapon"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInMeleeRange"));
+			EditorGUI.indentLevel--;
         }
 
         EditorGUILayout.Space(10);
@@ -106,11 +104,11 @@ public class NPCStateMachineEditor : Editor
         EditorGUILayout.LabelField("Ranged Attack State", EditorStyles.boldLabel);
         npc.EnableRangedAttack = EditorGUILayout.Toggle("Enable Ranged Attack", npc.EnableRangedAttack);
         if (npc.EnableRangedAttack)
-        {
-            EditorGUI.indentLevel++;
-            npc.OpponentInRangedAttackRange = EditorGUILayout.Toggle("Opponent In Ranged Attack Range", npc.OpponentInRangedAttackRange);
-            npc.RangedAttackRotSpeed = EditorGUILayout.FloatField("Ranged Attack RotSpeed", npc.RangedAttackRotSpeed);
-            EditorGUI.indentLevel--;
+		{
+			EditorGUI.indentLevel++;
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("hasEquippedRangedWeapon"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInShootingRange"));
+			EditorGUI.indentLevel--;
         }
 
 		if (GUI.changed)

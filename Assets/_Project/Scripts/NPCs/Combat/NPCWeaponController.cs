@@ -259,6 +259,7 @@ public class NPCWeaponController : MonoBehaviour
         Vector3 origin = muzzlePoint.position;
         Vector3 direction = muzzlePoint.forward;
 
+        /*
         string[] hitableTags =
             HitableObjects.Concat(stateMachine.TargetTags).ToArray();
 
@@ -283,6 +284,7 @@ public class NPCWeaponController : MonoBehaviour
         }
 
         SpawnVisualBullet(_lastHitPoint);
+        */
         #endregion
     }
 

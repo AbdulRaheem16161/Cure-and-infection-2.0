@@ -7,6 +7,10 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
 
+	[Header("Team")]
+	[ReadOnly] private NPCSpawner.Teams team;
+	public NPCSpawner.Teams Team => team;
+
 	#region stats
 	[Header("Stats")]
 	public int health;
@@ -33,9 +37,9 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	private void Awake()
 	{
 		if (!_Initialized)
-			InitializeStats(GetComponent<EquipmentHandler>(), null);
+			InitializeStats(NPCSpawner.Teams.FreeFighter, GetComponent<EquipmentHandler>(), null);
 	}
-	public void InitializeStats(EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
+	public void InitializeStats(NPCSpawner.Teams team, EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
 	{
 		_Initialized = true;
 		EquipmentHandler = equipmentHandler;
@@ -49,6 +53,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		IsDead = false;
 		EnableDeath = true;
 		EnableRespawn = false;
+
+		this.team = team;
 
 		if (npcDefinition == null) return; //keep values in inspector
 

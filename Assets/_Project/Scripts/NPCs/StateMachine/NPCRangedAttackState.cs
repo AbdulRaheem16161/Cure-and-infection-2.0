@@ -27,9 +27,6 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.IsDead) return;
 
-			//need a better check, preferably wont enter ranged attack if it doesnt have a ranged weapon.
-			if (!stateMachine.EquipmentHandler.HasRangedWeaponInHands) return;
-
             Debug.Log("ranged attack state ticking");
 
 			#region burst fire shot delay
@@ -43,7 +40,7 @@ namespace Game.MyNPC
 				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
             else
             {
-				EquippedWeapon.Shoot(stateMachine.TargetTags.ToArray());
+				EquippedWeapon.Shoot();
                 shotsToBurstFireCount--;
                 BurstFireBehaviour();
 			}
@@ -52,14 +49,14 @@ namespace Game.MyNPC
             #region State Transitions 
 
             // ----------- Attack to Chase -------------
-            if (!stateMachine.OpponentInRangedAttackRange || !stateMachine.HasEquippedRangedWeapon || !stateMachine.EnableRangedAttack)
+            if (!stateMachine.TargetInShootingRange || !stateMachine.HasEquippedRangedWeapon || !stateMachine.EnableRangedAttack)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;
             }
 
             // ----------- Ranged Attack to Melee Attack -------------
-            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
+            if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
             {
                 stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
                 return;
@@ -81,7 +78,7 @@ namespace Game.MyNPC
                 stateMachine.transform.rotation = Quaternion.RotateTowards(
                     stateMachine.transform.rotation,
                     targetRotation,
-                    stateMachine.RangedAttackRotSpeed * deltaTime * 100f
+                    stateMachine.RotationSpeed * deltaTime * 100f
                 );
             }
             #endregion

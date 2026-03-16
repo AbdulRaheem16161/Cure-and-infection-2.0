@@ -80,13 +80,6 @@ namespace Game.MyPlayer
         [Header("Attack Settings")]
         public int Damage = 10;
         public float AttackDuration;
-
-        [SerializeField] private List<string> targetTags = new List<string>();
-        public override List<string> TargetTags
-        {
-            get { return targetTags; }
-            set { targetTags = value; }
-        }
         #endregion
 
         #region Health

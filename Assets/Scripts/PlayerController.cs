@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
 	{
 		if (EquipmentHandler.HasRangedWeaponInHands)
 		{
-			EquipmentHandler.rangedWeaponInHands.Shoot(HitableTags);
+			EquipmentHandler.rangedWeaponInHands.Shoot();
 		}
 		else if (EquipmentHandler.HasMeleeWeaponInHands)
 		{

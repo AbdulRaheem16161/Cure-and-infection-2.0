@@ -400,6 +400,7 @@ public class PlayerWeaponController : MonoBehaviour
         Vector3 origin = playerStateMachine.CameraTransform.position;
         Vector3 direction = playerStateMachine.CameraTransform.forward;
 
+        /*
         string[] hitableTags =
             HitableObjects.Concat(playerStateMachine.TargetTags).ToArray();
 
@@ -425,6 +426,7 @@ public class PlayerWeaponController : MonoBehaviour
         }
 
         SpawnVisualBullet(_lastHitPoint);
+        */
         #endregion
     }
 

@@ -104,8 +104,8 @@ public class DetectionRadius : MonoBehaviour
         foreach (var hit in hits)
         {
             // Tag filter
-            if (!stateMachine.TargetTags.Contains(hit.tag) || hit.gameObject == this.gameObject)
-                continue;
+            //if (!stateMachine.TargetTags.Contains(hit.tag) || hit.gameObject == this.gameObject)
+                //continue;
 
             Vector3 dirToTarget = (hit.transform.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, dirToTarget);

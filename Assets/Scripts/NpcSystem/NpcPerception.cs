@@ -1,9 +1,14 @@
 #if UNITY_EDITOR
-using System.Collections;
 using Game.Core;
 using Game.MyNPC;
+using NUnit.Framework;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 public class NpcPerception : MonoBehaviour
 {
@@ -11,6 +16,7 @@ public class NpcPerception : MonoBehaviour
 
 	#region Settings
 	[Header("General Settings")]
+	public GameObject rayViewPoint;
 	private float baseViewAngle;
 	private float baseviewDistance;
 	public float viewAngle = 45f;
@@ -41,11 +47,22 @@ public class NpcPerception : MonoBehaviour
 	#region Runtime Values
 	[Header("Runtime Values")]
 	private readonly Collider[] ColliderHits = new Collider[100];
-	[SerializeField, ReadOnly] public bool isTargetDetected;
-	[SerializeField, ReadOnly] public GameObject DetectedTarget;
+	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
+	private List<StatsHandler> visibleTargets = new();
+	public bool IsTargetDetected { get; private set; }
+	public StatsHandler DetectedTarget { get; private set; }
 
-	[SerializeField, ReadOnly] public bool isEatableTargetDetected;
-	[SerializeField, ReadOnly] public GameObject EatableTarget;
+	public bool IsEatableTargetDetected { get; private set; }
+	public StatsHandler EatableTarget { get; private set; }
+
+
+	#endregion
+
+	#region search types
+	public enum SearchType
+	{
+		alive, eatable
+	}
 	#endregion
 
 	#region detect target timer
@@ -60,6 +77,9 @@ public class NpcPerception : MonoBehaviour
 
 	public void Initialize(NpcDefinition npcDefinition, NPCStateMachine stateMachine)
 	{
+		if (rayViewPoint == null)
+			Debug.LogError("rayViewPoint null, assign empty object where raycasts should start from");
+
 		#region Initialize
 		StateMachine = stateMachine;
 		isZombie = npcDefinition.IsZombie;
@@ -82,11 +102,12 @@ public class NpcPerception : MonoBehaviour
 		if (StateMachine.StatsHandler.IsDead) return;
 
 		#region search for targets
-		SearchForClosestTarget();
+		//if (!IsTargetDetected)
+			SearchForClosestTarget();
 		#endregion
 
 		#region search for eatable targets
-		if (isZombie)
+		//if (isZombie && !IsEatableTargetDetected)
 			SearchForEatableTarget();
 		#endregion
 	}
@@ -106,21 +127,21 @@ public class NpcPerception : MonoBehaviour
 		#endregion
 
 		#region Update Detected Target
-		GameObject closestTarget = GetClosestTargetInCone();
+		StatsHandler closestTarget = SearchForClosestTarget(SearchType.alive);
 
 		if (closestTarget != null)
 		{
 			DetectedTarget = closestTarget;
-			isTargetDetected = true;
+			IsTargetDetected = true;
 		}
 		else
 		{
-			GameObject recordedTarget = null;
+			StatsHandler recordedTarget = null;
 			if (DetectedTarget != null)
 				recordedTarget = DetectedTarget;
 
 			DetectedTarget = null;
-			isTargetDetected = false;
+			IsTargetDetected = false;
 
 			if (recordedTarget != null)
 				InvestigateLastSeenEnemyPosition(recordedTarget.transform.position);
@@ -128,46 +149,6 @@ public class NpcPerception : MonoBehaviour
 		#endregion
 	}
 
-	private GameObject GetClosestTargetInCone()
-	{
-		#region summary
-		/// <summary>
-		/// Checks all colliders within view distance and filters
-		/// only those inside the vision cone.
-		/// Returns the nearest valid target found.
-		/// </summary>
-		#endregion
-
-		#region GetClosestTarget
-		float closestDistance = viewDistance;
-		GameObject closestTarget = null;
-
-		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits); i++)
-		{
-			var hit = ColliderHits[i];
-
-			if (!StateMachine.TargetTags.Contains(hit.tag) || hit.gameObject == gameObject)
-				continue;
-
-			Vector3 dirToTarget = (hit.transform.position - transform.position).normalized;
-			float angle = Vector3.Angle(transform.forward, dirToTarget);
-
-			// Cone check
-			if (angle > viewAngle * 0.5f) // Half-angle used because Vector3.Angle measures from center, not edges
-				continue;
-
-			float distance = Vector3.Distance(transform.position, hit.transform.position);
-
-			if (distance < closestDistance)
-			{
-				closestDistance = distance;
-				closestTarget = hit.gameObject;
-			}
-		}
-
-		return closestTarget;
-		#endregion
-	}
 	private void SearchForEatableTarget()
 	{
 		#region summary
@@ -183,58 +164,115 @@ public class NpcPerception : MonoBehaviour
 		#endregion
 
 		#region Update Eatable Target
-		GameObject closestTarget = GetEatableTargetInCone();
+		StatsHandler closestTarget = SearchForClosestTarget(SearchType.eatable);
 
 		if (closestTarget != null)
 		{
 			EatableTarget = closestTarget;
-			isEatableTargetDetected = true;
+			IsEatableTargetDetected = true;
 		}
 		else
 		{
 			EatableTarget = null;
-			isEatableTargetDetected = false;
+			IsEatableTargetDetected = false;
 		}
 		#endregion
 	}
-	private GameObject GetEatableTargetInCone()
+
+	private StatsHandler SearchForClosestTarget(SearchType searchType)
 	{
 		#region summary
 		/// <summary>
-		/// Checks all colliders within view distance and filters
-		/// only those inside the vision cone.
-		/// Returns the nearest valid target found.
+		/// Checks all colliders within view distance use filters to filter targets
+		/// filter again via line of sight using raycast, sort visible targets by closest and return
 		/// </summary>
 		#endregion
 
-		#region get closest dead and eatable target
+		#region search for closest target
+		visibleTargets.Clear();
 		float closestDistance = viewDistance;
-		GameObject closestTarget = null;
+		StatsHandler closestTarget = null;
+		LayerMask mask = LayerMask.GetMask("Environment", "Characters"); // only layers that could block
 
-		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits); i++)
+		//grab all targets in view distance
+		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, mask); i++)
 		{
-			var hit = ColliderHits[i];
+			Collider collider = ColliderHits[i];
+			GameObject go = collider.gameObject;
 
-			if (!hit.CompareTag("Dead") || hit.gameObject == gameObject)
-				continue;
+			//filter self, team mates and filter type
+			if (gameObject == go) continue;
+			StatsHandler stats = go.GetComponent<StatsHandler>();
+			if (!FilterSearch(stats, searchType)) continue;
 
-			Vector3 dirToTarget = (hit.transform.position - transform.position).normalized;
-			float angle = Vector3.Angle(transform.forward, dirToTarget);
+			//filter for targets in vision cone
+			Vector3 dirToTarget = (collider.transform.position - transform.position).normalized;
+			float dot = Vector3.Dot(transform.forward, dirToTarget);
+			float cosHalfView = Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad);
+			if (dot < cosHalfView) continue;
 
-			// Cone check
-			if (angle > viewAngle * 0.5f) // Half-angle used because Vector3.Angle measures from center, not edges
-				continue;
+			//check if target is visible with raycast
+			for (int j = 0; j < Physics.RaycastNonAlloc(
+				rayViewPoint.transform.position, dirToTarget, RaycastHits, viewDistance, mask, QueryTriggerInteraction.Ignore); j++)
+			{
+				RaycastHit hit = RaycastHits[j];
 
-			float distance = Vector3.Distance(transform.position, hit.transform.position);
+				if (hit.collider.gameObject == gameObject) continue; //ignore self
+				if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Environment")) break;
+				if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Characters") && collider.gameObject == hit.collider.gameObject)
+				{
+					visibleTargets.Add(stats);
+					break;
+				}
+			}
+		}
 
-			if (distance < closestDistance)
+		for (int i = 0; i < visibleTargets.Count; i++)
+		{
+			StatsHandler target = visibleTargets[i];
+			float distance = Vector3.Distance(transform.position, target.transform.position);
+
+			if (distance < closestDistance) //track closest
 			{
 				closestDistance = distance;
-				closestTarget = hit.gameObject;
+				closestTarget = target;
 			}
 		}
 
 		return closestTarget;
+		#endregion
+	}
+
+	private bool FilterSearch(StatsHandler target, SearchType searchType)
+	{
+		#region filter logic, true = pass, false = fail
+		if (target == null) return false;
+		if (target.Team != NPCSpawner.Teams.FreeFighter)
+			if (target.Team == StateMachine.StatsHandler.Team) return false;
+
+		if (searchType == SearchType.alive)
+		{
+			if (!target.IsDead)
+				return true;
+			else
+				return false;
+		}
+		else if (searchType == SearchType.eatable)
+		{
+			if (target.EnableZombification && target.IsDead)
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			Debug.LogError($"SearchType: {searchType} not set up, add logic for it, using default alive search");
+
+			if (!target.IsDead)
+				return true;
+			else
+				return false;
+		}
 		#endregion
 	}
 
@@ -343,7 +381,7 @@ public class NpcPerception : MonoBehaviour
 
 		if (!showGizmos) return;
 
-		Color finalColor = isTargetDetected ? detectedColor : normalColor;
+		Color finalColor = IsTargetDetected ? detectedColor : normalColor;
 		finalColor.a = colorAlpha;
 		Handles.color = finalColor;
 

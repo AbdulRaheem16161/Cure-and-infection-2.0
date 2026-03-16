@@ -21,7 +21,7 @@ public class MeleeHitBox : MonoBehaviour
         #region 
         if (hasDamaged) return;
 
-        if (stateMachine.TargetTags.Contains(other.tag))
+       // if (stateMachine.TargetTags.Contains(other.tag))
         {
             IDamageable damageable = other.GetComponentInParent<IDamageable>();
 

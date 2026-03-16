@@ -30,6 +30,8 @@ namespace Game.MyNPC
 		#region FreeMove Settings
 		[Header("FreeMove Settings")]
 		public bool EnableFreeMove;
+        public float minIdleTime;
+        public float maxIdleTime;
 
 		[Header("Random Move Settings")]
 		public bool moveOnRandomPath = false;
@@ -62,43 +64,30 @@ namespace Game.MyNPC
 		[Space(10)]
 		#endregion
 
-		#region Attack (General)
-		[SerializeField] private List<string> targetTags = new List<string>();
-        public override List<string> TargetTags
-        {
-            get { return targetTags; }
-            set { targetTags = value; }
-        }
-
-        [Space(10)]
-        #endregion
-
         #region Melee Attack State
         [Header("Melee Attack State")]
         public bool EnableMeleeAttack;
-        public GameObject Hitbox;
-        public GameObject AttackRangeTrigger;
-        public int Damage = 5;
-        public bool OpponentInMeleeAttackRange;
-        public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
-        public float AttackDuration;
-        public float HitboxActivationDelay;
-        public float MinWaitBeforeFreeMove;
-        public float MaxWaitBeforeFreeMove;
+		public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
+		public bool TargetInMeleeRange => TargetInMeleeRangeCheck();
+
+		[SerializeField, ReadOnly] private bool hasEquippedMeleeWeapon;
+		[SerializeField, ReadOnly] private bool targetInMeleeRange;
         [Space(10)]
         #endregion
 
         #region Ranged Attack State
         [Header("Ranged Attack State")]
         public bool EnableRangedAttack;
-        public bool OpponentInRangedAttackRange;
-        public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
-        public float RangedAttackRotSpeed;
-        #endregion
+		public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
+		public bool TargetInShootingRange => TargetInShootingRangeCheck();
 
-        ///<summery>
-        /// move respawn related logic into a higher level object for npc pooling and reusing at a later date
-        ///<summery>
+		[SerializeField, ReadOnly] private bool hasEquippedRangedWeapon;
+		[SerializeField, ReadOnly] private bool targetInShootingRange;
+		#endregion
+
+		///<summery>
+		/// move respawn related logic into a higher level object for npc pooling and reusing at a later date
+		///<summery>
 
 		public static event Action<GameObject> OnDeathComplete;
 		public static event Action<GameObject> OnZombificationComplete;
@@ -112,7 +101,7 @@ namespace Game.MyNPC
         }
 
 		public void InitializeStateMachine(StatsHandler statsHandler, EquipmentHandler equipmentHandler, InventoryHandler inventoryHandler, 
-            NpcPerception npcPerception, NpcDefinition npcDefinition, Teams NPCsTeam)
+            NpcPerception npcPerception, NpcDefinition npcDefinition)
 		{
 			#region Initialize state machine
 			StatsHandler = statsHandler;
@@ -125,27 +114,8 @@ namespace Game.MyNPC
             RotationSpeed = npcDefinition.RotationSpeed;
             PatrolSpeed = npcDefinition.PatrolSpeed;
             ChaseSpeed = npcDefinition.ChaseSpeed;
-			#endregion
-
-			#region Set NPC's Team and Opponent Tags of the NPC
-			tag = NPCsTeam.ToString().Replace("Team", "Team "); // assign Team tag while changing Team(n) to Team (n)
-
-			List<string> NPCsTargetTags = new List<string>();
-
-			foreach (Teams t in Enum.GetValues(typeof(Teams)))
-			{
-				// add all the teams of the Enum "Teams" in the TargetTags list except for its own team
-
-				if (t == NPCsTeam && NPCsTeam != Teams.FreeFighter) // if its not a free fighter then skip its own tag
-					continue;
-
-				string teamName = t.ToString();
-				teamName = teamName.Replace("Team", "Team "); // change Team(n) to Team (n)
-
-				NPCsTargetTags.Add(teamName);
-			}
-
-			TargetTags = NPCsTargetTags;
+            minIdleTime = npcDefinition.MinIdleTime;
+            maxIdleTime = npcDefinition.MaxIdleTime;
 			#endregion
 
 			#region sub to events
@@ -153,7 +123,7 @@ namespace Game.MyNPC
 			#endregion
 
 			#region Transition to Default State
-			SwitchState(new NPCIdleState(this)); //
+			SwitchState(new NPCMoveState(this));
 			#endregion
 
 			#region Enable Movement
@@ -189,6 +159,7 @@ namespace Game.MyNPC
         {
             #region Functions
             UpdateStateName();
+            UpdateStateReadValues();
             RotateTowardsDestination();
             SingleLineUpdates();
             UpdateAnimations();
@@ -200,6 +171,15 @@ namespace Game.MyNPC
             #region Current State Name
             CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
             #endregion
+        }
+
+        private void UpdateStateReadValues()
+        {
+            hasEquippedMeleeWeapon = HasEquippedMeleeWeapon;
+            targetInMeleeRange = TargetInMeleeRange;
+
+            hasEquippedRangedWeapon = HasEquippedRangedWeapon;
+            targetInShootingRange = TargetInShootingRange;
         }
 
         private void RotateTowardsDestination()
@@ -236,6 +216,31 @@ namespace Game.MyNPC
             #endregion
         }
 
+		private bool TargetInMeleeRangeCheck()
+		{
+			if (!NpcPerception.IsTargetDetected) return false;
+
+			Vector3 targetPos = NpcPerception.DetectedTarget.transform.position;
+
+			if (Vector3.Distance(transform.position, targetPos) > 3f)
+				return false;
+			else
+				return true;
+		}
+
+		private bool TargetInShootingRangeCheck()
+        {
+            if (!NpcPerception.IsTargetDetected) return false;
+
+            Vector3 targetPos = NpcPerception.DetectedTarget.transform.position;
+            float weaponRange = EquipmentHandler.rangedWeaponInHands.WeaponDefinition.EffectiveRange;
+
+			if (Vector3.Distance(transform.position, targetPos) > weaponRange) 
+                return false;
+            else
+                return true;
+        }
+
 		public void CompleteZombification()
 		{
             OnZombificationComplete?.Invoke(gameObject);
@@ -248,10 +253,6 @@ namespace Game.MyNPC
 
         public IEnumerator Die()
         {
-            #region Disable Attack
-            OpponentInMeleeAttackRange = false;
-            #endregion
-
             #region Change Tag
             gameObject.tag = "Dead";
             #endregion

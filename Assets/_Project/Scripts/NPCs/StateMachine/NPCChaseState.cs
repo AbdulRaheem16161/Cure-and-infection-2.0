@@ -20,14 +20,14 @@ namespace Game.MyNPC
 
             // ----------- Chase to idle -------------
 
-            if (!stateMachine.NpcPerception.isTargetDetected)
+            if (!stateMachine.NpcPerception.IsTargetDetected)
             {
                 stateMachine.SwitchState(new NPCIdleState(stateMachine));
                 return;
             }
             // ----------- Chase to Melee Attack -------------
 
-            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
+            if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
             {
                 stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
                 return;
@@ -35,7 +35,7 @@ namespace Game.MyNPC
 
             // ----------- Idle to Ranged Attack -------------
 
-            if (stateMachine.OpponentInRangedAttackRange && stateMachine.HasEquippedRangedWeapon && stateMachine.EnableRangedAttack)
+            if (stateMachine.TargetInShootingRange && stateMachine.HasEquippedRangedWeapon && stateMachine.EnableRangedAttack)
             {
                 stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
                 return;

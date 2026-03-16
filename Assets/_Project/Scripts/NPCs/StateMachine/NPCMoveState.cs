@@ -29,7 +29,7 @@ namespace Game.MyNPC
 
 			// ----------- Free Move to Eat Corpse -------------
 
-			if (stateMachine.NpcPerception.isEatableTargetDetected && stateMachine.EnableEatCorpseState)
+			if (stateMachine.NpcPerception.IsEatableTargetDetected && stateMachine.EnableEatCorpseState)
 			{
 				stateMachine.SwitchState(new NPCEatCorpseState(stateMachine));
 				return;
@@ -37,7 +37,7 @@ namespace Game.MyNPC
 
 			// ----------- Free Move to Chase -------------
 
-			if (stateMachine.NpcPerception.isTargetDetected && stateMachine.EnableChase)
+			if (stateMachine.NpcPerception.IsTargetDetected && stateMachine.EnableChase)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;
@@ -45,7 +45,7 @@ namespace Game.MyNPC
 
             // ----------- Free Move to Melee Attack -------------
 
-            if (stateMachine.OpponentInMeleeAttackRange && stateMachine.EnableMeleeAttack)
+            if (stateMachine.TargetInMeleeRange && stateMachine.EnableMeleeAttack)
             {
                 stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
                 return;
@@ -53,7 +53,7 @@ namespace Game.MyNPC
 
             // ----------- Idle to Ranged Attack -------------
 
-            if (stateMachine.OpponentInRangedAttackRange && stateMachine.EnableRangedAttack)
+            if (stateMachine.TargetInShootingRange && stateMachine.EnableRangedAttack)
             {
                 stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
                 return;

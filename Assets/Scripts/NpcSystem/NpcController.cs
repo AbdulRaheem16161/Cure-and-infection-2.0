@@ -38,10 +38,10 @@ public class NpcController : MonoBehaviour
 	public void InitializeNpc(NpcDefinition npcDefinition, Teams team)
 	{
 		NpcDefinition = npcDefinition;
-		StatsHandler.InitializeStats(EquipmentHandler, NpcDefinition);
+		StatsHandler.InitializeStats(team, EquipmentHandler, NpcDefinition);
 		InventoryHandler.InitializeInventoryHandler(EquipmentHandler);
 		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, NpcDefinition);
-		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcPerception, NpcDefinition, team);
+		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcPerception, NpcDefinition);
 		NpcPerception.Initialize(NpcDefinition, StateMachine);
 
 		gameObject.name = NpcDefinition.NpcName;
