@@ -327,13 +327,15 @@ MonoBehaviour:
   ViewAngleMultiplier: 1.5
   ViewDistanceMultiplier: 2
   isInAlertMode: 0
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 256
+  lineOfSightMask:
+    serializedVersion: 2
+    m_Bits: 320
   normalColor: {r: 0, g: 1, b: 0, a: 1}
   detectedColor: {r: 1, g: 0, b: 0, a: 1}
   colorAlpha: 0.25
-  detectTargetCooldown: 0.1
-  detectTargetTimer: 0
-  detectEatableTargetCooldown: 0.5
-  detectEatableTargetTimer: 0
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
   m_ObjectHideFlags: 0

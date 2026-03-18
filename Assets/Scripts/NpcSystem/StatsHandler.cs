@@ -1,10 +1,10 @@
 using UnityEngine;
-using Game.MyNPC;
 using System;
 
 public class StatsHandler : MonoBehaviour, IDamageable
 {
 	public EquipmentHandler EquipmentHandler { get; private set; }
+	private BoxCollider hitCollider;
 	private bool _Initialized = false;
 
 	[Header("Team")]
@@ -25,7 +25,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	[HideInInspector] public bool EnableDeath;
 	[HideInInspector] public bool EnableRespawn;
 	[HideInInspector] public bool EnableZombification;
-	public bool IsDead { get; private set; }
+	public bool IsDead;
 	public bool IsPlayer { get; private set; }
 
 	#region events
@@ -33,9 +33,14 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public event Action OnDeath;
 	#endregion
 
-	#region initialize stats
+	#region awake + Initializing of stats script
 	private void Awake()
 	{
+		hitCollider = GetComponent<BoxCollider>();
+
+		if (hitCollider == null)
+			Debug.LogError("No HitCollider on :" + gameObject + "ignore if testing, or add one");
+
 		if (!_Initialized)
 			InitializeStats(NPCSpawner.Teams.FreeFighter, GetComponent<EquipmentHandler>(), null);
 	}
@@ -70,7 +75,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region event subbing/unsubbing
+	#region event subbing/unsubbing on enable/disable
 	private void OnEnable()
 	{
 		EquipmentHandler.OnItemEquip += OnItemEquipped;
@@ -86,7 +91,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region recieve damage (will need updating to account for body part protection)
+	#region recive damage interface + invoke hit and death events
 	public void RecieveDamage(int damageAmount, GameObject Attacker = null)
 	{
 		OnHit?.Invoke();
@@ -101,7 +106,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region item equip event listeners
+	#region on item equip/unequip events, update protection stats
 	private void OnItemEquipped(EquipmentSlot slot)
 	{
 		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
@@ -136,24 +141,19 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region consumable used event listener
+	#region on use consumable event, update stats
 	private void UseConsumable(EquipmentSlot slot)
 	{
 		if (slot.item.ItemDefinition is ConsumableDefinition consumableDefinition)
 		{
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
-			{
 				Mathf.Clamp(health += consumableDefinition.HealthRestored, 0, 100);
-			}
+
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.water))
-			{
 				Mathf.Clamp(water += consumableDefinition.WaterRestored, 0, 100);
-			}
-			water += consumableDefinition.WaterRestored;
+
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
-			{
 				Mathf.Clamp(food += consumableDefinition.FoodRestored, 0, 100);
-			}
 		}
 	}
 	#endregion

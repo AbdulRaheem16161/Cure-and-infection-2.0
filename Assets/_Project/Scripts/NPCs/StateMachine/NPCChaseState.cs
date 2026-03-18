@@ -44,7 +44,7 @@ namespace Game.MyNPC
 
             if (!stateMachine.StatsHandler.IsDead)
             {
-                stateMachine.CurrentFollowPoint = stateMachine.NpcPerception.DetectedTarget.transform;
+                stateMachine.CurrentFollowPoint = stateMachine.NpcPerception.DetectedTarget.Transform;
                 stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
             }
         }

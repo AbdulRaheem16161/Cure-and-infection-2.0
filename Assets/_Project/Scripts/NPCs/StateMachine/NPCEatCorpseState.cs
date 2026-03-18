@@ -31,11 +31,11 @@ public class NPCEatCorpseState : NPCBaseState
 		if (stateMachine.StatsHandler.IsDead) return;
 
 		// move to position of cropse
-		if (stateMachine.NpcPerception.EatableTarget)
+		if (stateMachine.NpcPerception.IsEatableTargetDetected)
 		{
 			if (!LocationReached)
 			{
-				stateMachine.Agent.SetDestination(stateMachine.NpcPerception.EatableTarget.transform.position);
+				stateMachine.Agent.SetDestination(stateMachine.NpcPerception.EatableTarget.Transform.position);
 				return;
 			}
 			else
@@ -44,7 +44,7 @@ public class NPCEatCorpseState : NPCBaseState
 				eatCorpseTimer -= deltaTime;
 				if (eatCorpseTimer < 0)
 				{
-					stateMachine.NpcPerception.EatableTarget.GetComponent<NPCStateMachine>().CompleteZombification();
+					stateMachine.NpcPerception.EatableTarget.StatsHandler.GetComponent<NPCStateMachine>().CompleteZombification();
 					stateMachine.SwitchState(new NPCIdleState(stateMachine));
 				}
 			}
@@ -57,7 +57,9 @@ public class NPCEatCorpseState : NPCBaseState
 
 	private bool ReachedCorpseLocation()
 	{
-		float distanceToLocation = Vector3.Distance(stateMachine.transform.position, stateMachine.NpcPerception.EatableTarget.transform.position);
+		float distanceToLocation = Vector3.Distance(
+			stateMachine.transform.position, stateMachine.NpcPerception.EatableTarget.Transform.position);
+
 		if (distanceToLocation < 1f)
 			return true;
 		else
