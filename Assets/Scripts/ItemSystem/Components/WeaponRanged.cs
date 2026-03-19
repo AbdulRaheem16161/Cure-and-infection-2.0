@@ -10,7 +10,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	[SerializeField] private WeaponRangedDefinition weaponDefinition;
 	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
 
-	public RangedWeaponView WeaponView { get; private set; }
+	public RangedWeaponView WeaponView;
 
 	public bool IsReloading { get; private set; }
 	public bool MagazineFull => currentMagazineAmmo == WeaponDefinition.MagazineSize;
@@ -33,7 +33,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		weaponDefinition = definition;
 
 		//weapon-specific setup here
-		WeaponView = GetComponentInChildren<RangedWeaponView>();
+		WeaponView = modelReference.GetComponent<RangedWeaponView>();
 		FireRateCooldown = 60 / WeaponDefinition.FireRateRPM;
 	}
 

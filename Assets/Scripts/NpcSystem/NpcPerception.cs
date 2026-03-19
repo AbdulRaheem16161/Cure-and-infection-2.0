@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using Game.Core;
 using Game.MyNPC;
+using System;
 using System.Collections;
 using System.Net;
 using UnityEditor;
@@ -50,13 +51,13 @@ public class NpcPerception : MonoBehaviour
 	[Header("Runtime Values")]
 	private readonly Collider[] ColliderHits = new Collider[100];
 	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
-	public bool IsTargetDetected { get; private set; }
-	public TargetData DetectedTarget { get; private set; }
+	public bool IsTargetDetected;
+	public TargetData DetectedTarget;
 
-	public TargetData LastKilledTarget { get; private set; }
+	public TargetData LastKilledTarget;
 
-	public bool IsEatableTargetDetected { get; private set; }
-	public TargetData EatableTarget { get; private set; }
+	public bool IsEatableTargetDetected;
+	public TargetData EatableTarget;
 	#endregion
 
 	#region search types
@@ -135,12 +136,17 @@ public class NpcPerception : MonoBehaviour
 			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, DetectedTarget.Collider)) return;
 
 			InvestigateLastSeenEnemyPosition(DetectedTarget.Transform.position);
-			IsTargetDetected = false;
+			IsTargetDetected = true;
 			DetectedTarget = null;
 		}
 		else
 		{
 			DetectedTarget = SearchForClosestTarget(SearchType.alive);
+
+			if (DetectedTarget != null && DetectedTarget.StatsHandler != null)
+				IsTargetDetected = true;
+			else
+				IsTargetDetected = false;
 		}
 	}
 	private void SearchForEatableTarget()
@@ -352,11 +358,12 @@ public class NpcPerception : MonoBehaviour
 }
 #endif
 
+[Serializable]
 public class TargetData
 {
-	public StatsHandler StatsHandler { get; private set; }
-	public Collider Collider { get; private set; }
-	public Transform Transform { get; private set; }
+	public StatsHandler StatsHandler;
+	public Collider Collider;
+	public Transform Transform;
 
 	public TargetData(StatsHandler statsHandler, Collider collider, Transform transform)
 	{

@@ -1,4 +1,5 @@
 using System;
+using Temp;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponMelee", menuName = "ScriptableObjects/Item/WeaponMelee")]
@@ -40,11 +41,16 @@ public class WeaponMeleeDefinition : ItemDefinition
 
 	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.EquipMeleeWeapon(slot);
+		WeaponMelee weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponMelee;
+
+		weaponInstance.transform.SetParent(handler.equippedWeaponsParent.transform);
+		weaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		weaponInstance.gameObject.SetActive(true);
 	}
 
 	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.UnEquipMeleeWeapon(slot);
+		WeaponMelee weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponMelee;
+		weaponInstance.gameObject.SetActive(false);
 	}
 }

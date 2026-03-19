@@ -1,4 +1,5 @@
 using System;
+using temp;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponRanged", menuName = "ScriptableObjects/Item/WeaponRanged")]
@@ -110,11 +111,17 @@ public class WeaponRangedDefinition : ItemDefinition
 
 	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.EquipRangedWeapon(slot);
+		WeaponRanged weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponRanged;
+
+		weaponInstance.transform.SetParent(handler.equippedWeaponsParent.transform);
+		weaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		weaponInstance.gameObject.SetActive(true);
 	}
 
+	//(TODO prob need to give player ammo back in magazine when unequipping)
 	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.UnEquipRangedWeapon(slot);
+		WeaponRanged weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponRanged;
+		weaponInstance.gameObject.SetActive(false);
 	}
 }

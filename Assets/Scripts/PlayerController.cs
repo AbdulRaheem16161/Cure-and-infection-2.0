@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerHotkeyPressOne()
 	{
-		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedRangedWeapons[EquipmentHandler.EquipmentType.weaponOne])
+		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedItems[EquipmentHandler.EquipmentType.weaponOne])
 			EquipmentHandler.HolsterWeapon();
 		else
 			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponOne);
@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerHotkeyPressTwo()
 	{
-		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedRangedWeapons[EquipmentHandler.EquipmentType.weaponTwo])
+		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedItems[EquipmentHandler.EquipmentType.weaponTwo])
 			EquipmentHandler.HolsterWeapon();
 		else
 			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponTwo);

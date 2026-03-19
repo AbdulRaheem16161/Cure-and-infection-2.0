@@ -29,11 +29,22 @@ public class ArmourDefinition : ItemDefinition
 
 	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.EquipArmour(slot);
+		Armour armourInstance = handler.GetOrCreateItemInstance(slot) as Armour;
+
+		if (armourInstance.ArmourDefinition.ArmourSlot ==ArmourSlotType.helmet)
+			armourInstance.transform.SetParent(handler.equippedHelmetParent.transform);
+		else if (armourInstance.ArmourDefinition.ArmourSlot == ArmourSlotType.chest)
+			armourInstance.transform.SetParent(handler.equippedChestpieceParent.transform);
+		else if (armourInstance.ArmourDefinition.ArmourSlot == ArmourSlotType.backpack)
+			armourInstance.transform.SetParent(handler.equippedBackpackParent.transform);
+
+		armourInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		armourInstance.gameObject.SetActive(true);
 	}
 
 	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
 	{
-		handler.UnEquipArmour(slot);
+		Armour armourInstance = handler.GetOrCreateItemInstance(slot) as Armour	;
+		armourInstance.gameObject.SetActive(false);
 	}
 }

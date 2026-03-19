@@ -1,18 +1,26 @@
+using System;
 using UnityEngine;
 
-public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
+public abstract class Item<T> : Item where T : ItemDefinition
 {
-	protected T itemDefinition;
+	public T TypedDefinition { get; private set; }
+	public override ItemDefinition ItemDefinition => TypedDefinition;
 
 	public int CurrentItemStack{ get; private set; }
 
 	[HideInInspector] protected GameObject modelReference;
 
+	public static event Action<Item> OnCleanUpItem;
+
 	#region initialize item
+	public override void InitializeItem(ItemDefinition definition, int itemStack)
+	{
+		InitializeItem(definition as T, itemStack);
+	}
 	public virtual void InitializeItem(T definition, int itemStack)
 	{
-		itemDefinition = definition;
-		gameObject.name = itemDefinition.ItemName;
+		TypedDefinition = definition;
+		gameObject.name = TypedDefinition.ItemName;
 		CurrentItemStack = itemStack;
 
 		UpdateItemModel(definition);
@@ -41,9 +49,22 @@ public abstract class Item<T> : MonoBehaviour where T : ItemDefinition
 	#region item pickup (TODO: destroy world object being picked up, decide how its called eg: interact or trigger collider etc...)
 	public virtual void PickUp(InventoryHandler inventory)
 	{
-		InventoryItem newItem = new(itemDefinition, CurrentItemStack);
+		InventoryItem newItem = new(TypedDefinition, CurrentItemStack);
 		inventory.AddNewItem(newItem);
-		Destroy(gameObject);
+		CleanUpItem();
 	}
 	#endregion
+
+	#region item cleanup
+	public void CleanUpItem()
+	{
+		OnCleanUpItem?.Invoke(this);
+	}
+	#endregion
+}
+
+public abstract class Item : MonoBehaviour
+{
+	public abstract ItemDefinition ItemDefinition { get; }
+	public abstract void InitializeItem(ItemDefinition definition, int itemStack);
 }

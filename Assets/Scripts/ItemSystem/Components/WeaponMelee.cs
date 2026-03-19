@@ -22,7 +22,7 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		base.InitializeItem(definition, itemStack);
 		weaponDefinition = definition;
 
-		WeaponView = GetComponentInChildren<MeleeWeaponView>();
+		WeaponView = modelReference.GetComponent<MeleeWeaponView>();
 		WeaponView.DisableHitCollider();
 
 		CurrentlySwinging = false;
