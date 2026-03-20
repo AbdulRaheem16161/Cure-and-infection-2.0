@@ -91,15 +91,9 @@ public class InventoryHandlerEditor : Editor
 				}
 
 				if (inventory.itemToSpawnCount > inventory.itemToSpawn.StackLimit)
-				{
-					Debug.LogWarning($"{inventory.itemToSpawnCount} is higher then stack limit of {inventory.itemToSpawn.StackLimit}, setting to max");
 					inventory.itemToSpawnCount = inventory.itemToSpawn.StackLimit;
-				}
-				if (inventory.itemToSpawnCount < 1)
-				{
-					Debug.LogWarning($"{inventory.itemToSpawnCount} is smaller then minimum limit of 1, setting to 1");
+				else if (inventory.itemToSpawnCount <= 0)
 					inventory.itemToSpawnCount = 1;
-				}
 
 				inventory.ItemContainer.AddNewItem(
 					TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));

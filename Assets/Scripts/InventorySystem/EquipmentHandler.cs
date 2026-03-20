@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
+using static ArmourDefinition;
 using static EquipmentHandler;
 using static ItemDefinition;
+using static UnityEditor.Progress;
 
 public class EquipmentHandler : MonoBehaviour
 {
@@ -299,19 +301,55 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		Debug.Log($"equipped {item.ItemDefinition.ItemName} to {slot.equipmentType} slot");
 		slot.item = new InventoryItem(item.ItemDefinition, item.CurrentStack);
-		item.ItemDefinition.OnEquip(this, slot);
+
+		if (item.ItemDefinition is not ConsumableDefinition) //doesnt need world item
+		{
+			Item spawnedItem = GetOrCreateItemInstance(slot);
+			spawnedItem.EquipItem(GetParentForSlot(spawnedItem));
+		}
 		OnItemEquip?.Invoke(slot);
 	}
 	private void HandleItemUnequipping(EquipmentSlot slot)
 	{
 		Debug.Log($"unequipped {slot.item.ItemDefinition.ItemName} from {slot.equipmentType} slot");
-		slot.item.ItemDefinition.OnUnequip(this, slot);
+
+		if (slot.item.ItemDefinition is not ConsumableDefinition) //has no world item
+		{
+			Item spawnedItem = GetOrCreateItemInstance(slot);
+			spawnedItem.UnEquipItem();
+		}
+
 		OnItemUnEquip?.Invoke(slot);
 		slot.item = null;
 	}
+	private Transform GetParentForSlot(Item item)
+	{
+		if (item is WeaponRanged || item is WeaponMelee)
+			return equippedWeaponsParent.transform;
+
+		else if (item is Armour armour)
+		{
+			return armour.ArmourDefinition.ArmourSlot switch
+			{
+				ArmourSlotType.helmet => equippedHelmetParent.transform,
+				ArmourSlotType.chest => equippedChestpieceParent.transform,
+				ArmourSlotType.backpack => equippedBackpackParent.transform,
+				_ => transform
+			};
+		}
+
+		else if (item is Consumable)
+			return null;
+
+		else
+		{
+			Debug.LogError("no equip slot found, returning Transfrom of EquipmentHandler");
+			return transform;
+		}
+	}
 	#endregion
 
-	#region instantiate world objects or get them (weapons/armours)
+	#region get equipped item instance
 	public Item GetOrCreateItemInstance(EquipmentSlot slot)
 	{
 		if (!equippedItems.TryGetValue(slot.equipmentType, out var itemInstance) || itemInstance == null)
@@ -332,16 +370,12 @@ public class EquipmentHandler : MonoBehaviour
 		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
 
-		if (!equippedItem.ItemDefinition.CanEquipTo(equipmentType))
+		//TODO: could add checks like if full health dont consume etc...
+		if (equippedItem.ItemDefinition is not ConsumableDefinition)
 		{
-			Debug.LogError($"{equipmentType} cannot use this item.");
+			Debug.LogError($"{equipmentType} cannot consume this item.");
 			return;
 		}
-
-		//TODO: could add checks like if full health dont consume etc...
-		bool shouldConsume = equippedItem.ItemDefinition.OnUsed(this, slot);
-		if (!shouldConsume)
-			return;
 
 		equippedItem.RemoveItemStack(1);
 		OnConsumableUsed?.Invoke(slot);
@@ -359,14 +393,14 @@ public class EquipmentHandler : MonoBehaviour
 		{
 			HasRangedWeaponInHands = false;
 			weaponObject = rangedWeaponInHands.gameObject;
-			rangedWeaponInHands.UnEquipWeapon();
+			rangedWeaponInHands.HolsterItem();
 			rangedWeaponInHands = null;
 		}
 		if (meleeWeaponInHands)
 		{
 			HasMeleeWeaponInHands = false;
 			weaponObject = meleeWeaponInHands.gameObject;
-			meleeWeaponInHands.UnEquipWeapon();
+			meleeWeaponInHands.HolsterItem();
 			meleeWeaponInHands = null;
 		}
 
@@ -386,7 +420,7 @@ public class EquipmentHandler : MonoBehaviour
 			if (equippedItems.TryGetValue(equipmentType, out var weapon))
 			{
 				rangedWeaponInHands = weapon as WeaponRanged;
-				rangedWeaponInHands.EquipWeapon();
+				rangedWeaponInHands.UnHolsterItem();
 				HasRangedWeaponInHands = true;
 				weaponObject = rangedWeaponInHands.gameObject;
 			}
@@ -398,7 +432,7 @@ public class EquipmentHandler : MonoBehaviour
 			if (equippedItems.TryGetValue(equipmentType, out var weapon))
 			{
 				meleeWeaponInHands = weapon as WeaponMelee;
-				meleeWeaponInHands.EquipWeapon();
+				meleeWeaponInHands.UnHolsterItem();
 				HasMeleeWeaponInHands = true;
 				weaponObject = meleeWeaponInHands.gameObject;
 			}

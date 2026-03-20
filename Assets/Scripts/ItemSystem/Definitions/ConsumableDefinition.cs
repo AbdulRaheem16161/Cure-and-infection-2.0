@@ -26,9 +26,4 @@ public class ConsumableDefinition : ItemDefinition
 	public int FoodRestored => foodRestored;
 	public int WaterRestored => waterRestored;
 	#endregion
-
-	public override bool OnUsed(EquipmentHandler handler, EquipmentSlot slot)
-	{
-		return true;
-	}
 }

@@ -36,16 +36,6 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		HandleSwingTimer();
 	}
 
-	public void EquipWeapon()
-	{
-		//hold in hands
-	}
-
-	public void UnEquipWeapon()
-	{
-		//holster
-	}
-
 	public void LightAttack()
 	{
 		if (!CanSwing) return;

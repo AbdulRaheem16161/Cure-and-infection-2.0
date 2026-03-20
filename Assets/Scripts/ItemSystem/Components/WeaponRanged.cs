@@ -18,6 +18,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public int currentMagazineAmmo; //track mag ammo count at runtime
 
 	public bool CanShoot => fireRateCooldownTimer <= 0;
+
 	public float FireRateCooldown;
 	public float fireRateCooldownTimer;
 
@@ -40,17 +41,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	private void Update()
 	{
 		HandleFireRate();
-	}
-
-	public void EquipWeapon()
-	{
-		//hold in hands
-		currentMagazineAmmo = WeaponDefinition.MagazineSize;
-	}
-
-	public void UnEquipWeapon()
-	{
-		//holster
 	}
 
 	public void AimDownSight()

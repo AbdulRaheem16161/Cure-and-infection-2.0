@@ -13,6 +13,13 @@ public class ItemSpawner : MonoBehaviour
 	public GameObject armourPrefab;
 	public GameObject consumablePrefab;
 
+	//Debug editor controls
+	[HideInInspector] public ItemDefinition itemToSpawn;
+	[HideInInspector] public int itemCountToSpawn;
+	[HideInInspector] public Vector3 locationToSpawnItem;
+
+	[HideInInspector] public Item worldItemToCleanUp;
+
 	private void Awake()
 	{
 		if (Instance == null)

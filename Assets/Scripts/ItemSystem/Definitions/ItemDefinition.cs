@@ -60,11 +60,4 @@ public class ItemDefinition : ScriptableObject
 	{
 		return (allowedEquipmentSlots & slot) != 0;
 	}
-
-	public virtual void OnEquip(EquipmentHandler handler, EquipmentSlot slot) { }
-	public virtual void OnUnequip(EquipmentHandler handler, EquipmentSlot slot) { }
-	public virtual bool OnUsed(EquipmentHandler handler, EquipmentSlot slot)
-	{
-		return false; // return true if item was consumed
-	}
 }

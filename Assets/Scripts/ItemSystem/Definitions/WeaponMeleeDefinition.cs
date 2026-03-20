@@ -38,19 +38,4 @@ public class WeaponMeleeDefinition : ItemDefinition
 	public float HeavySwingSpeed => heavySwingSpeed;
 	public float HeavySwingCooldown => heavySwingCooldown;
 	#endregion
-
-	public override void OnEquip(EquipmentHandler handler, EquipmentSlot slot)
-	{
-		WeaponMelee weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponMelee;
-
-		weaponInstance.transform.SetParent(handler.equippedWeaponsParent.transform);
-		weaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-		weaponInstance.gameObject.SetActive(true);
-	}
-
-	public override void OnUnequip(EquipmentHandler handler, EquipmentSlot slot)
-	{
-		WeaponMelee weaponInstance = handler.GetOrCreateItemInstance(slot) as WeaponMelee;
-		weaponInstance.gameObject.SetActive(false);
-	}
 }
