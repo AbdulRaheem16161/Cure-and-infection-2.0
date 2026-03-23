@@ -1,7 +1,5 @@
 using System;
-using temp;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 [CreateAssetMenu(fileName = "WeaponRanged", menuName = "ScriptableObjects/Item/WeaponRanged")]
 public class WeaponRangedDefinition : ItemDefinition

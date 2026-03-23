@@ -1,5 +1,3 @@
-using System;
-using Temp;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponMelee", menuName = "ScriptableObjects/Item/WeaponMelee")]

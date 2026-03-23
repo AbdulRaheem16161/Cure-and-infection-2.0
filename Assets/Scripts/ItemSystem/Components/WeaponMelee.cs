@@ -1,6 +1,3 @@
-using Game.Core;
-using Game.MyNPC;
-using Game.MyPlayer;
 using UnityEngine;
 
 public class WeaponMelee : Item<WeaponMeleeDefinition>

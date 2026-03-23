@@ -1,8 +1,4 @@
-using Game.Core;
-using Game.MyNPC;
-using Game.MyPlayer;
 using System.Collections;
-using temp;
 using UnityEngine;
 
 public class WeaponRanged : Item<WeaponRangedDefinition>
