@@ -30,13 +30,14 @@ public class EquipmentHandler : MonoBehaviour
 
 	#region equipped world items
 	[Header("Equipped World Items")]
-	[Header("Items Not In Hands")]
+	public Dictionary<EquipmentType, Item> equippedItems = new();
 	public GameObject equippedHelmetParent;
 	public GameObject equippedChestpieceParent;
 	public GameObject equippedBackpackParent;
 	public GameObject equippedWeaponsParent;
+
+	[Header("Item Equipped In Hands")]
 	public GameObject ItemsInHandsParent;
-	public Dictionary<EquipmentType, Item> equippedItems = new();
 	#endregion
 
 	#region item in hands
@@ -60,7 +61,8 @@ public class EquipmentHandler : MonoBehaviour
 	[HideInInspector] public EquipmentType slotToEquipItemTo;
 	[HideInInspector] public EquipmentType equipmentSlotToUnequip;
 	[HideInInspector] public EquipmentType consumableSlotToUse;
-	[HideInInspector] public int equipItemFromSlot;
+	[HideInInspector] public int equipItemFromInventorySlot;
+	[HideInInspector] public EquipmentType unHolsterItem;
 	#endregion
 
 	#region events
@@ -329,7 +331,7 @@ public class EquipmentHandler : MonoBehaviour
 
 		else if (item is Armour armour)
 		{
-			return armour.ArmourDefinition.ArmourSlot switch
+			return armour.TypedDefinition.ArmourSlot switch
 			{
 				ArmourSlotType.helmet => equippedHelmetParent.transform,
 				ArmourSlotType.chest => equippedChestpieceParent.transform,
@@ -357,8 +359,6 @@ public class EquipmentHandler : MonoBehaviour
 			itemInstance = ItemSpawner.GetItem(slot.item.ItemDefinition, slot.item.CurrentStack, null, Vector3.zero, Quaternion.identity);
 			equippedItems[slot.equipmentType] = itemInstance;
 		}
-		else
-			itemInstance.InitializeItem(slot.item.ItemDefinition, slot.item.CurrentStack);
 
 		return itemInstance;
 	}

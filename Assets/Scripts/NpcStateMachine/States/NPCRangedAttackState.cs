@@ -96,15 +96,15 @@ namespace Game.MyNPC
 		///<summery>
 		private void BurstFireBehaviour()
         {
-			if (EquippedWeapon.WeaponDefinition.FireMode != WeaponRangedDefinition.FireModeType.fullAuto)
+			if (EquippedWeapon.TypedDefinition.FireMode != WeaponRangedDefinition.FireModeType.fullAuto)
 				randomShotDelay = GetRandomShotDelay();
 
 			if (shotsToBurstFireCount <= 0)
 			{
-				if (EquippedWeapon.WeaponDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
+				if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
 					randomShotDelay = GetRandomShotDelay(); //gets skipped above, set full auto here
 
-				if (EquippedWeapon.WeaponDefinition.Weapon != WeaponRangedDefinition.WeaponType.boltActionRifle)
+				if (EquippedWeapon.TypedDefinition.Weapon != WeaponRangedDefinition.WeaponType.boltActionRifle)
 					randomShotDelay *= 3;
 
 				shotsToBurstFireCount = GetBurstFireCount();
@@ -115,7 +115,7 @@ namespace Game.MyNPC
 			float minFireDelay = 0;
 			float maxFireDelay = 0;
 
-			switch (EquippedWeapon.WeaponDefinition.Weapon)
+			switch (EquippedWeapon.TypedDefinition.Weapon)
 			{
 				case WeaponRangedDefinition.WeaponType.handgun:
 				minFireDelay = 0.25f;
@@ -150,7 +150,7 @@ namespace Game.MyNPC
 			int minShots = 0;
 			int maxShots = 0;
 
-			switch (EquippedWeapon.WeaponDefinition.Weapon)
+			switch (EquippedWeapon.TypedDefinition.Weapon)
 			{
 				case WeaponRangedDefinition.WeaponType.handgun:
 				minShots = 2;
@@ -179,7 +179,7 @@ namespace Game.MyNPC
 			}
 
 			//bigger bursts for full auto guns
-			if (EquippedWeapon.WeaponDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
+			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
 			{
 				minShots *= 2;
 				maxShots *= 2;

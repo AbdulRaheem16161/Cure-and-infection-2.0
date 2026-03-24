@@ -7,6 +7,7 @@ public class EquipmentHandlerEditor : Editor
 	private bool showDebugControls;
 	private bool showItemEquippingControls;
 	private bool showItemUnequippingControls;
+	private bool showItemHolsteringControls;
 	private bool showUseConsumableControls;
 
 	public override void OnInspectorGUI()
@@ -62,8 +63,9 @@ public class EquipmentHandlerEditor : Editor
 
 			#region equip item from inventory
 			GUILayout.Label("Equipping Item From Inventory", EditorStyles.boldLabel);
-			equipment.equipItemFromSlot = EditorGUILayout.IntField("Equip Item From Slot", equipment.equipItemFromSlot);
-			equipment.slotToEquipItemTo = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
+			equipment.equipItemFromInventorySlot = EditorGUILayout.IntField("Equip Item From Inventory Slot", equipment.equipItemFromInventorySlot);
+			equipment.slotToEquipItemTo = 
+				(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
 
 			if (GUILayout.Button("Equip Item From Inventory"))
 			{
@@ -75,7 +77,7 @@ public class EquipmentHandlerEditor : Editor
 					return;
 				}
 
-				equipment.EquipItemFromInventory(equipment.equipItemFromSlot, equipment.slotToEquipItemTo);
+				equipment.EquipItemFromInventory(equipment.equipItemFromInventorySlot, equipment.slotToEquipItemTo);
 			}
 			#endregion
 		}
@@ -102,6 +104,31 @@ public class EquipmentHandlerEditor : Editor
 				if (!ApplicationPlaying()) return;
 
 				equipment.UnequipItem(equipment.equipmentSlotToUnequip, false);
+			}
+			#endregion
+		}
+
+		GUILayout.Space(10);
+
+		showItemHolsteringControls = EditorGUILayout.Toggle("Show Item Unequipping Controls", showItemHolsteringControls);
+
+		if (showItemHolsteringControls)
+		{
+			#region item holstering/unholstering buttons
+			GUILayout.Label("Holster/Unholster Equipped Items", EditorStyles.boldLabel);
+			equipment.unHolsterItem = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Unholster Item", equipment.unHolsterItem);
+
+			if (GUILayout.Button("Un Holster Weapon"))
+			{
+				if (!ApplicationPlaying()) return;
+
+				equipment.UnholsterWeapon(equipment.unHolsterItem);
+			}
+			if (GUILayout.Button("Holster Weapon"))
+			{
+				if (!ApplicationPlaying()) return;
+
+				equipment.HolsterWeapon();
 			}
 			#endregion
 		}

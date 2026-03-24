@@ -3,13 +3,10 @@ using UnityEngine;
 
 public class WeaponRanged : Item<WeaponRangedDefinition>
 {
-	[SerializeField] private WeaponRangedDefinition weaponDefinition;
-	public WeaponRangedDefinition WeaponDefinition => weaponDefinition;
-
 	public RangedWeaponView WeaponView;
 
 	public bool IsReloading { get; private set; }
-	public bool MagazineFull => currentMagazineAmmo == WeaponDefinition.MagazineSize;
+	public bool MagazineFull => currentMagazineAmmo == TypedDefinition.MagazineSize;
 	public bool MagazineEmpty => currentMagazineAmmo <= 0;
 	public int currentMagazineAmmo; //track mag ammo count at runtime
 
@@ -24,14 +21,19 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
 
-	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
+	public override void InitializeItem(WeaponRangedDefinition definition, GameObject itemModel, int itemStack)
 	{
-		base.InitializeItem(definition, itemStack);
-		weaponDefinition = definition;
+		base.InitializeItem(definition, itemModel, itemStack);
 
 		//weapon-specific setup here
-		WeaponView = modelReference.GetComponent<RangedWeaponView>();
-		FireRateCooldown = 60 / WeaponDefinition.FireRateRPM;
+		WeaponView = ModelReference.GetComponent<RangedWeaponView>();
+
+		if (ModelReference == null)
+			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (temporary) model with {nameof(RangedWeaponView)}");
+		else if (WeaponView == null)
+			Debug.LogError($"{TypedDefinition.ItemName} missing component {nameof(RangedWeaponView)} in its ModelReference.\n");
+
+		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
 	}
 
 	private void Update()
@@ -61,11 +63,11 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 			LastHitPoint = hit.point;
 
 			if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
-				damageable.RecieveDamage(weaponDefinition.Damage);
+				damageable.RecieveDamage(TypedDefinition.Damage);
 		}
 		else
 		{
-			LastHitPoint = origin + direction * weaponDefinition.EffectiveRange;
+			LastHitPoint = origin + direction * TypedDefinition.EffectiveRange;
 		}
 
 		SpawnVisualBullet(LastHitPoint);
@@ -99,7 +101,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		if (MagazineFull) return;
 		if (IsReloading) return;
 
-		if (!hasUnlimitedAmmo && !ammoGiver.AmmoAvailable(weaponDefinition.AmmoType)) return; //no ammo in inventory
+		if (!hasUnlimitedAmmo && !ammoGiver.AmmoAvailable(TypedDefinition.AmmoType)) return; //no ammo in inventory
 
 		StartCoroutine(ReloadAmmo(ammoGiver, hasUnlimitedAmmo));
 	}
@@ -108,12 +110,12 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	{
 		#region ReloadAmmo
 		IsReloading = true;
-		yield return new WaitForSeconds(WeaponDefinition.ReloadTime);
+		yield return new WaitForSeconds(TypedDefinition.ReloadTime);
 
 		if (hasUnlimitedAmmo)
-			currentMagazineAmmo = ammoGiver.GetAmmo(WeaponDefinition.AmmoType, weaponDefinition.MagazineSize);
+			currentMagazineAmmo = ammoGiver.GetAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize);
 		else
-			currentMagazineAmmo = ammoGiver.TakeAmmo(WeaponDefinition.AmmoType, weaponDefinition.MagazineSize);
+			currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize);
 
 		IsReloading = false;
 		#endregion
@@ -137,9 +139,9 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		#region SphereCast
 		RaycastHit[] hits = Physics.SphereCastAll(
 			origin,
-			weaponDefinition.BeamRadius,
+			TypedDefinition.BeamRadius,
 			direction,
-			WeaponDefinition.EffectiveRange
+			TypedDefinition.EffectiveRange
 		);
 
 		float closestDistance = float.MaxValue;
@@ -177,7 +179,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 
 		#region SpawnVisualBullet
 
-		GameObject bullet = Instantiate(WeaponDefinition.BulletPrefab, 
+		GameObject bullet = Instantiate(TypedDefinition.BulletPrefab, 
 			WeaponView.MuzzlePoint.position, Quaternion.LookRotation(hitPoint - WeaponView.MuzzlePoint.position));
 
 		StartCoroutine(MoveBullet(bullet, hitPoint));
@@ -196,7 +198,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 
 		Vector3 startPos = bullet.transform.position;
 		float distance = Vector3.Distance(startPos, hitPoint);
-		float travelTime = distance / WeaponDefinition.BulletVisualSpeed;
+		float travelTime = distance / TypedDefinition.BulletVisualSpeed;
 
 		float t = 0f;
 

@@ -2,14 +2,9 @@ using UnityEngine;
 
 public class Armour : Item<ArmourDefinition>
 {
-	[SerializeField] private ArmourDefinition armourDefinition;
-
-	public ArmourDefinition ArmourDefinition => armourDefinition;
-
-	public override void InitializeItem(ArmourDefinition definition, int itemStack)
+	public override void InitializeItem(ArmourDefinition definition, GameObject itemModel, int itemStack)
 	{
-		base.InitializeItem(definition, itemStack);
-		armourDefinition = definition;
+		base.InitializeItem(definition, itemModel, itemStack);
 
 		// armour-specific setup here
 	}

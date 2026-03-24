@@ -233,7 +233,7 @@ namespace Game.MyNPC
             if (!NpcPerception.IsTargetDetected) return false;
 
             Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
-            float weaponRange = EquipmentHandler.rangedWeaponInHands.WeaponDefinition.EffectiveRange;
+            float weaponRange = EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange;
 
 			if (Vector3.Distance(transform.position, targetPos) > weaponRange) 
                 return false;

@@ -2,14 +2,9 @@ using UnityEngine;
 
 public class Consumable : Item<ConsumableDefinition>
 {
-	[SerializeField] private ConsumableDefinition consumableDefinition;
-
-	public ConsumableDefinition ConsumableDefinition => consumableDefinition;
-
-	public override void InitializeItem(ConsumableDefinition definition, int itemStack)
+	public override void InitializeItem(ConsumableDefinition definition, GameObject itemModel, int itemStack)
 	{
-		base.InitializeItem(definition, itemStack);
-		consumableDefinition = definition;
+		base.InitializeItem(definition, itemModel, itemStack);
 
 		//consumable-specific setup here
 	}

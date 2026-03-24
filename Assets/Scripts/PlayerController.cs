@@ -38,13 +38,13 @@ public class PlayerController : MonoBehaviour
 		if (item is WeaponRanged ranged)
 		{
 			if (inputKey == 0) // 0 = input key f for example
-				EquipmentHandler.EquipItem(ranged.WeaponDefinition, 1, EquipmentHandler.EquipmentType.weaponOne); //equip directly
+				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponOne); //equip directly
 			else if (inputKey == 1) // 1 = input key e for example
-				EquipmentHandler.EquipItem(ranged.WeaponDefinition, 1, EquipmentHandler.EquipmentType.weaponTwo); //equip directly
+				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponTwo); //equip directly
 		}
 		else if (item is WeaponMelee melee)
 		{
-			EquipmentHandler.EquipItem(melee.WeaponDefinition, 1, EquipmentHandler.EquipmentType.weaponMelee); //equip directly
+			EquipmentHandler.EquipItem(melee.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponMelee); //equip directly
 		}
 		else
 			item.PickUp(InventoryHandler);

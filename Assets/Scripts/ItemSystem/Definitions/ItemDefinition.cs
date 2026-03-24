@@ -36,7 +36,7 @@ public class ItemDefinition : ScriptableObject
 	//add fields for ui icons, 3d prefab models etc, sfx/vfx etc...
 	#region common item model, vfx, sfx
 	[Header("Item Model and Ui")]
-	[SerializeField] private GameObject itemPrefab;
+	[SerializeField] private GameObject modelPrefab;
 	[SerializeField] private Sprite itemUiIcon;
 	#endregion
 
@@ -52,7 +52,7 @@ public class ItemDefinition : ScriptableObject
 	public int StackLimit => stackLimit;
 	public float ItemWeight => itemWeight;
 
-	public GameObject ItemPrefab => itemPrefab;
+	public GameObject ModelPrefab => modelPrefab;
 	public Sprite ItemUiIcon => itemUiIcon;
 	#endregion
 

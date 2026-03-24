@@ -2,10 +2,6 @@ using UnityEngine;
 
 public class WeaponMelee : Item<WeaponMeleeDefinition>
 {
-	[SerializeField] private WeaponMeleeDefinition weaponDefinition;
-
-	public WeaponMeleeDefinition WeaponDefinition => weaponDefinition;
-
 	public MeleeWeaponView WeaponView { get; private set; }
 
 	private bool CanSwing => swingCooldownTimer <= 0;
@@ -14,12 +10,17 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	public float swingTimer;
 	public float swingCooldownTimer;
 
-	public override void InitializeItem(WeaponMeleeDefinition definition, int itemStack)
+	public override void InitializeItem(WeaponMeleeDefinition definition, GameObject itemModel, int itemStack)
 	{
-		base.InitializeItem(definition, itemStack);
-		weaponDefinition = definition;
+		base.InitializeItem(definition, itemModel, itemStack);
 
-		WeaponView = modelReference.GetComponent<MeleeWeaponView>();
+		WeaponView = ModelReference.GetComponent<MeleeWeaponView>();
+
+		if (ModelReference == null)
+			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (temporary) model with {nameof(MeleeWeaponView)}");
+		else if (WeaponView == null)
+			Debug.LogError($"{TypedDefinition.ItemName} missing component {nameof(MeleeWeaponView)} in its ModelReference.\n");
+
 		WeaponView.DisableHitCollider();
 
 		CurrentlySwinging = false;
@@ -41,8 +42,8 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		CurrentlySwinging = true;
 		WeaponView.EnableHitCollider(this);
 
-		swingTimer = WeaponDefinition.LightSwingSpeed;
-		swingCooldownTimer = swingTimer + WeaponDefinition.LightSwingCooldown;
+		swingTimer = TypedDefinition.LightSwingSpeed;
+		swingCooldownTimer = swingTimer + TypedDefinition.LightSwingCooldown;
 
 		///<summery>
 		/// swing weapon, if something gets hit damage it and disable hit collider
@@ -57,15 +58,15 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		CurrentlySwinging = true;
 		WeaponView.EnableHitCollider(this);
 
-		swingTimer = WeaponDefinition.HeavySwingSpeed;
-		swingCooldownTimer = swingTimer + WeaponDefinition.HeavySwingCooldown;
+		swingTimer = TypedDefinition.HeavySwingSpeed;
+		swingCooldownTimer = swingTimer + TypedDefinition.HeavySwingCooldown;
 	}
 
 	public void OnColliderHit(Collider other)
 	{
 		if (other.TryGetComponent(out IDamageable damageable))
 		{
-			damageable.RecieveDamage(WeaponDefinition.Damage);
+			damageable.RecieveDamage(TypedDefinition.Damage);
 			WeaponView.DisableHitCollider(); //disable hitting once something to hit is found
 		}
 	}

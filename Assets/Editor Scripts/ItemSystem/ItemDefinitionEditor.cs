@@ -22,7 +22,7 @@ public class ItemDefinitionEditor : Editor
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("stackLimit"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("itemWeight"));
 
-		EditorGUILayout.PropertyField(serializedObject.FindProperty("itemPrefab"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("modelPrefab"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("itemUiIcon"));
 
 		serializedObject.ApplyModifiedProperties();
