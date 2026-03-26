@@ -12,6 +12,8 @@ namespace Game.MyNPC
 
         public override void Enter()
         {
+            Debug.LogError("enter idle state");
+
             #region Enter Animation
             // Pick a random wait time between 2 and 5 seconds (customize these)
             WaitBeforeFreeMove = Random.Range(stateMachine.minIdleTime, stateMachine.maxIdleTime);

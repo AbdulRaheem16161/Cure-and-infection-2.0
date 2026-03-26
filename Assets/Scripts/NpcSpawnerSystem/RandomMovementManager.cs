@@ -7,51 +7,8 @@ using System.Linq;
 public class RandomMovementManager : MonoBehaviour
 {
    public AreaGizmos areaGizmos;
-   public List<GameObject> RandomFollowPoints;
 
-    public int MinDuration;
-    public int MaxDuration;
-
-    void Awake()
-    {
-        RandomFollowPoint.OnPointSpawned += AddPointInList;
-    }
-
-    public void Start()
-    {
-        for (int i = 0; i < RandomFollowPoints.Count; i++)
-        {
-            StartCoroutine(TeleportRandomFollowPoint(RandomFollowPoints[i]));
-        }
-    }
-
-    private void RestartTeleportationCoroutines()
-    {
-        if (Application.isPlaying)
-        { 
-            StopAllCoroutines();
-
-            for (int i = 0; i < RandomFollowPoints.Count; i++)
-            {
-                StartCoroutine(TeleportRandomFollowPoint(RandomFollowPoints[i]));
-            }
-        }
-    }
-
-    private IEnumerator TeleportRandomFollowPoint(GameObject point)
-	{
-		if (point == null)
-			RestartTeleportationCoroutines();
-
-		while (true && point.activeInHierarchy)
-       {
-            float randomDuration = Random.Range(MinDuration, MaxDuration);
-            point.transform.position = TeleportPosition();
-            yield return new WaitForSeconds(randomDuration);
-       }
-    }
-
-    private Vector3 TeleportPosition()
+    public Vector3 GetRandomLocationInArea()
     {
         #region get a random point within the Area to teleport the follow point to
         List<float> zPositionsOfAreaPoints = new List<float>(); // make a list to store z component of positions of each area point
@@ -83,14 +40,5 @@ public class RandomMovementManager : MonoBehaviour
         #endregion
 
         return TeleportPosition;
-    }
-
-    private void AddPointInList(GameObject point)
-    {
-        RandomFollowPoints.Add(point);
-
-        // everytime a new point is added in the list (that ofcourse happens when a new NPC is spawned) restart the teleportation coroutines
-        // so that the newly added point dont get ignored
-        RestartTeleportationCoroutines();
     }
 }

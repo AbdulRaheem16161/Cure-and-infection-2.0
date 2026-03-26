@@ -4,18 +4,17 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Game.MyNPC
 {
-    public class NPCMoveState : NPCBaseState
+    public class NPCMoveState : NpcBaseMovementState
     {
         public NPCMoveState(NPCStateMachine stateMachine) : base(stateMachine) { }
         public override void Enter()
         {
-            stateMachine.Agent.speed = stateMachine.PatrolSpeed;
+            MoveToNewDestination(NpcMoveType.regularMove);
         }
 
         public override void Exit()
         {
-            #region Exit Animation
-            #endregion
+
         }
 
         public override void Tick(float deltaTime)
@@ -26,8 +25,31 @@ namespace Game.MyNPC
                 stateMachine.SwitchState(new NPCIdleState(stateMachine));
 
 			#region State Transitions
+			// ----------- Move Ranged Attack -------------
 
-			// ----------- Free Move to Eat Corpse -------------
+			if (stateMachine.TargetInShootingRange && stateMachine.EnableRangedAttack)
+			{
+				stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
+				return;
+			}
+
+			// ----------- Move to Melee Attack -------------
+
+			if (stateMachine.TargetInMeleeRange && stateMachine.EnableMeleeAttack)
+			{
+				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
+				return;
+			}
+
+			// ----------- Move to Chase -------------
+
+			if (stateMachine.NpcPerception.IsTargetDetected && stateMachine.EnableChase)
+			{
+				stateMachine.SwitchState(new NPCChaseState(stateMachine));
+				return;
+			}
+
+			// ----------- Move to Eat Corpse -------------
 
 			if (stateMachine.NpcPerception.IsEatableTargetDetected && stateMachine.EnableEatCorpseState)
 			{
@@ -35,51 +57,15 @@ namespace Game.MyNPC
 				return;
 			}
 
-			// ----------- Free Move to Chase -------------
+			// ----------- Move to Idle -------------
 
-			if (stateMachine.NpcPerception.IsTargetDetected && stateMachine.EnableChase)
-            {
-                stateMachine.SwitchState(new NPCChaseState(stateMachine));
-                return;
-            }
+			if (HasReachedDestination())
+			{
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}
+			#endregion
+		}
+	}
 
-            // ----------- Free Move to Melee Attack -------------
-
-            if (stateMachine.TargetInMeleeRange && stateMachine.EnableMeleeAttack)
-            {
-                stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
-                return;
-            }
-
-            // ----------- Idle to Ranged Attack -------------
-
-            if (stateMachine.TargetInShootingRange && stateMachine.EnableRangedAttack)
-            {
-                stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
-                return;
-            }
-            #endregion
-
-            #region Destination Assignment
-
-            // Patrol if MoveOnStraightPath is Selected in the EnemyStateMachine
-            if (stateMachine.moveOnPatrolPath && stateMachine.PatrolFollowPoint != null)
-            {
-                stateMachine.CurrentFollowPoint = stateMachine.PatrolFollowPoint.transform;
-                stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
-                return;
-            }
-
-            // Do Random Movement if MoveOnRandomPath is Selected in the EnemyStateMachine
-            if (stateMachine.moveOnRandomPath && stateMachine.RandomFollowPoint != null)
-            {
-                stateMachine.CurrentFollowPoint = stateMachine.RandomFollowPoint.transform;
-                stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
-                return;
-            }
-
-            #endregion
-        }
-    }
-    
 }

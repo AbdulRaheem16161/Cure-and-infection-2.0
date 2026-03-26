@@ -31,12 +31,10 @@ using Game.MyNPC;
 
 public class NPCSpawner : MonoBehaviour
 {
-	#region prefab references
-	[Header("Prefab references")]
-    public GameObject RandomFollowPoint;
-    public GameObject PatrolFollowPoint;
-
-    public TrackGizmos TrackGizmos;
+    #region References
+	[Header("References")]
+	public TrackGizmos TrackGizmos;
+	public RandomMovementManager RandomMovementManager;
 	#endregion
 
 	[Header("Npc Definition List")]
@@ -89,16 +87,12 @@ public class NPCSpawner : MonoBehaviour
 		NPCInstance.transform.position = position;
 		#endregion
 
-		#region assign new points if null or re-enable
-		if (stateMachine.RandomFollowPoint == null)
-            stateMachine.AssignFollowPoint(GenerateWaypoints(RandomFollowPoint));
-		else
-			stateMachine.RandomFollowPoint.SetActive(true);
+		#region assign movement options
+		if (stateMachine.RandomMovementManager == null)
+            stateMachine.AssignFollowPoint(RandomMovementManager);
 
-		if (stateMachine.PatrolFollowPoint == null)
-			stateMachine.AssignPatrolPoint(GenerateWaypoints(PatrolFollowPoint), TrackGizmos);
-		else
-			stateMachine.PatrolFollowPoint.SetActive(true);
+		if (stateMachine.PatrolPoints == null)
+			stateMachine.AssignPatrolPoint(TrackGizmos);
 		#endregion
 
 		npcController.InitializeNpc(npcDefinitionToSpawn, NPCsTeam);
@@ -116,16 +110,6 @@ public class NPCSpawner : MonoBehaviour
 		SpawnNPC(npcDefinition, spawnPosition);
 		#endregion
 	}
-
-	private GameObject GenerateWaypoints(GameObject GameObjectToSpawn)
-    {
-        #region Instantiate and Parent waypoint object
-        GameObject Instance = Instantiate(GameObjectToSpawn, transform.position, Quaternion.identity);
-        Instance.transform.SetParent(transform);
-        Instance.transform.localPosition = Vector3.zero;
-        return Instance;
-        #endregion
-    }
 
 	private GameObject GetNpcObject(NpcDefinition npcDefinition)
     {
@@ -159,14 +143,9 @@ public class NPCSpawner : MonoBehaviour
 
 	private void HandleNpcDeath(GameObject gameObject)
     {
-		#region disable objects + follow points and add to pool
+		#region disable object add to npc pool
 		gameObject.SetActive(false);
         NpcController npcController = gameObject.GetComponent<NpcController>();
-        NPCStateMachine stateMachine = npcController.StateMachine;
-
-		stateMachine.RandomFollowPoint.SetActive(false);
-		stateMachine.PatrolFollowPoint.SetActive(false);
-
 		npcObjectPooling.Add(npcController);
 		#endregion
 	}

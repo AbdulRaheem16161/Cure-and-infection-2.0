@@ -22,7 +22,7 @@ namespace Game.MyNPC
         public NavMeshAgent Agent;
         public float CurrentSpeed;
         public string CurrentStateName;
-        public Transform CurrentFollowPoint;
+        public Vector3 CurrentDestination;
         public float RotationSpeed;
         [Space(20)]
 		#endregion
@@ -30,17 +30,18 @@ namespace Game.MyNPC
 		#region FreeMove Settings
 		[Header("FreeMove Settings")]
 		public bool EnableFreeMove;
-        public float minIdleTime;
+		public float PatrolSpeed;
+		public float minIdleTime;
         public float maxIdleTime;
 
 		[Header("Random Move Settings")]
 		public bool moveOnRandomPath = false;
-		public GameObject RandomFollowPoint;
+		public RandomMovementManager RandomMovementManager;
 
 		[Header("Patrol Move Settings")]
 		public bool moveOnPatrolPath = false;
-		public GameObject PatrolFollowPoint;
-		public float PatrolSpeed;
+		public TrackGizmos PatrolPoints;
+		public int currentPatrolPoint = 0;
 
 		[Space(10)]
 		#endregion
@@ -61,6 +62,8 @@ namespace Game.MyNPC
 		[Header("Chase State")]
 		public bool EnableChase;
 		public float ChaseSpeed;
+		public bool TargetInChaseRange => NpcPerception.IsTargetDetected;
+		[SerializeField, ReadOnly] private bool targetInChaseRange;
 		[Space(10)]
 		#endregion
 
@@ -132,19 +135,16 @@ namespace Game.MyNPC
 		}
 
 		#region assign follow/patrol/spawn points
-		public void AssignFollowPoint(GameObject followPoint)
+		public void AssignFollowPoint(RandomMovementManager randomMovementManager)
         {
             moveOnRandomPath = true;
-            RandomFollowPoint = followPoint;
+			RandomMovementManager = randomMovementManager;
 		}
-        public void AssignPatrolPoint(GameObject patrolPoint, TrackGizmos trackGizmos)
+        public void AssignPatrolPoint(TrackGizmos trackGizmos)
         {
             moveOnRandomPath = false;
             moveOnPatrolPath = true;
-            PatrolFollowPoint = patrolPoint;
-			var patrol = PatrolFollowPoint.GetComponent<PatrolFollowPoint>();
-			patrol.ItsFollower = gameObject;
-			patrol.TrackGizmos = trackGizmos;
+            PatrolPoints = trackGizmos;
 		}
 		#endregion
 
@@ -175,6 +175,8 @@ namespace Game.MyNPC
 
         private void UpdateStateReadValues()
         {
+            targetInChaseRange = TargetInChaseRange;
+
             hasEquippedMeleeWeapon = HasEquippedMeleeWeapon;
             targetInMeleeRange = TargetInMeleeRange;
 
@@ -216,9 +218,10 @@ namespace Game.MyNPC
             #endregion
         }
 
+		#region target in melee/ranged attack ranges check
 		private bool TargetInMeleeRangeCheck()
 		{
-			if (!NpcPerception.IsTargetDetected) return false;
+			if (!NpcPerception.IsTargetDetected || !hasEquippedMeleeWeapon) return false;
 
 			Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
 
@@ -230,7 +233,7 @@ namespace Game.MyNPC
 
 		private bool TargetInShootingRangeCheck()
         {
-            if (!NpcPerception.IsTargetDetected) return false;
+            if (!NpcPerception.IsTargetDetected || !hasEquippedRangedWeapon) return false;
 
             Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
             float weaponRange = EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange;
@@ -240,6 +243,7 @@ namespace Game.MyNPC
             else
                 return true;
         }
+		#endregion
 
 		public void CompleteZombification()
 		{

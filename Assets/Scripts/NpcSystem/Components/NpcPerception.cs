@@ -49,8 +49,6 @@ public class NpcPerception : MonoBehaviour
 
 	#region Runtime Values
 	[Header("Runtime Values")]
-	private readonly Collider[] ColliderHits = new Collider[100];
-	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
 	public bool IsTargetDetected;
 	public TargetData DetectedTarget;
 
@@ -58,6 +56,9 @@ public class NpcPerception : MonoBehaviour
 
 	public bool IsEatableTargetDetected;
 	public TargetData EatableTarget;
+
+	private readonly Collider[] ColliderHits = new Collider[100];
+	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
 	#endregion
 
 	#region search types
@@ -125,18 +126,21 @@ public class NpcPerception : MonoBehaviour
 		detectTargetTimer = detectTargetCooldown;
 
 		//skip looking if target already found
-		if (IsTargetDetected && DetectedTarget.StatsHandler.IsDead)
+		if (IsTargetDetected)
 		{
-			IsTargetDetected = false;
-			DetectedTarget = null;
-		}
-		else if (IsTargetDetected)
-		{
+			if (DetectedTarget.StatsHandler.IsDead)
+			{
+				LastKilledTarget = DetectedTarget;
+				IsTargetDetected = false;
+				DetectedTarget = null;
+				return;
+			}
+
 			Vector3 dirToTarget = (DetectedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
 			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, DetectedTarget.Collider)) return;
 
 			InvestigateLastSeenEnemyPosition(DetectedTarget.Transform.position);
-			IsTargetDetected = true;
+			IsTargetDetected = false;
 			DetectedTarget = null;
 		}
 		else
@@ -292,6 +296,7 @@ public class NpcPerception : MonoBehaviour
 		EnableAlertMode();
 
 		StateMachine.locationToInvestigate = position;
+		StateMachine.HasLocationToInvestigate = true;
 		StateMachine.SwitchState(new NPCInvestigateState(StateMachine));
 	}
 	public void InvestigateSound(Vector3 position)
@@ -301,6 +306,7 @@ public class NpcPerception : MonoBehaviour
 		if (InHigherPriorityState()) return;
 
 		StateMachine.locationToInvestigate = position;
+		StateMachine.HasLocationToInvestigate = true;
 		StateMachine.SwitchState(new NPCInvestigateState(StateMachine));
 	}
 

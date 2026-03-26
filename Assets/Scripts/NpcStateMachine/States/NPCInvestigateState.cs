@@ -1,17 +1,15 @@
 using Game.MyNPC;
 using UnityEngine;
 
-public class NPCInvestigateState : NPCBaseState
+public class NPCInvestigateState : NpcBaseMovementState
 {
 	public NPCInvestigateState(NPCStateMachine stateMachine) : base(stateMachine) { }
 
-	private bool LocationReached => ReachedInvestigationLocation();
-
 	public override void Enter()
 	{
-		stateMachine.Agent.speed = stateMachine.PatrolSpeed;
 		stateMachine.HasInvestigatedLocation = false;
 		stateMachine.HasLocationToInvestigate = true;
+		MoveToNewDestination(NpcMoveType.regularMove);
 	}
 
 	public override void Exit()
@@ -25,14 +23,22 @@ public class NPCInvestigateState : NPCBaseState
 		if (stateMachine.StatsHandler.IsDead) return;
 
 		#region State Transitions
+		// ----------- Investigate to Ranged Attack -------------
 
-		// ----------- Investigate to idle -------------
-
-		if (LocationReached)
+		if (stateMachine.TargetInShootingRange && stateMachine.HasEquippedRangedWeapon && stateMachine.EnableRangedAttack)
 		{
-			stateMachine.SwitchState(new NPCIdleState(stateMachine));
+			stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
 			return;
 		}
+
+		// ----------- Investigate to Melee Attack -------------
+
+		if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
+		{
+			stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
+			return;
+		}
+
 		// ----------- Investigate to Chase -------------
 
 		if (stateMachine.NpcPerception.IsTargetDetected)
@@ -40,22 +46,20 @@ public class NPCInvestigateState : NPCBaseState
 			stateMachine.SwitchState(new NPCChaseState(stateMachine));
 			return;
 		}
+
+		// ----------- Investigate to idle -------------
+
+		if (HasReachedDestination())
+		{
+			stateMachine.SwitchState(new NPCIdleState(stateMachine));
+			return;
+		}
 		#endregion
 
-		// Do Random Movement if MoveOnRandomPath is Selected in the EnemyStateMachine
 		if (stateMachine.HasLocationToInvestigate && !stateMachine.HasInvestigatedLocation)
 		{
 			stateMachine.Agent.SetDestination(stateMachine.locationToInvestigate);
 			return;
 		}
-	}
-
-	private bool ReachedInvestigationLocation()
-	{
-		float distanceToLocation = Vector3.Distance(stateMachine.transform.position, stateMachine.locationToInvestigate);
-		if (distanceToLocation < 2f)
-			return true;
-		else
-			return false;
 	}
 }

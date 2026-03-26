@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b76c873d305c9d342a1d5ed670b72db0, type: 3}
-  m_Name: HeavyZombie
+  m_Name: HeavyZombieAttack
   m_EditorClassIdentifier: 
   itemId: 
   itemName: BasicZombieAttack
@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 4
   stackLimit: 1
   itemWeight: 0
-  itemPrefab: {fileID: 7249631763097740997, guid: 13476e64ba788c14a8e08be3fae59515, type: 3}
+  modelPrefab: {fileID: 7249631763097740997, guid: 13476e64ba788c14a8e08be3fae59515, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 0
   damage: 75

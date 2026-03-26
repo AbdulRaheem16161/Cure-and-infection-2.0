@@ -14,12 +14,20 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	{
 		base.InitializeItem(definition, itemModel, itemStack);
 
+		//weapon-specific setup here
+		if (ModelReference == null)
+		{
+			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (or temporary) model with component: {nameof(MeleeWeaponView)}");
+			return;
+		}
+
 		WeaponView = ModelReference.GetComponent<MeleeWeaponView>();
 
-		if (ModelReference == null)
-			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (temporary) model with {nameof(MeleeWeaponView)}");
-		else if (WeaponView == null)
+		if (WeaponView == null)
+		{
 			Debug.LogError($"{TypedDefinition.ItemName} missing component {nameof(MeleeWeaponView)} in its ModelReference.\n");
+			return;
+		}
 
 		WeaponView.DisableHitCollider();
 

@@ -43,44 +43,46 @@ namespace Game.MyNPC
                 shotsToBurstFireCount--;
                 BurstFireBehaviour();
 			}
-            #endregion
+			#endregion
 
-            #region State Transitions 
+			#region Rotate Towards Target (seems very jittery but that was with me dragging npcs around to test it still works)
+			if (stateMachine.TargetInShootingRange)
+			{
+				Vector3 direction = (stateMachine.NpcPerception.DetectedTarget.Transform.position - stateMachine.transform.position).normalized;
+				if (direction != Vector3.zero) // Prevent errors when NPC is exactly at the target
+				{
+					Quaternion targetRotation = Quaternion.LookRotation(direction);
+					stateMachine.transform.rotation = Quaternion.RotateTowards(
+						stateMachine.transform.rotation,
+						targetRotation,
+						stateMachine.RotationSpeed * deltaTime * 100f
+					);
+				}
+			}
+			#endregion
 
-            // ----------- Attack to Chase -------------
-            if (!stateMachine.TargetInShootingRange || !stateMachine.HasEquippedRangedWeapon || !stateMachine.EnableRangedAttack)
+			#region State Transitions
+			// ----------- Early return -------------
+			if (!stateMachine.EnableRangedAttack || !stateMachine.HasEquippedRangedWeapon)
+			{
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}	
+
+			// ----------- Ranged Attack to Melee Attack -------------
+			if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
+			{
+				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
+				return;
+			}
+
+			// ----------- Ranged Attack to Chase -------------
+			if (!stateMachine.TargetInShootingRange)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;
             }
-
-            // ----------- Ranged Attack to Melee Attack -------------
-            if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
-            {
-                stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
-                return;
-            }
-            #endregion
-
-            #region Rotate Towards Follow Point
-
-            if (stateMachine.NpcPerception.DetectedTarget != null)
-            {
-                stateMachine.CurrentFollowPoint = stateMachine.NpcPerception.DetectedTarget.Transform;
-            }
-            stateMachine.Agent.SetDestination(stateMachine.CurrentFollowPoint.position);
-
-            Vector3 direction = (stateMachine.CurrentFollowPoint.position - stateMachine.transform.position).normalized;
-            if (direction != Vector3.zero) // Prevent errors when NPC is exactly at the target
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                stateMachine.transform.rotation = Quaternion.RotateTowards(
-                    stateMachine.transform.rotation,
-                    targetRotation,
-                    stateMachine.RotationSpeed * deltaTime * 100f
-                );
-            }
-            #endregion
+			#endregion
         }
 
         public override void Exit()

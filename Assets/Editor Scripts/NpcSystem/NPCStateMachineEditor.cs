@@ -22,7 +22,7 @@ public class NPCStateMachineEditor : Editor
         npc.Agent = (UnityEngine.AI.NavMeshAgent)EditorGUILayout.ObjectField("Agent", npc.Agent, typeof(UnityEngine.AI.NavMeshAgent), true);
         npc.CurrentSpeed = EditorGUILayout.FloatField("Current Speed", npc.CurrentSpeed);
         npc.CurrentStateName = EditorGUILayout.TextField("Current State Name", npc.CurrentStateName);
-        npc.CurrentFollowPoint = (Transform)EditorGUILayout.ObjectField("Current Follow Point", npc.CurrentFollowPoint, typeof(Transform), true);
+        npc.CurrentDestination = EditorGUILayout.Vector3Field("Current State Name", npc.CurrentDestination);
         npc.RotationSpeed = EditorGUILayout.FloatField("Rotation Speed", npc.RotationSpeed);
 
         EditorGUILayout.Space(10);
@@ -34,11 +34,16 @@ public class NPCStateMachineEditor : Editor
         if (npc.EnableFreeMove)
         {
             EditorGUI.indentLevel++;
-            npc.PatrolFollowPoint = (GameObject)EditorGUILayout.ObjectField("Patrol Follow Point", npc.PatrolFollowPoint, typeof(GameObject), true);
-            npc.RandomFollowPoint = (GameObject)EditorGUILayout.ObjectField("Random Follow Point", npc.RandomFollowPoint, typeof(GameObject), true);
-            npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
-            npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
-            npc.PatrolSpeed = EditorGUILayout.FloatField("Patrol Speed", npc.PatrolSpeed);
+			npc.PatrolSpeed = EditorGUILayout.FloatField("Patrol Speed", npc.PatrolSpeed);
+
+			EditorGUILayout.LabelField("Random Move Settings", EditorStyles.boldLabel);
+			npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
+			npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
+				"Random Follow Point", npc.RandomMovementManager, typeof(RandomMovementManager), true);
+
+			EditorGUILayout.LabelField("Patrol Move Settings", EditorStyles.boldLabel);
+			npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
+			npc.PatrolPoints = (TrackGizmos)EditorGUILayout.ObjectField("Patrol Points", npc.PatrolPoints, typeof(TrackGizmos), true);
             EditorGUI.indentLevel--;
         }
 

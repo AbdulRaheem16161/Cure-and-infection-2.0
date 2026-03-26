@@ -89,9 +89,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   areaGizmos: {fileID: 3709957971486700974}
-  RandomFollowPoints: []
-  MinDuration: 3
-  MaxDuration: 10
 --- !u!1 &1134186332743751758
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,9 +355,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dad04fe66dbc27242a8edc451be2aca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RandomFollowPoint: {fileID: 3835863379665885365, guid: d02f420b4bc9a534bbb5bf1f350c92e1, type: 3}
-  PatrolFollowPoint: {fileID: 5763262658595624350, guid: 3a2d5a53286ca144cb9471658e2171bf, type: 3}
   TrackGizmos: {fileID: 4270701735427954894}
+  RandomMovementManager: {fileID: 6475817367589874790}
   npcSpawns:
   - {fileID: 11400000, guid: ea717fe8b586a464ab3581a477b1165d, type: 2}
   - {fileID: 11400000, guid: 4abe508b91cc1ae47b9e3882cf5ffae4, type: 2}

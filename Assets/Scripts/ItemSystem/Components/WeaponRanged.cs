@@ -26,12 +26,19 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		base.InitializeItem(definition, itemModel, itemStack);
 
 		//weapon-specific setup here
+		if (ModelReference == null)
+		{
+			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (or temporary) model with component: {nameof(RangedWeaponView)}");
+			return;
+		}
+
 		WeaponView = ModelReference.GetComponent<RangedWeaponView>();
 
-		if (ModelReference == null)
-			Debug.LogError($"{TypedDefinition.ItemName} lacks a needed (temporary) model with {nameof(RangedWeaponView)}");
-		else if (WeaponView == null)
+		if (WeaponView == null)
+		{
 			Debug.LogError($"{TypedDefinition.ItemName} missing component {nameof(RangedWeaponView)} in its ModelReference.\n");
+			return;
+		}
 
 		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
 	}

@@ -33,11 +33,18 @@ namespace Game.MyNPC
 
 			#region Update Attack Timer
 			_attackDurationTimer += deltaTime;
-            #endregion
+			#endregion
 
-            #region State Transitions 
-            // Otherwise, return to Chase state
-            if (!stateMachine.TargetInMeleeRange || !stateMachine.HasEquippedMeleeWeapon)
+			#region State Transitions 
+			// ----------- Early return -------------
+			if (!stateMachine.EnableMeleeAttack || !stateMachine.HasEquippedMeleeWeapon)
+			{
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}
+
+			// Otherwise, return to Chase state
+			if (!stateMachine.TargetInMeleeRange || !stateMachine.HasEquippedMeleeWeapon)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;

@@ -11,14 +11,19 @@ public class TrackGizmos : MonoBehaviour
 
     public void CreateAreaPoint() // will run on pressing the button
     {
-        GameObject pointInstance = new GameObject("Point");
+        GameObject pointInstance = new("Point");
         pointInstance.transform.SetParent(TrackPointsFolder.transform);
         pointInstance.transform.localPosition = Vector3.zero;
 
         TrackPoints.Add(pointInstance);
     }
 
-    private void OnDrawGizmos()
+	public Vector3 GetNextPatrolPointLocation(int index)
+	{
+		return TrackPoints[index].transform.position;
+	}
+
+	private void OnDrawGizmos()
     {
         if (!ShowGizmoz) return;
 

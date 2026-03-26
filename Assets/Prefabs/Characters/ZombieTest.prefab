@@ -226,7 +226,7 @@ NavMeshAgent:
   m_Acceleration: 100
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0.5
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -268,6 +268,7 @@ MonoBehaviour:
   EnableDeath: 1
   EnableRespawn: 1
   EnableZombification: 0
+  IsDead: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -301,6 +302,7 @@ MonoBehaviour:
   locationToInvestigate: {x: 0, y: 0, z: 0}
   EnableChase: 1
   ChaseSpeed: 3.3
+  targetInChaseRange: 0
   EnableMeleeAttack: 1
   hasEquippedMeleeWeapon: 0
   targetInMeleeRange: 0
@@ -336,6 +338,20 @@ MonoBehaviour:
   normalColor: {r: 0, g: 1, b: 0, a: 1}
   detectedColor: {r: 1, g: 0, b: 0, a: 1}
   colorAlpha: 0.25
+  IsTargetDetected: 0
+  DetectedTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
+  LastKilledTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
+  IsEatableTargetDetected: 0
+  EatableTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,7 +380,8 @@ MonoBehaviour:
   slotToEquipItemTo: 0
   equipmentSlotToUnequip: 0
   consumableSlotToUse: 0
-  equipItemFromSlot: 0
+  equipItemFromInventorySlot: 0
+  unHolsterItem: 0
 --- !u!114 &-5542053669577002877
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -39,6 +39,11 @@ public abstract class Item<T> : Item where T : ItemDefinition
 			Debug.LogError($"{TypedDefinition.ItemName} model expected but none provided. ItemSpawner or pooling system failed.");
 			return;
 		}
+		else if (itemModel == null && definition.ModelPrefab == null)
+		{
+			Debug.LogWarning($"{TypedDefinition.ItemName} model not assigned ignore if intended or lacks model and isnt required.");
+			return;
+		}
 
 		/* remove old model, separate model pooling kept for potential future use but not required with current 1:1 items planned.
 		if (ModelReference != null)

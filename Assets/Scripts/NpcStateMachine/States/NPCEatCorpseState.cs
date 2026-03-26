@@ -1,11 +1,9 @@
 using Game.MyNPC;
 using UnityEngine;
 
-public class NPCEatCorpseState : NPCBaseState
+public class NPCEatCorpseState : NpcBaseMovementState
 {
 	public NPCEatCorpseState(NPCStateMachine stateMachine) : base(stateMachine) { }
-
-	private bool LocationReached => ReachedCorpseLocation();
 
 	/// <summary>
 	/// for now just use timer, later it would be better to have a stat in StateHandler like float ZombificationProgress.
@@ -13,12 +11,13 @@ public class NPCEatCorpseState : NPCBaseState
 	/// ZombificationProgress is complete and ignore other state switching (subject to change)
 	/// </summary>
 
-	private float eatCorpseDuration = 5f;
+	private readonly float eatCorpseDuration = 5f;
 	private float eatCorpseTimer;
 
 	public override void Enter()
 	{
 		eatCorpseTimer = eatCorpseDuration;
+		MoveToNewDestination(NpcMoveType.moveToCorpse);
 	}
 
 	public override void Exit()
@@ -30,39 +29,23 @@ public class NPCEatCorpseState : NPCBaseState
 	{
 		if (stateMachine.StatsHandler.IsDead) return;
 
-		// move to position of cropse
-		if (stateMachine.NpcPerception.IsEatableTargetDetected)
-		{
-			if (!LocationReached)
-			{
-				stateMachine.Agent.SetDestination(stateMachine.NpcPerception.EatableTarget.Transform.position);
-				return;
-			}
-			else
-			{
-				//call animator eat animation, vfs,sfx call ZombificationProgress on eatable targets StatsHandler
-				eatCorpseTimer -= deltaTime;
-				if (eatCorpseTimer < 0)
-				{
-					stateMachine.NpcPerception.EatableTarget.StatsHandler.GetComponent<NPCStateMachine>().CompleteZombification();
-					stateMachine.SwitchState(new NPCIdleState(stateMachine));
-				}
-			}
-		}
-		else // no corpse to eat
+		//return to idle state
+		if (!stateMachine.NpcPerception.IsEatableTargetDetected)
 		{
 			stateMachine.SwitchState(new NPCIdleState(stateMachine));
+			return;
 		}
-	}
 
-	private bool ReachedCorpseLocation()
-	{
-		float distanceToLocation = Vector3.Distance(
-			stateMachine.transform.position, stateMachine.NpcPerception.EatableTarget.Transform.position);
+		// move to position of cropse
+		if (HasReachedDestination())
+		{
+			eatCorpseTimer -= deltaTime;
+			if (eatCorpseTimer > 0) return;
 
-		if (distanceToLocation < 1f)
-			return true;
-		else
-			return false;
+			Debug.LogError("timer done");
+			stateMachine.NpcPerception.EatableTarget.StatsHandler.GetComponent<NPCStateMachine>().CompleteZombification();
+			stateMachine.SwitchState(new NPCIdleState(stateMachine));
+			return;
+		}
 	}
 }
