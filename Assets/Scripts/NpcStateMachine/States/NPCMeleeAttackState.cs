@@ -25,7 +25,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.IsDead) return;
+			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
 			randomSwingDelay -= deltaTime;
 			if (randomSwingDelay > 0f)

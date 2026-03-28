@@ -75,14 +75,14 @@ public abstract class Item : MonoBehaviour
 	public abstract void InitializeItem(ItemDefinition definition, GameObject itemModel, int itemStack);
 
 	#region base equip/unequip methods
-	public virtual void EquipItem(Transform parentTransform)
+	public virtual void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
 	{
 		transform.SetParent(parentTransform);
 		transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		gameObject.SetActive(true);
 		IsEquipped = true;
 	}
-	public virtual void UnEquipItem()
+	public virtual void UnEquipItem(EquipmentHandler equipmentHandler)
 	{
 		IsEquipped = false;
 		gameObject.SetActive(false);

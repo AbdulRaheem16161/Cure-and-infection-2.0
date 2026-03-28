@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class WeaponRanged : Item<WeaponRangedDefinition>
@@ -42,6 +43,33 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 
 		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
 	}
+
+	#region equipping/unequipping weapon override methods (TODO: may need updating when finalizing how behaviour should work)
+	public override void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
+	{
+		base.EquipItem(equipmentHandler, parentTransform);
+		if (equipmentHandler.StatsHandler.NpcDefinition.Player)
+		{
+			//player manually reloads when unholstering equipped weapon
+		}
+		else
+		{
+			Reload(equipmentHandler.InventoryHandler, true); //npcs auto reload for free when equipping weapon
+		}
+	}
+	public override void UnEquipItem(EquipmentHandler equipmentHandler)
+	{
+		base.UnEquipItem(equipmentHandler);
+		if (equipmentHandler.StatsHandler.NpcDefinition.Player)
+		{
+			equipmentHandler.InventoryHandler.AddNewItem(new(TypedDefinition.AmmoType, currentMagazineAmmo)); //return ammo in mag to inventory
+		}
+		else
+		{
+			//npc have unlimited ammo at the moment so doesnt need this
+		}
+	}
+	#endregion
 
 	private void Update()
 	{

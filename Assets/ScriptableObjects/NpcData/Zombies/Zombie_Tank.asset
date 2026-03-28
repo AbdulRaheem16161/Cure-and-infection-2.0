@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Zombie_Tank
   m_EditorClassIdentifier: 
   npcName: Tank Zombie
-  isZombie: 1
+  isPlayer: 0
+  startingLifeState: 2
+  entityFlags: 1
   supportsEquipmentModels: 0
   maxHealth: 200
   maxWater: 100

@@ -1,15 +1,22 @@
 using UnityEngine;
 using System;
+using static NpcDefinition;
 
+[RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
+	public NpcDefinition NpcDefinition { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private BoxCollider hitCollider;
 	private bool _Initialized = false;
 
 	[Header("Team")]
-	[ReadOnly] private NPCSpawner.Teams team;
+	[SerializeField, ReadOnly] private NPCSpawner.Teams team;
 	public NPCSpawner.Teams Team => team;
+
+	[Header("Life State")]
+	[SerializeField, ReadOnly] private LifeState lifeState;
+	public LifeState LifeState => lifeState;
 
 	#region stats
 	[Header("Stats")]
@@ -22,51 +29,38 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public float chestProtection;
 	#endregion
 
-	[HideInInspector] public bool EnableDeath;
-	[HideInInspector] public bool EnableRespawn;
-	[HideInInspector] public bool EnableZombification;
-	public bool IsDead;
-	public bool IsPlayer { get; private set; }
+	#region debug options
+	[Header("Debug Options")]
+	public bool invincible;
+	public bool forceRespawn;
+	#endregion
 
 	#region events
 	public event Action OnHit;
 	public event Action OnDeath;
+	public static event Action<GameObject> OnZombificationComplete;
 	#endregion
 
-	#region awake + Initializing of stats script
+	#region awake + Initialize stats handler method
 	private void Awake()
 	{
 		hitCollider = GetComponent<BoxCollider>();
+		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		if (hitCollider == null)
 			Debug.LogError("No HitCollider on :" + gameObject + "ignore if testing, or add one");
 
 		if (!_Initialized)
-			InitializeStats(NPCSpawner.Teams.FreeFighter, GetComponent<EquipmentHandler>(), null);
+			InitializeStats(Team, null);
 	}
-	public void InitializeStats(NPCSpawner.Teams team, EquipmentHandler equipmentHandler, NpcDefinition npcDefinition)
+	public void InitializeStats(NPCSpawner.Teams team, NpcDefinition npcDefinition)
 	{
 		_Initialized = true;
-		EquipmentHandler = equipmentHandler;
-
-		if (EquipmentHandler == null)
-		{
-			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-
-		IsDead = false;
-		EnableDeath = true;
-		EnableRespawn = false;
-
+		NpcDefinition = npcDefinition;
 		this.team = team;
 
-		if (npcDefinition == null) return; //keep values in inspector
-
-		if (npcDefinition.IsZombie)
-			EnableZombification = false;
-		else
-			EnableZombification = true;
+		if (npcDefinition == null) return; //keeps values in inspector and allows partial component testing
+		lifeState = npcDefinition.StartingLifeState;
 
 		health = npcDefinition.MaxHealth;
 		water = npcDefinition.MaxWater;
@@ -75,19 +69,25 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region event subbing/unsubbing on enable/disable
+	#region event subbing/unsubbing
 	private void OnEnable()
 	{
 		EquipmentHandler.OnItemEquip += OnItemEquipped;
 		EquipmentHandler.OnItemUnEquip += OnItemUnEquipped;
 		EquipmentHandler.OnConsumableUsed += UseConsumable;
 	}
-
 	private void OnDisable()
 	{
 		EquipmentHandler.OnItemEquip -= OnItemEquipped;
 		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
 		EquipmentHandler.OnConsumableUsed -= UseConsumable;
+	}
+	#endregion
+
+	#region Zombification complete event invoking
+	public void CompleteZombification()
+	{
+		OnZombificationComplete?.Invoke(gameObject);
 	}
 	#endregion
 
@@ -97,10 +97,10 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		OnHit?.Invoke();
 		health -= damageAmount;
 
-		if (!EnableDeath) return;
-		if (health <= 0 && !IsDead)
+		if (invincible) return;
+		if (health <= 0 && lifeState != LifeState.dead)
 		{
-			IsDead = true;
+			lifeState = LifeState.dead;
 			OnDeath?.Invoke();
 		}
 	}

@@ -2,6 +2,8 @@ using System;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
+[RequireComponent(typeof(StatsHandler))]
+[RequireComponent(typeof(EquipmentHandler))]
 public class InventoryHandler : MonoBehaviour, IAmmoGiver
 {
 	public EquipmentHandler EquipmentHandler { get; private set; }
@@ -29,28 +31,22 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	[HideInInspector] public int itemToSpawnCount;
 	#endregion
 
-	#region initialize inventory
+	#region awake + initialize inventory handler method
 	private void Awake()
 	{
+		EquipmentHandler = GetComponent<EquipmentHandler>();
+
 		if (!_Initialized)
-			InitializeInventoryHandler(GetComponent<EquipmentHandler>());
+			InitializeInventoryHandler();
 	}
-	public void InitializeInventoryHandler(EquipmentHandler equipmentHandler)
+	public void InitializeInventoryHandler()
 	{
 		_Initialized = true;
-		EquipmentHandler = equipmentHandler;
-
-		if (EquipmentHandler == null)
-		{
-			Debug.LogError($"EquipmentHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
-
 		itemContainer = new(initialInventorySize);
 	}
 	#endregion
 
-	#region event sub/unsub
+	#region event subbing/unsubbing
 	private void OnEnable()
 	{
 		EquipmentHandler.OnItemEquip += OnItemEquipped;

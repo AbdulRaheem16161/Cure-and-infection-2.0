@@ -3,23 +3,24 @@ using Game.Core;
 using Game.MyNPC;
 using System;
 using System.Collections;
-using System.Net;
 using UnityEditor;
 using UnityEngine;
+using static NpcDefinition;
 
+[RequireComponent(typeof(NPCStateMachine))]
+[RequireComponent(typeof(StatsHandler))]
 public class NpcPerception : MonoBehaviour
 {
+	public NpcDefinition NpcDefinition {  get; private set; }
+	public StatsHandler StatsHandler { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 
 	#region Settings
 	[Header("General Settings")]
 	public GameObject rayViewPoint;
-	private float baseViewAngle;
-	private float baseviewDistance;
 	public float viewAngle = 45f;
 	public float viewDistance = 5f;
 	public bool showGizmos = false;
-	private bool isZombie;
 	[Space(10)]
 	#endregion
 
@@ -78,15 +79,18 @@ public class NpcPerception : MonoBehaviour
 	private float detectEatableTargetTimer;
 	#endregion
 
-	public void Initialize(NpcDefinition npcDefinition, NPCStateMachine stateMachine)
+	#region awake + Initialize
+	private void Awake()
+	{
+		StatsHandler = GetComponent<StatsHandler>();
+		StateMachine = GetComponent<NPCStateMachine>();
+	}
+	public void Initialize(NpcDefinition npcDefinition)
 	{
 		if (rayViewPoint == null)
 			Debug.LogError("rayViewPoint null, assign empty object where vision raycasts should start from");
 
-		StateMachine = stateMachine;
-		isZombie = npcDefinition.IsZombie;
-		baseViewAngle = npcDefinition.ViewAngle;
-		baseviewDistance = npcDefinition.ViewDistance;
+		NpcDefinition = npcDefinition;
 
 		viewAngle = npcDefinition.ViewAngle;
 		viewDistance = npcDefinition.ViewDistance;
@@ -97,6 +101,7 @@ public class NpcPerception : MonoBehaviour
 		if (!StateMachine.EnableChase)
 			showGizmos = false;
 	}
+	#endregion
 
 	private void OnDisable()
 	{
@@ -109,12 +114,11 @@ public class NpcPerception : MonoBehaviour
 
 	private void Update()
 	{
-		if (StateMachine.StatsHandler.IsDead) return;
+		if (StatsHandler.LifeState == LifeState.dead) return;
 
 		SearchForLivingTarget();
 
-		//if (isZombie && !IsEatableTargetDetected)
-		if (isZombie)
+		if (StatsHandler.LifeState == LifeState.zombified)
 			SearchForEatableTarget();
 	}
 
@@ -128,7 +132,7 @@ public class NpcPerception : MonoBehaviour
 		//skip looking if target already found
 		if (IsTargetDetected)
 		{
-			if (DetectedTarget.StatsHandler.IsDead)
+			if (DetectedTarget.StatsHandler.LifeState == LifeState.dead)
 			{
 				LastKilledTarget = DetectedTarget;
 				IsTargetDetected = false;
@@ -174,6 +178,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
+	#region search for closest target base method
 	/// <summary>
 	/// base search method, returns closest valid target after line of sight and filter checks
 	/// </summary>
@@ -213,6 +218,7 @@ public class NpcPerception : MonoBehaviour
 
 		return closestTarget;
 	}
+	#endregion
 
 	#region search type filter and vision checks
 	private bool FilterSearch(StatsHandler target, SearchType searchType)
@@ -220,28 +226,18 @@ public class NpcPerception : MonoBehaviour
 		if (target == null) return false;
 		if (target.Team != NPCSpawner.Teams.FreeFighter && target.Team == StateMachine.StatsHandler.Team) return false;
 
-		if (searchType == SearchType.alive)
+		switch (searchType)
 		{
-			if (!target.IsDead)
-				return true;
-			else
-				return false;
-		}
-		else if (searchType == SearchType.eatable)
-		{
-			if (target.EnableZombification && target.IsDead)
-				return true;
-			else
-				return false;
-		}
-		else
-		{
-			Debug.LogError($"SearchType: {searchType} not set up, add logic for it, using default alive search");
+			case SearchType.alive:
+			return target.LifeState == LifeState.alive;
 
-			if (!target.IsDead)
-				return true;
-			else
-				return false;
+			case SearchType.eatable:
+			return target.LifeState == LifeState.dead &&
+				   target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie);
+
+			default:
+			Debug.LogError($"SearchType: {searchType} not set up, using default alive search");
+			return target.LifeState == LifeState.alive;
 		}
 	}
 	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
@@ -338,8 +334,8 @@ public class NpcPerception : MonoBehaviour
 		viewDistance *= ViewDistanceMultiplier;
 		yield return new WaitForSeconds(HighAlertDuration);
 
-		viewAngle = baseViewAngle;
-		viewDistance = baseviewDistance;
+		viewAngle = NpcDefinition.ViewAngle;
+		viewDistance = NpcDefinition.ViewDistance;
 		isInAlertMode = false;
 	}
 	#endregion

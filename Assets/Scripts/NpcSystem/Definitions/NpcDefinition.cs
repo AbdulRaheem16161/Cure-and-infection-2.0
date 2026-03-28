@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Npc", menuName = "ScriptableObjects/Npc")]
@@ -6,7 +7,21 @@ public class NpcDefinition : ScriptableObject
 	#region npc info
 	[Header("Npc Info")]
 	[SerializeField] private string npcName;
-	[SerializeField] private bool isZombie;
+	[SerializeField] private bool isPlayer;
+
+	[SerializeField] private LifeState startingLifeState;
+	public enum LifeState
+	{
+		alive, dead, zombified
+	}
+
+	[SerializeField] private EntityFlags entityFlags;
+	[Flags]
+	public enum EntityFlags
+	{
+		none = 0, canRespawn = 1 << 0, canBecomeZombie = 1 << 1
+	}
+
 	[SerializeField] private bool supportsEquipmentModels;
 	#endregion
 
@@ -67,7 +82,9 @@ public class NpcDefinition : ScriptableObject
 
 	#region read only
 	public string NpcName => npcName;
-	public bool IsZombie => isZombie;
+	public bool Player => isPlayer;
+	public LifeState StartingLifeState => startingLifeState;
+	public EntityFlags Flags => entityFlags;
 	public bool SupportsEquipmentModels => supportsEquipmentModels;
 
 	public int MaxHealth => maxHealth;

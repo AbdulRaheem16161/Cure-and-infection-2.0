@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.MyNPC;
+using static NpcDefinition;
 
 public class NPCSpawner : MonoBehaviour
 {
@@ -58,12 +59,12 @@ public class NPCSpawner : MonoBehaviour
 	private void OnEnable()
 	{
         NPCStateMachine.OnDeathComplete += HandleNpcDeath;
-		NPCStateMachine.OnZombificationComplete += HandleNpcZombification;
+		StatsHandler.OnZombificationComplete += HandleNpcZombification;
 	}
 	private void OnDisable()
 	{
 		NPCStateMachine.OnDeathComplete -= HandleNpcDeath;
-		NPCStateMachine.OnZombificationComplete -= HandleNpcZombification;
+		StatsHandler.OnZombificationComplete -= HandleNpcZombification;
 	}
 
 	public void SpawnNPC(NpcDefinition npcDefinition, Vector3? spawnPosition = null)
@@ -120,7 +121,7 @@ public class NPCSpawner : MonoBehaviour
 		{
 			var npcController = npcObjectPooling[i];
 
-			if (npcController.NpcDefinition.IsZombie == npcDefinition.IsZombie)
+			if (npcController.NpcDefinition.StartingLifeState == npcDefinition.StartingLifeState)
 			{
 				npcObject = npcController.gameObject;
 				npcObjectPooling.RemoveAt(i);

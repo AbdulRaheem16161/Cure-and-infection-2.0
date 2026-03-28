@@ -1,19 +1,15 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 using static ArmourDefinition;
 using static EquipmentHandler;
 using static ItemDefinition;
-using static UnityEditor.Progress;
 
+[RequireComponent(typeof(StatsHandler))]
+[RequireComponent(typeof(InventoryHandler))]
 public class EquipmentHandler : MonoBehaviour
 {
-	/// <summary>
-	/// item equipping/unequipping logic could do with a refactor to cut out duplicate logic
-	/// will consider it more 
-	/// </summary>
-
+	public StatsHandler StatsHandler { get; private set; }
 	public InventoryHandler InventoryHandler { get; private set; }
 	private bool _Initialized = false;
 
@@ -22,11 +18,6 @@ public class EquipmentHandler : MonoBehaviour
 	public Dictionary<EquipmentType, EquipmentSlot> slotLookup = new();
 	public List<EquipmentSlot> equipmentSlots = new();
 	#endregion
-
-	/// <summary>
-	/// currently uses empty game objects on character model to parent items to, can be changed to better setup
-	/// or refined as atm its done quick and dirty whilst item and character models are lacking.
-	/// </summary>
 
 	#region equipped world items
 	[Header("Equipped World Items")]
@@ -103,26 +94,24 @@ public class EquipmentHandler : MonoBehaviour
 	};
 	#endregion
 
-	#region initialize equipment
+	#region awake + initialize equipment handler method
 	private void Awake()
 	{
+		StatsHandler = GetComponent<StatsHandler>();
+		InventoryHandler = GetComponent<InventoryHandler>();
+
 		if (!_Initialized)
-			InitializeEquipmentHandler(GetComponent<InventoryHandler>(), null);
+			InitializeEquipmentHandler(null);
 	}
-	public void InitializeEquipmentHandler(InventoryHandler inventoryHandler, NpcDefinition npcDefinition)
+	public void InitializeEquipmentHandler(NpcDefinition npcDefinition)
 	{
 		_Initialized = true;
-		InventoryHandler = inventoryHandler;
-
-		if (InventoryHandler == null)
-		{
-			Debug.LogError($"InventoryHandler script not found on this gameobject: {gameObject.name}");
-			return;
-		}
 
 		//create equipment slot look up
 		equipmentSlots = new();
 		slotLookup = new();
+
+		if (npcDefinition == null) return; //allows partial component testing
 
 		foreach (EquipmentType type in Enum.GetValues(typeof(EquipmentType)))
 		{
@@ -307,7 +296,7 @@ public class EquipmentHandler : MonoBehaviour
 		if (item.ItemDefinition is not ConsumableDefinition) //doesnt need world item
 		{
 			Item spawnedItem = GetOrCreateItemInstance(slot);
-			spawnedItem.EquipItem(GetParentForSlot(spawnedItem));
+			spawnedItem.EquipItem(this, GetParentForSlot(spawnedItem));
 		}
 		OnItemEquip?.Invoke(slot);
 	}
@@ -318,7 +307,7 @@ public class EquipmentHandler : MonoBehaviour
 		if (slot.item.ItemDefinition is not ConsumableDefinition) //has no world item
 		{
 			Item spawnedItem = GetOrCreateItemInstance(slot);
-			spawnedItem.UnEquipItem();
+			spawnedItem.UnEquipItem(this);
 		}
 
 		OnItemUnEquip?.Invoke(slot);

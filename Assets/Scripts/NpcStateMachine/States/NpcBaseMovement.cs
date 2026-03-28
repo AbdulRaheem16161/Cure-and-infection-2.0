@@ -43,6 +43,8 @@ public class NpcBaseMovementState : NPCBaseState
 			{
 				if (HasValidRandomFollowPoint())
 					MoveToNewDestination(stateMachine.PatrolSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
+				else if (stateMachine.useBackupMovement)
+					MoveToNewDestination(stateMachine.PatrolSpeed, GetBackUpMovementLocationAroundNpc());
 				else
 				{
 					if (!stateMachine.moveOnPatrolPath || !stateMachine.moveOnRandomPath)
@@ -56,7 +58,7 @@ public class NpcBaseMovementState : NPCBaseState
 		else if (npcMoveType == NpcMoveType.moveToTarget)
 			MoveToNewDestination(stateMachine.ChaseSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
 
-		else if (npcMoveType == NpcMoveType.moveToTarget)
+		else if (npcMoveType == NpcMoveType.moveToInvestigate)
 			MoveToNewDestination(stateMachine.ChaseSpeed, stateMachine.locationToInvestigate);
 
 		else if (npcMoveType == NpcMoveType.moveToCorpse)
@@ -100,6 +102,19 @@ public class NpcBaseMovementState : NPCBaseState
 			return true;
 		else
 			return false;
+	}
+	#endregion
+
+	#region backup movement location (useful for drag and drop testing when not using a npc spawner)
+	private Vector3 GetBackUpMovementLocationAroundNpc()
+	{
+		float radius = 10f;
+		Vector3 randomDirection = Random.insideUnitSphere * radius;
+		randomDirection += stateMachine.transform.position;
+
+		if (NavMesh.SamplePosition(randomDirection, out NavMeshHit navHit, radius, NavMesh.AllAreas))
+			return navHit.position;
+		return stateMachine.transform.position;
 	}
 	#endregion
 }

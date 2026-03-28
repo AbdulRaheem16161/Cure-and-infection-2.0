@@ -9,6 +9,10 @@ using static NPCSpawner;
 
 namespace Game.MyNPC
 {
+	[RequireComponent(typeof(StatsHandler))]
+	[RequireComponent(typeof(EquipmentHandler))]
+	[RequireComponent(typeof(InventoryHandler))]
+	[RequireComponent(typeof(NpcPerception))]
     public class NPCStateMachine : StateMachine
     {
         public StatsHandler StatsHandler { get; private set; }
@@ -30,6 +34,7 @@ namespace Game.MyNPC
 		#region FreeMove Settings
 		[Header("FreeMove Settings")]
 		public bool EnableFreeMove;
+        public bool useBackupMovement = true;
 		public float PatrolSpeed;
 		public float minIdleTime;
         public float maxIdleTime;
@@ -93,89 +98,75 @@ namespace Game.MyNPC
 		///<summery>
 
 		public static event Action<GameObject> OnDeathComplete;
-		public static event Action<GameObject> OnZombificationComplete;
 
-        private void Awake()
+		#region awake + Initialize state machine method
+		private void Awake()
         {
             #region component initializations
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponent<Animator>();
+			StatsHandler = GetComponent<StatsHandler>();
+			EquipmentHandler = GetComponent<EquipmentHandler>();
+			InventoryHandler = GetComponent<InventoryHandler>();
+			NpcPerception = GetComponent<NpcPerception>();
 			#endregion
         }
 
-		public void InitializeStateMachine(StatsHandler statsHandler, EquipmentHandler equipmentHandler, InventoryHandler inventoryHandler, 
-            NpcPerception npcPerception, NpcDefinition npcDefinition)
+		public void InitializeStateMachine(NpcDefinition npcDefinition)
 		{
-			#region Initialize state machine
-			StatsHandler = statsHandler;
-            EquipmentHandler = equipmentHandler;
-            InventoryHandler = inventoryHandler;
-            NpcPerception = npcPerception;
-            #endregion
-
-            #region set values from definition
             RotationSpeed = npcDefinition.RotationSpeed;
             PatrolSpeed = npcDefinition.PatrolSpeed;
             ChaseSpeed = npcDefinition.ChaseSpeed;
             minIdleTime = npcDefinition.MinIdleTime;
             maxIdleTime = npcDefinition.MaxIdleTime;
-			#endregion
 
-			#region sub to events
 			StatsHandler.OnDeath += HandleDeath;
-			#endregion
-
-			#region Transition to Default State
 			SwitchState(new NPCMoveState(this));
-			#endregion
-
-			#region Enable Movement
 			Agent.enabled = true;
-			#endregion
 		}
+		#endregion
 
 		#region assign follow/patrol/spawn points
 		public void AssignFollowPoint(RandomMovementManager randomMovementManager)
         {
+            useBackupMovement = false;
             moveOnRandomPath = true;
 			RandomMovementManager = randomMovementManager;
 		}
         public void AssignPatrolPoint(TrackGizmos trackGizmos)
         {
-            moveOnRandomPath = false;
+			useBackupMovement = false;
+			moveOnRandomPath = false;
             moveOnPatrolPath = true;
             PatrolPoints = trackGizmos;
 		}
 		#endregion
 
-		private void OnDestroy()
+		#region event subbing/unsubbing
+		private void OnEnable()
 		{
-			#region unsub from events
-			StatsHandler.OnDeath -= HandleDeath;
-			#endregion
+			StatsHandler.OnDeath += HandleDeath;
 		}
+		private void OnDisable()
+		{
+			StatsHandler.OnDeath -= HandleDeath;
+		}
+		#endregion
 
 		private void LateUpdate()
         {
-            #region Functions
-            UpdateStateName();
             UpdateStateReadValues();
-            RotateTowardsDestination();
-            SingleLineUpdates();
+            //RotateTowardsDestination();
+			UpdateAndSmoothMovementSpeed();
             UpdateAnimations();
-            #endregion
         }
 
-        private void UpdateStateName()
+		#region update read values
+		private void UpdateStateReadValues()
         {
-            #region Current State Name
-            CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
-            #endregion
-        }
+			CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
 
-        private void UpdateStateReadValues()
-        {
-            targetInChaseRange = TargetInChaseRange;
+			targetInChaseRange = TargetInChaseRange;
 
             hasEquippedMeleeWeapon = HasEquippedMeleeWeapon;
             targetInMeleeRange = TargetInMeleeRange;
@@ -183,10 +174,11 @@ namespace Game.MyNPC
             hasEquippedRangedWeapon = HasEquippedRangedWeapon;
             targetInShootingRange = TargetInShootingRange;
         }
+		#endregion
 
-        private void RotateTowardsDestination()
+		#region navmesh + animation adjustments
+		private void RotateTowardsDestination()
         {
-            #region RotateTowardsDestination
             if (Agent == null || !Agent.hasPath) return;
 
             // Direction from current position to destination
@@ -199,24 +191,20 @@ namespace Game.MyNPC
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
             }
-            #endregion
         }
 
-        private void SingleLineUpdates()
+        private void UpdateAndSmoothMovementSpeed()
         {
-            #region Current Speed
             float smoothTime = 0.2f;
 			if (Agent != null && Agent.enabled)
 				CurrentSpeed = Mathf.Lerp(CurrentSpeed, Agent.velocity.magnitude, Time.deltaTime / smoothTime);
-            #endregion
         }
 
         private void UpdateAnimations()
         {
-            #region  Speed
             Animator.SetFloat("Speed", CurrentSpeed);
-            #endregion
         }
+		#endregion
 
 		#region target in melee/ranged attack ranges check
 		private bool TargetInMeleeRangeCheck()
@@ -245,23 +233,14 @@ namespace Game.MyNPC
         }
 		#endregion
 
-		public void CompleteZombification()
-		{
-            OnZombificationComplete?.Invoke(gameObject);
-		}
-
-		public void HandleDeath()
+		#region death event listener + die coroutine and death complete invoking
+		private void HandleDeath()
         {
             StartCoroutine(Die());
         }
 
-        public IEnumerator Die()
+        private IEnumerator Die()
         {
-            #region Change Tag
-            gameObject.tag = "Dead";
-            #endregion
-
-            #region Stop Movement
             if (Agent != null)
             {
                 Agent.isStopped = true;
@@ -269,19 +248,22 @@ namespace Game.MyNPC
                 Agent.enabled = false;
             }
 
-            #endregion
-
-            #region Animator
             if (Animator != null)
-            {
                 Animator.SetTrigger("Died");
+
+            yield return new WaitForSeconds(3f);
+
+            //will need replacing as spawners take over when to despawn dead enemies when player moves far away
+            if (!StatsHandler.NpcDefinition.Player)
+            {
+                if (StatsHandler.forceRespawn)
+				    OnDeathComplete?.Invoke(gameObject);
+			}
+            else
+            {
+
             }
-            #endregion
-
-			yield return new WaitForSeconds(3f);
-
-            if (!StatsHandler.EnableZombification && StatsHandler.EnableRespawn)
-				OnDeathComplete?.Invoke(gameObject);
 		}
+		#endregion
 	}
 }

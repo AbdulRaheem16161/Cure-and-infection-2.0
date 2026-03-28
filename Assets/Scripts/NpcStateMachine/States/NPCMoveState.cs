@@ -19,9 +19,9 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.IsDead) return;
+			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-            if (!stateMachine.EnableFreeMove)
+			if (!stateMachine.EnableFreeMove)
                 stateMachine.SwitchState(new NPCIdleState(stateMachine));
 
 			#region State Transitions

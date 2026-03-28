@@ -20,29 +20,37 @@ public class NpcController : MonoBehaviour
 
 	private void Awake()
 	{
-		AssignScriptReferences();
-
-		if (NpcDefinition != null && !_initialized)
-			InitializeNpc(NpcDefinition, Teams.FreeFighter); //set default team to freedom fighter
-	}
-
-	private void AssignScriptReferences()
-	{
 		StatsHandler = GetComponent<StatsHandler>();
 		StateMachine = GetComponent<NPCStateMachine>();
 		InventoryHandler = GetComponent<InventoryHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 		NpcPerception = GetComponent<NpcPerception>();
 	}
+	private void Start()
+	{
+		if (!_initialized)
+		{
+			if (NpcDefinition != null)
+				InitializeNpc(NpcDefinition, StatsHandler.Team); //keep current team
+			else
+				Debug.LogError($"{typeof(NpcDefinition)} null, assign reference in inspector when not using a NpcSpawner");
+		}
+	}
 
 	public void InitializeNpc(NpcDefinition npcDefinition, Teams team)
 	{
+		if (npcDefinition == null)
+		{
+			Debug.LogError($"{typeof(NpcDefinition)} null, NpcSpawner failed to assign definition");
+			return;
+		}
+
 		NpcDefinition = npcDefinition;
-		StatsHandler.InitializeStats(team, EquipmentHandler, NpcDefinition);
-		InventoryHandler.InitializeInventoryHandler(EquipmentHandler);
-		EquipmentHandler.InitializeEquipmentHandler(InventoryHandler, NpcDefinition);
-		StateMachine.InitializeStateMachine(StatsHandler, EquipmentHandler, InventoryHandler, NpcPerception, NpcDefinition);
-		NpcPerception.Initialize(NpcDefinition, StateMachine);
+		StatsHandler.InitializeStats(team, NpcDefinition);
+		InventoryHandler.InitializeInventoryHandler();
+		EquipmentHandler.InitializeEquipmentHandler(NpcDefinition);
+		StateMachine.InitializeStateMachine(NpcDefinition);
+		NpcPerception.Initialize(NpcDefinition);
 
 		gameObject.name = NpcDefinition.NpcName;
 		_initialized = true;

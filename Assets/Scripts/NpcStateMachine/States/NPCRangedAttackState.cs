@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.MyNPC
 {
-    public class NPCRangedAttackState : NPCBaseState
+    public class NPCRangedAttackState : NpcBaseMovementState
     {
         #region Constructor
         public NPCRangedAttackState(NPCStateMachine stateMachine) : base(stateMachine) { }
@@ -24,7 +24,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.IsDead) return;
+            if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
             Debug.Log("ranged attack state ticking");
 
@@ -48,16 +48,7 @@ namespace Game.MyNPC
 			#region Rotate Towards Target (seems very jittery but that was with me dragging npcs around to test it still works)
 			if (stateMachine.TargetInShootingRange)
 			{
-				Vector3 direction = (stateMachine.NpcPerception.DetectedTarget.Transform.position - stateMachine.transform.position).normalized;
-				if (direction != Vector3.zero) // Prevent errors when NPC is exactly at the target
-				{
-					Quaternion targetRotation = Quaternion.LookRotation(direction);
-					stateMachine.transform.rotation = Quaternion.RotateTowards(
-						stateMachine.transform.rotation,
-						targetRotation,
-						stateMachine.RotationSpeed * deltaTime * 100f
-					);
-				}
+				MoveToNewDestination(NpcMoveType.moveToTarget);
 			}
 			#endregion
 

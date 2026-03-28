@@ -9,7 +9,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 	{
 		stateMachine.HasInvestigatedLocation = false;
 		stateMachine.HasLocationToInvestigate = true;
-		MoveToNewDestination(NpcMoveType.regularMove);
+		MoveToNewDestination(NpcMoveType.moveToInvestigate);
 	}
 
 	public override void Exit()
@@ -20,7 +20,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.IsDead) return;
+		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
 		#region State Transitions
 		// ----------- Investigate to Ranged Attack -------------

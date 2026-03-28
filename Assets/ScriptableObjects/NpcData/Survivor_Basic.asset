@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Survivor_Basic
   m_EditorClassIdentifier: 
   npcName: Survivor
-  isZombie: 0
+  isPlayer: 0
+  startingLifeState: 0
+  entityFlags: -1
   supportsEquipmentModels: 1
   maxHealth: 100
   maxWater: 100

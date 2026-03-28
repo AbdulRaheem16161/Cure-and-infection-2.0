@@ -12,8 +12,6 @@ namespace Game.MyNPC
 
         public override void Enter()
         {
-            Debug.LogError("enter idle state");
-
             #region Enter Animation
             // Pick a random wait time between 2 and 5 seconds (customize these)
             WaitBeforeFreeMove = Random.Range(stateMachine.minIdleTime, stateMachine.maxIdleTime);
@@ -35,12 +33,12 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.IsDead) return;
+			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-            #region State Transitions
+			#region State Transitions
 
-            // ----------- Idle to Free Move -------------
-            timer += deltaTime;
+			// ----------- Idle to Free Move -------------
+			timer += deltaTime;
 
             // Wait until random time is over
             if (timer >= WaitBeforeFreeMove && stateMachine.EnableFreeMove) 

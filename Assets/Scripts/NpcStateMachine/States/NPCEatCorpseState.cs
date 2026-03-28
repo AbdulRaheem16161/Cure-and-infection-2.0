@@ -27,7 +27,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.IsDead) return;
+		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
 		//return to idle state
 		if (!stateMachine.NpcPerception.IsEatableTargetDetected)
@@ -43,7 +43,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 			if (eatCorpseTimer > 0) return;
 
 			Debug.LogError("timer done");
-			stateMachine.NpcPerception.EatableTarget.StatsHandler.GetComponent<NPCStateMachine>().CompleteZombification();
+			stateMachine.NpcPerception.EatableTarget.StatsHandler.CompleteZombification();
 			stateMachine.SwitchState(new NPCIdleState(stateMachine));
 			return;
 		}

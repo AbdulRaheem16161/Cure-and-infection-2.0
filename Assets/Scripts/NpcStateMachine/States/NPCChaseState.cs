@@ -14,9 +14,9 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.IsDead) return;
+			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-            if (stateMachine.TargetInChaseRange)
+			if (stateMachine.TargetInChaseRange && stateMachine.NpcPerception.DetectedTarget != null)
 			    MoveToNewDestination(NpcMoveType.moveToTarget);
 
 			#region State Transitions
