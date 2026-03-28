@@ -47,6 +47,7 @@ namespace Game.MyNPC
 		public bool moveOnPatrolPath = false;
 		public TrackGizmos PatrolPoints;
 		public int currentPatrolPoint = 0;
+		public bool reachedCurrentControlPoint = false;
 
 		[Space(10)]
 		#endregion
@@ -120,7 +121,9 @@ namespace Game.MyNPC
             minIdleTime = npcDefinition.MinIdleTime;
             maxIdleTime = npcDefinition.MaxIdleTime;
 
-			StatsHandler.OnDeath += HandleDeath;
+			Agent.speed = npcDefinition.PatrolSpeed;
+			Agent.angularSpeed = npcDefinition.RotationSpeed;
+
 			SwitchState(new NPCMoveState(this));
 			Agent.enabled = true;
 		}
@@ -156,9 +159,7 @@ namespace Game.MyNPC
 		private void LateUpdate()
         {
             UpdateStateReadValues();
-            //RotateTowardsDestination();
-			UpdateAndSmoothMovementSpeed();
-            UpdateAnimations();
+			UpdateAnimationMoveSpeed();
         }
 
 		#region update read values
@@ -176,44 +177,25 @@ namespace Game.MyNPC
         }
 		#endregion
 
-		#region navmesh + animation adjustments
-		private void RotateTowardsDestination()
-        {
-            if (Agent == null || !Agent.hasPath) return;
-
-            // Direction from current position to destination
-            Vector3 direction = (Agent.steeringTarget - transform.position).normalized;
-            direction.y = 0f; // ignore vertical tilt
-
-            if (direction.sqrMagnitude > 0.01f)
-            {
-                // Smooth rotate towards the target direction
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
-            }
-        }
-
-        private void UpdateAndSmoothMovementSpeed()
-        {
-            float smoothTime = 0.2f;
+		#region update animation speed based on move speed
+        private void UpdateAnimationMoveSpeed()
+		{
+			float smoothTime = 0.2f;
 			if (Agent != null && Agent.enabled)
 				CurrentSpeed = Mathf.Lerp(CurrentSpeed, Agent.velocity.magnitude, Time.deltaTime / smoothTime);
-        }
 
-        private void UpdateAnimations()
-        {
-            Animator.SetFloat("Speed", CurrentSpeed);
+			Animator.SetFloat("Speed", CurrentSpeed);
         }
 		#endregion
 
 		#region target in melee/ranged attack ranges check
 		private bool TargetInMeleeRangeCheck()
 		{
-			if (!NpcPerception.IsTargetDetected || !hasEquippedMeleeWeapon) return false;
+			if (!NpcPerception.IsTargetDetected || !HasEquippedMeleeWeapon) return false;
 
 			Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
 
-			if (Vector3.Distance(transform.position, targetPos) > 3f)
+			if (Vector3.Distance(transform.position, targetPos) > Agent.stoppingDistance + 0.1f)
 				return false;
 			else
 				return true;
@@ -221,7 +203,7 @@ namespace Game.MyNPC
 
 		private bool TargetInShootingRangeCheck()
         {
-            if (!NpcPerception.IsTargetDetected || !hasEquippedRangedWeapon) return false;
+            if (!NpcPerception.IsTargetDetected || !HasEquippedRangedWeapon) return false;
 
             Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
             float weaponRange = EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange;

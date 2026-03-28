@@ -56,6 +56,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public void InitializeStats(NPCSpawner.Teams team, NpcDefinition npcDefinition)
 	{
 		_Initialized = true;
+		hitCollider.enabled = true;
 		NpcDefinition = npcDefinition;
 		this.team = team;
 
@@ -101,6 +102,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		if (health <= 0 && lifeState != LifeState.dead)
 		{
 			lifeState = LifeState.dead;
+			hitCollider.enabled = false;
 			OnDeath?.Invoke();
 		}
 	}

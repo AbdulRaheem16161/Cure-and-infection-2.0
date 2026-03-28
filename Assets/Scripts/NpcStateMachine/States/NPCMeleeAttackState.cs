@@ -12,28 +12,23 @@ namespace Game.MyNPC
 
 		private readonly System.Random systemRandom = new();
 
-		#region Fields
-		private float _attackDurationTimer;
-        #endregion
+		/// <summary>
+		/// some way to have attack with weapon animation speed set to weapon attack speed + random swing delay
+		/// then not being able to exiting this state till animation is complete
+		/// </summary>
 
-        public override void Enter()
+		public override void Enter()
         {
-            #region Enter Animation
-            stateMachine.Animator.SetTrigger("Attack");
-            #endregion
+			stateMachine.Agent.isStopped = true;
+			randomSwingDelay = GetRandomSwingDelay();
         }
 
         public override void Tick(float deltaTime)
         {
 			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-			randomSwingDelay -= deltaTime;
-			if (randomSwingDelay > 0f)
-				return;
-
-			#region Update Attack Timer
-			_attackDurationTimer += deltaTime;
-			#endregion
+			//attack logic
+			HandleMeleeAttack(deltaTime);
 
 			#region State Transitions 
 			// ----------- Early return -------------
@@ -43,19 +38,36 @@ namespace Game.MyNPC
 				return;
 			}
 
-			// Otherwise, return to Chase state
-			if (!stateMachine.TargetInMeleeRange || !stateMachine.HasEquippedMeleeWeapon)
+			// ----------- Melee Attack to Chase -------------
+			if (!stateMachine.TargetInMeleeRange && stateMachine.TargetInChaseRange)
             {
                 stateMachine.SwitchState(new NPCChaseState(stateMachine));
                 return;
             }
-            #endregion
-        }
+
+			// ----------- Melee Attack to Idle -------------
+			if (!stateMachine.TargetInChaseRange)
+			{
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}
+			#endregion
+		}
 
         public override void Exit()
         {
+			stateMachine.Agent.isStopped = false;
+		}
 
-        }
+		private void HandleMeleeAttack(float deltaTime)
+		{
+			randomSwingDelay -= deltaTime;
+			if (randomSwingDelay > 0f)
+				return;
+
+			stateMachine.Animator.SetTrigger("Attack");
+			stateMachine.EquipmentHandler.meleeWeaponInHands.LightAttack();
+		}
 
 		private float GetRandomSwingDelay()
 		{

@@ -23,7 +23,7 @@ MonoBehaviour:
   maxStamina: 100
   patrolSpeed: 0.3
   chaseSpeed: 3.3
-  rotationSpeed: 10
+  rotationSpeed: 300
   minIdleTime: 1
   maxIdleTime: 3
   weaponOne: {fileID: 0}

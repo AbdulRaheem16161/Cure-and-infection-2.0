@@ -29,12 +29,18 @@ public class NpcBaseMovementState : NPCBaseState
 	#region move to destinations based on move type
 	protected void MoveToNewDestination(NpcMoveType npcMoveType)
 	{
+		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+
 		if (npcMoveType == NpcMoveType.regularMove)
 		{
 			if (HasValidPatrolFollowPoint())
 			{
-				//loop through control points
-				stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPoints.TrackPoints.Count;
+				//loop through control points and grab next if has reached current point, else continue to current one
+				if (stateMachine.reachedCurrentControlPoint)
+				{
+					stateMachine.reachedCurrentControlPoint = false;
+					stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPoints.TrackPoints.Count;
+				}
 
 				Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
 				MoveToNewDestination(stateMachine.PatrolSpeed, destination);

@@ -61,6 +61,7 @@ namespace Game.MyNPC
 
 			if (HasReachedDestination())
 			{
+				stateMachine.reachedCurrentControlPoint = true;
 				stateMachine.SwitchState(new NPCIdleState(stateMachine));
 				return;
 			}

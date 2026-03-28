@@ -12,13 +12,16 @@ namespace Game.MyNPC
         private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.rangedWeaponInHands;
 		private float shotsToBurstFireCount;
 		private float randomShotDelay;
+		private bool lookingAtTarget;
 		#endregion
 
 		private readonly System.Random systemRandom = new();
 
         public override void Enter()
         {
-            stateMachine.Agent.speed = 0f;
+			lookingAtTarget = false;
+			stateMachine.Agent.updateRotation = false;
+            stateMachine.Agent.isStopped = true;
             BurstFireBehaviour();
         }
 
@@ -28,29 +31,9 @@ namespace Game.MyNPC
 
             Debug.Log("ranged attack state ticking");
 
-			#region burst fire shot delay
-			randomShotDelay -= deltaTime;
-			if (randomShotDelay > 0f)
-				return;
-			#endregion
-
-			#region Shoot or reload behaviour
-			if (EquippedWeapon.MagazineEmpty)
-				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
-            else
-            {
-				EquippedWeapon.Shoot();
-                shotsToBurstFireCount--;
-                BurstFireBehaviour();
-			}
-			#endregion
-
-			#region Rotate Towards Target (seems very jittery but that was with me dragging npcs around to test it still works)
-			if (stateMachine.TargetInShootingRange)
-			{
-				MoveToNewDestination(NpcMoveType.moveToTarget);
-			}
-			#endregion
+			//logic
+			HandleShootingBehaviour(deltaTime);
+			RotateToLookAtTarget();
 
 			#region State Transitions
 			// ----------- Early return -------------
@@ -68,18 +51,67 @@ namespace Game.MyNPC
 			}
 
 			// ----------- Ranged Attack to Chase -------------
-			if (!stateMachine.TargetInShootingRange)
-            {
-                stateMachine.SwitchState(new NPCChaseState(stateMachine));
-                return;
-            }
+			if (!stateMachine.TargetInShootingRange && stateMachine.TargetInChaseRange)
+			{
+				stateMachine.SwitchState(new NPCChaseState(stateMachine));
+				return;
+			}
+
+			// ----------- Ranged Attack to Idle -------------
+			if (!stateMachine.TargetInChaseRange)
+			{
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}
 			#endregion
-        }
+		}
 
         public override void Exit()
         {
-            
-        }
+			stateMachine.Agent.updateRotation = true;
+			stateMachine.Agent.isStopped = false;
+		}
+
+		#region rotate to look at target
+		private void RotateToLookAtTarget()
+		{
+			if (!stateMachine.TargetInShootingRange) return;
+
+			Vector3 direction = stateMachine.NpcPerception.DetectedTarget.Transform.position - stateMachine.transform.position;
+			direction.y = 0f;
+			Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+			if (direction.sqrMagnitude > 0.01f)
+			{
+				lookingAtTarget = false;
+				stateMachine.transform.rotation = Quaternion.RotateTowards(
+					stateMachine.transform.rotation, targetRotation, stateMachine.RotationSpeed * Time.deltaTime);
+			}
+
+			float angle = Quaternion.Angle(stateMachine.transform.rotation, targetRotation);
+			lookingAtTarget = angle < 5f; // tweak this (2–10 degrees works well)
+		}
+		#endregion
+
+		#region Handle Shooting behaviour
+		private void HandleShootingBehaviour(float deltaTime)
+		{
+			if (!lookingAtTarget) return;
+
+			randomShotDelay -= deltaTime;
+			if (randomShotDelay > 0f)
+				return;
+
+			if (EquippedWeapon.MagazineEmpty)
+				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
+			else
+			{
+				EquippedWeapon.Shoot();
+				shotsToBurstFireCount--;
+				BurstFireBehaviour();
+			}
+		}
+		#endregion
 
 		#region human burst fire behaviour
 		///<summery>
