@@ -330,13 +330,26 @@ public class NpcPerception : MonoBehaviour
 	{
 		isInAlertMode = true;
 
-		viewAngle *= ViewAngleMultiplier;
-		viewDistance *= ViewDistanceMultiplier;
+		viewAngle = NpcDefinition.ViewAngle * ViewAngleMultiplier;
+		viewDistance = NpcDefinition.ViewDistance * ViewDistanceMultiplier;
 		yield return new WaitForSeconds(HighAlertDuration);
 
 		viewAngle = NpcDefinition.ViewAngle;
 		viewDistance = NpcDefinition.ViewDistance;
 		isInAlertMode = false;
+	}
+	#endregion
+
+	#region npc glance simulation
+	public void SimulateNpcGlancing(float glanceDuration)
+	{
+		StartCoroutine(SimulateNpcGlancingAround(glanceDuration));
+	}
+	private IEnumerator SimulateNpcGlancingAround(float glanceDuration)
+	{
+		viewAngle = NpcDefinition.ViewAngle * ViewAngleMultiplier;
+		yield return new WaitForSeconds(glanceDuration);
+		viewAngle = NpcDefinition.ViewAngle;
 	}
 	#endregion
 

@@ -4,6 +4,8 @@ using UnityEngine.AI;
 
 public class NpcBaseMovementState : NPCBaseState
 {
+	protected bool lookingAtTarget;
+
 	public enum NpcMoveType
 	{
 		regularMove, moveToTarget, moveToInvestigate, moveToCorpse
@@ -90,12 +92,45 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region destination setting
+	#region move to position at speed
 	private void MoveToNewDestination(float speed, Vector3 newDestination)
 	{
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.speed = speed;
 		stateMachine.Agent.SetDestination(newDestination);
+	}
+	#endregion
+
+	#region look around logic
+	/// <summary>
+	/// calculate the direction vector to look at based on given angle
+	/// </summary>
+	protected void LookAtDirection(float newLookAngle)
+	{
+		Vector3 directionToLookAt = Quaternion.Euler(0, newLookAngle, 0) * Vector3.forward;
+		RotateTowardsDirection(directionToLookAt);
+	}
+	/// <summary>
+	/// calculate direction vector to look at
+	/// </summary>
+	protected void LookAtDirection(Vector3 positionToLookAt)
+	{
+		Vector3 directionToLookAt = positionToLookAt - stateMachine.transform.position;
+		directionToLookAt.y = 0f;
+		RotateTowardsDirection(directionToLookAt);
+	}
+	private void RotateTowardsDirection(Vector3 directionToLookAt)
+	{
+		Quaternion targetRotation = Quaternion.LookRotation(directionToLookAt);
+
+		if (directionToLookAt.sqrMagnitude > 0.01f)
+		{
+			stateMachine.transform.rotation = Quaternion.RotateTowards(
+				stateMachine.transform.rotation, targetRotation, stateMachine.RotationSpeed * Time.deltaTime);
+		}
+
+		float angle = Quaternion.Angle(stateMachine.transform.rotation, targetRotation);
+		lookingAtTarget = angle < 2f; // If angle below 2 degrees, its looking at target
 	}
 	#endregion
 
