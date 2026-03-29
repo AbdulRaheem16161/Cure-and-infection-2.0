@@ -8,7 +8,7 @@ public class NpcBaseMovementState : NPCBaseState
 
 	public enum NpcMoveType
 	{
-		regularMove, moveToTarget, moveToInvestigate, moveToCorpse
+		regularMove, moveToTarget, moveToInvestigate, moveToCorpse, fleeFromTarget
 	}
 
 	public NpcBaseMovementState(NPCStateMachine stateMachine) : base(stateMachine) { }
@@ -28,53 +28,53 @@ public class NpcBaseMovementState : NPCBaseState
 
 	}
 
-	#region move to destinations based on move type
-	protected void MoveToNewDestination(NpcMoveType npcMoveType)
+	#region move to destination methods
+	/// <summary>
+	/// logic to handle what movement type to use
+	/// </summary>
+	protected void HandleMovementLogic()
 	{
-		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
-
-		if (npcMoveType == NpcMoveType.regularMove)
+		if (HasValidPatrolFollowPoint())
 		{
-			if (HasValidPatrolFollowPoint())
+			//loop through control points and grab next if has reached current point, else continue to current one
+			if (stateMachine.reachedCurrentControlPoint)
 			{
-				//loop through control points and grab next if has reached current point, else continue to current one
-				if (stateMachine.reachedCurrentControlPoint)
-				{
-					stateMachine.reachedCurrentControlPoint = false;
-					stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPoints.TrackPoints.Count;
-				}
-
-				Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
-				MoveToNewDestination(stateMachine.PatrolSpeed, destination);
+				stateMachine.reachedCurrentControlPoint = false;
+				stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPoints.TrackPoints.Count;
 			}
+
+			Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
+			MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, destination);
+		}
+		else
+		{
+			if (HasValidRandomFollowPoint())
+				MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
+			else if (stateMachine.useBackupMovement)
+				MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, GetBackUpMovementLocationAroundNpc());
 			else
 			{
-				if (HasValidRandomFollowPoint())
-					MoveToNewDestination(stateMachine.PatrolSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
-				else if (stateMachine.useBackupMovement)
-					MoveToNewDestination(stateMachine.PatrolSpeed, GetBackUpMovementLocationAroundNpc());
+				if (!stateMachine.moveOnPatrolPath || !stateMachine.moveOnRandomPath)
+					Debug.LogWarning($"{stateMachine.gameObject} has no valid movement options, enable one in inspector");
 				else
-				{
-					if (!stateMachine.moveOnPatrolPath || !stateMachine.moveOnRandomPath)
-						Debug.LogWarning($"{stateMachine.gameObject} has no valid movement options, enable one in inspector");
-					else
-						Debug.LogError($"{stateMachine.gameObject} has no valid movement options, " +
-							$"follow points likely failed to be assigned when initializing");
-				}
+					Debug.LogError($"{stateMachine.gameObject} has no valid movement options, " +
+						$"follow points likely failed to be assigned when initializing");
 			}
 		}
-		else if (npcMoveType == NpcMoveType.moveToTarget)
-			MoveToNewDestination(stateMachine.ChaseSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
+	}
 
-		else if (npcMoveType == NpcMoveType.moveToInvestigate)
-			MoveToNewDestination(stateMachine.ChaseSpeed, stateMachine.locationToInvestigate);
-
-		else if (npcMoveType == NpcMoveType.moveToCorpse)
-			MoveToNewDestination(stateMachine.PatrolSpeed, stateMachine.NpcPerception.EatableTarget.Transform.position);
+	/// <summary>
+	/// move to destination
+	/// </summary>
+	protected void MoveToDestination(float speed, Vector3 newDestination)
+	{
+		stateMachine.Agent.isStopped = false;
+		stateMachine.Agent.speed = speed;
+		stateMachine.Agent.SetDestination(newDestination);
 	}
 	#endregion
 
-	#region basic move to follow point checks
+	#region move to follow point checks
 	private bool HasValidPatrolFollowPoint()
 	{
 		if (stateMachine.moveOnPatrolPath && stateMachine.PatrolPoints != null)
@@ -92,18 +92,29 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region move to position at speed
-	private void MoveToNewDestination(float speed, Vector3 newDestination)
+	#region move to flee position at speed
+	/// <summary>
+	/// flee from passed in vector 3 argument, with a randomization angle
+	/// </summary>
+	protected void FleeToNewDestination(float speed, Vector3 positionToFleeFrom)
 	{
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.speed = speed;
-		stateMachine.Agent.SetDestination(newDestination);
+
+		//calculate flee direction with some randomization with angle
+		Vector3 fleeDirection = (stateMachine.transform.position - positionToFleeFrom).normalized;
+		float randomAngle = Random.Range(-45f, 45f);
+		Quaternion rotation = Quaternion.Euler(0, randomAngle, 0);
+		Vector3 randomFleeDirection = rotation * fleeDirection;
+
+		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.fleeDistance * 2);
+		stateMachine.Agent.SetDestination(fleeDestination);
 	}
 	#endregion
 
 	#region look around logic
 	/// <summary>
-	/// calculate the direction vector to look at based on given angle
+	/// adjust look direction based on angle given in 360 degrees
 	/// </summary>
 	protected void LookAtDirection(float newLookAngle)
 	{
@@ -111,7 +122,7 @@ public class NpcBaseMovementState : NPCBaseState
 		RotateTowardsDirection(directionToLookAt);
 	}
 	/// <summary>
-	/// calculate direction vector to look at
+	/// look at given position
 	/// </summary>
 	protected void LookAtDirection(Vector3 positionToLookAt)
 	{
@@ -126,7 +137,7 @@ public class NpcBaseMovementState : NPCBaseState
 		if (directionToLookAt.sqrMagnitude > 0.01f)
 		{
 			stateMachine.transform.rotation = Quaternion.RotateTowards(
-				stateMachine.transform.rotation, targetRotation, stateMachine.RotationSpeed * Time.deltaTime);
+				stateMachine.transform.rotation, targetRotation, stateMachine.NpcDefinition.RotationSpeed * Time.deltaTime);
 		}
 
 		float angle = Quaternion.Angle(stateMachine.transform.rotation, targetRotation);

@@ -17,7 +17,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 		glanceStarted = false;
 		glanceDone = false;
 		glancingDelay = 2f;
-		MoveToNewDestination(NpcMoveType.moveToInvestigate);
+		MoveToDestination(stateMachine.NpcDefinition.ChaseSpeed, stateMachine.locationToInvestigate);
 	}
 
 	public override void Exit()
@@ -56,7 +56,6 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 		#region State Transitions
 		// ----------- Investigate to Ranged Attack -------------
-
 		if (stateMachine.TargetInShootingRange && stateMachine.HasEquippedRangedWeapon && stateMachine.EnableRangedAttack)
 		{
 			stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
@@ -64,7 +63,6 @@ public class NPCInvestigateState : NpcBaseMovementState
 		}
 
 		// ----------- Investigate to Melee Attack -------------
-
 		if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
 		{
 			stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
@@ -72,7 +70,6 @@ public class NPCInvestigateState : NpcBaseMovementState
 		}
 
 		// ----------- Investigate to Chase -------------
-
 		if (stateMachine.NpcPerception.IsTargetDetected)
 		{
 			stateMachine.SwitchState(new NPCChaseState(stateMachine));

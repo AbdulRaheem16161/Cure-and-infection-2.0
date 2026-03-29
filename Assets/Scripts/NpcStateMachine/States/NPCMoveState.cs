@@ -9,7 +9,7 @@ namespace Game.MyNPC
         public NPCMoveState(NPCStateMachine stateMachine) : base(stateMachine) { }
         public override void Enter()
         {
-            MoveToNewDestination(NpcMoveType.regularMove);
+			HandleMovementLogic();
         }
 
         public override void Exit()
@@ -21,12 +21,19 @@ namespace Game.MyNPC
         {
 			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-			if (!stateMachine.EnableFreeMove)
+			if (!stateMachine.EnableMovement)
                 stateMachine.SwitchState(new NPCIdleState(stateMachine));
+
+			// ----------- Move to Idle -------------
+			if (HasReachedDestination())
+			{
+				stateMachine.reachedCurrentControlPoint = true;
+				stateMachine.SwitchState(new NPCIdleState(stateMachine));
+				return;
+			}
 
 			#region State Transitions
 			// ----------- Move Ranged Attack -------------
-
 			if (stateMachine.TargetInShootingRange && stateMachine.EnableRangedAttack)
 			{
 				stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
@@ -34,7 +41,6 @@ namespace Game.MyNPC
 			}
 
 			// ----------- Move to Melee Attack -------------
-
 			if (stateMachine.TargetInMeleeRange && stateMachine.EnableMeleeAttack)
 			{
 				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
@@ -42,7 +48,6 @@ namespace Game.MyNPC
 			}
 
 			// ----------- Move to Chase -------------
-
 			if (stateMachine.NpcPerception.IsTargetDetected && stateMachine.EnableChase)
 			{
 				stateMachine.SwitchState(new NPCChaseState(stateMachine));
@@ -50,19 +55,9 @@ namespace Game.MyNPC
 			}
 
 			// ----------- Move to Eat Corpse -------------
-
 			if (stateMachine.NpcPerception.IsEatableTargetDetected && stateMachine.EnableEatCorpseState)
 			{
 				stateMachine.SwitchState(new NPCEatCorpseState(stateMachine));
-				return;
-			}
-
-			// ----------- Move to Idle -------------
-
-			if (HasReachedDestination())
-			{
-				stateMachine.reachedCurrentControlPoint = true;
-				stateMachine.SwitchState(new NPCIdleState(stateMachine));
 				return;
 			}
 			#endregion

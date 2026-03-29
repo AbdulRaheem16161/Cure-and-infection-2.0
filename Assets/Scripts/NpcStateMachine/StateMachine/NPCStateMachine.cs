@@ -15,29 +15,26 @@ namespace Game.MyNPC
 	[RequireComponent(typeof(NpcPerception))]
     public class NPCStateMachine : StateMachine
     {
-        public StatsHandler StatsHandler { get; private set; }
+		public Animator Animator { get; private set; }
+		public NavMeshAgent Agent { get; private set; }
+		public StatsHandler StatsHandler { get; private set; }
         public EquipmentHandler EquipmentHandler { get; private set; }
         public InventoryHandler InventoryHandler { get; private set; }
 		public NpcPerception NpcPerception { get; private set; }
+		public NpcDefinition NpcDefinition { get; private set; }
 
-		#region General Values
-		[Header("General Values")]
-        public Animator Animator;
-        public NavMeshAgent Agent;
-        public float CurrentSpeed;
-        public string CurrentStateName;
-        public Vector3 CurrentDestination;
-        public float RotationSpeed;
-        [Space(20)]
+		#region Runtime Info
+		[Header("Runtime Info")]
+		public string CurrentStateName;
+		public float CurrentSpeed;
+		public Vector3 CurrentDestination;
+		[Space(10)]
 		#endregion
 
-		#region FreeMove Settings
-		[Header("FreeMove Settings")]
-		public bool EnableFreeMove;
-        public bool useBackupMovement = true;
-		public float PatrolSpeed;
-		public float minIdleTime;
-        public float maxIdleTime;
+		#region Movement State Settings
+		[Header("Movement State Settings")]
+		public bool EnableMovement;
+		public bool useBackupMovement = true;
 
 		[Header("Random Move Settings")]
 		public bool moveOnRandomPath = false;
@@ -50,6 +47,15 @@ namespace Game.MyNPC
 		public bool reachedCurrentControlPoint = false;
 
 		[Space(10)]
+		#endregion
+
+		#region Flee State 
+		[Header("Flee State")]
+		public bool EnableFlee;
+		public readonly float fleeDistance = 10;
+		public bool TargetInFleeRange => TargetInFleeRangeCheck();
+
+		[SerializeField, ReadOnly] private bool targetInFleeRange;
 		#endregion
 
 		#region Eat Corpse State
@@ -67,7 +73,6 @@ namespace Game.MyNPC
 		#region Chase State
 		[Header("Chase State")]
 		public bool EnableChase;
-		public float ChaseSpeed;
 		public bool TargetInChaseRange => NpcPerception.IsTargetDetected;
 		[SerializeField, ReadOnly] private bool targetInChaseRange;
 		[Space(10)]
@@ -81,7 +86,7 @@ namespace Game.MyNPC
 
 		[SerializeField, ReadOnly] private bool hasEquippedMeleeWeapon;
 		[SerializeField, ReadOnly] private bool targetInMeleeRange;
-        [Space(10)]
+		[Space(10)]
         #endregion
 
         #region Ranged Attack State
@@ -115,11 +120,17 @@ namespace Game.MyNPC
 
 		public void InitializeStateMachine(NpcDefinition npcDefinition)
 		{
-            RotationSpeed = npcDefinition.RotationSpeed;
-            PatrolSpeed = npcDefinition.PatrolSpeed;
-            ChaseSpeed = npcDefinition.ChaseSpeed;
-            minIdleTime = npcDefinition.MinIdleTime;
-            maxIdleTime = npcDefinition.MaxIdleTime;
+			NpcDefinition = npcDefinition;
+
+			EnableMovement = true;
+			EnableFlee = true;
+			EnableInvestigate = true;
+			EnableChase = true;
+			EnableMeleeAttack = true;
+			EnableRangedAttack = true;
+
+			if (npcDefinition.StartingLifeState == NpcDefinition.LifeState.zombified)
+				EnableEatCorpseState = true;
 
 			Agent.speed = npcDefinition.PatrolSpeed;
 			Agent.angularSpeed = npcDefinition.RotationSpeed;
@@ -174,6 +185,8 @@ namespace Game.MyNPC
 
             hasEquippedRangedWeapon = HasEquippedRangedWeapon;
             targetInShootingRange = TargetInShootingRange;
+
+			targetInFleeRange = TargetInFleeRange;
         }
 		#endregion
 
@@ -193,9 +206,7 @@ namespace Game.MyNPC
 		{
 			if (!NpcPerception.IsTargetDetected || !HasEquippedMeleeWeapon) return false;
 
-			Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
-
-			if (Vector3.Distance(transform.position, targetPos) > Agent.stoppingDistance + 0.1f)
+			if (NpcPerception.DetectedTarget.Distance > Agent.stoppingDistance + 0.1f)
 				return false;
 			else
 				return true;
@@ -205,14 +216,23 @@ namespace Game.MyNPC
         {
             if (!NpcPerception.IsTargetDetected || !HasEquippedRangedWeapon) return false;
 
-            Vector3 targetPos = NpcPerception.DetectedTarget.Transform.position;
-            float weaponRange = EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange;
-
-			if (Vector3.Distance(transform.position, targetPos) > weaponRange) 
+			if (NpcPerception.DetectedTarget.Distance > EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange) 
                 return false;
             else
                 return true;
         }
+		#endregion
+
+		#region target in flee range check
+		private bool TargetInFleeRangeCheck()
+		{
+			if (!NpcPerception.IsTargetDetected || HasEquippedMeleeWeapon) return false;
+
+			if (NpcPerception.DetectedTarget.Distance > fleeDistance)
+				return false;
+			else
+				return true;
+		}
 		#endregion
 
 		#region death event listener + die coroutine and death complete invoking

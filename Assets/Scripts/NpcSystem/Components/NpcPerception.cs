@@ -15,59 +15,46 @@ public class NpcPerception : MonoBehaviour
 	public StatsHandler StatsHandler { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 
-	#region Settings
-	[Header("General Settings")]
 	public GameObject rayViewPoint;
-	public float viewAngle = 45f;
-	public float viewDistance = 5f;
-	public bool showGizmos = false;
-	[Space(10)]
-	#endregion
 
-	#region AlertMode Settings
-	[Header("Alert Mode Settings")]
-	public float HighAlertDuration = 3f;
-	public float ViewAngleMultiplier = 1.5f;
-	public float ViewDistanceMultiplier = 2f;
+	#region Runtime Vision Values
+	[Header("Runtime Vision Values")]
+	public float viewAngle;
+	public float viewDistance;
 	public bool isInAlertMode;
-	public Coroutine alertModeCoroutine;
-	[Space(10)]
+	public bool showVision = false;
 	#endregion
 
-	#region layerMasks
+	#region Runtime Target Detection
+	[Header("Runtime Target Detection")]
+	[ReadOnly] public bool IsTargetDetected;
+	[ReadOnly] public TargetData DetectedTarget;
+	[Space(10)]
+	[ReadOnly] public TargetData LastKilledTarget;
+	[Space(10)]
+	[ReadOnly] public bool IsEatableTargetDetected;
+	[ReadOnly] public TargetData EatableTarget;
+	#endregion
+
+	#region layer Masks
 	[Header("Layer Masks")]
 	[SerializeField] private LayerMask targetMask;
 	[SerializeField] private LayerMask lineOfSightMask;
 	#endregion
 
-	#region Colors
-	[Header("Colors")]
-	[SerializeField] private Color normalColor = Color.green;
-	[SerializeField] private Color detectedColor = Color.red;
-	[SerializeField] private float colorAlpha = 0.25f;
-	[Space(10)]
-	#endregion
-
-	#region Runtime Values
-	[Header("Runtime Values")]
-	public bool IsTargetDetected;
-	public TargetData DetectedTarget;
-
-	public TargetData LastKilledTarget;
-
-	public bool IsEatableTargetDetected;
-	public TargetData EatableTarget;
+	private Color normalColor = Color.green;
+	private Color detectedColor = Color.red;
+	private readonly float colorAlpha = 0.25f;
 
 	private readonly Collider[] ColliderHits = new Collider[100];
 	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
-	#endregion
 
-	#region search types
+	public Coroutine alertModeCoroutine;
+
 	public enum SearchType
 	{
 		alive, eatable
 	}
-	#endregion
 
 	#region detect target timer
 	private readonly float detectTargetCooldown = 0.1f;
@@ -91,21 +78,15 @@ public class NpcPerception : MonoBehaviour
 			Debug.LogError("rayViewPoint null, assign empty object where vision raycasts should start from");
 
 		NpcDefinition = npcDefinition;
-
-		viewAngle = npcDefinition.ViewAngle;
-		viewDistance = npcDefinition.ViewDistance;
-		HighAlertDuration = npcDefinition.HighAlertDuration;
-		ViewAngleMultiplier = npcDefinition.ViewAngleMultiplier;
-		ViewDistanceMultiplier = npcDefinition.ViewDistanceMultiplier;
-
-		if (!StateMachine.EnableChase)
-			showGizmos = false;
+		viewAngle = NpcDefinition.ViewAngle;
+		viewDistance = NpcDefinition.ViewDistance;
+		showVision = false;
 	}
 	#endregion
 
 	private void OnDisable()
 	{
-		showGizmos = false;
+		showVision = false;
 	}
 
 	/// <summary>
@@ -140,6 +121,7 @@ public class NpcPerception : MonoBehaviour
 				return;
 			}
 
+			DetectedTarget.UpdateTargetDistance(transform.position);
 			Vector3 dirToTarget = (DetectedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
 			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, DetectedTarget.Collider)) return;
 
@@ -152,7 +134,10 @@ public class NpcPerception : MonoBehaviour
 			DetectedTarget = SearchForClosestTarget(SearchType.alive);
 
 			if (DetectedTarget != null && DetectedTarget.StatsHandler != null)
+			{
 				IsTargetDetected = true;
+				DetectedTarget.UpdateTargetDistance(transform.position);
+			}
 			else
 				IsTargetDetected = false;
 		}
@@ -163,17 +148,33 @@ public class NpcPerception : MonoBehaviour
 		if (detectEatableTargetTimer > 0) return;
 		detectEatableTargetTimer = detectEatableTargetCooldown;
 
-		TargetData closestTarget = SearchForClosestTarget(SearchType.eatable);
-
-		if (closestTarget != null)
+		if (IsEatableTargetDetected)
 		{
-			EatableTarget = closestTarget;
-			IsEatableTargetDetected = true;
+			if (EatableTarget.StatsHandler.LifeState != LifeState.dead)
+			{
+				IsEatableTargetDetected = false;
+				EatableTarget = null;
+				return;
+			}
+
+			EatableTarget.UpdateTargetDistance(transform.position);
+			Vector3 dirToTarget = (EatableTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
+			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, EatableTarget.Collider)) return;
+
+			IsEatableTargetDetected = false;
+			EatableTarget = null;
 		}
 		else
 		{
-			EatableTarget = null;
-			IsEatableTargetDetected = false;
+			EatableTarget = SearchForClosestTarget(SearchType.alive);
+
+			if (EatableTarget != null && EatableTarget.StatsHandler != null)
+			{
+				EatableTarget.UpdateTargetDistance(transform.position);
+				IsEatableTargetDetected = true;
+			}
+			else
+				IsEatableTargetDetected = false;
 		}
 	}
 	#endregion
@@ -229,7 +230,7 @@ public class NpcPerception : MonoBehaviour
 		switch (searchType)
 		{
 			case SearchType.alive:
-			return target.LifeState == LifeState.alive;
+			return target.LifeState != LifeState.dead;
 
 			case SearchType.eatable:
 			return target.LifeState == LifeState.dead &&
@@ -237,7 +238,7 @@ public class NpcPerception : MonoBehaviour
 
 			default:
 			Debug.LogError($"SearchType: {searchType} not set up, using default alive search");
-			return target.LifeState == LifeState.alive;
+			return target.LifeState != LifeState.dead;
 		}
 	}
 	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
@@ -291,6 +292,8 @@ public class NpcPerception : MonoBehaviour
 	{
 		EnableAlertMode();
 
+		if (InHigherPriorityState()) return;
+
 		StateMachine.locationToInvestigate = position;
 		StateMachine.HasLocationToInvestigate = true;
 		StateMachine.SwitchState(new NPCInvestigateState(StateMachine));
@@ -310,7 +313,7 @@ public class NpcPerception : MonoBehaviour
 	{
 		State state = StateMachine.CurrentState;
 
-		if (state is NPCRangedAttackState || state is NPCMeleeAttackState || state is NPCChaseState)
+		if (state is NPCRangedAttackState || state is NPCMeleeAttackState || state is NPCChaseState || state is NpcFleeState)
 			return true;
 		else
 			return false;
@@ -330,9 +333,9 @@ public class NpcPerception : MonoBehaviour
 	{
 		isInAlertMode = true;
 
-		viewAngle = NpcDefinition.ViewAngle * ViewAngleMultiplier;
-		viewDistance = NpcDefinition.ViewDistance * ViewDistanceMultiplier;
-		yield return new WaitForSeconds(HighAlertDuration);
+		viewAngle = NpcDefinition.ViewAngle * NpcDefinition.ViewAngleMultiplier;
+		viewDistance = NpcDefinition.ViewDistance * NpcDefinition.ViewDistanceMultiplier;
+		yield return new WaitForSeconds(NpcDefinition.HighAlertDuration);
 
 		viewAngle = NpcDefinition.ViewAngle;
 		viewDistance = NpcDefinition.ViewDistance;
@@ -347,7 +350,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	private IEnumerator SimulateNpcGlancingAround(float glanceDuration)
 	{
-		viewAngle = NpcDefinition.ViewAngle * ViewAngleMultiplier;
+		viewAngle = NpcDefinition.ViewAngle * NpcDefinition.ViewAngleMultiplier;
 		yield return new WaitForSeconds(glanceDuration);
 		viewAngle = NpcDefinition.ViewAngle;
 	}
@@ -356,7 +359,7 @@ public class NpcPerception : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 		//draw vision cone for debugging
-		if (!showGizmos) return;
+		if (!showVision) return;
 
 		Color finalColor = IsTargetDetected ? detectedColor : normalColor;
 		finalColor.a = colorAlpha;
@@ -379,11 +382,17 @@ public class TargetData
 	public StatsHandler StatsHandler;
 	public Collider Collider;
 	public Transform Transform;
+	public float Distance;
 
 	public TargetData(StatsHandler statsHandler, Collider collider, Transform transform)
 	{
 		StatsHandler = statsHandler;
 		Collider = collider;
 		Transform = transform;
+	}
+
+	public void UpdateTargetDistance(Vector3 currentPosition)
+	{
+		Distance = (currentPosition - Transform.position).sqrMagnitude;
 	}
 }

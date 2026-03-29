@@ -259,16 +259,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  team: 0
+  lifeState: 0
   health: 0
   water: 0
   food: 0
   stamina: 0
   headProtection: 0
   chestProtection: 0
-  EnableDeath: 1
-  EnableRespawn: 1
-  EnableZombification: 0
-  IsDead: 0
+  invincible: 0
+  forceRespawn: 0
 --- !u!114 &8904301891162826575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,29 +281,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f8e05518ec3ef340a546214ff43280e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Animator: {fileID: 4063393921656050725}
-  Agent: {fileID: 8323173595102019015}
-  CurrentSpeed: 0
   CurrentStateName: 
-  CurrentFollowPoint: {fileID: 0}
-  RotationSpeed: 10
-  EnableFreeMove: 1
+  CurrentDestination: {x: 0, y: 0, z: 0}
+  PatrolSpeed: 0
+  ChaseSpeed: 0
+  RotationSpeed: 0
   minIdleTime: 0
   maxIdleTime: 0
-  moveOnRandomPath: 1
-  RandomFollowPoint: {fileID: 0}
-  moveOnPatrolPath: 1
-  PatrolFollowPoint: {fileID: 0}
-  PatrolSpeed: 0.3
-  EnableEatCorpseState: 1
-  EnableInvestigate: 1
+  EnableMovement: 0
+  CurrentSpeed: 0
+  useBackupMovement: 0
+  moveOnRandomPath: 0
+  RandomMovementManager: {fileID: 0}
+  moveOnPatrolPath: 0
+  PatrolPoints: {fileID: 0}
+  currentPatrolPoint: 0
+  reachedCurrentControlPoint: 0
+  EnableFlee: 0
+  targetInFleeRange: 0
+  EnableEatCorpseState: 0
+  EnableInvestigate: 0
   HasLocationToInvestigate: 0
   HasInvestigatedLocation: 0
   locationToInvestigate: {x: 0, y: 0, z: 0}
-  EnableChase: 1
-  ChaseSpeed: 3.3
+  EnableChase: 0
   targetInChaseRange: 0
-  EnableMeleeAttack: 1
+  EnableMeleeAttack: 0
   hasEquippedMeleeWeapon: 0
   targetInMeleeRange: 0
   EnableRangedAttack: 0
@@ -343,15 +346,18 @@ MonoBehaviour:
     StatsHandler: {fileID: 0}
     Collider: {fileID: 0}
     Transform: {fileID: 0}
+    Distance: 0
   LastKilledTarget:
     StatsHandler: {fileID: 0}
     Collider: {fileID: 0}
     Transform: {fileID: 0}
+    Distance: 0
   IsEatableTargetDetected: 0
   EatableTarget:
     StatsHandler: {fileID: 0}
     Collider: {fileID: 0}
     Transform: {fileID: 0}
+    Distance: 0
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
   m_ObjectHideFlags: 0

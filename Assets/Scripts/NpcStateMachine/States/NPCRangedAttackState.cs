@@ -54,6 +54,13 @@ namespace Game.MyNPC
 				return;
 			}
 
+			// ----------- Ranged Attack to Flee -------------
+			if (stateMachine.EnableFlee && stateMachine.TargetInFleeRange)
+			{
+				stateMachine.SwitchState(new NpcFleeState(stateMachine));
+				return;
+			}
+
 			// ----------- Ranged Attack to Idle -------------
 			if (!stateMachine.TargetInChaseRange)
 			{

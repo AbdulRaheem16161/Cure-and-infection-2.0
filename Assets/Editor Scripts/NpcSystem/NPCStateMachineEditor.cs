@@ -16,49 +16,69 @@ public class NPCStateMachineEditor : Editor
         serializedObject.Update();
 
         // ─────────────────────────────
-        // General Values
-        EditorGUILayout.LabelField("General Values", EditorStyles.boldLabel);
-        npc.Animator = (Animator)EditorGUILayout.ObjectField("Animator", npc.Animator, typeof(Animator), true);
-        npc.Agent = (UnityEngine.AI.NavMeshAgent)EditorGUILayout.ObjectField("Agent", npc.Agent, typeof(UnityEngine.AI.NavMeshAgent), true);
-        npc.CurrentSpeed = EditorGUILayout.FloatField("Current Speed", npc.CurrentSpeed);
-        npc.CurrentStateName = EditorGUILayout.TextField("Current State Name", npc.CurrentStateName);
-        npc.CurrentDestination = EditorGUILayout.Vector3Field("Current State Name", npc.CurrentDestination);
-        npc.RotationSpeed = EditorGUILayout.FloatField("Rotation Speed", npc.RotationSpeed);
+        // Beliefs
+        EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
+		EditorGUI.indentLevel++;
+		npc.CurrentStateName = EditorGUILayout.TextField("Current State Name", npc.CurrentStateName);
+		npc.CurrentSpeed = EditorGUILayout.FloatField("Current Speed", npc.CurrentSpeed);
+		npc.CurrentDestination = EditorGUILayout.Vector3Field("Current Destination", npc.CurrentDestination);
+		EditorGUI.indentLevel--;
 
-        EditorGUILayout.Space(10);
+		EditorGUILayout.Space(10);
 
-        // ─────────────────────────────
-        // Free Move
-        EditorGUILayout.LabelField("FreeMove Settings", EditorStyles.boldLabel);
-        npc.EnableFreeMove = EditorGUILayout.Toggle("Enable Free Move", npc.EnableFreeMove);
-        if (npc.EnableFreeMove)
+		// ─────────────────────────────
+		// Free Move
+		EditorGUILayout.LabelField("Movement State Settings", EditorStyles.boldLabel);
+        npc.EnableMovement = EditorGUILayout.Toggle("Enable Movement", npc.EnableMovement);
+        if (npc.EnableMovement)
         {
-            EditorGUI.indentLevel++;
-			npc.PatrolSpeed = EditorGUILayout.FloatField("Patrol Speed", npc.PatrolSpeed);
+			npc.useBackupMovement = EditorGUILayout.Toggle("Use Backup Movement", npc.useBackupMovement);
 
+			EditorGUI.indentLevel++;
 			EditorGUILayout.LabelField("Random Move Settings", EditorStyles.boldLabel);
 			npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
-			npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
-				"Random Follow Point", npc.RandomMovementManager, typeof(RandomMovementManager), true);
+			if (npc.moveOnRandomPath)
+			{
+				npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
+					"Random Follow Point", npc.RandomMovementManager, typeof(RandomMovementManager), true);
+			}
+
+			EditorGUILayout.Space(10);
 
 			EditorGUILayout.LabelField("Patrol Move Settings", EditorStyles.boldLabel);
 			npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
-			npc.PatrolPoints = (TrackGizmos)EditorGUILayout.ObjectField("Patrol Points", npc.PatrolPoints, typeof(TrackGizmos), true);
-            EditorGUI.indentLevel--;
+			if (npc.moveOnPatrolPath)
+			{
+				npc.PatrolPoints = (TrackGizmos)EditorGUILayout.ObjectField("Patrol Points", npc.PatrolPoints, typeof(TrackGizmos), true);
+			}
+			EditorGUI.indentLevel--;
         }
 
         EditorGUILayout.Space(10);
 
 		// ─────────────────────────────
+		// Flee State
+		EditorGUILayout.LabelField("Flee State Settings", EditorStyles.boldLabel);
+		npc.EnableFlee = EditorGUILayout.Toggle("Enable Flee", npc.EnableFlee);
+		if (npc.EnableFlee)
+		{
+			EditorGUI.indentLevel++;
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInFleeRange"));
+			EditorGUI.indentLevel--;
+		}
+
+		EditorGUILayout.Space(10);
+
+		// ─────────────────────────────
 		// Eat Corpse
-		EditorGUILayout.LabelField("Eat Corpse Settings", EditorStyles.boldLabel);
+		EditorGUILayout.LabelField("Eat Corpse State Settings", EditorStyles.boldLabel);
 		npc.EnableEatCorpseState = EditorGUILayout.Toggle("Enable Eat Corpse", npc.EnableEatCorpseState);
 
 		EditorGUILayout.Space(10);
 
 		// ─────────────────────────────
 		// Investigate
-		EditorGUILayout.LabelField("Investigate Settings", EditorStyles.boldLabel);
+		EditorGUILayout.LabelField("Investigate State Settings", EditorStyles.boldLabel);
 		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
 		if (npc.EnableInvestigate)
 		{
@@ -73,20 +93,14 @@ public class NPCStateMachineEditor : Editor
 
 		// ─────────────────────────────
 		// Chase
-		EditorGUILayout.LabelField("Chase Settings", EditorStyles.boldLabel);
+		EditorGUILayout.LabelField("Chase State Settings", EditorStyles.boldLabel);
         npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
-        if (npc.EnableChase)
-        {
-            EditorGUI.indentLevel++;
-            npc.ChaseSpeed = EditorGUILayout.FloatField("Chase Speed", npc.ChaseSpeed);
-            EditorGUI.indentLevel--;
-        }
-
-        EditorGUILayout.Space(10);
-
-		// ─────────────────────────────
-		// Attack (General)
-		EditorGUILayout.LabelField("Attack Settings", EditorStyles.boldLabel);
+		if (npc.EnableChase)
+		{
+			EditorGUI.indentLevel++;
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInChaseRange"));
+			EditorGUI.indentLevel--;
+		}
 
         EditorGUILayout.Space(10);
 
@@ -94,13 +108,13 @@ public class NPCStateMachineEditor : Editor
         // Melee Attack
         EditorGUILayout.LabelField("Melee Attack State", EditorStyles.boldLabel);
         npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
-        if (npc.EnableMeleeAttack)
-        {
+		if (npc.EnableMeleeAttack)
+		{
 			EditorGUI.indentLevel++;
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("hasEquippedMeleeWeapon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInMeleeRange"));
 			EditorGUI.indentLevel--;
-        }
+		}
 
         EditorGUILayout.Space(10);
 

@@ -35,10 +35,10 @@ MonoBehaviour:
   consumableOne: {fileID: 0}
   consumableTwo: {fileID: 0}
   consumableThree: {fileID: 0}
-  viewAngle: 60
-  viewDistance: 12
-  highAlertDuration: 5
-  viewAngleMultiplier: 1.25
-  viewDistanceMultiplier: 2
+  viewAngle: 90
+  viewDistance: 20
+  highAlertDuration: 10
+  viewAngleMultiplier: 1.5
+  viewDistanceMultiplier: 1.5
   soundSensitivity: 0
   gameObjectPrefab: {fileID: 4125029387023148961, guid: e4195ad6d3e19ff4695153d850c778cc, type: 3}

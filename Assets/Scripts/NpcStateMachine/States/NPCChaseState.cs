@@ -9,7 +9,7 @@ namespace Game.MyNPC
 
         public override void Enter()
         {
-            MoveToNewDestination(NpcMoveType.moveToTarget);
+			MoveToDestination(stateMachine.NpcDefinition.ChaseSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
         }
 
         public override void Tick(float deltaTime)
@@ -17,7 +17,7 @@ namespace Game.MyNPC
 			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
 			if (stateMachine.TargetInChaseRange && stateMachine.NpcPerception.DetectedTarget != null)
-			    MoveToNewDestination(NpcMoveType.moveToTarget);
+				MoveToDestination(stateMachine.NpcDefinition.ChaseSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
 
 			#region State Transitions
 			// ----------- Chase to Ranged Attack -------------
@@ -33,6 +33,13 @@ namespace Game.MyNPC
 			if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
 			{
 				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
+				return;
+			}
+
+			// ----------- Chase to Flee if no melee weapon -------------
+			if (stateMachine.EnableFlee && stateMachine.TargetInFleeRange && !stateMachine.HasEquippedMeleeWeapon)
+			{
+				stateMachine.SwitchState(new NpcFleeState(stateMachine));
 				return;
 			}
 
