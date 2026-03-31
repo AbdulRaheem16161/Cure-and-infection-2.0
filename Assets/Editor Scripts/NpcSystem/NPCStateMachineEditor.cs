@@ -15,27 +15,40 @@ public class NPCStateMachineEditor : Editor
         var npc = (NPCStateMachine)target;
         serializedObject.Update();
 
-        // ─────────────────────────────
-        // Beliefs
-        EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
+		#region Runtime Info
+		EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		npc.CurrentStateName = EditorGUILayout.TextField("Current State Name", npc.CurrentStateName);
 		npc.CurrentSpeed = EditorGUILayout.FloatField("Current Speed", npc.CurrentSpeed);
 		npc.CurrentDestination = EditorGUILayout.Vector3Field("Current Destination", npc.CurrentDestination);
 		EditorGUI.indentLevel--;
+		#endregion
 
 		EditorGUILayout.Space(10);
 
-		// ─────────────────────────────
-		// Free Move
-		EditorGUILayout.LabelField("Movement State Settings", EditorStyles.boldLabel);
+		#region State Toggles
+		EditorGUILayout.LabelField("State Toggles", EditorStyles.boldLabel);
+		EditorGUI.indentLevel++;
+		npc.EnableFlee = EditorGUILayout.Toggle("Enable Flee", npc.EnableFlee);
+		npc.EnableRangedAttack = EditorGUILayout.Toggle("Enable Ranged Attack", npc.EnableRangedAttack);
+		npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
+		npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
+		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
+		npc.EnableEatCorpseState = EditorGUILayout.Toggle("Enable Eat Corpse", npc.EnableEatCorpseState);
+		EditorGUI.indentLevel--;
+		#endregion
+
+		EditorGUILayout.Space(10);
+
+		#region Movement State Toggles
+		EditorGUILayout.LabelField("Movement State Toggles", EditorStyles.boldLabel);
         npc.EnableMovement = EditorGUILayout.Toggle("Enable Movement", npc.EnableMovement);
         if (npc.EnableMovement)
         {
 			npc.useBackupMovement = EditorGUILayout.Toggle("Use Backup Movement", npc.useBackupMovement);
 
 			EditorGUI.indentLevel++;
-			EditorGUILayout.LabelField("Random Move Settings", EditorStyles.boldLabel);
+			EditorGUILayout.LabelField("Random Move", EditorStyles.boldLabel);
 			npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
 			if (npc.moveOnRandomPath)
 			{
@@ -45,7 +58,7 @@ public class NPCStateMachineEditor : Editor
 
 			EditorGUILayout.Space(10);
 
-			EditorGUILayout.LabelField("Patrol Move Settings", EditorStyles.boldLabel);
+			EditorGUILayout.LabelField("Patrol Move", EditorStyles.boldLabel);
 			npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
 			if (npc.moveOnPatrolPath)
 			{
@@ -53,48 +66,7 @@ public class NPCStateMachineEditor : Editor
 			}
 			EditorGUI.indentLevel--;
         }
-
-        EditorGUILayout.Space(10);
-
-		// ─────────────────────────────
-		// Flee State
-		EditorGUILayout.LabelField("Flee State Settings", EditorStyles.boldLabel);
-		npc.EnableFlee = EditorGUILayout.Toggle("Enable Flee", npc.EnableFlee);
-
-		EditorGUILayout.Space(10);
-
-		// ─────────────────────────────
-		// Eat Corpse
-		EditorGUILayout.LabelField("Eat Corpse State Settings", EditorStyles.boldLabel);
-		npc.EnableEatCorpseState = EditorGUILayout.Toggle("Enable Eat Corpse", npc.EnableEatCorpseState);
-
-		EditorGUILayout.Space(10);
-
-		// ─────────────────────────────
-		// Investigate
-		EditorGUILayout.LabelField("Investigate State Settings", EditorStyles.boldLabel);
-		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
-
-		EditorGUILayout.Space(10);
-
-		// ─────────────────────────────
-		// Chase
-		EditorGUILayout.LabelField("Chase State Settings", EditorStyles.boldLabel);
-        npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
-
-        EditorGUILayout.Space(10);
-
-        // ─────────────────────────────
-        // Melee Attack
-        EditorGUILayout.LabelField("Melee Attack State", EditorStyles.boldLabel);
-        npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
-
-        EditorGUILayout.Space(10);
-
-        // ─────────────────────────────
-        // Ranged Attack
-        EditorGUILayout.LabelField("Ranged Attack State", EditorStyles.boldLabel);
-        npc.EnableRangedAttack = EditorGUILayout.Toggle("Enable Ranged Attack", npc.EnableRangedAttack);
+		#endregion
 
 		if (GUI.changed)
         {

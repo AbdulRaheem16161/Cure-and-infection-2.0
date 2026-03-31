@@ -61,7 +61,6 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.LabelField("Target Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Has Target", beliefs.HasTarget);
-		EditorGUILayout.Toggle("Target In Flee Range", beliefs.TargetInFleeRange);
 		EditorGUILayout.Toggle("Target In Shooting Range", beliefs.TargetInShootingRange);
 		EditorGUILayout.Toggle("Target In Melee Range", beliefs.TargetInMeleeRange);
 		EditorGUI.indentLevel--;
@@ -69,10 +68,22 @@ public class NpcBeliefsEditor : Editor
 
 		EditorGUILayout.Space(10);
 
+		#region Flee Beliefs
+		EditorGUILayout.LabelField("Flee Beliefs", EditorStyles.boldLabel);
+		EditorGUI.indentLevel++;
+		EditorGUILayout.Toggle("Target In Flee Range", beliefs.TargetInFleeRange);
+		EditorGUILayout.Toggle("Safe From Flee Target", beliefs.SafeFromFleeTarget);
+		EditorGUI.indentLevel--;
+		#endregion
+
+		EditorGUILayout.Space(10);
+
 		#region Equipment Beliefs
 		EditorGUILayout.LabelField("Equipment Beliefs", EditorStyles.boldLabel);
+		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Ranged Weapon In Hands", beliefs.RangedWeaponInHands);
 		EditorGUILayout.Toggle("Melee Weapon In Hands", beliefs.MeleeWeaponInHands);
+		EditorGUI.indentLevel--;
 		#endregion
 	}
 

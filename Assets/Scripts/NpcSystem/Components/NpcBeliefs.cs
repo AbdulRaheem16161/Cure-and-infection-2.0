@@ -43,7 +43,7 @@ public class NpcBeliefs : MonoBehaviour
 
 	#region Flee Beliefs
 	public bool TargetInFleeRange => TargetInFleeRangeCheck();
-	public bool SafeFromFleeTarget;
+	[NonSerialized] public bool SafeFromFleeTarget;
 	#endregion
 
 	#region Equipment Beliefs
