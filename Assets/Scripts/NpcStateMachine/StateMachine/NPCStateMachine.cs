@@ -1,27 +1,28 @@
 using Game.Core;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
-using static NPCSpawner;
 
 namespace Game.MyNPC
 {
+	[RequireComponent(typeof(Animator))]
+	[RequireComponent(typeof(NavMeshAgent))]
+	[RequireComponent(typeof(NpcBeliefs))]
+	[RequireComponent(typeof(NpcPerception))]
 	[RequireComponent(typeof(StatsHandler))]
 	[RequireComponent(typeof(EquipmentHandler))]
 	[RequireComponent(typeof(InventoryHandler))]
-	[RequireComponent(typeof(NpcPerception))]
     public class NPCStateMachine : StateMachine
     {
 		public Animator Animator { get; private set; }
 		public NavMeshAgent Agent { get; private set; }
+		public NpcBeliefs Beliefs { get; private set; }
+		public NpcPerception NpcPerception { get; private set; }
+		public NpcDefinition NpcDefinition { get; private set; }
 		public StatsHandler StatsHandler { get; private set; }
         public EquipmentHandler EquipmentHandler { get; private set; }
         public InventoryHandler InventoryHandler { get; private set; }
-		public NpcPerception NpcPerception { get; private set; }
-		public NpcDefinition NpcDefinition { get; private set; }
 
 		#region Runtime Info
 		[Header("Runtime Info")]
@@ -31,8 +32,31 @@ namespace Game.MyNPC
 		[Space(10)]
 		#endregion
 
-		#region Movement State Settings
-		[Header("Movement State Settings")]
+		private float stateSwitchCooldown = 0.1f;
+
+		#region NpcStates;
+		private NpcFleeState fleeState;
+		private NPCRangedAttackState rangedAttackState;
+		private NPCMeleeAttackState meleeAttackState;
+		private NPCChaseState chaseState;
+		private NPCEatCorpseState eatCorpseState;
+		private NPCInvestigateState investigateState;
+		private NPCMoveState moveState;
+		private NPCIdleState idleState;
+		#endregion
+
+		#region Npc State Toggles
+		[Header("Npc State Toggles")]
+		public bool EnableFlee;
+		public bool EnableRangedAttack;
+		public bool EnableMeleeAttack;
+		public bool EnableChase;
+		public bool EnableEatCorpseState;
+		public bool EnableInvestigate;
+		#endregion
+
+		#region Movement State Toggles
+		[Header("Movement State Toggles")]
 		public bool EnableMovement;
 		public bool useBackupMovement = true;
 
@@ -45,58 +69,6 @@ namespace Game.MyNPC
 		public TrackGizmos PatrolPoints;
 		public int currentPatrolPoint = 0;
 		public bool reachedCurrentControlPoint = false;
-
-		[Space(10)]
-		#endregion
-
-		#region Flee State 
-		[Header("Flee State")]
-		public bool EnableFlee;
-		public readonly float fleeDistance = 10;
-		public bool TargetInFleeRange => TargetInFleeRangeCheck();
-
-		[SerializeField, ReadOnly] private bool targetInFleeRange;
-		#endregion
-
-		#region Eat Corpse State
-		public bool EnableEatCorpseState;
-		#endregion
-
-		#region Investigate State
-		[Header("Investigate State")]
-		public bool EnableInvestigate;
-		public bool HasLocationToInvestigate;
-		public bool HasInvestigatedLocation;
-		public Vector3 locationToInvestigate;
-		#endregion
-
-		#region Chase State
-		[Header("Chase State")]
-		public bool EnableChase;
-		public bool TargetInChaseRange => NpcPerception.IsTargetDetected;
-		[SerializeField, ReadOnly] private bool targetInChaseRange;
-		[Space(10)]
-		#endregion
-
-        #region Melee Attack State
-        [Header("Melee Attack State")]
-        public bool EnableMeleeAttack;
-		public bool HasEquippedMeleeWeapon => EquipmentHandler.meleeWeaponInHands;
-		public bool TargetInMeleeRange => TargetInMeleeRangeCheck();
-
-		[SerializeField, ReadOnly] private bool hasEquippedMeleeWeapon;
-		[SerializeField, ReadOnly] private bool targetInMeleeRange;
-		[Space(10)]
-        #endregion
-
-        #region Ranged Attack State
-        [Header("Ranged Attack State")]
-        public bool EnableRangedAttack;
-		public bool HasEquippedRangedWeapon => EquipmentHandler.rangedWeaponInHands;
-		public bool TargetInShootingRange => TargetInShootingRangeCheck();
-
-		[SerializeField, ReadOnly] private bool hasEquippedRangedWeapon;
-		[SerializeField, ReadOnly] private bool targetInShootingRange;
 		#endregion
 
 		///<summery>
@@ -114,9 +86,21 @@ namespace Game.MyNPC
 			StatsHandler = GetComponent<StatsHandler>();
 			EquipmentHandler = GetComponent<EquipmentHandler>();
 			InventoryHandler = GetComponent<InventoryHandler>();
+			Beliefs = GetComponent<NpcBeliefs>();
 			NpcPerception = GetComponent<NpcPerception>();
 			#endregion
-        }
+
+			#region state initializations
+			fleeState = new NpcFleeState(this);
+			rangedAttackState = new NPCRangedAttackState(this);
+			meleeAttackState = new NPCMeleeAttackState(this);
+			chaseState = new NPCChaseState(this);
+			eatCorpseState = new NPCEatCorpseState(this);
+			investigateState = new NPCInvestigateState(this);
+			moveState = new NPCMoveState(this);
+			idleState = new NPCIdleState(this);
+			#endregion
+		}
 
 		public void InitializeStateMachine(NpcDefinition npcDefinition)
 		{
@@ -132,7 +116,7 @@ namespace Game.MyNPC
 			if (npcDefinition.StartingLifeState == NpcDefinition.LifeState.zombified)
 				EnableEatCorpseState = true;
 
-			Agent.speed = npcDefinition.PatrolSpeed;
+			Agent.speed = npcDefinition.WalkSpeed;
 			Agent.angularSpeed = npcDefinition.RotationSpeed;
 
 			SwitchState(new NPCMoveState(this));
@@ -167,31 +151,92 @@ namespace Game.MyNPC
 		}
 		#endregion
 
+		protected override void Update()
+		{
+			// ---------- STATE PRIORITY DESCENDING ----------
+
+			// Stay in current state if its conditions are still valid
+			if (currentState == fleeState && ShouldFlee()) { base.Update(); return; }
+			if (currentState == rangedAttackState && ShouldRangedAttack()) { base.Update(); return; }
+			if (currentState == meleeAttackState && ShouldMeleeAttack()) { base.Update(); return; }
+			if (currentState == chaseState && ShouldChase()) { base.Update(); return; }
+			if (currentState == eatCorpseState && ShouldEatCorpse()) { base.Update(); return; }
+			if (currentState == investigateState && ShouldInvestigate()) { base.Update(); return; }
+			if (currentState == moveState && ShouldMove()) { base.Update(); return; }
+			if (currentState == idleState && ShouldIdle()) { base.Update(); return; }
+
+			// Otherwise, switch to the highest-priority valid state
+			if (ShouldFlee()) SwitchState(fleeState, true);
+			else if (ShouldRangedAttack()) SwitchState(rangedAttackState, true);
+			else if (ShouldMeleeAttack()) SwitchState(meleeAttackState, true);
+			else if (ShouldChase()) SwitchState(chaseState, true);
+			else if (ShouldEatCorpse()) SwitchState(eatCorpseState, true);
+			else if (ShouldInvestigate()) SwitchState(investigateState, true);
+			else if (ShouldMove()) SwitchState(moveState, true);
+			else if (ShouldIdle()) SwitchState(idleState, true);
+		}
+
 		private void LateUpdate()
         {
-            UpdateStateReadValues();
+			CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
 			UpdateAnimationMoveSpeed();
         }
 
-		#region update read values
-		private void UpdateStateReadValues()
-        {
-			CurrentStateName = currentState != null ? currentState.GetType().Name : "No State";
-
-			targetInChaseRange = TargetInChaseRange;
-
-            hasEquippedMeleeWeapon = HasEquippedMeleeWeapon;
-            targetInMeleeRange = TargetInMeleeRange;
-
-            hasEquippedRangedWeapon = HasEquippedRangedWeapon;
-            targetInShootingRange = TargetInShootingRange;
-
-			targetInFleeRange = TargetInFleeRange;
-        }
+		#region State Transition Checks
+		private bool ShouldFlee()
+		{
+			if (EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.SafeFromFleeTarget && !Beliefs.MeleeWeaponInHands)
+				return true;
+			else return false;
+		}
+		private bool ShouldRangedAttack()
+		{
+			if (EnableRangedAttack && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands)
+				return true;
+			else return false;
+		}
+		private bool ShouldMeleeAttack()
+		{
+			if (EnableMeleeAttack && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands)
+				return true;
+			else return false;
+		}
+		private bool ShouldChase()
+		{
+			bool targetOutOfAttackRange = !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
+			if (EnableChase && Beliefs.HasTarget && targetOutOfAttackRange)
+				return true;
+			else
+				return false;
+		}
+		private bool ShouldEatCorpse()
+		{
+			if (EnableEatCorpseState && StatsHandler.LifeState == NpcDefinition.LifeState.zombified) //add has eatable target
+				return true;
+			else return false;
+		}
+		private bool ShouldInvestigate()
+		{
+			if (EnableInvestigate && Beliefs.FreeToInvestigate)
+				return true;
+			else return false;
+		}
+		private bool ShouldMove()
+		{
+			if (EnableMovement && !Beliefs.HasTarget && !Beliefs.Idling)
+				return true;
+			else return false;
+		}
+		private bool ShouldIdle()
+		{
+			if (Beliefs.Idling && !Beliefs.HasTarget)
+				return true;
+			else return false;
+		}
 		#endregion
 
 		#region update animation speed based on move speed
-        private void UpdateAnimationMoveSpeed()
+		private void UpdateAnimationMoveSpeed()
 		{
 			float smoothTime = 0.2f;
 			if (Agent != null && Agent.enabled)
@@ -199,40 +244,6 @@ namespace Game.MyNPC
 
 			Animator.SetFloat("Speed", CurrentSpeed);
         }
-		#endregion
-
-		#region target in melee/ranged attack ranges check
-		private bool TargetInMeleeRangeCheck()
-		{
-			if (!NpcPerception.IsTargetDetected || !HasEquippedMeleeWeapon) return false;
-
-			if (NpcPerception.DetectedTarget.Distance > Agent.stoppingDistance + 0.1f)
-				return false;
-			else
-				return true;
-		}
-
-		private bool TargetInShootingRangeCheck()
-        {
-            if (!NpcPerception.IsTargetDetected || !HasEquippedRangedWeapon) return false;
-
-			if (NpcPerception.DetectedTarget.Distance > EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange) 
-                return false;
-            else
-                return true;
-        }
-		#endregion
-
-		#region target in flee range check
-		private bool TargetInFleeRangeCheck()
-		{
-			if (!NpcPerception.IsTargetDetected || HasEquippedMeleeWeapon) return false;
-
-			if (NpcPerception.DetectedTarget.Distance > fleeDistance)
-				return false;
-			else
-				return true;
-		}
 		#endregion
 
 		#region death event listener + die coroutine and death complete invoking

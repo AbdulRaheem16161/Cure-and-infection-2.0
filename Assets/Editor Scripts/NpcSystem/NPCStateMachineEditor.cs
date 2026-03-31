@@ -60,12 +60,6 @@ public class NPCStateMachineEditor : Editor
 		// Flee State
 		EditorGUILayout.LabelField("Flee State Settings", EditorStyles.boldLabel);
 		npc.EnableFlee = EditorGUILayout.Toggle("Enable Flee", npc.EnableFlee);
-		if (npc.EnableFlee)
-		{
-			EditorGUI.indentLevel++;
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInFleeRange"));
-			EditorGUI.indentLevel--;
-		}
 
 		EditorGUILayout.Space(10);
 
@@ -80,14 +74,6 @@ public class NPCStateMachineEditor : Editor
 		// Investigate
 		EditorGUILayout.LabelField("Investigate State Settings", EditorStyles.boldLabel);
 		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
-		if (npc.EnableInvestigate)
-		{
-			EditorGUI.indentLevel++;
-			npc.HasLocationToInvestigate = EditorGUILayout.Toggle("Has Location To Investigate", npc.HasLocationToInvestigate);
-			npc.HasInvestigatedLocation = EditorGUILayout.Toggle("Has Investigated Location", npc.HasInvestigatedLocation);
-			npc.locationToInvestigate = EditorGUILayout.Vector3Field("location To Investigate", npc.locationToInvestigate);
-			EditorGUI.indentLevel--;
-		}
 
 		EditorGUILayout.Space(10);
 
@@ -95,12 +81,6 @@ public class NPCStateMachineEditor : Editor
 		// Chase
 		EditorGUILayout.LabelField("Chase State Settings", EditorStyles.boldLabel);
         npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
-		if (npc.EnableChase)
-		{
-			EditorGUI.indentLevel++;
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInChaseRange"));
-			EditorGUI.indentLevel--;
-		}
 
         EditorGUILayout.Space(10);
 
@@ -108,13 +88,6 @@ public class NPCStateMachineEditor : Editor
         // Melee Attack
         EditorGUILayout.LabelField("Melee Attack State", EditorStyles.boldLabel);
         npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
-		if (npc.EnableMeleeAttack)
-		{
-			EditorGUI.indentLevel++;
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("hasEquippedMeleeWeapon"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInMeleeRange"));
-			EditorGUI.indentLevel--;
-		}
 
         EditorGUILayout.Space(10);
 
@@ -122,13 +95,6 @@ public class NPCStateMachineEditor : Editor
         // Ranged Attack
         EditorGUILayout.LabelField("Ranged Attack State", EditorStyles.boldLabel);
         npc.EnableRangedAttack = EditorGUILayout.Toggle("Enable Ranged Attack", npc.EnableRangedAttack);
-        if (npc.EnableRangedAttack)
-		{
-			EditorGUI.indentLevel++;
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("hasEquippedRangedWeapon"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("targetInShootingRange"));
-			EditorGUI.indentLevel--;
-        }
 
 		if (GUI.changed)
         {

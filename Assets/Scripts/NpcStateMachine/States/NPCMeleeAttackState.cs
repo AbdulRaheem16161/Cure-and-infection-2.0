@@ -20,6 +20,7 @@ namespace Game.MyNPC
 		public override void Enter()
         {
 			stateMachine.Agent.isStopped = true;
+			stateMachine.Beliefs.InvestigateLocation = null;
 			randomSwingDelay = GetRandomSwingDelay();
         }
 
@@ -29,29 +30,6 @@ namespace Game.MyNPC
 
 			//attack logic
 			HandleMeleeAttack(deltaTime);
-
-			#region State Transitions 
-			// ----------- Early return -------------
-			if (!stateMachine.EnableMeleeAttack || !stateMachine.HasEquippedMeleeWeapon)
-			{
-				stateMachine.SwitchState(new NPCIdleState(stateMachine));
-				return;
-			}
-
-			// ----------- Melee Attack to Chase -------------
-			if (!stateMachine.TargetInMeleeRange && stateMachine.TargetInChaseRange)
-            {
-                stateMachine.SwitchState(new NPCChaseState(stateMachine));
-                return;
-            }
-
-			// ----------- Melee Attack to Idle -------------
-			if (!stateMachine.TargetInChaseRange)
-			{
-				stateMachine.SwitchState(new NPCIdleState(stateMachine));
-				return;
-			}
-			#endregion
 		}
 
         public override void Exit()

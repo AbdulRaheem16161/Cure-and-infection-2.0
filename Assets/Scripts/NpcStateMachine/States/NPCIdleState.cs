@@ -32,48 +32,10 @@ namespace Game.MyNPC
 			stateMachine.Animator.SetFloat("Speed", stateMachine.CurrentSpeed);
 
 			// Wait until random time is over
-			if (timer >= WaitBeforeFreeMove && stateMachine.EnableMovement)
+			if (timer >= WaitBeforeFreeMove)
 			{
-				stateMachine.SwitchState(new NPCMoveState(stateMachine));
-				return;
+                stateMachine.Beliefs.Idling = false;
 			}
-
-			#region State Transitions
-			// ----------- Idle to Ranged Attack -------------
-			if (stateMachine.TargetInShootingRange && stateMachine.EnableRangedAttack)
-			{
-				stateMachine.SwitchState(new NPCRangedAttackState(stateMachine));
-				return;
-			}
-
-			// ----------- Idle to Melee Attack -------------
-			if (stateMachine.TargetInMeleeRange && stateMachine.EnableMeleeAttack)
-			{
-				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
-				return;
-			}
-
-			// ----------- Idle to Chase -------------
-			if (stateMachine.NpcPerception.IsTargetDetected && stateMachine.EnableChase)
-			{
-				stateMachine.SwitchState(new NPCChaseState(stateMachine));
-				return;
-			}
-
-			// ----------- Free Move to Eat Corpse -------------
-			if (stateMachine.NpcPerception.IsEatableTargetDetected && stateMachine.EnableEatCorpseState)
-			{
-				stateMachine.SwitchState(new NPCEatCorpseState(stateMachine));
-				return;
-			}
-
-			// ----------- Chase to Flee -------------
-			if (stateMachine.EnableFlee && stateMachine.TargetInFleeRange)
-			{
-				stateMachine.SwitchState(new NpcFleeState(stateMachine));
-				return;
-			}
-            #endregion
         }
     }
 }

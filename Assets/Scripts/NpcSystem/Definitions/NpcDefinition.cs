@@ -25,7 +25,12 @@ public class NpcDefinition : ScriptableObject
 	[SerializeField] private bool supportsEquipmentModels;
 	#endregion
 
-	#region npc stats
+	#region definition prefab to use
+	[Header("Definition Prefab To Use")]
+	public GameObject gameObjectPrefab;
+	#endregion
+
+	#region Npc Stats
 	[Header("Npc Stats")]
 	[SerializeField] private int maxHealth;
 	[SerializeField] private int maxWater;
@@ -33,16 +38,31 @@ public class NpcDefinition : ScriptableObject
 	[SerializeField] private int maxStamina;
 	#endregion
 
-	#region npc behaviour stats
-	[Header("Npc Behaviour")]
-	[SerializeField] private float patrolSpeed;
-	[SerializeField] private float chaseSpeed;
+	#region Npc Movement Behaviour
+	[Header("Npc Movement Behaviour")]
+	[SerializeField] private float walkSpeed;
+	[SerializeField] private float sprintSpeed;
 	[SerializeField] private float rotationSpeed;
+	[SerializeField] private float fleeDistance;
 	[SerializeField] private float minIdleTime;
 	[SerializeField] private float maxIdleTime;
 	#endregion
 
-	#region npc equipment
+	#region NPC Perception Settings
+	[Header("NPC Perception Settings")]
+	[SerializeField] private float viewAngle = 45f;
+	[SerializeField] private float viewDistance = 5f;
+	[SerializeField] private float highAlertDuration = 5f;
+	[SerializeField] private float viewAngleMultiplier = 1.5f;
+	[SerializeField] private float viewDistanceMultiplier = 2f;
+	#endregion
+
+	#region npc sound detection
+	[Header("NPC Sound Detection")]
+	[SerializeField] private float soundSensitivity; //percentage chance divided by distance to sound source or something
+	#endregion
+
+	#region Npc Equipment
 	[Header("Npc Equipment")]
 	/// <summary>
 	/// for zombie ranged attacks we can create a unique WeaponRangedDefinition ZombieSpit as they should work fine if set up like a single shot gun
@@ -61,25 +81,6 @@ public class NpcDefinition : ScriptableObject
 	[SerializeField] private ConsumableDefinition consumableThree;
 	#endregion
 
-	#region npc vision detection
-	[Header("NPC Vision Detection")]
-	[SerializeField] private float viewAngle = 45f;
-	[SerializeField] private float viewDistance = 5f;
-	[SerializeField] private float highAlertDuration = 5f;
-	[SerializeField] private float viewAngleMultiplier = 1.5f;
-	[SerializeField] private float viewDistanceMultiplier = 2f;
-	#endregion
-
-	#region npc sound detection
-	[Header("NPC Sound Detection")]
-	[SerializeField] private float soundSensitivity; //percentage chance divided by distance to sound source or something
-	#endregion
-
-	#region definition prefab to use
-	[Header("Definition Prefab To Use")]
-	public GameObject gameObjectPrefab;
-	#endregion
-
 	#region read only
 	public string NpcName => npcName;
 	public bool Player => isPlayer;
@@ -87,16 +88,27 @@ public class NpcDefinition : ScriptableObject
 	public EntityFlags Flags => entityFlags;
 	public bool SupportsEquipmentModels => supportsEquipmentModels;
 
+	public GameObject GameObjectPrefab => gameObjectPrefab;
+
 	public int MaxHealth => maxHealth;
 	public int MaxWater => maxWater;
 	public int MaxFood => maxFood;
 	public int MaxStamina => maxStamina;
 
-	public float PatrolSpeed => patrolSpeed;
-	public float ChaseSpeed => chaseSpeed;
+	public float WalkSpeed => walkSpeed;
+	public float SprintSpeed => sprintSpeed;
 	public float RotationSpeed => rotationSpeed;
+	public float FleeDistance => fleeDistance;
 	public float MinIdleTime => minIdleTime;
 	public float MaxIdleTime => maxIdleTime;
+
+	public float ViewAngle => viewAngle;
+	public float ViewDistance => viewDistance;
+	public float HighAlertDuration => highAlertDuration;
+	public float ViewAngleMultiplier => viewAngleMultiplier;
+	public float ViewDistanceMultiplier => viewDistanceMultiplier;
+
+	public float SoundSensitivity => soundSensitivity;
 
 	public WeaponRangedDefinition WeaponOne => weaponOne;
 	public WeaponRangedDefinition WeaponTwo => weaponTwo;
@@ -109,15 +121,5 @@ public class NpcDefinition : ScriptableObject
 	public ConsumableDefinition ConsumableOne => consumableOne;
 	public ConsumableDefinition ConsumableTwo => consumableTwo;
 	public ConsumableDefinition ConsumableThree => consumableThree;
-
-	public float ViewAngle => viewAngle;
-	public float ViewDistance => viewDistance;
-	public float HighAlertDuration => highAlertDuration;
-	public float ViewAngleMultiplier => viewAngleMultiplier;
-	public float ViewDistanceMultiplier => viewDistanceMultiplier;
-
-	public float SoundSensitivity => soundSensitivity;
-
-	public GameObject GameObjectPrefab => gameObjectPrefab;
 	#endregion
 }

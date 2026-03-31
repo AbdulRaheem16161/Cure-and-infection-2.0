@@ -32,8 +32,8 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 
 	#region item in hands
-	public bool HasRangedWeaponInHands {  get; private set; }
-	public bool HasMeleeWeaponInHands {  get; private set; }
+	public bool HasRangedWeaponInHands { get; private set; }
+	public bool HasMeleeWeaponInHands { get; private set; }
 	[ReadOnly] public WeaponRanged rangedWeaponInHands;
 	[ReadOnly] public WeaponMelee meleeWeaponInHands;
 	#endregion

@@ -108,9 +108,10 @@ GameObject:
   - component: {fileID: 4063393921656050725}
   - component: {fileID: 8323173595102019015}
   - component: {fileID: -5772089214708602261}
-  - component: {fileID: 2458076507582956389}
+  - component: {fileID: 1459240498261318319}
   - component: {fileID: 8904301891162826575}
   - component: {fileID: 2656706438221597951}
+  - component: {fileID: 2458076507582956389}
   - component: {fileID: -6753609607226209330}
   - component: {fileID: -5542053669577002877}
   m_Layer: 8
@@ -247,6 +248,88 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NpcDefinition: {fileID: 0}
+--- !u!114 &1459240498261318319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556762a593628674da71c4a27adcac09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SafeFromFleeTarget: 0
+--- !u!114 &8904301891162826575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8e05518ec3ef340a546214ff43280e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CurrentStateName: 
+  CurrentSpeed: 0
+  CurrentDestination: {x: 0, y: 0, z: 0}
+  EnableFlee: 0
+  EnableRangedAttack: 0
+  EnableMeleeAttack: 0
+  EnableChase: 0
+  EnableEatCorpseState: 0
+  EnableInvestigate: 0
+  EnableMovement: 0
+  useBackupMovement: 0
+  moveOnRandomPath: 0
+  RandomMovementManager: {fileID: 0}
+  moveOnPatrolPath: 0
+  PatrolPoints: {fileID: 0}
+  currentPatrolPoint: 0
+  reachedCurrentControlPoint: 0
+--- !u!114 &2656706438221597951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4125029387023148961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5395a13c361ec294086a798047f3e532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rayViewPoint: {fileID: 5071036370674661854}
+  viewAngle: 45
+  viewDistance: 5
+  isInAlertMode: 0
+  showVision: 0
+  IsTargetDetected: 0
+  DetectedTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
+    Distance: 0
+  LastKilledTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
+    Distance: 0
+  IsEatableTargetDetected: 0
+  EatableTarget:
+    StatsHandler: {fileID: 0}
+    Collider: {fileID: 0}
+    Transform: {fileID: 0}
+    Distance: 0
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 256
+  lineOfSightMask:
+    serializedVersion: 2
+    m_Bits: 320
 --- !u!114 &2458076507582956389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,95 +352,6 @@ MonoBehaviour:
   chestProtection: 0
   invincible: 0
   forceRespawn: 0
---- !u!114 &8904301891162826575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4125029387023148961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f8e05518ec3ef340a546214ff43280e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CurrentStateName: 
-  CurrentDestination: {x: 0, y: 0, z: 0}
-  PatrolSpeed: 0
-  ChaseSpeed: 0
-  RotationSpeed: 0
-  minIdleTime: 0
-  maxIdleTime: 0
-  EnableMovement: 0
-  CurrentSpeed: 0
-  useBackupMovement: 0
-  moveOnRandomPath: 0
-  RandomMovementManager: {fileID: 0}
-  moveOnPatrolPath: 0
-  PatrolPoints: {fileID: 0}
-  currentPatrolPoint: 0
-  reachedCurrentControlPoint: 0
-  EnableFlee: 0
-  targetInFleeRange: 0
-  EnableEatCorpseState: 0
-  EnableInvestigate: 0
-  HasLocationToInvestigate: 0
-  HasInvestigatedLocation: 0
-  locationToInvestigate: {x: 0, y: 0, z: 0}
-  EnableChase: 0
-  targetInChaseRange: 0
-  EnableMeleeAttack: 0
-  hasEquippedMeleeWeapon: 0
-  targetInMeleeRange: 0
-  EnableRangedAttack: 0
-  hasEquippedRangedWeapon: 0
-  targetInShootingRange: 0
---- !u!114 &2656706438221597951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4125029387023148961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5395a13c361ec294086a798047f3e532, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rayViewPoint: {fileID: 5071036370674661854}
-  viewAngle: 45
-  viewDistance: 5
-  showGizmos: 0
-  HighAlertDuration: 3
-  ViewAngleMultiplier: 1.5
-  ViewDistanceMultiplier: 2
-  isInAlertMode: 0
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 256
-  lineOfSightMask:
-    serializedVersion: 2
-    m_Bits: 320
-  normalColor: {r: 0, g: 1, b: 0, a: 1}
-  detectedColor: {r: 1, g: 0, b: 0, a: 1}
-  colorAlpha: 0.25
-  IsTargetDetected: 0
-  DetectedTarget:
-    StatsHandler: {fileID: 0}
-    Collider: {fileID: 0}
-    Transform: {fileID: 0}
-    Distance: 0
-  LastKilledTarget:
-    StatsHandler: {fileID: 0}
-    Collider: {fileID: 0}
-    Transform: {fileID: 0}
-    Distance: 0
-  IsEatableTargetDetected: 0
-  EatableTarget:
-    StatsHandler: {fileID: 0}
-    Collider: {fileID: 0}
-    Transform: {fileID: 0}
-    Distance: 0
 --- !u!114 &-6753609607226209330
 MonoBehaviour:
   m_ObjectHideFlags: 0

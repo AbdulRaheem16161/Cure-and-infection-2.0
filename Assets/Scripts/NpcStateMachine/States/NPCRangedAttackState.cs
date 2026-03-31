@@ -21,8 +21,9 @@ namespace Game.MyNPC
 			lookingAtTarget = false;
 			stateMachine.Agent.updateRotation = false;
             stateMachine.Agent.isStopped = true;
+			stateMachine.Beliefs.InvestigateLocation = null;
             BurstFireBehaviour();
-        }
+		}
 
         public override void Tick(float deltaTime)
         {
@@ -31,43 +32,6 @@ namespace Game.MyNPC
 			//logic to handle looking at target and handling shooting
 			HandleShootingBehaviour(deltaTime);
 			LookAtDirection(stateMachine.NpcPerception.DetectedTarget.Transform.position);
-
-			#region State Transitions
-			// ----------- Early return -------------
-			if (!stateMachine.EnableRangedAttack || !stateMachine.HasEquippedRangedWeapon)
-			{
-				stateMachine.SwitchState(new NPCIdleState(stateMachine));
-				return;
-			}	
-
-			// ----------- Ranged Attack to Melee Attack -------------
-			if (stateMachine.TargetInMeleeRange && stateMachine.HasEquippedMeleeWeapon && stateMachine.EnableMeleeAttack)
-			{
-				stateMachine.SwitchState(new NPCMeleeAttackState(stateMachine));
-				return;
-			}
-
-			// ----------- Ranged Attack to Chase -------------
-			if (!stateMachine.TargetInShootingRange && stateMachine.TargetInChaseRange)
-			{
-				stateMachine.SwitchState(new NPCChaseState(stateMachine));
-				return;
-			}
-
-			// ----------- Ranged Attack to Flee -------------
-			if (stateMachine.EnableFlee && stateMachine.TargetInFleeRange)
-			{
-				stateMachine.SwitchState(new NpcFleeState(stateMachine));
-				return;
-			}
-
-			// ----------- Ranged Attack to Idle -------------
-			if (!stateMachine.TargetInChaseRange)
-			{
-				stateMachine.SwitchState(new NPCIdleState(stateMachine));
-				return;
-			}
-			#endregion
 		}
 
         public override void Exit()

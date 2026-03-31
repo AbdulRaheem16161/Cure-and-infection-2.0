@@ -1,8 +1,5 @@
-using System;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
-[RequireComponent(typeof(StatsHandler))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class InventoryHandler : MonoBehaviour, IAmmoGiver
 {

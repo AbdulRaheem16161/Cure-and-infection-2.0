@@ -291,32 +291,12 @@ public class NpcPerception : MonoBehaviour
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
 		EnableAlertMode();
-
-		if (InHigherPriorityState()) return;
-
-		StateMachine.locationToInvestigate = position;
-		StateMachine.HasLocationToInvestigate = true;
-		StateMachine.SwitchState(new NPCInvestigateState(StateMachine));
+		StateMachine.Beliefs.InvestigateLocation = position;
 	}
 	public void InvestigateSound(Vector3 position)
 	{
 		EnableAlertMode();
-
-		if (InHigherPriorityState()) return;
-
-		StateMachine.locationToInvestigate = position;
-		StateMachine.HasLocationToInvestigate = true;
-		StateMachine.SwitchState(new NPCInvestigateState(StateMachine));
-	}
-
-	private bool InHigherPriorityState()
-	{
-		State state = StateMachine.CurrentState;
-
-		if (state is NPCRangedAttackState || state is NPCMeleeAttackState || state is NPCChaseState || state is NpcFleeState)
-			return true;
-		else
-			return false;
+		StateMachine.Beliefs.InvestigateLocation = position;
 	}
 	#endregion
 

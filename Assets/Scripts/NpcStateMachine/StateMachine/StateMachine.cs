@@ -9,9 +9,12 @@ namespace Game.Core
         protected State currentState;
 		public State CurrentState => currentState;
 
-        public void SwitchState(State newState)
+        public void SwitchState(State newState, bool logStateSwitch = false)
         {
-            currentState?.Exit();
+			if (logStateSwitch)
+				Debug.LogWarning($"switched from state: {currentState} to {newState}");
+
+			currentState?.Exit();
             currentState = newState;
             currentState?.Enter();
         }

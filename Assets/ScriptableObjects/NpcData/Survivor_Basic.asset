@@ -17,15 +17,23 @@ MonoBehaviour:
   startingLifeState: 0
   entityFlags: -1
   supportsEquipmentModels: 1
+  gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}
   maxHealth: 100
   maxWater: 100
   maxFood: 100
   maxStamina: 100
-  patrolSpeed: 3
-  chaseSpeed: 4
+  walkSpeed: 3
+  sprintSpeed: 5
   rotationSpeed: 240
+  fleeDistance: 0
   minIdleTime: 1
   maxIdleTime: 3
+  viewAngle: 120
+  viewDistance: 30
+  highAlertDuration: 10
+  viewAngleMultiplier: 1.5
+  viewDistanceMultiplier: 1.5
+  soundSensitivity: 0
   weaponOne: {fileID: 11400000, guid: 891c4fb4191ce7c479c3aa2c2a088c45, type: 2}
   weaponTwo: {fileID: 0}
   meleeWeapon: {fileID: 0}
@@ -35,10 +43,3 @@ MonoBehaviour:
   consumableOne: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
   consumableTwo: {fileID: 0}
   consumableThree: {fileID: 0}
-  viewAngle: 120
-  viewDistance: 30
-  highAlertDuration: 10
-  viewAngleMultiplier: 1.5
-  viewDistanceMultiplier: 1.5
-  soundSensitivity: 0
-  gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}

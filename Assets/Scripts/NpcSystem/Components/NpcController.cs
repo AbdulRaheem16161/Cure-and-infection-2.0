@@ -13,6 +13,7 @@ public class NpcController : MonoBehaviour
 
 	public NpcDefinition NpcDefinition;
 	public StatsHandler StatsHandler { get; private set; }
+	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 	public InventoryHandler InventoryHandler { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
@@ -21,6 +22,7 @@ public class NpcController : MonoBehaviour
 	private void Awake()
 	{
 		StatsHandler = GetComponent<StatsHandler>();
+		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
 		InventoryHandler = GetComponent<InventoryHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
@@ -46,13 +48,14 @@ public class NpcController : MonoBehaviour
 		}
 
 		NpcDefinition = npcDefinition;
+		gameObject.name = NpcDefinition.NpcName;
+
 		StatsHandler.InitializeStats(team, NpcDefinition);
 		InventoryHandler.InitializeInventoryHandler();
 		EquipmentHandler.InitializeEquipmentHandler(NpcDefinition);
+		Beliefs.InitializeBeliefs(NpcDefinition);
 		StateMachine.InitializeStateMachine(NpcDefinition);
 		NpcPerception.Initialize(NpcDefinition);
-
-		gameObject.name = NpcDefinition.NpcName;
 		_initialized = true;
 	}
 }

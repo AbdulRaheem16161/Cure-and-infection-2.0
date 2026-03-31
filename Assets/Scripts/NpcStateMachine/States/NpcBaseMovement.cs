@@ -44,14 +44,14 @@ public class NpcBaseMovementState : NPCBaseState
 			}
 
 			Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
-			MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, destination);
+			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, destination);
 		}
 		else
 		{
 			if (HasValidRandomFollowPoint())
-				MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
+				MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
 			else if (stateMachine.useBackupMovement)
-				MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, GetBackUpMovementLocationAroundNpc());
+				MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, GetBackUpMovementLocationAroundNpc());
 			else
 			{
 				if (!stateMachine.moveOnPatrolPath || !stateMachine.moveOnRandomPath)
@@ -107,7 +107,7 @@ public class NpcBaseMovementState : NPCBaseState
 		Quaternion rotation = Quaternion.Euler(0, randomAngle, 0);
 		Vector3 randomFleeDirection = rotation * fleeDirection;
 
-		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.fleeDistance * 2);
+		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.NpcDefinition.FleeDistance * 2);
 		stateMachine.Agent.SetDestination(fleeDestination);
 	}
 	#endregion
@@ -141,7 +141,7 @@ public class NpcBaseMovementState : NPCBaseState
 		}
 
 		float angle = Quaternion.Angle(stateMachine.transform.rotation, targetRotation);
-		lookingAtTarget = angle < 2f; // If angle below 2 degrees, its looking at target
+		lookingAtTarget = angle < 5f; // If angle below 2 degrees, its looking at target
 	}
 	#endregion
 

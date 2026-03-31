@@ -17,7 +17,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	public override void Enter()
 	{
 		eatCorpseTimer = eatCorpseDuration;
-		MoveToDestination(stateMachine.NpcDefinition.PatrolSpeed, stateMachine.NpcPerception.EatableTarget.Transform.position);
+		MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.NpcPerception.EatableTarget.Transform.position);
 	}
 
 	public override void Exit()

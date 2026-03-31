@@ -10,7 +10,7 @@ public class NpcFleeState : NpcBaseMovementState
 	public override void Enter()
 	{
 		directionToLookBackTo = stateMachine.NpcPerception.DetectedTarget.Transform.position;
-		FleeToNewDestination(stateMachine.NpcDefinition.ChaseSpeed, directionToLookBackTo);
+		FleeToNewDestination(stateMachine.NpcDefinition.SprintSpeed, directionToLookBackTo);
 	}
 
 	public override void Exit()
@@ -28,7 +28,7 @@ public class NpcFleeState : NpcBaseMovementState
 
 			if (!lookingAtTarget) return;
 
-			stateMachine.SwitchState(new NPCIdleState(stateMachine));
+			stateMachine.Beliefs.SafeFromFleeTarget = true;
 			return;
 		}
 	}
