@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 8402613863463263392}
   - component: {fileID: 417494239959303289}
   - component: {fileID: 1585906986943235660}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: ShooterTest
   m_TagString: Team 2
   m_Icon: {fileID: 0}
@@ -610,7 +610,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556762a593628674da71c4a27adcac09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SafeFromFleeTarget: 0
 --- !u!114 &1864734135541436750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,10 +675,13 @@ MonoBehaviour:
     Distance: 0
   targetMask:
     serializedVersion: 2
-    m_Bits: 256
-  lineOfSightMask:
+    m_Bits: 192
+  characterLoSMask:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 72
+  corpseLoSMask:
+    serializedVersion: 2
+    m_Bits: 136
 --- !u!114 &8402613863463263392
 MonoBehaviour:
   m_ObjectHideFlags: 0

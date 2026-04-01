@@ -25,7 +25,7 @@ MonoBehaviour:
   walkSpeed: 3
   sprintSpeed: 5
   rotationSpeed: 240
-  fleeDistance: 0
+  fleeDistance: 10
   minIdleTime: 1
   maxIdleTime: 3
   viewAngle: 120

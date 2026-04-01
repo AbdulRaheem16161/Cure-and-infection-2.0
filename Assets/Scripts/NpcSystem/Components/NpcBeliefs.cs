@@ -18,15 +18,20 @@ public class NpcBeliefs : MonoBehaviour
 	public StatsHandler StatsHandler { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 
+	#region Alert Beliefs
+	public bool Alert;
+	public bool InAlertState => Alerted();
+	#endregion
+
 	#region Movement Beliefs
 	[NonSerialized] public bool Idling;
-	public bool IsMoving => Agent.velocity.sqrMagnitude > 0.1f;
+	public bool Moving => Agent.velocity.sqrMagnitude > 0.1f;
 	#endregion
 
 	#region Stat Beliefs
 	public bool Hurt => StatsHandler.health <= NpcDefinition.MaxHealth * 0.5f;
-	public bool Thirsty => StatsHandler.water <= NpcDefinition.MaxWater * 0.25f;
-	public bool Hungry => StatsHandler.food <= NpcDefinition.MaxFood * 0.25f;
+	public bool Thirsty => StatsHandler.water <= NpcDefinition.MaxWater * 0.3f;
+	public bool Hungry => StatsHandler.food <= NpcDefinition.MaxFood * 0.2f;
 	public bool Exhausted => StatsHandler.stamina <= NpcDefinition.MaxStamina * 0.1f;
 	#endregion
 
@@ -36,6 +41,7 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Target Beliefs
+	public bool HasEatableTarget => NpcPerception.IsEatableTargetDetected;
 	public bool HasTarget => NpcPerception.IsTargetDetected;
 	public bool TargetInShootingRange => TargetInShootingRangeCheck();
 	public bool TargetInMeleeRange => TargetInMeleeRangeCheck();
@@ -63,6 +69,16 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		NpcDefinition = npcDefinition;
 	}
+
+	#region alert belief check
+	public bool Alerted()
+	{
+		if (HasTarget || HasEatableTarget || InvestigateLocation != null)
+			return true;
+		else 
+			return false;
+	}
+	#endregion
 
 	#region target in melee/ranged attack ranges check
 	private bool TargetInMeleeRangeCheck()

@@ -160,18 +160,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	#region try get accurate hit
 	private bool TryGetAccurateHit(Vector3 origin, Vector3 direction, out RaycastHit finalHit)
 	{
-		#region Summary
-		/// <summary>
-		/// Uses Raycast first for accuracy,
-		/// then SphereCast as fallback aim assist
-		/// </summary>
-		#endregion
-
-		#region TryGetAccurateHit
-
 		finalHit = new RaycastHit();
 
-		#region SphereCast
 		RaycastHit[] hits = Physics.SphereCastAll(
 			origin,
 			TypedDefinition.BeamRadius,
@@ -197,9 +187,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		}
 
 		return hitFound;
-		#endregion
-
-		#endregion
 	}
 	#endregion
 

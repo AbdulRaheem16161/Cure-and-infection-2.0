@@ -22,11 +22,15 @@ public class NpcBeliefsEditor : Editor
 
 		EditorGUILayout.Space(10);
 
+		EditorGUI.indentLevel++;
+		EditorGUILayout.Toggle("Alert", beliefs.Alert);
+		EditorGUI.indentLevel--;
+
 		#region Movement Beliefs
 		EditorGUILayout.LabelField("Movement Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Idling", beliefs.Idling);
-		EditorGUILayout.Toggle("IsMoving", beliefs.IsMoving);
+		EditorGUILayout.Toggle("Moving", beliefs.Moving);
 		EditorGUI.indentLevel--;
 		#endregion
 
@@ -60,6 +64,9 @@ public class NpcBeliefsEditor : Editor
 		#region Target Beliefs
 		EditorGUILayout.LabelField("Target Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
+		if (beliefs.StatsHandler.LifeState == NpcDefinition.LifeState.zombified)
+			EditorGUILayout.Toggle("Has Eatable Target", beliefs.HasEatableTarget);
+
 		EditorGUILayout.Toggle("Has Target", beliefs.HasTarget);
 		EditorGUILayout.Toggle("Target In Shooting Range", beliefs.TargetInShootingRange);
 		EditorGUILayout.Toggle("Target In Melee Range", beliefs.TargetInMeleeRange);

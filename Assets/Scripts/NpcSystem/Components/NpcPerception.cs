@@ -7,13 +7,15 @@ using UnityEditor;
 using UnityEngine;
 using static NpcDefinition;
 
+[RequireComponent(typeof(NpcBeliefs))]
 [RequireComponent(typeof(NPCStateMachine))]
 [RequireComponent(typeof(StatsHandler))]
 public class NpcPerception : MonoBehaviour
 {
 	public NpcDefinition NpcDefinition {  get; private set; }
-	public StatsHandler StatsHandler { get; private set; }
+	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
+	public StatsHandler StatsHandler { get; private set; }
 
 	public GameObject rayViewPoint;
 
@@ -21,7 +23,6 @@ public class NpcPerception : MonoBehaviour
 	[Header("Runtime Vision Values")]
 	public float viewAngle;
 	public float viewDistance;
-	public bool isInAlertMode;
 	public bool showVision = false;
 	#endregion
 
@@ -29,9 +30,6 @@ public class NpcPerception : MonoBehaviour
 	[Header("Runtime Target Detection")]
 	[ReadOnly] public bool IsTargetDetected;
 	[ReadOnly] public TargetData DetectedTarget;
-	[Space(10)]
-	[ReadOnly] public TargetData LastKilledTarget;
-	[Space(10)]
 	[ReadOnly] public bool IsEatableTargetDetected;
 	[ReadOnly] public TargetData EatableTarget;
 	#endregion
@@ -39,7 +37,8 @@ public class NpcPerception : MonoBehaviour
 	#region layer Masks
 	[Header("Layer Masks")]
 	[SerializeField] private LayerMask targetMask;
-	[SerializeField] private LayerMask lineOfSightMask;
+	[SerializeField] private LayerMask characterLoSMask;
+	[SerializeField] private LayerMask corpseLoSMask;
 	#endregion
 
 	private Color normalColor = Color.green;
@@ -49,12 +48,12 @@ public class NpcPerception : MonoBehaviour
 	private readonly Collider[] ColliderHits = new Collider[100];
 	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
 
-	public Coroutine alertModeCoroutine;
+	#region alert mode timer;
+	private readonly float alertModeCooldown = 5f;
+	private float alertModeTimer;
+	#endregion
 
-	public enum SearchType
-	{
-		alive, eatable
-	}
+	public Coroutine alertModeCoroutine;
 
 	#region detect target timer
 	private readonly float detectTargetCooldown = 0.1f;
@@ -69,8 +68,9 @@ public class NpcPerception : MonoBehaviour
 	#region awake + Initialize
 	private void Awake()
 	{
-		StatsHandler = GetComponent<StatsHandler>();
+		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
+		StatsHandler = GetComponent<StatsHandler>();
 	}
 	public void Initialize(NpcDefinition npcDefinition)
 	{
@@ -97,11 +97,48 @@ public class NpcPerception : MonoBehaviour
 	{
 		if (StatsHandler.LifeState == LifeState.dead) return;
 
+		AlertModeTimer();
+		UpdateVisionBasedOnAlertState(Beliefs.Alert);
 		SearchForLivingTarget();
-
-		if (StatsHandler.LifeState == LifeState.zombified)
-			SearchForEatableTarget();
+		SearchForEatableTarget();
 	}
+
+	/// <summary>
+	/// things that should trigger investigations
+	/// getting attacked by something or moosing target to attack
+	/// hearing a sound (could specify sounds, or filter sounds made by player (if not zombie) or npcs on same team)
+	/// </summary>
+
+	#region npc investigation triggers
+	private void InvestigateLastSeenEnemyPosition(Vector3 position)
+	{
+		Beliefs.InvestigateLocation = position;
+	}
+	public void InvestigateSound(Vector3 position)
+	{
+		Beliefs.InvestigateLocation = position;
+	}
+	#endregion
+
+	#region npc alert mode timer + state handler
+	private void AlertModeTimer()
+	{
+		if (Beliefs.InAlertState)
+			alertModeTimer = alertModeCooldown;
+		else if (alertModeTimer > 0)
+			alertModeTimer -= Time.deltaTime;
+
+		Beliefs.Alert = Beliefs.InAlertState || alertModeTimer > 0;
+	}
+	private void UpdateVisionBasedOnAlertState(bool alert)
+	{
+		float angleMultiplier = alert ? NpcDefinition.ViewAngleMultiplier : 1f;
+		float distanceMultiplier = alert ? NpcDefinition.ViewDistanceMultiplier : 1f;
+
+		viewAngle = NpcDefinition.ViewAngle * angleMultiplier;
+		viewDistance = NpcDefinition.ViewDistance * distanceMultiplier;
+	}
+	#endregion
 
 	#region timed target search types
 	private void SearchForLivingTarget()
@@ -113,66 +150,36 @@ public class NpcPerception : MonoBehaviour
 		//skip looking if target already found
 		if (IsTargetDetected)
 		{
-			if (DetectedTarget.StatsHandler.LifeState == LifeState.dead)
-			{
-				LastKilledTarget = DetectedTarget;
-				IsTargetDetected = false;
-				DetectedTarget = null;
-				return;
-			}
-
-			DetectedTarget.UpdateTargetDistance(transform.position);
-			Vector3 dirToTarget = (DetectedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
-			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, DetectedTarget.Collider)) return;
-
-			InvestigateLastSeenEnemyPosition(DetectedTarget.Transform.position);
-			IsTargetDetected = false;
-			DetectedTarget = null;
+			(DetectedTarget, IsTargetDetected) = TrackTarget(DetectedTarget, LifeState.alive);
 		}
 		else
 		{
-			DetectedTarget = SearchForClosestTarget(SearchType.alive);
+			DetectedTarget = SearchForClosestTarget(characterLoSMask);
 
 			if (DetectedTarget != null && DetectedTarget.StatsHandler != null)
-			{
 				IsTargetDetected = true;
-				DetectedTarget.UpdateTargetDistance(transform.position);
-			}
 			else
 				IsTargetDetected = false;
 		}
 	}
 	private void SearchForEatableTarget()
 	{
+		if (StatsHandler.LifeState != LifeState.zombified) return;
+
 		detectEatableTargetTimer -= Time.deltaTime;
 		if (detectEatableTargetTimer > 0) return;
 		detectEatableTargetTimer = detectEatableTargetCooldown;
 
 		if (IsEatableTargetDetected)
 		{
-			if (EatableTarget.StatsHandler.LifeState != LifeState.dead)
-			{
-				IsEatableTargetDetected = false;
-				EatableTarget = null;
-				return;
-			}
-
-			EatableTarget.UpdateTargetDistance(transform.position);
-			Vector3 dirToTarget = (EatableTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
-			if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, EatableTarget.Collider)) return;
-
-			IsEatableTargetDetected = false;
-			EatableTarget = null;
+			(EatableTarget, IsEatableTargetDetected) = TrackTarget(DetectedTarget, LifeState.alive);
 		}
 		else
 		{
-			EatableTarget = SearchForClosestTarget(SearchType.alive);
+			EatableTarget = SearchForClosestTarget(corpseLoSMask);
 
 			if (EatableTarget != null && EatableTarget.StatsHandler != null)
-			{
-				EatableTarget.UpdateTargetDistance(transform.position);
 				IsEatableTargetDetected = true;
-			}
 			else
 				IsEatableTargetDetected = false;
 		}
@@ -183,7 +190,7 @@ public class NpcPerception : MonoBehaviour
 	/// <summary>
 	/// base search method, returns closest valid target after line of sight and filter checks
 	/// </summary>
-	private TargetData SearchForClosestTarget(SearchType searchType)
+	private TargetData SearchForClosestTarget(LayerMask searchMask)
 	{
 		float closestSqrDistance = viewDistance * viewDistance;
 		TargetData closestTarget = null;
@@ -201,12 +208,12 @@ public class NpcPerception : MonoBehaviour
 				continue;
 			}
 
-			if (!FilterSearch(stats, searchType)) continue;
+			if (!FilterSearch(stats)) continue;
 
 			Vector3 dirToTarget = (collider.bounds.center - rayViewPoint.transform.position).normalized;
 			if (!TargetInVisionConeAngle(dirToTarget)) continue;
 
-			if (!TargetInLineOfSight(dirToTarget, lineOfSightMask, collider)) continue;
+			if (!TargetInLineOfSight(dirToTarget, searchMask, collider)) continue;
 
 			float sqrDistance = (stats.transform.position - transform.position).sqrMagnitude;
 
@@ -214,6 +221,7 @@ public class NpcPerception : MonoBehaviour
 			{
 				closestSqrDistance = sqrDistance;
 				closestTarget = new TargetData(stats, collider, stats.transform);
+				closestTarget.UpdateTargetDistance(transform.position);
 			}
 		}
 
@@ -222,23 +230,25 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region search type filter and vision checks
-	private bool FilterSearch(StatsHandler target, SearchType searchType)
+	private bool FilterSearch(StatsHandler target)
 	{
 		if (target == null) return false;
 		if (target.Team != NPCSpawner.Teams.FreeFighter && target.Team == StateMachine.StatsHandler.Team) return false;
 
-		switch (searchType)
+		switch (target.LifeState)
 		{
-			case SearchType.alive:
-			return target.LifeState != LifeState.dead;
+			case LifeState.alive:
+			return true;
 
-			case SearchType.eatable:
-			return target.LifeState == LifeState.dead &&
-				   target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie);
+			case LifeState.dead:
+			return target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie);
+
+			case LifeState.zombified:
+			return true;
 
 			default:
-			Debug.LogError($"SearchType: {searchType} not set up, using default alive search");
-			return target.LifeState != LifeState.dead;
+			Debug.LogError($"life state not handled, add it, returning true");
+			return true;
 		}
 	}
 	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
@@ -281,45 +291,19 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	/// <summary>
-	/// things that should trigger alert mode:
-	/// getting attacked by something or finding target to attack
-	/// hearing a sound (could specify sounds, or filter sounds made by player (if not zombie) or npcs on same team)
-	/// </summary>
-
-	#region npc alert mode triggers
-	private void InvestigateLastSeenEnemyPosition(Vector3 position)
+	#region handle tracking found targets and loosing them
+	private (TargetData, bool) TrackTarget(TargetData trackedTarget, LifeState lifeState)
 	{
-		EnableAlertMode();
-		StateMachine.Beliefs.InvestigateLocation = position;
-	}
-	public void InvestigateSound(Vector3 position)
-	{
-		EnableAlertMode();
-		StateMachine.Beliefs.InvestigateLocation = position;
-	}
-	#endregion
+		if (trackedTarget.StatsHandler.LifeState != lifeState) //life state changed (died or zombieifed now)
+			return (null, false);
 
-	#region npc alert mode + coroutine
-	private void EnableAlertMode()
-	{
-		if (alertModeCoroutine != null)
-			StopCoroutine(alertModeCoroutine);
+		trackedTarget.UpdateTargetDistance(transform.position);
+		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
+		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, characterLoSMask, trackedTarget.Collider)) 
+			return (trackedTarget, true);
 
-		alertModeCoroutine = StartCoroutine(AlertModeCoroutine());
-	}
-
-	private IEnumerator AlertModeCoroutine()
-	{
-		isInAlertMode = true;
-
-		viewAngle = NpcDefinition.ViewAngle * NpcDefinition.ViewAngleMultiplier;
-		viewDistance = NpcDefinition.ViewDistance * NpcDefinition.ViewDistanceMultiplier;
-		yield return new WaitForSeconds(NpcDefinition.HighAlertDuration);
-
-		viewAngle = NpcDefinition.ViewAngle;
-		viewDistance = NpcDefinition.ViewDistance;
-		isInAlertMode = false;
+		InvestigateLastSeenEnemyPosition(trackedTarget.Transform.position);
+		return (null, false); //no longer in vision cone or line of sight
 	}
 	#endregion
 

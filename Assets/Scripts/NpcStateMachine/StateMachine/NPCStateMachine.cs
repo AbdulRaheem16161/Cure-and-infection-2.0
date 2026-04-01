@@ -211,7 +211,7 @@ namespace Game.MyNPC
 		}
 		private bool ShouldEatCorpse()
 		{
-			if (EnableEatCorpseState && StatsHandler.LifeState == NpcDefinition.LifeState.zombified) //add has eatable target
+			if (EnableEatCorpseState && StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget)
 				return true;
 			else return false;
 		}
@@ -229,6 +229,9 @@ namespace Game.MyNPC
 		}
 		private bool ShouldIdle()
 		{
+			if (!EnableMovement && Beliefs.Idling)
+				Beliefs.Idling = true;
+
 			if (Beliefs.Idling && !Beliefs.HasTarget)
 				return true;
 			else return false;
