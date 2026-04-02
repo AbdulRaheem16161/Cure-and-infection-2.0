@@ -19,7 +19,7 @@ public class NpcBeliefs : MonoBehaviour
 	public EquipmentHandler EquipmentHandler { get; private set; }
 
 	#region Alert Beliefs
-	public bool Alert;
+	[NonSerialized] public bool Alert;
 	public bool InAlertState => Alerted();
 	#endregion
 

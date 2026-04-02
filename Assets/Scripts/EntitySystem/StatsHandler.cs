@@ -2,12 +2,12 @@ using UnityEngine;
 using System;
 using static NpcDefinition;
 
+[RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
 	public NpcDefinition NpcDefinition { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
-	private BoxCollider hitCollider;
 	private bool _Initialized = false;
 
 	[Header("Team")]
@@ -36,7 +36,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#endregion
 
 	#region events
-	public event Action OnHit;
+	public event Action<DamageContext> OnHit;
+	public event Action OnInitialize;
 	public event Action OnDeath;
 	public static event Action<GameObject> OnZombificationComplete;
 	#endregion
@@ -44,19 +45,15 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region awake + Initialize stats handler method
 	private void Awake()
 	{
-		hitCollider = GetComponent<BoxCollider>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
-
-		if (hitCollider == null)
-			Debug.LogError("No HitCollider on :" + gameObject + "ignore if testing, or add one");
 
 		if (!_Initialized)
 			InitializeStats(Team, null);
 	}
 	public void InitializeStats(NPCSpawner.Teams team, NpcDefinition npcDefinition)
 	{
+		OnInitialize?.Invoke();
 		_Initialized = true;
-		gameObject.layer = LayerMask.NameToLayer("Characters");
 		NpcDefinition = npcDefinition;
 		this.team = team;
 
@@ -93,16 +90,33 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#endregion
 
 	#region recive damage interface + invoke hit and death events
-	public void RecieveDamage(int damageAmount, GameObject Attacker = null)
+	public void RecieveDamage(DamageContext damageContext)
 	{
-		OnHit?.Invoke();
-		health -= damageAmount;
+		OnHit?.Invoke(damageContext);
+		float damageRecieved = damageContext.Damage;
+
+		switch (damageContext.BodyPartHit)
+		{
+			case HitCollider.BodyPart.Head:
+			damageRecieved *= (1 - headProtection);
+			break;
+
+			case HitCollider.BodyPart.body:
+			damageRecieved *= (1 - chestProtection);
+			break;
+
+			default:
+			Debug.LogError($"body part of type {damageContext.BodyPartHit} not set up, defaulting to body hit");
+			damageRecieved *= (1 - chestProtection);
+			break;
+		}
+
+		health -= Mathf.RoundToInt(damageRecieved);
 
 		if (invincible) return;
 		if (health <= 0 && lifeState != LifeState.dead)
 		{
 			lifeState = LifeState.dead;
-			gameObject.layer = LayerMask.NameToLayer("Corpses");
 			OnDeath?.Invoke();
 		}
 	}

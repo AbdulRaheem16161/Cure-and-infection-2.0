@@ -29,13 +29,6 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	{
 		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-		//return to idle state
-		if (!stateMachine.NpcPerception.IsEatableTargetDetected)
-		{
-			stateMachine.SwitchState(new NPCIdleState(stateMachine));
-			return;
-		}
-
 		// move to position of cropse
 		if (HasReachedDestination())
 		{
@@ -44,7 +37,6 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 			Debug.LogError("timer done");
 			stateMachine.NpcPerception.EatableTarget.StatsHandler.CompleteZombification();
-			stateMachine.SwitchState(new NPCIdleState(stateMachine));
 			return;
 		}
 	}

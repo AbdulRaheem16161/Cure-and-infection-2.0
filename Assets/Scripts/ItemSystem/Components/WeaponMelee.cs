@@ -72,9 +72,9 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 
 	public void OnColliderHit(Collider other)
 	{
-		if (other.TryGetComponent(out IDamageable damageable))
+		if (other.TryGetComponent(out HitCollider hitCollider))
 		{
-			damageable.RecieveDamage(TypedDefinition.Damage);
+			hitCollider.OnHit(TypedDefinition.Damage, CurrentOwner);
 			WeaponView.DisableHitCollider(); //disable hitting once something to hit is found
 		}
 	}

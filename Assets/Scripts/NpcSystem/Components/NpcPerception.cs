@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static NpcDefinition;
 
 [RequireComponent(typeof(NpcBeliefs))]
@@ -23,6 +24,7 @@ public class NpcPerception : MonoBehaviour
 	[Header("Runtime Vision Values")]
 	public float viewAngle;
 	public float viewDistance;
+	private bool glancing;
 	public bool showVision = false;
 	#endregion
 
@@ -37,8 +39,7 @@ public class NpcPerception : MonoBehaviour
 	#region layer Masks
 	[Header("Layer Masks")]
 	[SerializeField] private LayerMask targetMask;
-	[SerializeField] private LayerMask characterLoSMask;
-	[SerializeField] private LayerMask corpseLoSMask;
+	[SerializeField] private LayerMask lineOfSightMask;
 	#endregion
 
 	private Color normalColor = Color.green;
@@ -71,6 +72,8 @@ public class NpcPerception : MonoBehaviour
 		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
 		StatsHandler = GetComponent<StatsHandler>();
+
+		StatsHandler.OnHit += InvestigateWhereHitFrom;
 	}
 	public void Initialize(NpcDefinition npcDefinition)
 	{
@@ -87,6 +90,10 @@ public class NpcPerception : MonoBehaviour
 	private void OnDisable()
 	{
 		showVision = false;
+	}
+	private void OnDestroy()
+	{
+		StatsHandler.OnHit -= InvestigateWhereHitFrom;
 	}
 
 	/// <summary>
@@ -110,13 +117,20 @@ public class NpcPerception : MonoBehaviour
 	/// </summary>
 
 	#region npc investigation triggers
+	private void InvestigateWhereHitFrom(DamageContext damageContext)
+	{
+		if (!Beliefs.Alert)
+			Beliefs.InvestigateLocation = damageContext.Attacker.transform.position;
+	}
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
-		Beliefs.InvestigateLocation = position;
+		if (!Beliefs.Alert)
+			Beliefs.InvestigateLocation = position;
 	}
 	public void InvestigateSound(Vector3 position)
 	{
-		Beliefs.InvestigateLocation = position;
+		if (!Beliefs.Alert)
+			Beliefs.InvestigateLocation = position;
 	}
 	#endregion
 
@@ -135,8 +149,24 @@ public class NpcPerception : MonoBehaviour
 		float angleMultiplier = alert ? NpcDefinition.ViewAngleMultiplier : 1f;
 		float distanceMultiplier = alert ? NpcDefinition.ViewDistanceMultiplier : 1f;
 
+		if (glancing)
+			angleMultiplier = NpcDefinition.ViewAngleMultiplier + 0.5f;
+
 		viewAngle = NpcDefinition.ViewAngle * angleMultiplier;
 		viewDistance = NpcDefinition.ViewDistance * distanceMultiplier;
+	}
+	#endregion
+
+	#region npc glance simulation
+	public void SimulateNpcGlancing(float glanceDuration)
+	{
+		StartCoroutine(SimulateNpcGlancingAround(glanceDuration));
+	}
+	private IEnumerator SimulateNpcGlancingAround(float glanceDuration)
+	{
+		glancing = true;
+		yield return new WaitForSeconds(glanceDuration);
+		glancing = false;
 	}
 	#endregion
 
@@ -154,7 +184,7 @@ public class NpcPerception : MonoBehaviour
 		}
 		else
 		{
-			DetectedTarget = SearchForClosestTarget(characterLoSMask);
+			DetectedTarget = SearchForClosestTarget(LifeState.alive);
 
 			if (DetectedTarget != null && DetectedTarget.StatsHandler != null)
 				IsTargetDetected = true;
@@ -172,11 +202,11 @@ public class NpcPerception : MonoBehaviour
 
 		if (IsEatableTargetDetected)
 		{
-			(EatableTarget, IsEatableTargetDetected) = TrackTarget(DetectedTarget, LifeState.alive);
+			(EatableTarget, IsEatableTargetDetected) = TrackTarget(DetectedTarget, LifeState.dead);
 		}
 		else
 		{
-			EatableTarget = SearchForClosestTarget(corpseLoSMask);
+			EatableTarget = SearchForClosestTarget(LifeState.dead);
 
 			if (EatableTarget != null && EatableTarget.StatsHandler != null)
 				IsEatableTargetDetected = true;
@@ -190,7 +220,7 @@ public class NpcPerception : MonoBehaviour
 	/// <summary>
 	/// base search method, returns closest valid target after line of sight and filter checks
 	/// </summary>
-	private TargetData SearchForClosestTarget(LayerMask searchMask)
+	private TargetData SearchForClosestTarget(LifeState lifeState)
 	{
 		float closestSqrDistance = viewDistance * viewDistance;
 		TargetData closestTarget = null;
@@ -208,12 +238,12 @@ public class NpcPerception : MonoBehaviour
 				continue;
 			}
 
-			if (!FilterSearch(stats)) continue;
+			if (!FilterSearch(stats, lifeState)) continue;
 
 			Vector3 dirToTarget = (collider.bounds.center - rayViewPoint.transform.position).normalized;
 			if (!TargetInVisionConeAngle(dirToTarget)) continue;
 
-			if (!TargetInLineOfSight(dirToTarget, searchMask, collider)) continue;
+			if (!TargetInLineOfSight(dirToTarget, lineOfSightMask, collider)) continue;
 
 			float sqrDistance = (stats.transform.position - transform.position).sqrMagnitude;
 
@@ -230,26 +260,18 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region search type filter and vision checks
-	private bool FilterSearch(StatsHandler target)
+	private bool FilterSearch(StatsHandler target, LifeState requiredLifeState)
 	{
+		//filter null and teams
 		if (target == null) return false;
 		if (target.Team != NPCSpawner.Teams.FreeFighter && target.Team == StateMachine.StatsHandler.Team) return false;
 
-		switch (target.LifeState)
-		{
-			case LifeState.alive:
-			return true;
+		//filter life state + special flags
+		if (target.LifeState != requiredLifeState) return false;
+		if (target.LifeState == LifeState.dead && !target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie))
+			return false;
 
-			case LifeState.dead:
-			return target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie);
-
-			case LifeState.zombified:
-			return true;
-
-			default:
-			Debug.LogError($"life state not handled, add it, returning true");
-			return true;
-		}
+		return true;
 	}
 	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
 	{
@@ -299,24 +321,11 @@ public class NpcPerception : MonoBehaviour
 
 		trackedTarget.UpdateTargetDistance(transform.position);
 		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
-		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, characterLoSMask, trackedTarget.Collider)) 
+		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, trackedTarget.Collider)) 
 			return (trackedTarget, true);
 
 		InvestigateLastSeenEnemyPosition(trackedTarget.Transform.position);
 		return (null, false); //no longer in vision cone or line of sight
-	}
-	#endregion
-
-	#region npc glance simulation
-	public void SimulateNpcGlancing(float glanceDuration)
-	{
-		StartCoroutine(SimulateNpcGlancingAround(glanceDuration));
-	}
-	private IEnumerator SimulateNpcGlancingAround(float glanceDuration)
-	{
-		viewAngle = NpcDefinition.ViewAngle * NpcDefinition.ViewAngleMultiplier;
-		yield return new WaitForSeconds(glanceDuration);
-		viewAngle = NpcDefinition.ViewAngle;
 	}
 	#endregion
 

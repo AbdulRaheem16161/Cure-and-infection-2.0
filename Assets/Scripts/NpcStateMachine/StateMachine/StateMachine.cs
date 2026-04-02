@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
 
 namespace Game.Core
@@ -12,7 +10,7 @@ namespace Game.Core
         public void SwitchState(State newState, bool logStateSwitch = false)
         {
 			if (logStateSwitch)
-				Debug.LogWarning($"switched from state: {currentState} to {newState}");
+				Debug.Log($"switched from state: {currentState} to {newState}");
 
 			currentState?.Exit();
             currentState = newState;

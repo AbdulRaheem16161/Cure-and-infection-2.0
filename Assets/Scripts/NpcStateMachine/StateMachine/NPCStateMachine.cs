@@ -32,8 +32,6 @@ namespace Game.MyNPC
 		[Space(10)]
 		#endregion
 
-		private float stateSwitchCooldown = 0.1f;
-
 		#region NpcStates;
 		private NpcFleeState fleeState;
 		private NPCRangedAttackState rangedAttackState;
@@ -166,14 +164,14 @@ namespace Game.MyNPC
 			if (currentState == idleState && ShouldIdle()) { base.Update(); return; }
 
 			// Otherwise, switch to the highest-priority valid state
-			if (ShouldFlee()) SwitchState(fleeState, true);
-			else if (ShouldRangedAttack()) SwitchState(rangedAttackState, true);
-			else if (ShouldMeleeAttack()) SwitchState(meleeAttackState, true);
-			else if (ShouldChase()) SwitchState(chaseState, true);
-			else if (ShouldEatCorpse()) SwitchState(eatCorpseState, true);
-			else if (ShouldInvestigate()) SwitchState(investigateState, true);
-			else if (ShouldMove()) SwitchState(moveState, true);
-			else if (ShouldIdle()) SwitchState(idleState, true);
+			if (ShouldFlee()) SwitchState(fleeState);
+			else if (ShouldRangedAttack()) SwitchState(rangedAttackState);
+			else if (ShouldMeleeAttack()) SwitchState(meleeAttackState);
+			else if (ShouldChase()) SwitchState(chaseState);
+			else if (ShouldEatCorpse()) SwitchState(eatCorpseState);
+			else if (ShouldInvestigate()) SwitchState(investigateState);
+			else if (ShouldMove()) SwitchState(moveState);
+			else if (ShouldIdle()) SwitchState(idleState);
 		}
 
 		private void LateUpdate()
@@ -211,19 +209,19 @@ namespace Game.MyNPC
 		}
 		private bool ShouldEatCorpse()
 		{
-			if (EnableEatCorpseState && StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget)
+			if (EnableEatCorpseState && !Beliefs.HasTarget && StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget)
 				return true;
 			else return false;
 		}
 		private bool ShouldInvestigate()
 		{
-			if (EnableInvestigate && Beliefs.FreeToInvestigate)
+			if (EnableInvestigate && !Beliefs.HasTarget && Beliefs.FreeToInvestigate)
 				return true;
 			else return false;
 		}
 		private bool ShouldMove()
 		{
-			if (EnableMovement && !Beliefs.HasTarget && !Beliefs.Idling)
+			if (EnableMovement && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate && !Beliefs.Idling)
 				return true;
 			else return false;
 		}
@@ -232,7 +230,7 @@ namespace Game.MyNPC
 			if (!EnableMovement && Beliefs.Idling)
 				Beliefs.Idling = true;
 
-			if (Beliefs.Idling && !Beliefs.HasTarget)
+			if (Beliefs.Idling && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate)
 				return true;
 			else return false;
 		}

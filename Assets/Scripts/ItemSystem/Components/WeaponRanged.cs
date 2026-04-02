@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -89,23 +90,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		if (!CanShoot) return;
 
 		currentMagazineAmmo--;
-
-		Vector3 origin = WeaponView.MuzzlePoint.position;
-		Vector3 direction = WeaponView.MuzzlePoint.forward;
-
-		if (TryGetAccurateHit(origin, direction, out RaycastHit hit))
-		{
-			LastHitPoint = hit.point;
-
-			if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
-				damageable.RecieveDamage(TypedDefinition.Damage);
-		}
-		else
-		{
-			LastHitPoint = origin + direction * TypedDefinition.EffectiveRange;
-		}
-
-		SpawnVisualBullet(LastHitPoint);
+		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
 	}
 	#endregion
 
@@ -157,87 +142,60 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
-	#region try get accurate hit
-	private bool TryGetAccurateHit(Vector3 origin, Vector3 direction, out RaycastHit finalHit)
+	#region simulate simple bullet spread for now
+	private void SimulateBulletSpread()
 	{
-		finalHit = new RaycastHit();
+		float hardcodedSpread = 0.01f;
 
-		RaycastHit[] hits = Physics.SphereCastAll(
-			origin,
-			TypedDefinition.BeamRadius,
-			direction,
-			TypedDefinition.EffectiveRange
-		);
+		Vector3 startPos = WeaponView.MuzzlePoint.position;
+		Vector3 direction = WeaponView.MuzzlePoint.forward;
+		float distance = TypedDefinition.EffectiveRange;
 
-		float closestDistance = float.MaxValue;
-		bool hitFound = false;
+		//apply random spread
+		direction = Quaternion.Euler(
+			Random.Range(-hardcodedSpread, hardcodedSpread),
+			Random.Range(-hardcodedSpread, hardcodedSpread),
+			0) * direction;
 
-		for (int i = 0; i < hits.Length; i++)
+		if (Physics.Raycast(startPos, direction, out RaycastHit hit, 
+			TypedDefinition.EffectiveRange, LayerMask.GetMask("CharacterHitbox", "Environment")))
 		{
-			RaycastHit hit = hits[i];
+			//handle hit
+			if (hit.collider.TryGetComponent(out HitCollider hitCollider))
+				hitCollider.OnHit(TypedDefinition.Damage, CurrentOwner);
 
-			float distance = Vector3.Distance(origin, hit.point);
-
-			if (distance >= closestDistance)
-				continue;
-
-			closestDistance = distance;
-			finalHit = hit;
-			hitFound = true;
+			distance = hit.distance;
 		}
 
-		return hitFound;
+		SpawnVisualBullet(startPos, direction, distance);
 	}
 	#endregion
 
 	#region visual bullet spawning + moving
-	private void SpawnVisualBullet(Vector3 hitPoint)
+	private void SpawnVisualBullet(Vector3 startPos, Vector3 direction, float maxDistance)
 	{
-		#region Summary
-		/// <summary>
-		/// Spawns and animates a visual bullet toward the hit point
-		/// </summary>
-		#endregion
-
-		#region SpawnVisualBullet
-
-		GameObject bullet = Instantiate(TypedDefinition.BulletPrefab, 
-			WeaponView.MuzzlePoint.position, Quaternion.LookRotation(hitPoint - WeaponView.MuzzlePoint.position));
-
-		StartCoroutine(MoveBullet(bullet, hitPoint));
-		#endregion
+		GameObject bullet = Instantiate(TypedDefinition.BulletPrefab, startPos, Quaternion.LookRotation(direction));
+		StartCoroutine(MoveBullet(bullet, direction, maxDistance));
 	}
 
-	private IEnumerator MoveBullet(GameObject bullet, Vector3 hitPoint)
+	private IEnumerator MoveBullet(GameObject bullet, Vector3 direction, float maxDistance)
 	{
-		#region Summary
-		/// <summary>
-		/// Smoothly moves the bullet toward the target point
-		/// </summary>
-		#endregion
+		float traveled = 0f;
+		float speed = TypedDefinition.BulletVisualSpeed;
 
-		#region MoveBullet
+		direction.Normalize(); // make sure it's a unit vector
 
-		Vector3 startPos = bullet.transform.position;
-		float distance = Vector3.Distance(startPos, hitPoint);
-		float travelTime = distance / TypedDefinition.BulletVisualSpeed;
-
-		float t = 0f;
-
-		while (t < 1f)
+		while (bullet != null && traveled < maxDistance)
 		{
-			if (bullet == null)
-				yield break;
-
-			bullet.transform.position = Vector3.Lerp(startPos, hitPoint, t);
-			t += Time.deltaTime / travelTime;
+			float step = speed * Time.deltaTime;
+			bullet.transform.position += direction * step;
+			traveled += step;
 
 			yield return null;
 		}
 
 		if (bullet != null)
 			Destroy(bullet);
-		#endregion
 	}
 	#endregion
 }

@@ -40,8 +40,6 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private float spreadIncreasePerShot;
 	[SerializeField] private float spreadRecoveryRate;
 	[SerializeField] private float maxSpread;
-
-	[SerializeField] private float beamRadius;
 	#endregion
 
 	#region weapon recoil
@@ -88,8 +86,6 @@ public class WeaponRangedDefinition : ItemDefinition
 	public float SpreadIncreasePerShot => spreadIncreasePerShot;
 	public float SpreadRecoveryRate => spreadRecoveryRate;
 	public float MaxSpread => maxSpread;
-
-	public float BeamRadius => beamRadius;
 
 	//recoil
 	public Vector2 RecoilPerShot => recoilPerShot;

@@ -64,6 +64,8 @@ public abstract class Item : MonoBehaviour
 	public abstract ItemDefinition ItemDefinition { get; }
 	[HideInInspector] public GameObject ModelReference { get; protected set; }
 
+	public GameObject CurrentOwner { get; protected set; }
+
 	public bool IsInHands { get; protected set; }
 	public bool IsEquipped { get; protected set; }
 
@@ -80,10 +82,12 @@ public abstract class Item : MonoBehaviour
 		transform.SetParent(parentTransform);
 		transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		gameObject.SetActive(true);
+		CurrentOwner = equipmentHandler.gameObject;
 		IsEquipped = true;
 	}
 	public virtual void UnEquipItem(EquipmentHandler equipmentHandler)
 	{
+		CurrentOwner = null;
 		IsEquipped = false;
 		gameObject.SetActive(false);
 	}

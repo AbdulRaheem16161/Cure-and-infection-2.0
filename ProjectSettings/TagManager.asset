@@ -26,8 +26,8 @@ TagManager:
   - Environment
   - Water
   - UI
-  - Characters
-  - Corpses
+  - CharacterDetection
+  - CharacterHitBox
   - Projectiles
   - 
   - 

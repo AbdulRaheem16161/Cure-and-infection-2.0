@@ -24,13 +24,13 @@ public class StatsHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(25);
+			stats.RecieveDamage(new(25, HitCollider.BodyPart.body, stats.gameObject));
 		}
 		if (GUILayout.Button("Kill Npc"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(stats.health + 1);
+			stats.RecieveDamage(new(stats.health + 1, HitCollider.BodyPart.body, stats.gameObject));
 		}
 		#endregion
 	}
