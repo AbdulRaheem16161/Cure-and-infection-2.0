@@ -90,6 +90,9 @@ public class NpcBeliefsEditor : Editor
 		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Ranged Weapon In Hands", beliefs.RangedWeaponInHands);
 		EditorGUILayout.Toggle("Melee Weapon In Hands", beliefs.MeleeWeaponInHands);
+		EditorGUILayout.Toggle("Can Heal", beliefs.CanHeal);
+		EditorGUILayout.Toggle("Can Drink", beliefs.CanDrink);
+		EditorGUILayout.Toggle("Can Eat", beliefs.CanEat);
 		EditorGUI.indentLevel--;
 		#endregion
 	}

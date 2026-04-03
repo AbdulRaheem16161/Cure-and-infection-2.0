@@ -46,13 +46,11 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	#region event subbing/unsubbing
 	private void OnEnable()
 	{
-		EquipmentHandler.OnItemEquip += OnItemEquipped;
-		EquipmentHandler.OnItemUnEquip += OnItemUnEquipped;
+		EquipmentHandler.OnEquippedItemChanges += OnEquippedItemChanges;
 	}
 	private void OnDisable()
 	{
-		EquipmentHandler.OnItemEquip -= OnItemEquipped;
-		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
+		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
 	}
 	#endregion
 
@@ -78,29 +76,20 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	#endregion
 
 	#region item equipment events
-	private void OnItemEquipped(EquipmentSlot slot)
+	private void OnEquippedItemChanges(EquipmentSlot slot, bool wasEquipped)
 	{
-		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
-		{
-			switch (slot.EquipmentType)
-			{
-				case EquipmentHandler.EquipmentType.backpack:
-				itemContainer.ModifySize((int)armourDefinition.InventorySlotsProvided);
-				break;
-			}
-		}
-	}
+		if (slot.Item.ItemDefinition is not ArmourDefinition armourDefinition) return;
 
-	private void OnItemUnEquipped(EquipmentSlot slot)
-	{
-		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
+		static int GetInventorySizeModifier(int inventorySizeModifier, bool wasEquipped)
 		{
-			switch (slot.EquipmentType)
-			{
-				case EquipmentHandler.EquipmentType.backpack:
-				itemContainer.ModifySize(-(int)armourDefinition.InventorySlotsProvided);
-				break;
-			}
+			return wasEquipped ? inventorySizeModifier : -inventorySizeModifier;
+		}
+
+		switch (slot.EquipmentType)
+		{
+			case EquipmentHandler.EquipmentType.backpack:
+			itemContainer.ModifySize(GetInventorySizeModifier(armourDefinition.InventorySlotsProvided, wasEquipped));
+			break;
 		}
 	}
 	#endregion

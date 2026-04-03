@@ -61,9 +61,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 		if (equipmentRef != null)
 		{
-			equipmentRef.OnItemEquip -= HandleEquippingItem;
-			equipmentRef.OnItemUnEquip -= HandleUnequippingItem;
-			equipmentRef.OnConsumableUsed -= HandleEquippingItem;
+			equipmentRef.OnEquippedItemChanges -= OnEquippedItemChanges;
 		}
 	}
 
@@ -76,9 +74,8 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		{
 			this.equipmentRef = equipmentRef;
 			this.slotEquipmentType = equipmentType;
-			equipmentRef.OnItemEquip += HandleEquippingItem;
-			equipmentRef.OnItemUnEquip += HandleUnequippingItem;
-			equipmentRef.OnConsumableUsed += HandleEquippingItem;
+			equipmentRef.OnEquippedItemChanges += OnEquippedItemChanges;
+			equipmentRef.OnConsumableUsed += OnConsumableUsed;
 		}
 
 		inventorySlotUi.SetActive(true);
@@ -89,9 +86,8 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 		if (equipmentRef != null) //unsub to events
 		{
-			equipmentRef.OnItemEquip -= HandleEquippingItem;
-			equipmentRef.OnItemUnEquip -= HandleUnequippingItem;
-			equipmentRef.OnConsumableUsed -= HandleEquippingItem;
+			equipmentRef.OnEquippedItemChanges -= OnEquippedItemChanges;
+			equipmentRef.OnConsumableUsed -= OnConsumableUsed;
 		}
 
 		UpdateSlotUi(null);
@@ -201,19 +197,19 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	#region equipment slot listeners
-	private void HandleEquippingItem(EquipmentSlot slot)
+	private void OnEquippedItemChanges(EquipmentSlot slot, bool wasEquipped)
 	{
 		if (equipmentRef == null) return;
 		if (slotEquipmentType != slot.EquipmentType) return; //not correct equipment slot type
 
-		UpdateSlotUi(slot.Item);
+		if (wasEquipped)
+			UpdateSlotUi(slot.Item);
+		else
+			UpdateSlotUi(null);
 	}
-	private void HandleUnequippingItem(EquipmentSlot slot)
+	private void OnConsumableUsed(EquipmentSlot slot)
 	{
-		if (equipmentRef == null) return;
-		if (slotEquipmentType != slot.EquipmentType) return; //not correct equipment slot type
-
-		UpdateSlotUi(null);
+		OnEquippedItemChanges(slot, true);
 	}
 	#endregion
 

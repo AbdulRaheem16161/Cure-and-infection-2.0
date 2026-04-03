@@ -70,14 +70,12 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region event subbing/unsubbing
 	private void OnEnable()
 	{
-		EquipmentHandler.OnItemEquip += OnItemEquipped;
-		EquipmentHandler.OnItemUnEquip += OnItemUnEquipped;
+		EquipmentHandler.OnEquippedItemChanges += OnEquippedItemChanges;
 		EquipmentHandler.OnConsumableUsed += UseConsumable;
 	}
 	private void OnDisable()
 	{
-		EquipmentHandler.OnItemEquip -= OnItemEquipped;
-		EquipmentHandler.OnItemUnEquip -= OnItemUnEquipped;
+		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
 		EquipmentHandler.OnConsumableUsed -= UseConsumable;
 	}
 	#endregion
@@ -123,36 +121,24 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#endregion
 
 	#region on item equip/unequip events, update protection stats
-	private void OnItemEquipped(EquipmentSlot slot)
+	private void OnEquippedItemChanges(EquipmentSlot slot, bool wasEquipped)
 	{
-		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
-		{
-			switch (slot.EquipmentType)
-			{
-				case EquipmentHandler.EquipmentType.helmet:
-				headProtection += armourDefinition.ProtectionProvided;
-				break;
+		if (slot.Item.ItemDefinition is not ArmourDefinition armourDefinition) return;
 
-				case EquipmentHandler.EquipmentType.chest:
-				chestProtection += armourDefinition.ProtectionProvided;
-				break;
-			}
+		static float GetProtectionModifier(float modifier, bool wasEquipped)
+		{
+			return wasEquipped ? modifier : -modifier;
 		}
-	}
-	private void OnItemUnEquipped(EquipmentSlot slot)
-	{
-		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
-		{
-			switch (slot.EquipmentType)
-			{
-				case EquipmentHandler.EquipmentType.helmet:
-				headProtection -= armourDefinition.ProtectionProvided;
-				break;
 
-				case EquipmentHandler.EquipmentType.chest:
-				chestProtection -= armourDefinition.ProtectionProvided;
-				break;
-			}
+		switch (slot.EquipmentType)
+		{
+			case EquipmentHandler.EquipmentType.helmet:
+			headProtection = GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
+			break;
+
+			case EquipmentHandler.EquipmentType.chest:
+			chestProtection = GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
+			break;
 		}
 	}
 	#endregion

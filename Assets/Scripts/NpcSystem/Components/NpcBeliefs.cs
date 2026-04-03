@@ -3,6 +3,7 @@ using Game.MyNPC;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using static EquipmentHandler;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(NPCStateMachine))]
@@ -55,6 +56,22 @@ public class NpcBeliefs : MonoBehaviour
 	#region Equipment Beliefs
 	public bool RangedWeaponInHands => EquipmentHandler.itemInHands is WeaponRanged;
 	public bool MeleeWeaponInHands => EquipmentHandler.itemInHands is WeaponMelee;
+	public bool CanHeal => Hurt && HealableItem != null;
+	public bool CanDrink => Thirsty && DrinkableItem != null;
+	public bool CanEat => Hungry && EatableItem != null;
+	#endregion
+
+	//internal belifs that should probably stay hidden
+	#region tracked Equipment slots updated on events
+	private EquipmentSlot ConsumableOne;
+	private EquipmentSlot ConsumableTwo;
+	private EquipmentSlot ConsumableThree;
+	#endregion
+
+	#region track usable consumables
+	public EquipmentSlot HealableItem => CanUseConsumableItem(ConsumableDefinition.RestorationType.health);
+	public EquipmentSlot DrinkableItem => CanUseConsumableItem(ConsumableDefinition.RestorationType.water);
+	public EquipmentSlot EatableItem => CanUseConsumableItem(ConsumableDefinition.RestorationType.food);
 	#endregion
 
 	private void Awake()
@@ -64,10 +81,17 @@ public class NpcBeliefs : MonoBehaviour
 		NpcPerception = GetComponent<NpcPerception>();
 		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
+
+		EquipmentHandler.OnEquippedItemChanges += OnEquippedItemChanges;
 	}
 	public void InitializeBeliefs(NpcDefinition npcDefinition)
 	{
 		NpcDefinition = npcDefinition;
+	}
+
+	private void OnDestroy()
+	{
+		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
 	}
 
 	#region alert belief check
@@ -119,6 +143,49 @@ public class NpcBeliefs : MonoBehaviour
 	}
 	#endregion
 
+	#region Track Equipment Changes
+	private void OnEquippedItemChanges(EquipmentSlot equipmentSlot, bool wasEquipped)
+	{
+		static EquipmentSlot UpdateOrNullEquipmentReference(EquipmentSlot equipmentSlot, bool wasEquipped)
+		{
+			return wasEquipped ? equipmentSlot : null;
+		}
+
+		switch (equipmentSlot.EquipmentType)
+		{
+			case EquipmentType.consumableOne:
+			ConsumableOne = UpdateOrNullEquipmentReference(equipmentSlot, wasEquipped);
+			return;
+			case EquipmentType.consumableTwo:
+			ConsumableTwo = UpdateOrNullEquipmentReference(equipmentSlot, wasEquipped);
+			return;
+			case EquipmentType.consumableThree:
+			ConsumableThree = UpdateOrNullEquipmentReference(equipmentSlot, wasEquipped);
+			return;
+		}
+	}
+	#endregion
+
 	#region complex equipment checks
+	private EquipmentSlot CanUseConsumableItem(ConsumableDefinition.RestorationType restorationType)
+	{
+		if (restorationType == ConsumableDefinition.RestorationType.health && !Hurt) return null;
+		if (restorationType == ConsumableDefinition.RestorationType.water && !Thirsty) return null;
+		if (restorationType == ConsumableDefinition.RestorationType.food && !Hungry) return null;
+
+		static EquipmentSlot CanRestore(EquipmentSlot consumableSlot, ConsumableDefinition.RestorationType restorationType)
+		{
+			if (consumableSlot == null || consumableSlot.ItemDefinitionNull ||
+			consumableSlot.Item.ItemDefinition is not ConsumableDefinition consumable || 
+			!consumable.RestorationTypes.HasFlag(restorationType)) return null;
+			else
+				return consumableSlot;
+		}
+		EquipmentSlot cachedConsumableSlot = CanRestore(ConsumableOne, restorationType) ??
+								   CanRestore(ConsumableTwo, restorationType) ??
+								   CanRestore(ConsumableThree, restorationType);
+
+		return cachedConsumableSlot;
+	}
 	#endregion
 }

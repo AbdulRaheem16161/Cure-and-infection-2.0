@@ -52,8 +52,7 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 
 	#region events
-	public event Action<EquipmentSlot> OnItemEquip;
-	public event Action<EquipmentSlot> OnItemUnEquip;
+	public event Action<EquipmentSlot, bool> OnEquippedItemChanges;
 	public event Action<EquipmentSlot> OnConsumableUsed;
 	#endregion
 
@@ -292,7 +291,7 @@ public class EquipmentHandler : MonoBehaviour
 			spawnedItem.EquipItem(this, GetParentForSlot(spawnedItem));
 			slot.SetWorldItem(spawnedItem);
 		}
-		OnItemEquip?.Invoke(slot);
+		OnEquippedItemChanges?.Invoke(slot, true);
 	}
 	private void HandleItemUnequipping(EquipmentSlot slot)
 	{
@@ -306,7 +305,7 @@ public class EquipmentHandler : MonoBehaviour
 			slot.SetWorldItem(spawnedItem);
 		}
 
-		OnItemUnEquip?.Invoke(slot);
+		OnEquippedItemChanges?.Invoke(slot, false);
 		slot.SetInventoryItem(null);
 	}
 	private Transform GetParentForSlot(Item item)
@@ -375,10 +374,9 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		if (itemInHands == null) return;
 		itemInHands.HolsterItem();
-		itemInHands = null;
-
 		itemInHands.transform.SetParent(equippedWeaponsParent.transform);
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		itemInHands = null;
 	}
 	public void UnholsterWeapon(EquipmentType equipmentType)
 	{

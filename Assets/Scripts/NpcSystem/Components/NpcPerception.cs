@@ -119,6 +119,7 @@ public class NpcPerception : MonoBehaviour
 	#region npc investigation triggers
 	private void InvestigateWhereHitFrom(DamageContext damageContext)
 	{
+		if (damageContext.Attacker == gameObject) return; //ignore damage from self
 		if (!Beliefs.Alert)
 			Beliefs.InvestigateLocation = damageContext.Attacker.transform.position;
 	}

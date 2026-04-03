@@ -14,7 +14,7 @@ public class ArmourDefinition : ItemDefinition
 	[Tooltip("% Damage reduction")]
 	[Range(0f, 1f)]
 	[SerializeField] private float protectionProvided;
-	[SerializeField] private float inventorySlotsProvided;
+	[SerializeField] private int inventorySlotsProvided;
 	#endregion
 
 	//add fields for ui icons, 3d prefab models etc, sfx/vfx specific for armour etc...
@@ -24,6 +24,6 @@ public class ArmourDefinition : ItemDefinition
 	#region readoly properties
 	public ArmourSlotType ArmourSlot => armourType;
 	public float ProtectionProvided => protectionProvided;
-	public float InventorySlotsProvided => inventorySlotsProvided;
+	public int InventorySlotsProvided => inventorySlotsProvided;
 	#endregion
 }

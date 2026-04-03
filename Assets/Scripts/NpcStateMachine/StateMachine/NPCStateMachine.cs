@@ -33,6 +33,7 @@ namespace Game.MyNPC
 		#endregion
 
 		#region NpcStates;
+		private NpcUseConsumableState useConsumableState;
 		private NpcFleeState fleeState;
 		private NPCRangedAttackState rangedAttackState;
 		private NPCMeleeAttackState meleeAttackState;
@@ -45,6 +46,7 @@ namespace Game.MyNPC
 
 		#region Npc State Toggles
 		[Header("Npc State Toggles")]
+		public bool EnableConsumableUse;
 		public bool EnableFlee;
 		public bool EnableRangedAttack;
 		public bool EnableMeleeAttack;
@@ -89,6 +91,7 @@ namespace Game.MyNPC
 			#endregion
 
 			#region state initializations
+			useConsumableState = new NpcUseConsumableState(this);
 			fleeState = new NpcFleeState(this);
 			rangedAttackState = new NPCRangedAttackState(this);
 			meleeAttackState = new NPCMeleeAttackState(this);
@@ -104,6 +107,7 @@ namespace Game.MyNPC
 		{
 			NpcDefinition = npcDefinition;
 
+			EnableConsumableUse = true;
 			EnableMovement = true;
 			EnableFlee = true;
 			EnableInvestigate = true;
@@ -154,23 +158,37 @@ namespace Game.MyNPC
 			// ---------- STATE PRIORITY DESCENDING ----------
 
 			// Stay in current state if its conditions are still valid
+			if (currentState == useConsumableState && ShouldHeal()) { base.Update(); return; }
 			if (currentState == fleeState && ShouldFlee()) { base.Update(); return; }
+
 			if (currentState == rangedAttackState && ShouldRangedAttack()) { base.Update(); return; }
 			if (currentState == meleeAttackState && ShouldMeleeAttack()) { base.Update(); return; }
+
 			if (currentState == chaseState && ShouldChase()) { base.Update(); return; }
 			if (currentState == eatCorpseState && ShouldEatCorpse()) { base.Update(); return; }
 			if (currentState == investigateState && ShouldInvestigate()) { base.Update(); return; }
+
 			if (currentState == moveState && ShouldMove()) { base.Update(); return; }
+			if (currentState == useConsumableState && ShouldDrink()) { base.Update(); return; }
+			if (currentState == useConsumableState && ShouldEat()) { base.Update(); return; }
+
 			if (currentState == idleState && ShouldIdle()) { base.Update(); return; }
 
 			// Otherwise, switch to the highest-priority valid state
-			if (ShouldFlee()) SwitchState(fleeState);
+			if (ShouldHeal()) SwitchState(useConsumableState);
+			else if (ShouldFlee()) SwitchState(fleeState);
+
 			else if (ShouldRangedAttack()) SwitchState(rangedAttackState);
 			else if (ShouldMeleeAttack()) SwitchState(meleeAttackState);
+
 			else if (ShouldChase()) SwitchState(chaseState);
 			else if (ShouldEatCorpse()) SwitchState(eatCorpseState);
 			else if (ShouldInvestigate()) SwitchState(investigateState);
+
+			else if (ShouldDrink()) SwitchState(useConsumableState);
+			else if (ShouldEat()) SwitchState(useConsumableState);
 			else if (ShouldMove()) SwitchState(moveState);
+
 			else if (ShouldIdle()) SwitchState(idleState);
 		}
 
@@ -180,59 +198,55 @@ namespace Game.MyNPC
 			UpdateAnimationMoveSpeed();
         }
 
-		#region State Transition Checks
+		#region State Transition Checks (based mostly on NpcBeliefs)
+		private bool ShouldHeal()
+		{
+			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Hurt && Beliefs.CanHeal;
+		}
 		private bool ShouldFlee()
 		{
-			if (EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.SafeFromFleeTarget && !Beliefs.MeleeWeaponInHands)
-				return true;
-			else return false;
+			return EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.SafeFromFleeTarget && !Beliefs.MeleeWeaponInHands;
 		}
 		private bool ShouldRangedAttack()
 		{
-			if (EnableRangedAttack && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands)
-				return true;
-			else return false;
+			return EnableRangedAttack && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 		}
 		private bool ShouldMeleeAttack()
 		{
-			if (EnableMeleeAttack && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands)
-				return true;
-			else return false;
+			return EnableMeleeAttack && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
 		}
 		private bool ShouldChase()
 		{
-			bool targetOutOfAttackRange = !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
-			if (EnableChase && Beliefs.HasTarget && targetOutOfAttackRange)
-				return true;
-			else
-				return false;
+			return EnableChase && Beliefs.HasTarget && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
 		}
 		private bool ShouldEatCorpse()
 		{
-			if (EnableEatCorpseState && !Beliefs.HasTarget && StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget)
-				return true;
-			else return false;
+			return EnableEatCorpseState && !Beliefs.HasTarget && 
+				StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget;
 		}
 		private bool ShouldInvestigate()
 		{
-			if (EnableInvestigate && !Beliefs.HasTarget && Beliefs.FreeToInvestigate)
-				return true;
-			else return false;
+			return EnableInvestigate && !Beliefs.HasTarget && Beliefs.FreeToInvestigate;
 		}
 		private bool ShouldMove()
 		{
-			if (EnableMovement && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate && !Beliefs.Idling)
-				return true;
-			else return false;
+			return EnableMovement && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate &&
+				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat && !Beliefs.Idling;
+		}
+		private bool ShouldDrink()
+		{
+			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Thirsty && Beliefs.CanDrink;
+		}
+		private bool ShouldEat()
+		{
+			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Hungry && Beliefs.CanEat;
 		}
 		private bool ShouldIdle()
 		{
 			if (!EnableMovement && Beliefs.Idling)
 				Beliefs.Idling = true;
 
-			if (Beliefs.Idling && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate)
-				return true;
-			else return false;
+			return Beliefs.Idling && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate && !Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
 		}
 		#endregion
 
