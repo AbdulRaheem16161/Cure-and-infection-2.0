@@ -125,9 +125,9 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region on item equip/unequip events, update protection stats
 	private void OnItemEquipped(EquipmentSlot slot)
 	{
-		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
 		{
-			switch (slot.equipmentType)
+			switch (slot.EquipmentType)
 			{
 				case EquipmentHandler.EquipmentType.helmet:
 				headProtection += armourDefinition.ProtectionProvided;
@@ -141,9 +141,9 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	private void OnItemUnEquipped(EquipmentSlot slot)
 	{
-		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
 		{
-			switch (slot.equipmentType)
+			switch (slot.EquipmentType)
 			{
 				case EquipmentHandler.EquipmentType.helmet:
 				headProtection -= armourDefinition.ProtectionProvided;
@@ -160,7 +160,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region on use consumable event, update stats
 	private void UseConsumable(EquipmentSlot slot)
 	{
-		if (slot.item.ItemDefinition is ConsumableDefinition consumableDefinition)
+		if (slot.Item.ItemDefinition is ConsumableDefinition consumableDefinition)
 		{
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
 				Mathf.Clamp(health += consumableDefinition.HealthRestored, 0, 100);

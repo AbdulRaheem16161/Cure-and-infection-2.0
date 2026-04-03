@@ -80,9 +80,9 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	#region item equipment events
 	private void OnItemEquipped(EquipmentSlot slot)
 	{
-		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
 		{
-			switch (slot.equipmentType)
+			switch (slot.EquipmentType)
 			{
 				case EquipmentHandler.EquipmentType.backpack:
 				itemContainer.ModifySize((int)armourDefinition.InventorySlotsProvided);
@@ -93,9 +93,9 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 
 	private void OnItemUnEquipped(EquipmentSlot slot)
 	{
-		if (slot.item.ItemDefinition is ArmourDefinition armourDefinition)
+		if (slot.Item.ItemDefinition is ArmourDefinition armourDefinition)
 		{
-			switch (slot.equipmentType)
+			switch (slot.EquipmentType)
 			{
 				case EquipmentHandler.EquipmentType.backpack:
 				itemContainer.ModifySize(-(int)armourDefinition.InventorySlotsProvided);

@@ -30,7 +30,7 @@ MonoBehaviour:
   fireMode: 4
   fireRateRPM: 550
   reloadTime: 2
-  effectiveRange: 175
+  effectiveRange: 300
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0
@@ -39,7 +39,6 @@ MonoBehaviour:
   spreadIncreasePerShot: 0
   spreadRecoveryRate: 0
   maxSpread: 0
-  beamRadius: 0
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2

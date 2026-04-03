@@ -8,6 +8,7 @@ namespace Game.MyNPC
         public NPCMeleeAttackState(NPCStateMachine stateMachine) : base(stateMachine) { }
 		#endregion
 
+		private WeaponMelee EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponMelee;
 		private float randomSwingDelay;
 
 		private readonly System.Random systemRandom = new();
@@ -44,7 +45,7 @@ namespace Game.MyNPC
 				return;
 
 			stateMachine.Animator.SetTrigger("Attack");
-			stateMachine.EquipmentHandler.meleeWeaponInHands.LightAttack();
+			EquippedWeapon.LightAttack();
 		}
 
 		private float GetRandomSwingDelay()

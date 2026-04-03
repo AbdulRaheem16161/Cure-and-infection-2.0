@@ -53,8 +53,8 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Equipment Beliefs
-	public bool RangedWeaponInHands => EquipmentHandler.HasRangedWeaponInHands;
-	public bool MeleeWeaponInHands => EquipmentHandler.HasMeleeWeaponInHands;
+	public bool RangedWeaponInHands => EquipmentHandler.itemInHands is WeaponRanged;
+	public bool MeleeWeaponInHands => EquipmentHandler.itemInHands is WeaponMelee;
 	#endregion
 
 	private void Awake()
@@ -95,7 +95,9 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (!NpcPerception.IsTargetDetected || !RangedWeaponInHands) return false;
 
-		if (NpcPerception.DetectedTarget.Distance > EquipmentHandler.rangedWeaponInHands.TypedDefinition.EffectiveRange)
+		WeaponRanged weaponRanged = EquipmentHandler.itemInHands as WeaponRanged;
+
+		if (NpcPerception.DetectedTarget.Distance > weaponRanged.TypedDefinition.EffectiveRange)
 			return false;
 		else
 			return true;
@@ -115,5 +117,8 @@ public class NpcBeliefs : MonoBehaviour
 			return true;
 		}
 	}
+	#endregion
+
+	#region complex equipment checks
 	#endregion
 }

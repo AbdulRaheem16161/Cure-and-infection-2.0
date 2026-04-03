@@ -13,36 +13,31 @@ public class EquipmentHandler : MonoBehaviour
 	public InventoryHandler InventoryHandler { get; private set; }
 	private bool _Initialized = false;
 
-	#region equipment slots + dictionary lookup
-	[Header("Equipment Settings")]
-	public Dictionary<EquipmentType, EquipmentSlot> slotLookup = new();
-	public List<EquipmentSlot> equipmentSlots = new();
+	#region Equipment Item Prefabs
+	[Header("Equipment Item Prefabs")]
+	public GameObject WeaponRangedPrefab;
+	public GameObject WeaponMeleePrefab;
+	public GameObject ArmourPrefab;
 	#endregion
 
-	#region equipped world items
-	[Header("Equipped World Items")]
-	public Dictionary<EquipmentType, Item> equippedItems = new();
+	#region Equipped Items Parent Slots
+	[Header("Equipped Items Parent Slots")]
 	public GameObject equippedHelmetParent;
 	public GameObject equippedChestpieceParent;
 	public GameObject equippedBackpackParent;
 	public GameObject equippedWeaponsParent;
-
-	[Header("Item Equipped In Hands")]
 	public GameObject ItemsInHandsParent;
 	#endregion
 
-	#region item in hands
-	public bool HasRangedWeaponInHands { get; private set; }
-	public bool HasMeleeWeaponInHands { get; private set; }
-	[ReadOnly] public WeaponRanged rangedWeaponInHands;
-	[ReadOnly] public WeaponMelee meleeWeaponInHands;
+	#region Equipped Items Data Settings
+	[Header("Equipped Items Data Settings")]
+	public List<EquipmentSlot> equippedItems = new();
 	#endregion
 
-	#region item prefabs
-	[Header("Equipment Prefabs")]
-	public GameObject WeaponRangedPrefab;
-	public GameObject WeaponMeleePrefab;
-	public GameObject ArmourPrefab;
+	#region item in hands
+	[Header("Weapon Item In Hands")]
+	public Item itemInHands;
+	public bool HasItemInHands => itemInHands != null;
 	#endregion
 
 	#region debug settings
@@ -107,11 +102,7 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		_Initialized = true;
 
-		//create equipment slot look up
-		equipmentSlots = new();
-		slotLookup = new();
-
-		if (npcDefinition == null) return; //allows partial component testing
+		equippedItems.Clear();
 
 		foreach (EquipmentType type in Enum.GetValues(typeof(EquipmentType)))
 		{
@@ -122,10 +113,11 @@ public class EquipmentHandler : MonoBehaviour
 				continue;
 			}
 
-			EquipmentSlot newSlot = new(slotType, type, new(null, 0));
-			equipmentSlots.Add(newSlot);
-			slotLookup.Add(type, newSlot);
+			EquipmentSlot equipmentSlot = new(slotType, type, new(null, 0), null);
+			equippedItems.Add(equipmentSlot);
 		}
+
+		if (npcDefinition == null) return; //allows partial component testing
 
 		EquipNpcEquipment(npcDefinition);
 	}
@@ -185,20 +177,20 @@ public class EquipmentHandler : MonoBehaviour
 	/// </summary>
 	public void EquipItemFromInventory(int itemSlot, EquipmentType equipmentType, bool returnItem = true)
 	{
-		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
-		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
+		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 		InventoryItem itemToEquip = InventoryHandler.ItemContainer.Items[itemSlot];
 
-		if (itemToEquip.ItemDefinition == null && equippedItem != null && returnItem) //return early if no weapon to equip
+
+		if (itemToEquip.ItemDefinitionNull && !slot.ItemDefinitionNull && returnItem) //return early if no item to equip
 		{
-			HandleItemUnequipping(equipmentSlot);
-			InventoryHandler.ItemContainer.AddNewItem(equippedItem);
+			HandleItemUnequipping(slot);
+			InventoryHandler.ItemContainer.AddNewItem(slot.Item);
 			return;
 		}
 
-		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
+		if (!EquipmentSlotsMatch(slot, itemToEquip)) return;
 
-		if (equippedItem != null && returnItem) //return item
+		if (!slot.ItemDefinitionNull && returnItem) //return item
 		{
 			if (InventoryHandler.ItemContainer.ContainerFull())
 			{
@@ -206,11 +198,11 @@ public class EquipmentHandler : MonoBehaviour
 				return;
 			}
 
-			HandleItemUnequipping(equipmentSlot);
-			InventoryHandler.ItemContainer.AddNewItem(equippedItem);
+			HandleItemUnequipping(slot);
+			InventoryHandler.ItemContainer.AddNewItem(slot.Item);
 		}
 
-		HandleItemEquipping(itemToEquip, equipmentSlot);
+		HandleItemEquipping(itemToEquip, slot);
 		InventoryHandler.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack);
 	}
 	/// <summary>
@@ -218,30 +210,27 @@ public class EquipmentHandler : MonoBehaviour
 	/// </summary>
 	public void EquipItemFromEquipment(EquipmentType currentSlotType, EquipmentType newSlotType)
 	{
-		EquipmentSlot currentEquipmentSlot = GetEquipmentSlot(currentSlotType);
-		EquipmentSlot newEquipmentSlot = GetEquipmentSlot(newSlotType);
+		EquipmentSlot currentSlot = GetEquipmentSlot(currentSlotType);
+		EquipmentSlot newSlot = GetEquipmentSlot(newSlotType);
 
-		InventoryItem currentEquippedItem = CheckForEquippedItem(currentSlotType);
-		InventoryItem newEquippedItem = CheckForEquippedItem(newSlotType);
+		if (!SlotTypesMatch(currentSlot, newSlot)) return; //cant swap equipped items
+		if (!EquipmentSlotsMatch(newSlot, currentSlot.Item)) return;
 
-		if (!SlotTypesMatch(currentEquipmentSlot, newEquipmentSlot)) return; //cant swap equipped items
-		if (!EquipmentSlotsMatch(newEquipmentSlot, currentEquippedItem)) return;
+		HandleItemEquipping(currentSlot.Item, newSlot);
 
-		HandleItemEquipping(currentEquippedItem, newEquipmentSlot);
-
-		if (newEquippedItem == null)
+		if (currentSlot.Item == null)
 		{
-			HandleItemUnequipping(currentEquipmentSlot);
+			HandleItemUnequipping(currentSlot);
 			Debug.LogWarning("inventory item null");
 			return;
 		}
-		if (newEquippedItem.ItemDefinition == null) //item def null nothing to swap
+		if (newSlot.Item.ItemDefinition == null) //item def null nothing to swap
 		{
 			Debug.LogWarning("inventory item definition null");
 			return;
 		}
 
-		HandleItemEquipping(newEquippedItem, currentEquipmentSlot);
+		HandleItemEquipping(newSlot.Item, currentSlot);
 	}
 	#endregion
 
@@ -251,32 +240,30 @@ public class EquipmentHandler : MonoBehaviour
 	/// </summary>
 	public void UnequipItem(EquipmentType equipmentType, bool returnItem = true)
 	{
-		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
-		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
+		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 
-		if (equippedItem == null) return; //no equipped item to unequip
-		HandleItemUnequipping(equipmentSlot);
+		if (slot.ItemNull) return; //no equipped item to unequip
+		HandleItemUnequipping(slot);
 
 		if (returnItem)
 		{
 			if (!InventoryHandler.ItemContainer.ContainerFull()) //return equipped item
-				InventoryHandler.ItemContainer.AddNewItem(equippedItem);
+				InventoryHandler.ItemContainer.AddNewItem(slot.Item);
 			else
 				Debug.LogWarning("inventory full, cannot unequip item");
 		}
 	}
 	#endregion
 
-	#region drop item method on ground
+	#region drop item method on ground (TODO add spawning of item on ground logic)
 	public void DropItem(EquipmentType equipmentType, bool dropStack)
 	{
 		//TODO: instantiate item in world at characters feet
-		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
-		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
+		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 
-		if (equippedItem == null) return;
+		if (slot.ItemNull) return;
 
-		HandleItemUnequipping(equipmentSlot);
+		HandleItemUnequipping(slot);
 
 		//spawn world item
 	}
@@ -290,28 +277,37 @@ public class EquipmentHandler : MonoBehaviour
 	#region handle item equipping/unequipping
 	private void HandleItemEquipping(InventoryItem item, EquipmentSlot slot)
 	{
-		Debug.Log($"equipped {item.ItemDefinition.ItemName} to {slot.equipmentType} slot");
-		slot.item = new InventoryItem(item.ItemDefinition, item.CurrentStack);
+		if (item.ItemDefinitionNull)
+		{
+			Debug.LogError("items, itemDefinition is null when reference is expected");
+			return;
+		}
+
+		Debug.Log($"equipped {item.ItemDefinition.ItemName} to {slot.EquipmentType} slot");
+		slot.SetInventoryItem(new(item.ItemDefinition, item.CurrentStack));
 
 		if (item.ItemDefinition is not ConsumableDefinition) //doesnt need world item
 		{
 			Item spawnedItem = GetOrCreateItemInstance(slot);
 			spawnedItem.EquipItem(this, GetParentForSlot(spawnedItem));
+			slot.SetWorldItem(spawnedItem);
 		}
 		OnItemEquip?.Invoke(slot);
 	}
 	private void HandleItemUnequipping(EquipmentSlot slot)
 	{
-		Debug.Log($"unequipped {slot.item.ItemDefinition.ItemName} from {slot.equipmentType} slot");
+		if (slot.ItemDefinitionNull) return; //no item to unequip can be expected
+		Debug.Log($"unequipped {slot.Item.ItemDefinition.ItemName} from {slot.EquipmentType} slot");
 
-		if (slot.item.ItemDefinition is not ConsumableDefinition) //has no world item
+		if (slot.Item.ItemDefinition is not ConsumableDefinition) //has no world item
 		{
 			Item spawnedItem = GetOrCreateItemInstance(slot);
 			spawnedItem.UnEquipItem(this);
+			slot.SetWorldItem(spawnedItem);
 		}
 
 		OnItemUnEquip?.Invoke(slot);
-		slot.item = null;
+		slot.SetInventoryItem(null);
 	}
 	private Transform GetParentForSlot(Item item)
 	{
@@ -343,11 +339,12 @@ public class EquipmentHandler : MonoBehaviour
 	#region get equipped item instance
 	public Item GetOrCreateItemInstance(EquipmentSlot slot)
 	{
-		if (!equippedItems.TryGetValue(slot.equipmentType, out var itemInstance) || itemInstance == null)
-		{
-			itemInstance = ItemSpawner.GetItem(slot.item.ItemDefinition, slot.item.CurrentStack, null, Vector3.zero, Quaternion.identity);
-			equippedItems[slot.equipmentType] = itemInstance;
-		}
+		Item itemInstance;
+
+		if (slot.WorldItemNull)
+			itemInstance = ItemSpawner.GetItem(slot.Item.ItemDefinition, slot.Item.CurrentStack, null, Vector3.zero, Quaternion.identity);
+		else
+			itemInstance = slot.WorldItem;
 
 		return itemInstance;
 	}
@@ -357,19 +354,18 @@ public class EquipmentHandler : MonoBehaviour
 	public void UseConsumable(EquipmentType equipmentType)
 	{
 		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-		InventoryItem equippedItem = CheckForEquippedItem(equipmentType);
 
 		//TODO: could add checks like if full health dont consume etc...
-		if (equippedItem.ItemDefinition is not ConsumableDefinition)
+		if (slot.Item.ItemDefinition is not ConsumableDefinition)
 		{
 			Debug.LogError($"{equipmentType} cannot consume this item.");
 			return;
 		}
 
-		equippedItem.RemoveItemStack(1);
+		slot.Item.RemoveItemStack(1);
 		OnConsumableUsed?.Invoke(slot);
 
-		if (equippedItem.CurrentStack <= 0)
+		if (slot.Item.CurrentStack <= 0)
 			HandleItemUnequipping(slot);
 	}
 	#endregion
@@ -377,103 +373,42 @@ public class EquipmentHandler : MonoBehaviour
 	#region handle holstering/unholstering weapons
 	public void HolsterWeapon()
 	{
-		GameObject weaponObject = null;
-		if (rangedWeaponInHands)
-		{
-			HasRangedWeaponInHands = false;
-			weaponObject = rangedWeaponInHands.gameObject;
-			rangedWeaponInHands.HolsterItem();
-			rangedWeaponInHands = null;
-		}
-		if (meleeWeaponInHands)
-		{
-			HasMeleeWeaponInHands = false;
-			weaponObject = meleeWeaponInHands.gameObject;
-			meleeWeaponInHands.HolsterItem();
-			meleeWeaponInHands = null;
-		}
+		if (itemInHands == null) return;
+		itemInHands.HolsterItem();
+		itemInHands = null;
 
-		if (weaponObject == null) //no weapon obj to move
-			return;
-
-		weaponObject.transform.SetParent(equippedWeaponsParent.transform);
-		weaponObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		itemInHands.transform.SetParent(equippedWeaponsParent.transform);
+		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 	}
 	public void UnholsterWeapon(EquipmentType equipmentType)
 	{
 		HolsterWeapon(); //holster current weapon if any
-
-		GameObject weaponObject;
-		if (equipmentType == EquipmentType.weaponOne || equipmentType == EquipmentType.weaponTwo)
-		{
-			if (equippedItems.TryGetValue(equipmentType, out var weapon))
-			{
-				rangedWeaponInHands = weapon as WeaponRanged;
-				rangedWeaponInHands.UnHolsterItem();
-				HasRangedWeaponInHands = true;
-				weaponObject = rangedWeaponInHands.gameObject;
-			}
-			else
-				return;
-		}
-		else if (equipmentType == EquipmentType.weaponMelee)
-		{
-			if (equippedItems.TryGetValue(equipmentType, out var weapon))
-			{
-				meleeWeaponInHands = weapon as WeaponMelee;
-				meleeWeaponInHands.UnHolsterItem();
-				HasMeleeWeaponInHands = true;
-				weaponObject = meleeWeaponInHands.gameObject;
-			}
-			else
-				return;
-		}
-		else
-			return; //wrong equipment type
-
-		weaponObject.transform.SetParent(ItemsInHandsParent.transform);
-		weaponObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		itemInHands = GetEquipmentSlot(equipmentType).WorldItem;
+		itemInHands.UnHolsterItem();
+		itemInHands.transform.SetParent(ItemsInHandsParent.transform);
+		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 	}
 	#endregion
 
 	#region equipment slot and inventory item checks
-	private InventoryItem CheckForEquippedItem(EquipmentType equipmentType)
+	public EquipmentSlot GetEquipmentSlot(EquipmentType equipmentType)
 	{
-		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-
-		if (slot == null)
+		foreach (EquipmentSlot equipmentSlot in equippedItems)
 		{
-			Debug.LogError($"no slot found for {equipmentType}");
-			return null;
+			if (equipmentSlot.EquipmentType == equipmentType)
+				return equipmentSlot;
 		}
+		Debug.LogError($"Failed to find {typeof(EquipmentSlot)} that matched {equipmentType}, returning first as fallback");
 
-		if (slot.item == null)
-		{
-			Debug.LogWarning($"slot {equipmentType} item is null");
-			return null;
-		}
-
-		if (slot.item.ItemDefinition == null)
-		{
-			Debug.LogWarning($"slot {equipmentType} item definition is null");
-			return null;
-		}
-
-		return slot.item;
-	}
-	private EquipmentSlot GetEquipmentSlot(EquipmentType equipmentType)
-	{
-		if (!slotLookup.TryGetValue(equipmentType, out var slot))
-			return null;
-		return slot;
+		return equippedItems[0];
 	}
 	#endregion
 
 	#region slot and item type checks
 	private bool SlotTypesMatch(EquipmentSlot slotOne, EquipmentSlot slotTwo)
 	{
-		InventorySlotType slotTypeOne = slotToInventoryType[slotOne.equipmentType];
-		InventorySlotType slotTypeTwo = slotToInventoryType[slotTwo.equipmentType];
+		InventorySlotType slotTypeOne = slotToInventoryType[slotOne.EquipmentType];
+		InventorySlotType slotTypeTwo = slotToInventoryType[slotTwo.EquipmentType];
 
 		if (slotTypeOne == slotTypeTwo)
 			return true;
@@ -483,7 +418,7 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	private bool EquipmentSlotsMatch(EquipmentSlot slot, InventoryItem item)
 	{
-		return (slot.equipmentType & item.ItemDefinition.AllowedEquipmentSlots) != 0;
+		return (slot.EquipmentType & item.ItemDefinition.AllowedEquipmentSlots) != 0;
 	}
 	#endregion
 }
@@ -491,14 +426,34 @@ public class EquipmentHandler : MonoBehaviour
 [System.Serializable]
 public class EquipmentSlot
 {
-	public InventorySlotType slotType; // stored once
-	public EquipmentType equipmentType;
-	public InventoryItem item;
+	[SerializeField] private InventorySlotType slotType;
+	[SerializeField] private EquipmentType equipmentType;
+	[SerializeField] private InventoryItem item;
+	[SerializeField] private Item worldItem;
 
-	public EquipmentSlot(InventorySlotType slotType, EquipmentType equipmentType, InventoryItem item)
+	public InventorySlotType SlotType => slotType;
+	public EquipmentType EquipmentType => equipmentType;
+	public InventoryItem Item => item;
+	public Item WorldItem => worldItem;
+
+	public bool ItemNull => item == null;
+	public bool ItemDefinitionNull => item == null || item.ItemDefinition == null;
+	public bool WorldItemNull => worldItem == null;
+
+	public EquipmentSlot(InventorySlotType slotType, EquipmentType equipmentType, InventoryItem item, Item worldItem)
 	{
 		this.slotType = slotType;
 		this.equipmentType = equipmentType;
 		this.item = item;
+		this.worldItem = worldItem;
+	}
+
+	public void SetInventoryItem(InventoryItem item)
+	{
+		this.item = item;
+	}
+	public void SetWorldItem(Item worldItem)
+	{
+		this.worldItem = worldItem;
 	}
 }

@@ -19,13 +19,13 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerMouseLeftClick()
 	{
-		if (EquipmentHandler.HasRangedWeaponInHands)
+		if (EquipmentHandler.itemInHands is WeaponRanged weaponRanged)
 		{
-			EquipmentHandler.rangedWeaponInHands.Shoot();
+			weaponRanged.Shoot();
 		}
-		else if (EquipmentHandler.HasMeleeWeaponInHands)
+		else if (EquipmentHandler.itemInHands is WeaponMelee weaponMelee)
 		{
-			EquipmentHandler.meleeWeaponInHands.LightAttack();
+			weaponMelee.LightAttack();
 		}
 	}
 
@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerHotkeyPressOne()
 	{
-		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedItems[EquipmentHandler.EquipmentType.weaponOne])
+		if (EquipmentHandler.HasItemInHands)
 			EquipmentHandler.HolsterWeapon();
 		else
 			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponOne);
@@ -62,10 +62,18 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerHotkeyPressTwo()
 	{
-		if (EquipmentHandler.rangedWeaponInHands == EquipmentHandler.equippedItems[EquipmentHandler.EquipmentType.weaponTwo])
+		if (EquipmentHandler.HasItemInHands)
 			EquipmentHandler.HolsterWeapon();
 		else
 			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponTwo);
+	}
+
+	public void PlayerHotkeyPressThree()
+	{
+		if (EquipmentHandler.HasItemInHands)
+			EquipmentHandler.HolsterWeapon();
+		else
+			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponMelee);
 	}
 
 	//use consumables on hotkey presses

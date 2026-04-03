@@ -204,14 +204,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	private void HandleEquippingItem(EquipmentSlot slot)
 	{
 		if (equipmentRef == null) return;
-		if (slotEquipmentType != slot.equipmentType) return; //not correct equipment slot type
+		if (slotEquipmentType != slot.EquipmentType) return; //not correct equipment slot type
 
-		UpdateSlotUi(slot.item);
+		UpdateSlotUi(slot.Item);
 	}
 	private void HandleUnequippingItem(EquipmentSlot slot)
 	{
 		if (equipmentRef == null) return;
-		if (slotEquipmentType != slot.equipmentType) return; //not correct equipment slot type
+		if (slotEquipmentType != slot.EquipmentType) return; //not correct equipment slot type
 
 		UpdateSlotUi(null);
 	}

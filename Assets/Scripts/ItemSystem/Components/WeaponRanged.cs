@@ -145,7 +145,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	#region simulate simple bullet spread for now
 	private void SimulateBulletSpread()
 	{
-		float hardcodedSpread = 0.01f;
+		float hardcodedSpread = 0.25f;
 
 		Vector3 startPos = WeaponView.MuzzlePoint.position;
 		Vector3 direction = WeaponView.MuzzlePoint.forward;

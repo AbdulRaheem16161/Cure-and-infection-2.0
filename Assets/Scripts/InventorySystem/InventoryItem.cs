@@ -8,6 +8,7 @@ public class InventoryItem
 	[SerializeField] private int currentStack;
 
 	//read only
+	public bool ItemDefinitionNull => itemDefinition == null;
 	public ItemDefinition ItemDefinition => itemDefinition;
 	public int CurrentStack => currentStack;
 	public bool StackEmpty => currentStack <= 0;

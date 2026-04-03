@@ -9,7 +9,7 @@ namespace Game.MyNPC
         #endregion
 
         #region Fields
-        private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.rangedWeaponInHands;
+        private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponRanged;
 		private float shotsToBurstFireCount;
 		private float randomShotDelay;
 		#endregion
