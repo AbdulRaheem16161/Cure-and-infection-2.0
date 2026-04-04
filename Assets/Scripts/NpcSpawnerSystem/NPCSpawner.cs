@@ -67,40 +67,32 @@ public class NPCSpawner : MonoBehaviour
 		StatsHandler.OnZombificationComplete -= HandleNpcZombification;
 	}
 
+	#region spawn npc methods
 	public void SpawnNPC(NpcDefinition npcDefinition, Vector3? spawnPosition = null)
 	{
-		#region null definition check
 		if (npcDefinition == null)
         {
             Debug.LogError("NpcDefinition null assign a reference");
             return;
         }
-		#endregion
 
-		#region get new npc and its refs
 		GameObject NPCInstance = GetNpcObject(npcDefinition);
 		NpcController npcController = NPCInstance.GetComponent<NpcController>();
 		NPCStateMachine stateMachine = npcController.StateMachine;
-		#endregion
 
-		#region set spawn position
 		Vector3 position = spawnPosition ?? transform.position;
 		NPCInstance.transform.position = position;
-		#endregion
-
-		#region assign movement options
-		if (stateMachine.RandomMovementManager == null)
-            stateMachine.AssignFollowPoint(RandomMovementManager);
 
 		if (stateMachine.PatrolPoints == null)
-			stateMachine.AssignPatrolPoint(TrackGizmos);
-		#endregion
+			stateMachine.AssignPatrolPoints(TrackGizmos);
+
+		if (stateMachine.RandomMovementManager == null)
+            stateMachine.AssignMoveArea(RandomMovementManager);
 
 		npcController.InitializeNpc(npcDefinitionToSpawn, NPCsTeam);
 	}
 	public void SpawnRandomNPC(bool spawnZombie, Vector3? spawnPosition = null)
 	{
-		#region get random definition, call SpawnNpc method
 		NpcDefinition npcDefinition;
 
 		if (spawnZombie)
@@ -109,12 +101,12 @@ public class NPCSpawner : MonoBehaviour
 			npcDefinition = npcSpawns[systemRandom.Next(0, npcSpawns.Count + 1)];
 
 		SpawnNPC(npcDefinition, spawnPosition);
-		#endregion
 	}
+	#endregion
 
+	#region npc object pooling via GetNpcObject and HandleNpcDeath event (TODO will need updating to only listen for npc it spawned)
 	private GameObject GetNpcObject(NpcDefinition npcDefinition)
     {
-		#region get matching npc from pool. or instantiate new one if no match
 		GameObject npcObject = null;
 
 		for (int i = 0; i < npcObjectPooling.Count; i++)
@@ -131,31 +123,26 @@ public class NPCSpawner : MonoBehaviour
 
 		if (npcObject == null)
 			npcObject = Instantiate(npcDefinition.gameObjectPrefab, transform.position, Quaternion.identity);
-		#endregion
 
-		#region set transforms and return
 		npcObject.transform.SetParent(transform);
 		npcObject.transform.localPosition = Vector3.zero;
 		npcObject.SetActive(true);
-
 		return npcObject;
-		#endregion
 	}
 
 	private void HandleNpcDeath(GameObject gameObject)
     {
-		#region disable object add to npc pool
 		gameObject.SetActive(false);
         NpcController npcController = gameObject.GetComponent<NpcController>();
 		npcObjectPooling.Add(npcController);
-		#endregion
 	}
+	#endregion
 
+	#region handle zombification events (TODO will need updating to only listen for npc it spawned)
 	private void HandleNpcZombification(GameObject gameObject)
 	{
-		#region call HandleNpcDeath, spawn random zombie npc at death position
 		HandleNpcDeath(gameObject);
 		SpawnRandomNPC(true, gameObject.transform.position);
-		#endregion
 	}
+	#endregion
 }

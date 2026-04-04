@@ -350,7 +350,10 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 
 	#region handle using consumables
-	public void UseConsumable(EquipmentType equipmentType)
+	/// <summary>
+	/// use consumable currently equipped to slot, with optional consumeItem bool (true by default)
+	/// </summary>
+	public void UseConsumable(EquipmentType equipmentType, bool consumeItem = true)
 	{
 		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 
@@ -361,7 +364,9 @@ public class EquipmentHandler : MonoBehaviour
 			return;
 		}
 
-		slot.Item.RemoveItemStack(1);
+		if (consumeItem)
+			slot.Item.RemoveItemStack(1);
+
 		OnConsumableUsed?.Invoke(slot);
 
 		if (slot.Item.CurrentStack <= 0)

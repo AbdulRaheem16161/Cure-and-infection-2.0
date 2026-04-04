@@ -34,7 +34,7 @@ public class NpcBaseMovementState : NPCBaseState
 	/// </summary>
 	protected void HandleMovementLogic()
 	{
-		if (HasValidPatrolFollowPoint())
+		if (HasValidPatrolPoints())
 		{
 			//loop through control points and grab next if has reached current point, else continue to current one
 			if (stateMachine.reachedCurrentControlPoint)
@@ -46,21 +46,10 @@ public class NpcBaseMovementState : NPCBaseState
 			Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
 			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, destination);
 		}
+		else if (HasValidAreaMove())
+			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
 		else
-		{
-			if (HasValidRandomFollowPoint())
-				MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
-			else if (stateMachine.useBackupMovement)
-				MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, GetBackUpMovementLocationAroundNpc());
-			else
-			{
-				if (!stateMachine.moveOnPatrolPath || !stateMachine.moveOnRandomPath)
-					Debug.LogWarning($"{stateMachine.gameObject} has no valid movement options, enable one in inspector");
-				else
-					Debug.LogError($"{stateMachine.gameObject} has no valid movement options, " +
-						$"follow points likely failed to be assigned when initializing");
-			}
-		}
+			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, GetMoveLocationAroundNpc());
 	}
 
 	/// <summary>
@@ -68,6 +57,7 @@ public class NpcBaseMovementState : NPCBaseState
 	/// </summary>
 	protected void MoveToDestination(float speed, Vector3 newDestination)
 	{
+		stateMachine.CurrentDestination = newDestination;
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.speed = speed;
 		stateMachine.Agent.SetDestination(newDestination);
@@ -75,17 +65,17 @@ public class NpcBaseMovementState : NPCBaseState
 	#endregion
 
 	#region move to follow point checks
-	private bool HasValidPatrolFollowPoint()
+	private bool HasValidPatrolPoints()
 	{
-		if (stateMachine.moveOnPatrolPath && stateMachine.PatrolPoints != null)
+		if (stateMachine.usePatrolMove && stateMachine.PatrolPoints != null)
 			return true;
 		else
 			return false;
 
 	}
-	private bool HasValidRandomFollowPoint()
+	private bool HasValidAreaMove()
 	{
-		if (stateMachine.moveOnRandomPath && stateMachine.RandomMovementManager != null)
+		if (stateMachine.useRandomAreaMove && stateMachine.RandomMovementManager != null)
 			return true;
 		else
 			return false;
@@ -148,8 +138,6 @@ public class NpcBaseMovementState : NPCBaseState
 	#region destination reached check
 	protected bool HasReachedDestination()
 	{
-		//Debug.LogError($"distance {stateMachine.Agent.remainingDistance}");
-
 		if (stateMachine.Agent.remainingDistance <= stateMachine.Agent.stoppingDistance)
 			return true;
 		else
@@ -158,15 +146,16 @@ public class NpcBaseMovementState : NPCBaseState
 	#endregion
 
 	#region backup movement location (useful for drag and drop testing when not using a npc spawner)
-	private Vector3 GetBackUpMovementLocationAroundNpc()
+	private Vector3 GetMoveLocationAroundNpc()
 	{
 		float radius = 10f;
-		Vector3 randomDirection = Random.insideUnitSphere * radius;
-		randomDirection += stateMachine.transform.position;
+		Vector3 randomDirection = Random.insideUnitSphere * radius + stateMachine.transform.position;
 
-		if (NavMesh.SamplePosition(randomDirection, out NavMeshHit navHit, radius, NavMesh.AllAreas))
-			return navHit.position;
-		return stateMachine.transform.position;
+		while (true)
+		{
+			if (NavMesh.SamplePosition(randomDirection, out NavMeshHit navHit, radius, NavMesh.AllAreas))
+				return navHit.position;  // Valid position found, return it
+		}
 	}
 	#endregion
 }

@@ -12,6 +12,9 @@ public class NpcController : MonoBehaviour
 	private bool _initialized = false;
 
 	public NpcDefinition NpcDefinition;
+
+	public Teams Team;
+
 	public StatsHandler StatsHandler { get; private set; }
 	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
@@ -33,7 +36,7 @@ public class NpcController : MonoBehaviour
 		if (!_initialized)
 		{
 			if (NpcDefinition != null)
-				InitializeNpc(NpcDefinition, StatsHandler.Team); //keep current team
+				InitializeNpc(NpcDefinition, Team); //keep current team
 			else
 				Debug.LogError($"{typeof(NpcDefinition)} null, assign reference in inspector when not using a NpcSpawner");
 		}

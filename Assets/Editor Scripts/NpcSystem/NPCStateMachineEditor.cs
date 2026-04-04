@@ -45,25 +45,24 @@ public class NPCStateMachineEditor : Editor
         npc.EnableMovement = EditorGUILayout.Toggle("Enable Movement", npc.EnableMovement);
         if (npc.EnableMovement)
         {
-			npc.useBackupMovement = EditorGUILayout.Toggle("Use Backup Movement", npc.useBackupMovement);
-
 			EditorGUI.indentLevel++;
-			EditorGUILayout.LabelField("Random Move", EditorStyles.boldLabel);
-			npc.moveOnRandomPath = EditorGUILayout.Toggle("Move On Random Path", npc.moveOnRandomPath);
-			if (npc.moveOnRandomPath)
-			{
-				npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
-					"Random Follow Point", npc.RandomMovementManager, typeof(RandomMovementManager), true);
-			}
-
-			EditorGUILayout.Space(10);
-
 			EditorGUILayout.LabelField("Patrol Move", EditorStyles.boldLabel);
-			npc.moveOnPatrolPath = EditorGUILayout.Toggle("Move On Patrol Path", npc.moveOnPatrolPath);
-			if (npc.moveOnPatrolPath)
+			npc.usePatrolMove = EditorGUILayout.Toggle("Patrol Move", npc.usePatrolMove);
+			if (npc.usePatrolMove)
 			{
 				npc.PatrolPoints = (TrackGizmos)EditorGUILayout.ObjectField("Patrol Points", npc.PatrolPoints, typeof(TrackGizmos), true);
 			}
+
+			EditorGUILayout.LabelField("Random Area Move", EditorStyles.boldLabel);
+			npc.useRandomAreaMove = EditorGUILayout.Toggle("Random Area Move", npc.useRandomAreaMove);
+			if (npc.useRandomAreaMove)
+			{
+				npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
+					"Random Area Move Manager", npc.RandomMovementManager, typeof(RandomMovementManager), true);
+			}
+
+			EditorGUILayout.LabelField("Backup Random Move", EditorStyles.boldLabel);
+			npc.useRandomMove = EditorGUILayout.Toggle("Use Random Move", npc.useRandomMove);
 			EditorGUI.indentLevel--;
         }
 		#endregion

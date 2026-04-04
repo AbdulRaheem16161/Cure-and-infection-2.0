@@ -40,8 +40,7 @@ namespace Game.MyNPC
 		private NPCChaseState chaseState;
 		private NPCEatCorpseState eatCorpseState;
 		private NPCInvestigateState investigateState;
-		private NPCMoveState moveState;
-		private NPCIdleState idleState;
+		private NpcIdleMovementState moveState;
 		#endregion
 
 		#region Npc State Toggles
@@ -58,17 +57,19 @@ namespace Game.MyNPC
 		#region Movement State Toggles
 		[Header("Movement State Toggles")]
 		public bool EnableMovement;
-		public bool useBackupMovement = true;
 
-		[Header("Random Move Settings")]
-		public bool moveOnRandomPath = false;
-		public RandomMovementManager RandomMovementManager;
-
-		[Header("Patrol Move Settings")]
-		public bool moveOnPatrolPath = false;
+		[Header("Patrol Move")]
+		public bool usePatrolMove = false;
 		public TrackGizmos PatrolPoints;
 		public int currentPatrolPoint = 0;
 		public bool reachedCurrentControlPoint = false;
+
+		[Header("Random Area Move")]
+		public bool useRandomAreaMove = false;
+		public RandomMovementManager RandomMovementManager;
+
+		[Header("Random Move Settings")]
+		public bool useRandomMove = true;
 		#endregion
 
 		///<summery>
@@ -80,7 +81,6 @@ namespace Game.MyNPC
 		#region awake + Initialize state machine method
 		private void Awake()
         {
-            #region component initializations
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponent<Animator>();
 			StatsHandler = GetComponent<StatsHandler>();
@@ -88,9 +88,7 @@ namespace Game.MyNPC
 			InventoryHandler = GetComponent<InventoryHandler>();
 			Beliefs = GetComponent<NpcBeliefs>();
 			NpcPerception = GetComponent<NpcPerception>();
-			#endregion
 
-			#region state initializations
 			useConsumableState = new NpcUseConsumableState(this);
 			fleeState = new NpcFleeState(this);
 			rangedAttackState = new NPCRangedAttackState(this);
@@ -98,9 +96,7 @@ namespace Game.MyNPC
 			chaseState = new NPCChaseState(this);
 			eatCorpseState = new NPCEatCorpseState(this);
 			investigateState = new NPCInvestigateState(this);
-			moveState = new NPCMoveState(this);
-			idleState = new NPCIdleState(this);
-			#endregion
+			moveState = new NpcIdleMovementState(this);
 		}
 
 		public void InitializeStateMachine(NpcDefinition npcDefinition)
@@ -108,12 +104,13 @@ namespace Game.MyNPC
 			NpcDefinition = npcDefinition;
 
 			EnableConsumableUse = true;
-			EnableMovement = true;
 			EnableFlee = true;
-			EnableInvestigate = true;
-			EnableChase = true;
-			EnableMeleeAttack = true;
 			EnableRangedAttack = true;
+			EnableMeleeAttack = true;
+			EnableChase = true;
+			EnableInvestigate = true;
+			EnableMovement = true;
+			useRandomMove = true;
 
 			if (npcDefinition.StartingLifeState == NpcDefinition.LifeState.zombified)
 				EnableEatCorpseState = true;
@@ -121,24 +118,21 @@ namespace Game.MyNPC
 			Agent.speed = npcDefinition.WalkSpeed;
 			Agent.angularSpeed = npcDefinition.RotationSpeed;
 
-			SwitchState(new NPCMoveState(this));
+			SwitchState(new NpcIdleMovementState(this));
 			Agent.enabled = true;
 		}
 		#endregion
 
 		#region assign follow/patrol/spawn points
-		public void AssignFollowPoint(RandomMovementManager randomMovementManager)
-        {
-            useBackupMovement = false;
-            moveOnRandomPath = true;
-			RandomMovementManager = randomMovementManager;
+		public void AssignPatrolPoints(TrackGizmos trackGizmos)
+		{
+			usePatrolMove = true;
+			PatrolPoints = trackGizmos;
 		}
-        public void AssignPatrolPoint(TrackGizmos trackGizmos)
+		public void AssignMoveArea(RandomMovementManager randomMovementManager)
         {
-			useBackupMovement = false;
-			moveOnRandomPath = false;
-            moveOnPatrolPath = true;
-            PatrolPoints = trackGizmos;
+			useRandomAreaMove = true;
+			RandomMovementManager = randomMovementManager;
 		}
 		#endregion
 
@@ -168,11 +162,9 @@ namespace Game.MyNPC
 			if (currentState == eatCorpseState && ShouldEatCorpse()) { base.Update(); return; }
 			if (currentState == investigateState && ShouldInvestigate()) { base.Update(); return; }
 
-			if (currentState == moveState && ShouldMove()) { base.Update(); return; }
 			if (currentState == useConsumableState && ShouldDrink()) { base.Update(); return; }
 			if (currentState == useConsumableState && ShouldEat()) { base.Update(); return; }
-
-			if (currentState == idleState && ShouldIdle()) { base.Update(); return; }
+			if (currentState == moveState && ShouldMove()) { base.Update(); return; }
 
 			// Otherwise, switch to the highest-priority valid state
 			if (ShouldHeal()) SwitchState(useConsumableState);
@@ -188,8 +180,6 @@ namespace Game.MyNPC
 			else if (ShouldDrink()) SwitchState(useConsumableState);
 			else if (ShouldEat()) SwitchState(useConsumableState);
 			else if (ShouldMove()) SwitchState(moveState);
-
-			else if (ShouldIdle()) SwitchState(idleState);
 		}
 
 		private void LateUpdate()
@@ -230,8 +220,8 @@ namespace Game.MyNPC
 		}
 		private bool ShouldMove()
 		{
-			return EnableMovement && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate &&
-				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat && !Beliefs.Idling;
+			return !Beliefs.HasTarget && !Beliefs.FreeToInvestigate &&
+				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
 		}
 		private bool ShouldDrink()
 		{
@@ -240,13 +230,6 @@ namespace Game.MyNPC
 		private bool ShouldEat()
 		{
 			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Hungry && Beliefs.CanEat;
-		}
-		private bool ShouldIdle()
-		{
-			if (!EnableMovement && Beliefs.Idling)
-				Beliefs.Idling = true;
-
-			return Beliefs.Idling && !Beliefs.HasTarget && !Beliefs.FreeToInvestigate && !Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
 		}
 		#endregion
 

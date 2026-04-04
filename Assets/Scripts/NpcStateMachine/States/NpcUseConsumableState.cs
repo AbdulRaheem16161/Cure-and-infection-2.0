@@ -10,7 +10,6 @@ public class NpcUseConsumableState : NPCBaseState
 
 	public override void Enter()
 	{
-		stateMachine.Agent.speed = 0;
 		stateMachine.Agent.isStopped = true;
 		useConsumableTimer = useConsumableCooldown;
 	}
@@ -28,9 +27,9 @@ public class NpcUseConsumableState : NPCBaseState
 			if (stateMachine.Beliefs.CanHeal)
 				stateMachine.EquipmentHandler.UseConsumable(stateMachine.Beliefs.HealableItem.EquipmentType);
 			else if (stateMachine.Beliefs.CanDrink)
-				stateMachine.EquipmentHandler.UseConsumable(stateMachine.Beliefs.DrinkableItem.EquipmentType);
+				stateMachine.EquipmentHandler.UseConsumable(stateMachine.Beliefs.DrinkableItem.EquipmentType, false);
 			else if (stateMachine.Beliefs.CanEat)
-				stateMachine.EquipmentHandler.UseConsumable(stateMachine.Beliefs.EatableItem.EquipmentType);
+				stateMachine.EquipmentHandler.UseConsumable(stateMachine.Beliefs.EatableItem.EquipmentType, false);
 
 			useConsumableTimer = useConsumableCooldown; //should loop till satisfied unless no item or gets alerted
 		}
