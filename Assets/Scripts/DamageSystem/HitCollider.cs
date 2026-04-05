@@ -1,4 +1,5 @@
 using UnityEngine;
+using static DamageContext;
 
 [RequireComponent(typeof(Collider))]
 public class HitCollider : MonoBehaviour
@@ -44,11 +45,11 @@ public class HitCollider : MonoBehaviour
 		hitCollider.enabled = false;
 	}
 
-	public void OnHit(float damage, GameObject attacker)
+	public void OnHit(float damage, HitImpact impactType, GameObject attacker)
 	{
 		if (!hitCollider.enabled) return;
 
-		DamageContext damageContext = new(damage, bodyPart, attacker);
+		DamageContext damageContext = new(damage, bodyPart, impactType, attacker);
 		damageable.RecieveDamage(damageContext);
 	}
 }

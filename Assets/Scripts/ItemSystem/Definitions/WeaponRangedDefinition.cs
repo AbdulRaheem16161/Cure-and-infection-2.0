@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using static DamageContext;
 
 [CreateAssetMenu(fileName = "WeaponRanged", menuName = "ScriptableObjects/Item/WeaponRanged")]
 public class WeaponRangedDefinition : ItemDefinition
@@ -12,6 +13,7 @@ public class WeaponRangedDefinition : ItemDefinition
 		unset, melee, handgun, shotgun, smg, assaultRifle, marksmanRifle, boltActionRifle
 	}
 
+	[SerializeField] private HitImpact impactType;
 	[SerializeField] private int damage;
 	[SerializeField] private int magazineSize;
 
@@ -67,6 +69,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	#region readonly properties
 	//weapon characteristics
 	public WeaponType Weapon => weaponType;
+	public HitImpact ImpactType => impactType;
 	public int Damage => damage;
 	public int MagazineSize => magazineSize;
 

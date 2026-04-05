@@ -378,7 +378,7 @@ public class EquipmentHandler : MonoBehaviour
 	public void HolsterWeapon()
 	{
 		if (itemInHands == null) return;
-		itemInHands.HolsterItem();
+		itemInHands.HolsterItem(this);
 		itemInHands.transform.SetParent(equippedWeaponsParent.transform);
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		itemInHands = null;
@@ -387,7 +387,7 @@ public class EquipmentHandler : MonoBehaviour
 	{
 		HolsterWeapon(); //holster current weapon if any
 		itemInHands = GetEquipmentSlot(equipmentType).WorldItem;
-		itemInHands.UnHolsterItem();
+		itemInHands.UnHolsterItem(this);
 		itemInHands.transform.SetParent(ItemsInHandsParent.transform);
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 	}

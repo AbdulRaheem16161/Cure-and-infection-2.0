@@ -29,6 +29,7 @@ public class NpcBeliefsEditor : Editor
 		#region Movement Beliefs
 		EditorGUILayout.LabelField("Movement Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
+		EditorGUILayout.Toggle("Stunned", beliefs.Stunned);
 		EditorGUILayout.Toggle("Idling", beliefs.Idling);
 		EditorGUILayout.Toggle("Moving", beliefs.Moving);
 		EditorGUI.indentLevel--;

@@ -25,6 +25,7 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Movement Beliefs
+	[NonSerialized] public bool Stunned;
 	[NonSerialized] public bool Idling;
 	public bool Moving => Agent.velocity.sqrMagnitude > 0.1f;
 	#endregion
@@ -83,6 +84,7 @@ public class NpcBeliefs : MonoBehaviour
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		EquipmentHandler.OnEquippedItemChanges += OnEquippedItemChanges;
+		StatsHandler.OnHit += HandleOnHit;
 	}
 	public void InitializeBeliefs(NpcDefinition npcDefinition)
 	{
@@ -92,6 +94,7 @@ public class NpcBeliefs : MonoBehaviour
 	private void OnDestroy()
 	{
 		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
+		StatsHandler.OnHit -= HandleOnHit;
 	}
 
 	#region alert belief check
@@ -186,6 +189,14 @@ public class NpcBeliefs : MonoBehaviour
 								   CanRestore(ConsumableThree, restorationType);
 
 		return cachedConsumableSlot;
+	}
+	#endregion
+
+	#region On Hit Stunned Event Listener
+	private void HandleOnHit(DamageContext damageContext)
+	{
+		if (damageContext.ImpactType == DamageContext.HitImpact.knockback)
+			Stunned = true;
 	}
 	#endregion
 }

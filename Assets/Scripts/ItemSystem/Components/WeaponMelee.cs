@@ -10,6 +10,7 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	public float swingTimer;
 	public float swingCooldownTimer;
 
+	#region Initialize Item Override
 	public override void InitializeItem(WeaponMeleeDefinition definition, GameObject itemModel, int itemStack)
 	{
 		base.InitializeItem(definition, itemModel, itemStack);
@@ -35,13 +36,16 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		swingTimer = 0;
 		swingCooldownTimer = 0;
 	}
+	#endregion
 
 	private void Update()
 	{
+		if (!IsInHands) return;
 		HandleSwingCooldownTimer();
 		HandleSwingTimer();
 	}
 
+	#region Melee Weapon Attack Types
 	public void LightAttack()
 	{
 		if (!CanSwing) return;
@@ -69,15 +73,18 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 		swingTimer = TypedDefinition.HeavySwingSpeed;
 		swingCooldownTimer = swingTimer + TypedDefinition.HeavySwingCooldown;
 	}
+	#endregion
 
+	#region Collider Hit Collision
 	public void OnColliderHit(Collider other)
 	{
 		if (other.TryGetComponent(out HitCollider hitCollider))
 		{
-			hitCollider.OnHit(TypedDefinition.Damage, CurrentOwner);
+			hitCollider.OnHit(TypedDefinition.Damage, TypedDefinition.ImpactType, CurrentOwner);
 			WeaponView.DisableHitCollider(); //disable hitting once something to hit is found
 		}
 	}
+	#endregion
 
 	#region handle swing timer and auto disable collider if nothing hit
 	private void HandleSwingTimer()

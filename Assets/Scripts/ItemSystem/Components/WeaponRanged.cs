@@ -17,12 +17,10 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public float FireRateCooldown;
 	public float fireRateCooldownTimer;
 
-	private Vector3 LastHitPoint;
-	private float NextFireTime;
-
-	private float accuracyModifer; //adjusted based on weapon definiton + how player is moving or firing
+	public float accuracyModifer;
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
 
+	#region Initialize Item Override
 	public override void InitializeItem(WeaponRangedDefinition definition, GameObject itemModel, int itemStack)
 	{
 		base.InitializeItem(definition, itemModel, itemStack);
@@ -43,7 +41,9 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		}
 
 		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
+		accuracyModifer = TypedDefinition.HipFireSpread;
 	}
+	#endregion
 
 	#region equipping/unequipping weapon override methods (TODO: may need updating when finalizing how behaviour should work)
 	public override void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
@@ -72,9 +72,21 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
+	#region on owner hit event listener override
+	public override void OnHit(DamageContext damageContext)
+	{
+		if (damageContext.ImpactType == DamageContext.HitImpact.flinch)
+			accuracyModifer += 0.25f;
+		else if (damageContext.ImpactType == DamageContext.HitImpact.knockback)
+			accuracyModifer += 5f;
+	}
+	#endregion
+
 	private void Update()
 	{
+		if (!IsInHands) return;
 		HandleFireRate();
+		HandleBulletAccuracyRecovery();
 	}
 
 	public void AimDownSight()
@@ -90,30 +102,10 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		if (!CanShoot) return;
 
 		currentMagazineAmmo--;
+		accuracyModifer += TypedDefinition.SpreadIncreasePerShot;
 		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
 	}
 	#endregion
-
-	#region handle fire rate
-	private void HandleFireRate()
-	{
-		if (CanShoot) return;
-
-		fireRateCooldownTimer -= Time.deltaTime;
-		if (fireRateCooldownTimer > 0f) return;
-		fireRateCooldownTimer = FireRateCooldown;
-	}
-	#endregion
-
-	public void AdjustRecoil()
-	{
-		//update recoil while firing
-	}
-
-	public void AdjustAccuracy()
-	{
-		//update accuracy while firing
-	}
 
 	#region reloading (TODO add sfx, vfx and animations)
 	public void Reload(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
@@ -142,19 +134,41 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
-	#region simulate simple bullet spread for now
+	public void AdjustRecoil()
+	{
+		//update recoil while firing
+	}
+
+	#region Handle Fire Rate
+	private void HandleFireRate()
+	{
+		if (CanShoot) return;
+
+		fireRateCooldownTimer -= Time.deltaTime;
+		if (fireRateCooldownTimer > 0f) return;
+		fireRateCooldownTimer = FireRateCooldown;
+	}
+	#endregion
+
+	#region Handle Bullet Accuracy Recovery
+	private void HandleBulletAccuracyRecovery()
+	{
+		accuracyModifer -= Time.deltaTime;
+		accuracyModifer = Mathf.Clamp(accuracyModifer, TypedDefinition.AdsSpread, TypedDefinition.MaxSpread);
+	}
+	#endregion
+
+	#region simulate bullet spread
 	private void SimulateBulletSpread()
 	{
-		float hardcodedSpread = 0.25f;
-
 		Vector3 startPos = WeaponView.MuzzlePoint.position;
 		Vector3 direction = WeaponView.MuzzlePoint.forward;
 		float distance = TypedDefinition.EffectiveRange;
 
 		//apply random spread
 		direction = Quaternion.Euler(
-			Random.Range(-hardcodedSpread, hardcodedSpread),
-			Random.Range(-hardcodedSpread, hardcodedSpread),
+			Random.Range(-accuracyModifer, accuracyModifer),
+			Random.Range(-accuracyModifer, accuracyModifer),
 			0) * direction;
 
 		if (Physics.Raycast(startPos, direction, out RaycastHit hit, 
@@ -162,7 +176,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 		{
 			//handle hit
 			if (hit.collider.TryGetComponent(out HitCollider hitCollider))
-				hitCollider.OnHit(TypedDefinition.Damage, CurrentOwner);
+				hitCollider.OnHit(TypedDefinition.Damage, TypedDefinition.ImpactType, CurrentOwner);
 
 			distance = hit.distance;
 		}

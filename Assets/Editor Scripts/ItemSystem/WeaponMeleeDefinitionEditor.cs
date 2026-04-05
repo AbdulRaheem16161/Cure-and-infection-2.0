@@ -8,6 +8,7 @@ public class WeaponMeleeDefinitionEditor : ItemDefinitionEditor
 		base.OnInspectorGUI();
 
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("weaponType"));
+		EditorGUILayout.PropertyField(serializedObject.FindProperty("impactType"));
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("damage"));
 
 		EditorGUILayout.PropertyField(serializedObject.FindProperty("lightSwingSpeed"));

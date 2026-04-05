@@ -94,13 +94,22 @@ public abstract class Item : MonoBehaviour
 	#endregion
 
 	#region base holster/unholster methods
-	public virtual void HolsterItem()
+	public virtual void HolsterItem(EquipmentHandler equipmentHandler)
 	{
 		IsInHands = false;
+		equipmentHandler.StatsHandler.OnHit -= OnHit;
 	}
-	public virtual void UnHolsterItem()
+	public virtual void UnHolsterItem(EquipmentHandler equipmentHandler)
 	{
 		IsInHands = true;
+		equipmentHandler.StatsHandler.OnHit += OnHit;
+	}
+	#endregion
+
+	#region base on owner hit event listener
+	public virtual void OnHit(DamageContext damageContext)
+	{
+
 	}
 	#endregion
 

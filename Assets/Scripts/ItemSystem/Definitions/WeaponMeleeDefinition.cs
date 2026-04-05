@@ -1,4 +1,5 @@
 using UnityEngine;
+using static DamageContext;
 
 [CreateAssetMenu(fileName = "WeaponMelee", menuName = "ScriptableObjects/Item/WeaponMelee")]
 public class WeaponMeleeDefinition : ItemDefinition
@@ -10,8 +11,8 @@ public class WeaponMeleeDefinition : ItemDefinition
 	{
 		unset, melee, handgun, smg, assaultRifle, marksmanRifle, boltActionRifle
 	}
-
 	[SerializeField] private int damage;
+	[SerializeField] private HitImpact impactType;
 
 	[Header("Swing Behaviour")]
 	[Tooltip("How quick the swing is")]
@@ -27,6 +28,7 @@ public class WeaponMeleeDefinition : ItemDefinition
 
 	#region readonly properties
 	public WeaponType Weapon => weaponType;
+	public HitImpact ImpactType => impactType;
 	public int Damage => damage;
 
 	//swing behaviour

@@ -1,6 +1,7 @@
 using Game.MyNPC;
 using UnityEditor;
 using UnityEngine;
+using static DamageContext;
 
 [CustomEditor(typeof(StatsHandler))]
 public class StatsHandlerEditor : Editor
@@ -24,13 +25,13 @@ public class StatsHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(new(25, HitCollider.BodyPart.body, stats.gameObject));
+			stats.RecieveDamage(new(25, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
 		}
 		if (GUILayout.Button("Kill Npc"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(new(stats.health + 1, HitCollider.BodyPart.body, stats.gameObject));
+			stats.RecieveDamage(new(stats.health + 1, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
 		}
 		#endregion
 	}

@@ -33,6 +33,7 @@ namespace Game.MyNPC
 		#endregion
 
 		#region NpcStates;
+		private NpcStunnedState stunnedState;
 		private NpcUseConsumableState useConsumableState;
 		private NpcFleeState fleeState;
 		private NPCRangedAttackState rangedAttackState;
@@ -89,6 +90,7 @@ namespace Game.MyNPC
 			Beliefs = GetComponent<NpcBeliefs>();
 			NpcPerception = GetComponent<NpcPerception>();
 
+			stunnedState = new NpcStunnedState(this);
 			useConsumableState = new NpcUseConsumableState(this);
 			fleeState = new NpcFleeState(this);
 			rangedAttackState = new NPCRangedAttackState(this);
@@ -152,6 +154,7 @@ namespace Game.MyNPC
 			// ---------- STATE PRIORITY DESCENDING ----------
 
 			// Stay in current state if its conditions are still valid
+			if (currentState == stunnedState && Beliefs.Stunned) { base.Update(); return; }
 			if (currentState == useConsumableState && ShouldHeal()) { base.Update(); return; }
 			if (currentState == fleeState && ShouldFlee()) { base.Update(); return; }
 
@@ -167,7 +170,8 @@ namespace Game.MyNPC
 			if (currentState == moveState && ShouldMove()) { base.Update(); return; }
 
 			// Otherwise, switch to the highest-priority valid state
-			if (ShouldHeal()) SwitchState(useConsumableState);
+			if (Beliefs.Stunned) SwitchState(stunnedState);
+			else if (ShouldHeal()) SwitchState(useConsumableState);
 			else if (ShouldFlee()) SwitchState(fleeState);
 
 			else if (ShouldRangedAttack()) SwitchState(rangedAttackState);
