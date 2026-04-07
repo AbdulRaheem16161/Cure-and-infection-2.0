@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(TrackGizmos))]
-public class TrackGizmoz_Editor : Editor
+[CustomEditor(typeof(PatrolPathManager))]
+public class PatrolPathManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        TrackGizmos TrackGizmos = (TrackGizmos)target;
+		PatrolPathManager TrackGizmos = (PatrolPathManager)target;
 
         if (GUILayout.Button("Create Track Point"))
         {

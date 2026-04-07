@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(AreaGizmos))]
-public class AreaGizmoz_Editor : Editor
+[CustomEditor(typeof(RandomAreaMoveManager))]
+public class RandomAreaMoveManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        AreaGizmos areaGizmos = (AreaGizmos)target;
+        RandomAreaMoveManager areaGizmos = (RandomAreaMoveManager)target;
 
         if (GUILayout.Button("Create Area Point"))
         {

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [ExecuteAlways] // this script willl now run both in Play Mode and in Edit Mode
-public class TrackGizmos : MonoBehaviour
+public class PatrolPathManager : MonoBehaviour
 {
     public List<GameObject> TrackPoints;
     public GameObject TrackPointsFolder;

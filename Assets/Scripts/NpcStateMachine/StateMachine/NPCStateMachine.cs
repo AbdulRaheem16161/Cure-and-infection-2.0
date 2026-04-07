@@ -14,12 +14,13 @@ namespace Game.MyNPC
 	[RequireComponent(typeof(EquipmentHandler))]
 	[RequireComponent(typeof(InventoryHandler))]
     public class NPCStateMachine : StateMachine
-    {
+	{
+		public NpcDefinition NpcDefinition { get; private set; }
 		public Animator Animator { get; private set; }
 		public NavMeshAgent Agent { get; private set; }
+		public NpcController NpcController { get; private set; }
 		public NpcBeliefs Beliefs { get; private set; }
 		public NpcPerception NpcPerception { get; private set; }
-		public NpcDefinition NpcDefinition { get; private set; }
 		public StatsHandler StatsHandler { get; private set; }
         public EquipmentHandler EquipmentHandler { get; private set; }
         public InventoryHandler InventoryHandler { get; private set; }
@@ -58,37 +59,38 @@ namespace Game.MyNPC
 		#region Movement State Toggles
 		[Header("Movement State Toggles")]
 		public bool EnableMovement;
+		public MovementType movementType;
+		public enum MovementType
+		{
+			randomMove, randomAreaMove, patrolMove
+		}
 
 		[Header("Patrol Move")]
-		public bool usePatrolMove = false;
-		public TrackGizmos PatrolPoints;
+		public PatrolPathManager PatrolPathManager;
 		public int currentPatrolPoint = 0;
 		public bool reachedCurrentControlPoint = false;
 
 		[Header("Random Area Move")]
-		public bool useRandomAreaMove = false;
-		public RandomMovementManager RandomMovementManager;
-
-		[Header("Random Move Settings")]
-		public bool useRandomMove = true;
+		public RandomAreaMoveManager RandomAreaMoveManager;
 		#endregion
+
+		public event Action<NpcController> OnDeathComplete;
 
 		///<summery>
 		/// move respawn related logic into a higher level object for npc pooling and reusing at a later date
 		///<summery>
-
-		public static event Action<GameObject> OnDeathComplete;
 
 		#region awake + Initialize state machine method
 		private void Awake()
         {
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponent<Animator>();
+			NpcController = GetComponent<NpcController>();
+			Beliefs = GetComponent<NpcBeliefs>();
+			NpcPerception = GetComponent<NpcPerception>();
 			StatsHandler = GetComponent<StatsHandler>();
 			EquipmentHandler = GetComponent<EquipmentHandler>();
 			InventoryHandler = GetComponent<InventoryHandler>();
-			Beliefs = GetComponent<NpcBeliefs>();
-			NpcPerception = GetComponent<NpcPerception>();
 
 			stunnedState = new NpcStunnedState(this);
 			useConsumableState = new NpcUseConsumableState(this);
@@ -112,7 +114,6 @@ namespace Game.MyNPC
 			EnableChase = true;
 			EnableInvestigate = true;
 			EnableMovement = true;
-			useRandomMove = true;
 
 			if (npcDefinition.StartingLifeState == NpcDefinition.LifeState.zombified)
 				EnableEatCorpseState = true;
@@ -126,15 +127,19 @@ namespace Game.MyNPC
 		#endregion
 
 		#region assign follow/patrol/spawn points
-		public void AssignPatrolPoints(TrackGizmos trackGizmos)
+		public void SetMovementType(MovementType type, PatrolPathManager patrolPathManager)
 		{
-			usePatrolMove = true;
-			PatrolPoints = trackGizmos;
+			PatrolPathManager = patrolPathManager;
+			movementType = type;
 		}
-		public void AssignMoveArea(RandomMovementManager randomMovementManager)
-        {
-			useRandomAreaMove = true;
-			RandomMovementManager = randomMovementManager;
+		public void SetMovementType(MovementType type, RandomAreaMoveManager randomAreaMoveManager)
+		{
+			RandomAreaMoveManager = randomAreaMoveManager;
+			movementType = type;
+		}
+		public void SetMovementType(MovementType type)
+		{
+			movementType = type;
 		}
 		#endregion
 
@@ -248,36 +253,18 @@ namespace Game.MyNPC
         }
 		#endregion
 
-		#region death event listener + die coroutine and death complete invoking
+		#region death event listener
 		private void HandleDeath()
         {
-            StartCoroutine(Die());
-        }
-
-        private IEnumerator Die()
-        {
-            if (Agent != null)
-            {
-                Agent.isStopped = true;
-                Agent.velocity = Vector3.zero;
-                Agent.enabled = false;
-            }
-
-            if (Animator != null)
-                Animator.SetTrigger("Died");
-
-            yield return new WaitForSeconds(3f);
-
-            //will need replacing as spawners take over when to despawn dead enemies when player moves far away
-            if (!StatsHandler.NpcDefinition.Player)
-            {
-                if (StatsHandler.forceRespawn)
-				    OnDeathComplete?.Invoke(gameObject);
+			if (Agent != null)
+			{
+				Agent.isStopped = true;
+				Agent.velocity = Vector3.zero;
+				Agent.enabled = false;
 			}
-            else
-            {
 
-            }
+			if (Animator != null)
+				Animator.SetTrigger("Died");
 		}
 		#endregion
 	}

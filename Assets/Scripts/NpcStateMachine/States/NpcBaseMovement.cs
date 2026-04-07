@@ -40,14 +40,14 @@ public class NpcBaseMovementState : NPCBaseState
 			if (stateMachine.reachedCurrentControlPoint)
 			{
 				stateMachine.reachedCurrentControlPoint = false;
-				stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPoints.TrackPoints.Count;
+				stateMachine.currentPatrolPoint = (stateMachine.currentPatrolPoint + 1) % stateMachine.PatrolPathManager.TrackPoints.Count;
 			}
 
-			Vector3 destination = stateMachine.PatrolPoints.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
+			Vector3 destination = stateMachine.PatrolPathManager.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
 			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, destination);
 		}
 		else if (HasValidAreaMove())
-			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.RandomMovementManager.GetRandomLocationInArea());
+			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.RandomAreaMoveManager.GetRandomLocationInArea());
 		else
 			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, GetMoveLocationAroundNpc());
 	}
@@ -67,7 +67,7 @@ public class NpcBaseMovementState : NPCBaseState
 	#region move to follow point checks
 	private bool HasValidPatrolPoints()
 	{
-		if (stateMachine.usePatrolMove && stateMachine.PatrolPoints != null)
+		if (stateMachine.movementType == NPCStateMachine.MovementType.patrolMove && stateMachine.PatrolPathManager != null)
 			return true;
 		else
 			return false;
@@ -75,7 +75,7 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	private bool HasValidAreaMove()
 	{
-		if (stateMachine.useRandomAreaMove && stateMachine.RandomMovementManager != null)
+		if (stateMachine.movementType == NPCStateMachine.MovementType.randomAreaMove && stateMachine.RandomAreaMoveManager != null)
 			return true;
 		else
 			return false;

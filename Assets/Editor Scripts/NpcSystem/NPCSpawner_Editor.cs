@@ -1,41 +1,52 @@
 using UnityEngine;
 using UnityEditor;
+using Game.MyNPC;
 
 [CustomEditor(typeof(NPCSpawner))]
 public class NPCSpawner_Editor : Editor
 {
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
+	private NpcDefinition npcDefinition;
+	private NPCSpawner.Teams team;
+	private NPCStateMachine.MovementType moveType;
 
-        NPCSpawner spawner = (NPCSpawner)target;
+	public override void OnInspectorGUI()
+    {
+		serializedObject.Update();
+
+		DrawDefaultInspector();
 
 		EditorGUILayout.Space(10);
 		EditorGUILayout.LabelField("Spawner Controls", EditorStyles.boldLabel);
-		spawner.NPCsTeam = (NPCSpawner.Teams)EditorGUILayout.EnumPopup("Npcs Team", spawner.NPCsTeam);
-		spawner.npcDefinitionToSpawn = 
-			(NpcDefinition)EditorGUILayout.ObjectField("Npc Definition", spawner.npcDefinitionToSpawn, typeof(NpcDefinition), true);
+
+		npcDefinition = (NpcDefinition)EditorGUILayout.ObjectField("Npc Definition", npcDefinition, typeof(NpcDefinition), true);
+		team = (NPCSpawner.Teams)EditorGUILayout.EnumPopup("Npcs Team", team);
+		moveType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", moveType);
+
+		EditorGUILayout.Space(5);
+
+		NPCSpawner spawner = (NPCSpawner)target;
 
 		if (GUILayout.Button("Spawn Npc Based On Definition"))
-        {
-            if (!ApplicationPlaying()) return;
-            spawner.SpawnNPC(spawner.npcDefinitionToSpawn);
-        }
+		{
+			if (!ApplicationPlaying()) return;
+			spawner.SpawnSpecifiedNpc(npcDefinition, team, moveType);
+		}
 
 		EditorGUILayout.Space(10);
 
-		spawner.NPCsTeam = (NPCSpawner.Teams)EditorGUILayout.EnumPopup("Npcs Team", spawner.NPCsTeam);
-
-		if (GUILayout.Button("Spawn Random Npc"))
+		if (GUILayout.Button("Spawn Random Survivor Npc"))
 		{
 			if (!ApplicationPlaying()) return;
-			spawner.SpawnRandomNPC(false);
+			spawner.SpawnRandomSurvivorNpc(team, moveType);
 		}
+
 		if (GUILayout.Button("Spawn Random Zombie Npc"))
 		{
 			if (!ApplicationPlaying()) return;
-			spawner.SpawnRandomNPC(true);
+			spawner.SpawnRandomZombieNpc(team, moveType);
 		}
+
+		serializedObject.ApplyModifiedProperties();
 	}
 
 	private bool ApplicationPlaying()

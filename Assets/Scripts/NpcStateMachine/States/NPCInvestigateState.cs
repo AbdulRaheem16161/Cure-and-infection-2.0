@@ -35,7 +35,6 @@ public class NPCInvestigateState : NpcBaseMovementState
 			{
 				glanceStarted = true;
 				stateMachine.NpcPerception.SimulateNpcGlancing(glancingDelay);
-				Debug.LogError("glance started");
 			}
 			else
 			{
@@ -46,10 +45,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 			}
 
 			if (glanceDone)
-			{
-				Debug.LogError("glance done");
 				stateMachine.Beliefs.InvestigateLocation = null;
-			}
 		}
 	}
 }

@@ -125,7 +125,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
-		if (!Beliefs.Alert)
+		if (!Beliefs.HasTarget)
 			Beliefs.InvestigateLocation = position;
 	}
 	public void InvestigateSound(Vector3 position)
@@ -181,7 +181,10 @@ public class NpcPerception : MonoBehaviour
 		//skip looking if target already found
 		if (IsTargetDetected)
 		{
+			Vector3 lastSeenPosition = DetectedTarget.Transform.position;
 			(DetectedTarget, IsTargetDetected) = TrackTarget(DetectedTarget, LifeState.alive);
+			if (!IsTargetDetected)
+				InvestigateLastSeenEnemyPosition(lastSeenPosition);
 		}
 		else
 		{

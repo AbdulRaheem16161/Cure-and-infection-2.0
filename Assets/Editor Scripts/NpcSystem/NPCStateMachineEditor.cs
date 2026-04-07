@@ -43,26 +43,23 @@ public class NPCStateMachineEditor : Editor
 		#region Movement State Toggles
 		EditorGUILayout.LabelField("Movement State Toggles", EditorStyles.boldLabel);
         npc.EnableMovement = EditorGUILayout.Toggle("Enable Movement", npc.EnableMovement);
-        if (npc.EnableMovement)
+
+		if (npc.EnableMovement)
         {
 			EditorGUI.indentLevel++;
+			npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
 			EditorGUILayout.LabelField("Patrol Move", EditorStyles.boldLabel);
-			npc.usePatrolMove = EditorGUILayout.Toggle("Patrol Move", npc.usePatrolMove);
-			if (npc.usePatrolMove)
+			npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
+			if (npc.movementType == NPCStateMachine.MovementType.patrolMove)
 			{
-				npc.PatrolPoints = (TrackGizmos)EditorGUILayout.ObjectField("Patrol Points", npc.PatrolPoints, typeof(TrackGizmos), true);
+				npc.PatrolPathManager = (PatrolPathManager)EditorGUILayout.ObjectField(
+					"Patrol Points", npc.PatrolPathManager, typeof(PatrolPathManager), true);
 			}
-
-			EditorGUILayout.LabelField("Random Area Move", EditorStyles.boldLabel);
-			npc.useRandomAreaMove = EditorGUILayout.Toggle("Random Area Move", npc.useRandomAreaMove);
-			if (npc.useRandomAreaMove)
+			else if (npc.movementType == NPCStateMachine.MovementType.randomAreaMove)
 			{
-				npc.RandomMovementManager = (RandomMovementManager)EditorGUILayout.ObjectField(
-					"Random Area Move Manager", npc.RandomMovementManager, typeof(RandomMovementManager), true);
+				npc.RandomAreaMoveManager = (RandomAreaMoveManager)EditorGUILayout.ObjectField(
+					"Random Area Move Manager", npc.RandomAreaMoveManager, typeof(RandomAreaMoveManager), true);
 			}
-
-			EditorGUILayout.LabelField("Backup Random Move", EditorStyles.boldLabel);
-			npc.useRandomMove = EditorGUILayout.Toggle("Use Random Move", npc.useRandomMove);
 			EditorGUI.indentLevel--;
         }
 		#endregion
