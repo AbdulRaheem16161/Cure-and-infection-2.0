@@ -83,14 +83,13 @@ public class NpcPerception : MonoBehaviour
 		NpcDefinition = npcDefinition;
 		viewAngle = NpcDefinition.ViewAngle;
 		viewDistance = NpcDefinition.ViewDistance;
-		showVision = false;
+		DetectedTarget = null;
+		IsTargetDetected = false;
+		EatableTarget = null;
+		IsEatableTargetDetected = false;
 	}
 	#endregion
 
-	private void OnDisable()
-	{
-		showVision = false;
-	}
 	private void OnDestroy()
 	{
 		StatsHandler.OnHit -= InvestigateWhereHitFrom;

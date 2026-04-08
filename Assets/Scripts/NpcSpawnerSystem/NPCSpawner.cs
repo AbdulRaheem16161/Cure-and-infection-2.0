@@ -34,6 +34,16 @@ using static NPCSpawner;
 
 public class NPCSpawner : MonoBehaviour
 {
+	[Header("Spawner Sub Component Prefabs")]
+	public GameObject patrolPathPrefab;
+	public GameObject spawnPointPrefab;
+
+	[Header("Spawner Child Objects")]
+	public GameObject movementAreaAndPathsParent;
+	public GameObject spawnPointsParent;
+	public GameObject activeNpcsParent;
+	public GameObject inactiveNpcsParent;
+
 	[Header("Patrol Paths, supports multiple")]
 	public List<PatrolPathManager> PatrolPaths = new();
 
@@ -55,7 +65,7 @@ public class NPCSpawner : MonoBehaviour
 	public List<NpcSpawnData> CustomNpcsToSpawn = new();
 
 	[Header("Random Npcs To Spawn")]
-	private readonly float spawnTimerCooldown = 0.1f;
+	private readonly float spawnTimerCooldown = 1f;
 	private float spawnTimer;
 	public List<NpcDefinition> NpcsToRandomSpawn = new();
 	public int minSpawnAmount;
@@ -90,18 +100,16 @@ public class NPCSpawner : MonoBehaviour
 
 	private void Start()
 	{
-		if (spawnerType == SpawnerType.random)
-			SpawnRandomNpcs();
-		else if (spawnerType == SpawnerType.custom)
+		if (spawnerType == SpawnerType.custom || spawnerType == SpawnerType.both)
 			SpawnCustomNpcs();
-		else if (spawnerType == SpawnerType.both)
-		{
-			SpawnCustomNpcs();
+	}
+	private void Update()
+	{
+		if (spawnerType == SpawnerType.random || spawnerType == SpawnerType.both)
 			SpawnRandomNpcs();
-		}
 	}
 
-	#region spawn npcs on start methods
+	#region spawn npcs on start and update
 	private void SpawnRandomNpcs()
 	{
 		spawnTimer -= Time.deltaTime;
@@ -111,7 +119,7 @@ public class NPCSpawner : MonoBehaviour
 		while (activeNpcs.Count < maxSpawnAmount)
 			SpawnRandomNpc();
 	}
-	private void SpawnCustomNpcs()
+	public void SpawnCustomNpcs()
 	{
 		foreach (NpcSpawnData npcSpawnData in CustomNpcsToSpawn)
 		{
@@ -157,6 +165,7 @@ public class NPCSpawner : MonoBehaviour
 
 		NpcController npcController = GetNpc(npcDefinition);
 		NPCStateMachine stateMachine = npcController.StateMachine;
+		npcController.transform.SetParent(activeNpcsParent.transform);
 		npcController.transform.position = spawnPosition;
 
 		if (movementType == MovementType.patrolMove)
@@ -235,16 +244,25 @@ public class NPCSpawner : MonoBehaviour
 	#endregion
 
 	#region npc clean up and repooling
-	private void CleanUpAllNpcs()
+	public void CleanUpAllNpcs()
 	{
-		for (int i = activeNpcs.Count; i > 0; i--)
+		for (int i = activeNpcs.Count - 1; i >= 0; i--)
 			CleanUpNpc(activeNpcs[i]);
+	}
+	public void CleanUpDeadNpcs()
+	{
+		for (int i = activeNpcs.Count - 1; i >= 0; i--)
+		{
+			if (activeNpcs[i].StatsHandler.LifeState != NpcDefinition.LifeState.dead) continue;
+			CleanUpNpc(activeNpcs[i]);
+		}
 	}
 	private void CleanUpNpc(NpcController npcController)
 	{
 		inactiveNpcs.Add(npcController);
 		activeNpcs.Remove(npcController);
 		npcController.gameObject.SetActive(false);
+		npcController.transform.SetParent(inactiveNpcsParent.transform);
 	}
 	#endregion
 

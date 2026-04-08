@@ -85,7 +85,7 @@ MonoBehaviour:
   - {fileID: 3532739571255077954}
   - {fileID: 6393995443403096659}
   AreaPointsFolder: {fileID: 2535383236390917907}
-  GizmosColor: {r: 0, g: 0, b: 0, a: 0}
+  GizmosColor: {r: 0, g: 0.5019608, b: 1, a: 0.5019608}
   ShowGizmoz: 0
 --- !u!1 &3532739571255077954
 GameObject:

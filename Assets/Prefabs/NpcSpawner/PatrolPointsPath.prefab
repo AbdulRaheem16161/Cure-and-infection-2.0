@@ -85,7 +85,7 @@ MonoBehaviour:
   - {fileID: 6964396948563903857}
   - {fileID: 3966124884783634124}
   TrackPointsFolder: {fileID: 3964071398597378811}
-  GizmosColor: {r: 0, g: 0, b: 0, a: 0}
+  GizmosColor: {r: 0, g: 0.5019608, b: 1, a: 0.5019608}
   ShowGizmoz: 0
 --- !u!1 &3966124884783634124
 GameObject:

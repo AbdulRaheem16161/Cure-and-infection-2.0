@@ -89,6 +89,7 @@ public class NpcBeliefs : MonoBehaviour
 	public void InitializeBeliefs(NpcDefinition npcDefinition)
 	{
 		NpcDefinition = npcDefinition;
+		InvestigateLocation = null;
 	}
 
 	private void OnDestroy()
