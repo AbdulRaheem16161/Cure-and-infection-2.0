@@ -38,20 +38,21 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Investigation Beliefs
-	public bool FreeToInvestigate => InvestigateLocation != null && !HasTarget;
+	public bool FreeToInvestigate => InvestigateLocation != null && Target != null;
 	public Vector3? InvestigateLocation { get; private set; }
 	#endregion
 
 	#region Target Beliefs
-	public bool HasEatableTarget => NpcPerception.IsEatableTargetDetected;
-	public bool HasTarget => NpcPerception.IsTargetDetected;
+	public TargetData Target => NpcPerception.Target;
+	public TargetData EatableTarget => NpcPerception.EatableTarget;
 	public bool TargetInShootingRange => TargetInShootingRangeCheck();
 	public bool TargetInMeleeRange => TargetInMeleeRangeCheck();
 	#endregion
 
 	#region Flee Beliefs
 	public bool TargetInFleeRange => TargetInFleeRangeCheck();
-	[NonSerialized] public bool SafeFromFleeTarget;
+	public TargetData ClosestFleeTarget => NpcPerception.ClosestFleeTarget; //not shown
+	public TargetData TargetFleeingFrom { get; private set; }
 	#endregion
 
 	#region Equipment Beliefs
@@ -101,7 +102,7 @@ public class NpcBeliefs : MonoBehaviour
 	#region alert belief check
 	public bool Alerted()
 	{
-		if (HasTarget || HasEatableTarget || InvestigateLocation != null)
+		if (Target != null || EatableTarget != null || InvestigateLocation != null)
 			return true;
 		else 
 			return false;
@@ -111,39 +112,56 @@ public class NpcBeliefs : MonoBehaviour
 	#region target in melee/ranged attack ranges check
 	private bool TargetInMeleeRangeCheck()
 	{
-		if (!NpcPerception.IsTargetDetected || !MeleeWeaponInHands) return false;
+		if (Target == null || !MeleeWeaponInHands) return false;
 
-		if (NpcPerception.DetectedTarget.Distance > Agent.stoppingDistance + 0.1f)
-			return false;
-		else
+		if (Target.Distance < Agent.stoppingDistance + 0.1f)
 			return true;
+		else
+			return false;
 	}
 
 	private bool TargetInShootingRangeCheck()
 	{
-		if (!NpcPerception.IsTargetDetected || !RangedWeaponInHands) return false;
+		if (Target == null || !RangedWeaponInHands) return false;
 
 		WeaponRanged weaponRanged = EquipmentHandler.itemInHands as WeaponRanged;
 
-		if (NpcPerception.DetectedTarget.Distance > weaponRanged.TypedDefinition.EffectiveRange)
-			return false;
-		else
+		if (Target.Distance < weaponRanged.TypedDefinition.EffectiveRange)
 			return true;
+		else
+			return false;
 	}
 	#endregion
 
-	#region target in flee range check
+	#region target in flee range check and updates
 	private bool TargetInFleeRangeCheck()
 	{
-		if (!NpcPerception.IsTargetDetected || MeleeWeaponInHands) return false;
+		if (MeleeWeaponInHands) return false;
 
-		if (NpcPerception.DetectedTarget.Distance > NpcDefinition.FleeDistance)
-			return false;
-		else
+		if (TargetFleeingFrom != null) //flee
 		{
-			SafeFromFleeTarget = false;
+			TargetFleeingFrom.UpdateTargetDistance(transform.position);
+
+			if (TargetFleeingFrom.Distance < NpcDefinition.FleeDistance)
+			{
+				if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < TargetFleeingFrom.Distance) //switch to flee from closer threat
+					TargetFleeingFrom = ClosestFleeTarget;
+
+				return true;
+			}
+		}
+
+		if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < NpcDefinition.FleeDistance) //start fleeing if not already
+		{
+			TargetFleeingFrom = ClosestFleeTarget;
 			return true;
 		}
+
+		return false;
+	}
+	public void UpdateTargetFleeingFrom(TargetData targetData)
+	{
+		TargetFleeingFrom = targetData;
 	}
 	#endregion
 

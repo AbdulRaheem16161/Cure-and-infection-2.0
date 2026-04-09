@@ -28,7 +28,7 @@ public class NpcBaseMovementState : NPCBaseState
 
 	}
 
-	#region move to destination methods
+	#region Handle Movement Types Logic
 	/// <summary>
 	/// logic to handle what movement type to use
 	/// </summary>
@@ -51,7 +51,26 @@ public class NpcBaseMovementState : NPCBaseState
 		else
 			MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, GetMoveLocationAroundNpc());
 	}
+	#endregion
 
+	#region move to flee position
+	/// <summary>
+	/// flee from passed in vector 3 argument, with a randomization angle
+	/// </summary>
+	protected void FleeToNewDestination(float speed, Vector3 positionToFleeFrom)
+	{
+		//calculate flee direction with some randomization with angle
+		Vector3 fleeDirection = (stateMachine.transform.position - positionToFleeFrom).normalized;
+		float randomAngle = Random.Range(-45f, 45f);
+		Quaternion rotation = Quaternion.Euler(0, randomAngle, 0);
+		Vector3 randomFleeDirection = rotation * fleeDirection;
+		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.NpcDefinition.FleeDistance * 2);
+
+		MoveToDestination(speed, fleeDestination);
+	}
+	#endregion
+
+	#region Shared Move To Destination Method
 	/// <summary>
 	/// move to destination
 	/// </summary>
@@ -59,6 +78,7 @@ public class NpcBaseMovementState : NPCBaseState
 	{
 		stateMachine.CurrentDestination = newDestination;
 		stateMachine.Agent.isStopped = false;
+		stateMachine.Agent.updatePosition = true;
 		stateMachine.Agent.speed = speed;
 		stateMachine.Agent.SetDestination(newDestination);
 	}
@@ -82,26 +102,6 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region move to flee position at speed
-	/// <summary>
-	/// flee from passed in vector 3 argument, with a randomization angle
-	/// </summary>
-	protected void FleeToNewDestination(float speed, Vector3 positionToFleeFrom)
-	{
-		stateMachine.Agent.isStopped = false;
-		stateMachine.Agent.speed = speed;
-
-		//calculate flee direction with some randomization with angle
-		Vector3 fleeDirection = (stateMachine.transform.position - positionToFleeFrom).normalized;
-		float randomAngle = Random.Range(-45f, 45f);
-		Quaternion rotation = Quaternion.Euler(0, randomAngle, 0);
-		Vector3 randomFleeDirection = rotation * fleeDirection;
-
-		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.NpcDefinition.FleeDistance * 2);
-		stateMachine.Agent.SetDestination(fleeDestination);
-	}
-	#endregion
-
 	#region look around logic
 	/// <summary>
 	/// adjust look direction based on angle given in 360 degrees
@@ -116,6 +116,8 @@ public class NpcBaseMovementState : NPCBaseState
 	/// </summary>
 	protected void LookAtDirection(Vector3 positionToLookAt)
 	{
+		stateMachine.Agent.isStopped = true;
+		stateMachine.Agent.updateRotation = false;
 		Vector3 directionToLookAt = positionToLookAt - stateMachine.transform.position;
 		directionToLookAt.y = 0f;
 		RotateTowardsDirection(directionToLookAt);

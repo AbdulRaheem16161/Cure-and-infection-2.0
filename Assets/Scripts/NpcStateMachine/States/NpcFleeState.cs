@@ -5,13 +5,16 @@ public class NpcFleeState : NpcBaseMovementState
 {
 	Vector3 directionToLookBackTo;
 
+	private readonly float fleeCooldown = 2f;
+	private float fleeTimer;
+
 	public NpcFleeState(NPCStateMachine stateMachine) : base(stateMachine) { }
 
 	public override void Enter()
 	{
-		directionToLookBackTo = stateMachine.NpcPerception.DetectedTarget.Transform.position;
-		FleeToNewDestination(stateMachine.NpcDefinition.SprintSpeed, directionToLookBackTo);
+		fleeTimer = 0;
 		stateMachine.Beliefs.SetNewInvestigateLocation(null);
+		lookingAtTarget = false;
 	}
 
 	public override void Exit()
@@ -21,16 +24,30 @@ public class NpcFleeState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		// ----------- Move to Idle -------------
-		if (HasReachedDestination())
+		if (stateMachine.Beliefs.TargetInFleeRange)
 		{
-			lookingAtTarget = false;
+			fleeTimer -= deltaTime;
+
+			if (fleeTimer <= 0)
+				UpdateFleeingDirection();
+		}
+		else
+		{
 			LookAtDirection(directionToLookBackTo);
+			Debug.LogError("rotating to look at target");
 
 			if (!lookingAtTarget) return;
 
-			stateMachine.Beliefs.SafeFromFleeTarget = true;
+			stateMachine.Beliefs.UpdateTargetFleeingFrom(null);
+			Debug.LogError("looking at target, null");
 			return;
 		}
+	}
+
+	private void UpdateFleeingDirection()
+	{
+		fleeTimer = fleeCooldown;
+		directionToLookBackTo = stateMachine.Beliefs.TargetFleeingFrom.Transform.position;
+		FleeToNewDestination(stateMachine.NpcDefinition.SprintSpeed, directionToLookBackTo);
 	}
 }

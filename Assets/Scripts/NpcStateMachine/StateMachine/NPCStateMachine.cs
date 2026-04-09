@@ -204,32 +204,34 @@ namespace Game.MyNPC
 		}
 		private bool ShouldFlee()
 		{
-			return EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.SafeFromFleeTarget && !Beliefs.MeleeWeaponInHands;
+			if (EnableFlee && Beliefs.TargetFleeingFrom != null) return true;
+			return EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.MeleeWeaponInHands;
 		}
 		private bool ShouldRangedAttack()
 		{
-			return EnableRangedAttack && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
+			return EnableRangedAttack && Beliefs.TargetFleeingFrom == null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 		}
 		private bool ShouldMeleeAttack()
 		{
-			return EnableMeleeAttack && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
+			return EnableMeleeAttack && Beliefs.TargetFleeingFrom == null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
 		}
 		private bool ShouldChase()
 		{
-			return EnableChase && Beliefs.HasTarget && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
+			return EnableChase && Beliefs.TargetFleeingFrom == null && 
+				Beliefs.Target != null && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
 		}
 		private bool ShouldEatCorpse()
 		{
-			return EnableEatCorpseState && !Beliefs.HasTarget &&
-				StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget;
+			return EnableEatCorpseState && Beliefs.Target == null &&
+				StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
 		}
 		private bool ShouldInvestigate()
 		{
-			return EnableInvestigate && !Beliefs.HasTarget && !Beliefs.HasEatableTarget && Beliefs.FreeToInvestigate;
+			return EnableInvestigate && Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
 		}
 		private bool ShouldMove()
 		{
-			return !Beliefs.HasTarget && !Beliefs.HasEatableTarget && !Beliefs.FreeToInvestigate &&
+			return Beliefs.Target == null && Beliefs.EatableTarget == null && !Beliefs.FreeToInvestigate &&
 				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
 		}
 		private bool ShouldDrink()

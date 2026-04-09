@@ -66,9 +66,9 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.LabelField("Target Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		if (beliefs.StatsHandler.LifeState == NpcDefinition.LifeState.zombified)
-			EditorGUILayout.Toggle("Has Eatable Target", beliefs.HasEatableTarget);
+			DrawTargetData("Eatable Target", beliefs.EatableTarget);
 
-		EditorGUILayout.Toggle("Has Target", beliefs.HasTarget);
+		DrawTargetData("Target", beliefs.Target);
 		EditorGUILayout.Toggle("Target In Shooting Range", beliefs.TargetInShootingRange);
 		EditorGUILayout.Toggle("Target In Melee Range", beliefs.TargetInMeleeRange);
 		EditorGUI.indentLevel--;
@@ -80,7 +80,7 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.LabelField("Flee Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Target In Flee Range", beliefs.TargetInFleeRange);
-		EditorGUILayout.Toggle("Safe From Flee Target", beliefs.SafeFromFleeTarget);
+		DrawTargetData("Target Fleeing From", beliefs.TargetFleeingFrom);
 		EditorGUI.indentLevel--;
 		#endregion
 
@@ -103,5 +103,25 @@ public class NpcBeliefsEditor : Editor
 		if (!Application.isPlaying)
 			return false;
 		return true;
+	}
+
+	private void DrawTargetData(string label, TargetData target)
+	{
+		EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+
+		if (target == null)
+		{
+			EditorGUILayout.LabelField("None");
+			return;
+		}
+
+		EditorGUI.indentLevel++;
+
+		EditorGUILayout.ObjectField("Transform", target.Transform, typeof(Transform), true);
+		EditorGUILayout.ObjectField("Collider", target.Collider, typeof(Collider), true);
+		EditorGUILayout.ObjectField("Stats Handler", target.StatsHandler, typeof(StatsHandler), true);
+		EditorGUILayout.FloatField("Distance", target.Distance);
+
+		EditorGUI.indentLevel--;
 	}
 }

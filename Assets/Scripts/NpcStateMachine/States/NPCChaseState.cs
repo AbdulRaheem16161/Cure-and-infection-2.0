@@ -10,15 +10,14 @@ namespace Game.MyNPC
         public override void Enter()
         {
 			stateMachine.Beliefs.SetNewInvestigateLocation(null);
-			MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
         }
 
         public override void Tick(float deltaTime)
         {
 			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
-			if (stateMachine.Beliefs.HasTarget)
-				MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
+			if (stateMachine.Beliefs.Target != null)
+				MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, stateMachine.Beliefs.Target.Transform.position);
         }
 
         public override void Exit()

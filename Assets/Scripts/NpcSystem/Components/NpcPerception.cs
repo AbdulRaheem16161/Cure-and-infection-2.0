@@ -28,23 +28,22 @@ public class NpcPerception : MonoBehaviour
 	public bool showVision = false;
 	#endregion
 
-	#region Runtime Target Detection
-	[Header("Runtime Target Detection")]
-	[ReadOnly] public bool IsTargetDetected;
-	[ReadOnly] public TargetData DetectedTarget;
-	[ReadOnly] public bool IsEatableTargetDetected;
-	[ReadOnly] public TargetData EatableTarget;
-
 	public enum TargetTrackResult
 	{
 		valid, invalid, lost
 	}
-	#endregion
 
 	#region layer Masks
 	[Header("Layer Masks")]
 	[SerializeField] private LayerMask targetMask;
 	[SerializeField] private LayerMask lineOfSightMask;
+	#endregion
+
+	#region Runtime Targets
+	[Header("Runtime Targets")]
+	public TargetData Target {get; private set;}
+	public TargetData EatableTarget {get; private set;}
+	public TargetData ClosestFleeTarget { get; private set;}
 	#endregion
 
 	private Color normalColor = Color.green;
@@ -71,6 +70,11 @@ public class NpcPerception : MonoBehaviour
 	private float detectEatableTargetTimer;
 	#endregion
 
+	#region flee target timer
+	private readonly float fleeTargetCooldown = 0.25f;
+	private float fleeTargetTimer;
+	#endregion
+
 	#region awake + Initialize
 	private void Awake()
 	{
@@ -88,10 +92,6 @@ public class NpcPerception : MonoBehaviour
 		NpcDefinition = npcDefinition;
 		viewAngle = NpcDefinition.ViewAngle;
 		viewDistance = NpcDefinition.ViewDistance;
-		DetectedTarget = null;
-		IsTargetDetected = false;
-		EatableTarget = null;
-		IsEatableTargetDetected = false;
 	}
 	#endregion
 
@@ -112,6 +112,7 @@ public class NpcPerception : MonoBehaviour
 		UpdateVisionBasedOnAlertState(Beliefs.Alert);
 		SearchForLivingTarget();
 		SearchForEatableTarget();
+		SearchForClosestFleeTarget();
 	}
 
 	/// <summary>
@@ -129,7 +130,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
-		if (!Beliefs.HasTarget)
+		if (Beliefs.Target == null)
 			Beliefs.SetNewInvestigateLocation(position);
 	}
 	public void InvestigateSound(Vector3 position)
@@ -183,24 +184,17 @@ public class NpcPerception : MonoBehaviour
 		detectTargetTimer = detectTargetCooldown;
 
 		//skip looking if target already found
-		if (IsTargetDetected)
+		if (Target != null)
 		{
-			Vector3 lastKnownEnemyPositon = DetectedTarget.Transform.position;
+			Vector3 lastRecordedPosition = Beliefs.Target.Transform.position;
 			TargetTrackResult trackResult;
-			(DetectedTarget, IsTargetDetected, trackResult) = TrackTarget(DetectedTarget, LifeState.alive);
+			(Target, trackResult) = TrackTarget(Target, LifeState.alive);
 
 			if (trackResult == TargetTrackResult.lost)
-				InvestigateLastSeenEnemyPosition(lastKnownEnemyPositon);
+				InvestigateLastSeenEnemyPosition(lastRecordedPosition);
 		}
 		else
-		{
-			DetectedTarget = SearchForClosestTarget(LifeState.alive);
-
-			if (DetectedTarget != null && DetectedTarget.StatsHandler != null)
-				IsTargetDetected = true;
-			else
-				IsTargetDetected = false;
-		}
+			Target = SearchForClosestTarget(LifeState.alive);
 	}
 	private void SearchForEatableTarget()
 	{
@@ -210,20 +204,21 @@ public class NpcPerception : MonoBehaviour
 		if (detectEatableTargetTimer > 0) return;
 		detectEatableTargetTimer = detectEatableTargetCooldown;
 
-		if (IsEatableTargetDetected)
+		if (EatableTarget != null)
 		{
-			TargetTrackResult trackResult; //not utilized
-			(EatableTarget, IsEatableTargetDetected, trackResult) = TrackTarget(EatableTarget, LifeState.dead);
+			TargetTrackResult trackResult;
+			(EatableTarget, trackResult) = TrackTarget(EatableTarget, LifeState.dead);
 		}
 		else
-		{
 			EatableTarget = SearchForClosestTarget(LifeState.dead);
+	}
+	private void SearchForClosestFleeTarget()
+	{
+		fleeTargetTimer -= Time.deltaTime;
+		if (fleeTargetTimer > 0) return;
+		fleeTargetTimer = fleeTargetCooldown;
 
-			if (EatableTarget != null && EatableTarget.StatsHandler != null)
-				IsEatableTargetDetected = true;
-			else
-				IsEatableTargetDetected = false;
-		}
+		ClosestFleeTarget = SearchForClosestTarget(LifeState.alive);
 	}
 	#endregion
 
@@ -278,11 +273,17 @@ public class NpcPerception : MonoBehaviour
 		if (target.Team != NPCSpawner.Teams.FreeFighter && target.Team == StateMachine.StatsHandler.Team) return false;
 
 		//filter life state + special flags
-		if (target.LifeState != requiredLifeState) return false;
-		if (target.LifeState == LifeState.dead && !target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie))
-			return false;
+		static bool LifeStateValid(StatsHandler target, LifeState requiredLifeState)
+		{
+			if (requiredLifeState == LifeState.alive && target.LifeState != LifeState.dead) return true;
 
-		return true;
+			else if (requiredLifeState == LifeState.dead && target.LifeState == LifeState.dead && 
+				!target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie)) return true;
+
+			else return false;
+		}
+
+		return LifeStateValid(target, requiredLifeState);
 	}
 	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
 	{
@@ -325,17 +326,17 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region handle tracking found targets and loosing them
-	private (TargetData, bool, TargetTrackResult) TrackTarget(TargetData trackedTarget, LifeState lifeState)
+	private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, LifeState lifeState)
 	{
 		if (trackedTarget.StatsHandler.LifeState != lifeState) //life state changed (died or zombiefied now)
-			return (null, false, TargetTrackResult.invalid);
+			return (null, TargetTrackResult.invalid);
 
 		trackedTarget.UpdateTargetDistance(transform.position);
 		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
 		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, trackedTarget.Collider)) 
-			return (trackedTarget, true, TargetTrackResult.valid);
+			return (trackedTarget, TargetTrackResult.valid);
 
-		return (null, false, TargetTrackResult.lost); //no longer in vision cone or line of sight
+		return (null, TargetTrackResult.lost); //no longer in vision cone or line of sight
 	}
 	#endregion
 
@@ -344,7 +345,7 @@ public class NpcPerception : MonoBehaviour
 		//draw vision cone for debugging
 		if (!showVision) return;
 
-		Color finalColor = IsTargetDetected ? detectedColor : normalColor;
+		Color finalColor = Beliefs.Target != null ? detectedColor : normalColor;
 		finalColor.a = colorAlpha;
 		Handles.color = finalColor;
 

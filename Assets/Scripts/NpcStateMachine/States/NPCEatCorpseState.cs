@@ -21,7 +21,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 		eatingCorpse = false;
 		ateCorpse = false;
 		eatCorpseTimer = eatCorpseDuration;
-		MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.NpcPerception.EatableTarget.Transform.position);
+		MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.Beliefs.EatableTarget.Transform.position);
 	}
 
 	public override void Exit()
@@ -47,7 +47,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 			if (!ateCorpse)
 			{
 				ateCorpse = true;
-				stateMachine.NpcPerception.EatableTarget.StatsHandler.CompleteZombification();
+				stateMachine.Beliefs.Target.StatsHandler.CompleteZombification();
 			}
 		}
 	}

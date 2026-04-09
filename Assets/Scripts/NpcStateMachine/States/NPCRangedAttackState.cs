@@ -19,8 +19,6 @@ namespace Game.MyNPC
         public override void Enter()
         {
 			lookingAtTarget = false;
-			stateMachine.Agent.updateRotation = false;
-            stateMachine.Agent.isStopped = true;
 			stateMachine.Beliefs.SetNewInvestigateLocation(null);
 			BurstFireBehaviour();
 		}
@@ -31,7 +29,7 @@ namespace Game.MyNPC
 
 			//logic to handle looking at target and handling shooting
 			HandleShootingBehaviour(deltaTime);
-			LookAtDirection(stateMachine.NpcPerception.DetectedTarget.Transform.position);
+			LookAtDirection(stateMachine.Beliefs.Target.Transform.position);
 		}
 
         public override void Exit()
