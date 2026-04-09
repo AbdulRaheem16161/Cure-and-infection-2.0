@@ -20,7 +20,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 	public override void Exit()
 	{
 		//null on exit incase enemy spotted before glancing finished
-		stateMachine.Beliefs.InvestigateLocation = null;
+		stateMachine.Beliefs.SetNewInvestigateLocation(null);
 	}
 
 	public override void Tick(float deltaTime)
@@ -45,7 +45,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 			}
 
 			if (glanceDone)
-				stateMachine.Beliefs.InvestigateLocation = null;
+				stateMachine.Beliefs.SetNewInvestigateLocation(null);
 		}
 	}
 }

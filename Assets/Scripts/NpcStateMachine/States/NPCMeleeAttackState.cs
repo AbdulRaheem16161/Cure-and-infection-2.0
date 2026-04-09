@@ -21,7 +21,7 @@ namespace Game.MyNPC
 		public override void Enter()
         {
 			stateMachine.Agent.isStopped = true;
-			stateMachine.Beliefs.InvestigateLocation = null;
+			stateMachine.Beliefs.SetNewInvestigateLocation(null);
 			randomSwingDelay = GetRandomSwingDelay();
         }
 

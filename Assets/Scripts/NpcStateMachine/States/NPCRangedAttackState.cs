@@ -21,8 +21,8 @@ namespace Game.MyNPC
 			lookingAtTarget = false;
 			stateMachine.Agent.updateRotation = false;
             stateMachine.Agent.isStopped = true;
-			stateMachine.Beliefs.InvestigateLocation = null;
-            BurstFireBehaviour();
+			stateMachine.Beliefs.SetNewInvestigateLocation(null);
+			BurstFireBehaviour();
 		}
 
         public override void Tick(float deltaTime)

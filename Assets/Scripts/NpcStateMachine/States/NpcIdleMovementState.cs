@@ -10,7 +10,7 @@ namespace Game.MyNPC
 		public NpcIdleMovementState(NPCStateMachine stateMachine) : base(stateMachine) { }
         public override void Enter()
         {
-
+			stateMachine.Agent.ResetPath();
         }
 
         public override void Exit()

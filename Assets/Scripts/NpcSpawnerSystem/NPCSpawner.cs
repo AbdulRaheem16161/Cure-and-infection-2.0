@@ -28,6 +28,7 @@ using Game.MyNPC;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using static Game.MyNPC.NPCStateMachine;
 using static NPCSpawner;
@@ -128,14 +129,12 @@ public class NPCSpawner : MonoBehaviour
 
 			PatrolPathManager patrolPath = npcSpawnData.patrolPath;
 			if (npcSpawnData.movementType == MovementType.patrolMove && patrolPath == null)
-				patrolPath = AssignRandomPatrolPath();
+				npcSpawnData.patrolPath = AssignRandomPatrolPath();
 
-			Vector3 spawnPoint = Vector3.zero;
+			if (npcSpawnData.spawnPoint == null)
+				npcSpawnData.spawnPoint = transform;
 
-			if (npcSpawnData.spawnPoint != null)
-				spawnPoint = npcSpawnData.spawnPoint.transform.position;
-
-			SpawnNPC(npcSpawnData.npcDefinition, npcSpawnData.team, npcSpawnData.movementType, patrolPath, spawnPoint);
+			SpawnNpc(npcSpawnData);
 		}
 	}
 	#endregion
@@ -143,66 +142,65 @@ public class NPCSpawner : MonoBehaviour
 	#region spawn npcs
 	private void SpawnRandomNpc()
 	{
-		NpcDefinition npcToSpawn = AssignRandomNpc();
-		Teams randomTeam = AssignRandomTeam();
-		Vector3 spawnPoint = AssignRandomSpawnPosition();
+		NpcSpawnData spawnData = new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPosition());
 
-		if (npcToSpawn == null) return;
+		if (!spawnData.npcDefinition.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
+			spawnData.team = Teams.Zombie;
 
-		if (!npcToSpawn.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
-			randomTeam = Teams.Zombie;
-
-		SpawnNPC(npcToSpawn, randomTeam, MovementType.randomAreaMove, null, spawnPoint); //path null as randoms spawns dont have paths for now
+		SpawnNpc(spawnData); //path null as randoms spawns dont have paths for now
 	}
-	private void SpawnNPC(NpcDefinition npcDefinition, Teams team, 
-		MovementType movementType, PatrolPathManager patrolPath, Vector3 spawnPosition)
+	private void SpawnNpc(NpcSpawnData npcSpawnData)
 	{
-		if (npcDefinition == null)
-        {
-            Debug.LogError("NpcDefinition null assign a reference");
-            return;
-        }
+		if (npcSpawnData.npcDefinition == null)
+		{
+			Debug.LogError("NpcDefinition null in spawn data assign a reference");
+			return;
+		}
 
-		NpcController npcController = GetNpc(npcDefinition);
+		NpcController npcController = GetNpc(npcSpawnData.npcDefinition);
 		NPCStateMachine stateMachine = npcController.StateMachine;
 		npcController.transform.SetParent(activeNpcsParent.transform);
-		npcController.transform.position = spawnPosition;
 
-		if (movementType == MovementType.patrolMove)
+		if (npcSpawnData.spawnPoint != null)
+			npcController.transform.position = npcSpawnData.spawnPoint.transform.position;
+		else
+			npcController.transform.position = npcSpawnData.SpawnPosition;
+
+		if (npcSpawnData.movementType == MovementType.patrolMove)
 		{
-			if (patrolPath != null)
-				stateMachine.SetMovementType(movementType, patrolPath);
+			if (npcSpawnData.patrolPath != null)
+				stateMachine.SetMovementType(npcSpawnData.movementType, npcSpawnData.patrolPath);
 			else
 				stateMachine.SetMovementType(MovementType.randomMove); //fall back to random move
 		}
 
-		else if (movementType == MovementType.randomAreaMove)
-		{ 
+		else if (npcSpawnData.movementType == MovementType.randomAreaMove)
+		{
 			if (RandomAreaMoveManager != null)
-				stateMachine.SetMovementType(movementType, RandomAreaMoveManager);
+				stateMachine.SetMovementType(npcSpawnData.movementType, RandomAreaMoveManager);
 			else
 				stateMachine.SetMovementType(MovementType.randomMove); //fall back to random move
 		}
 
-		else if (movementType == MovementType.randomMove)
-			stateMachine.SetMovementType(movementType);
+		else if (npcSpawnData.movementType == MovementType.randomMove)
+			stateMachine.SetMovementType(npcSpawnData.movementType);
 
-		npcController.InitializeNpc(npcDefinition, team);
+		npcController.InitializeNpc(npcSpawnData.npcDefinition, npcSpawnData.team);
 		activeNpcs.Add(npcController);
+
+		if (npcSpawnData.forceInvincible)
+			npcController.StatsHandler.invincible = true;
+		if (npcSpawnData.forceDeath)
+			npcController.StatsHandler.DebugKillNpc();
 	}
 	#endregion
 
 	#region npc spawner helpers
-	public NpcDefinition AssignRandomNpc()
+	public NpcDefinition AssignRandomNpc(List<NpcDefinition> npcDefinitions)
 	{
-		if (NpcsToRandomSpawn.Count == 0)
-		{ Debug.LogError("NpcsToRandomSpawn.Count == 0, assign definition refereces"); return null; }
-		return NpcsToRandomSpawn[systemRandom.Next(0, NpcsToRandomSpawn.Count)];
-	}
-	public Teams AssignRandomTeam()
-	{
-		Array teams = Enum.GetValues(typeof(Teams));
-		return(Teams)teams.GetValue(systemRandom.Next(teams.Length));
+		if (npcDefinitions.Count == 0)
+		{ Debug.LogError("npcDefinitions.Count == 0, assign definition references to list"); return null; }
+		return npcDefinitions[systemRandom.Next(0, npcDefinitions.Count)];
 	}
 	public PatrolPathManager AssignRandomPatrolPath()
 	{
@@ -221,15 +219,13 @@ public class NPCSpawner : MonoBehaviour
     {
 		NpcController npc = null;
 
-		for (int i = 0; i < inactiveNpcs.Count; i++)
+		for (int i = inactiveNpcs.Count - 1; i >= 0; i--)
 		{
-			npc = inactiveNpcs[i];
+			if (inactiveNpcs[i].NpcDefinition.StartingLifeState != npcDefinition.StartingLifeState) continue;
 
-			if (npc.NpcDefinition.StartingLifeState == npcDefinition.StartingLifeState)
-			{
-				inactiveNpcs.RemoveAt(i);
-				break;
-			}
+			npc = inactiveNpcs[i];
+			inactiveNpcs.RemoveAt(i);
+			break;
 		}
 
 		if (npc == null)
@@ -270,35 +266,44 @@ public class NPCSpawner : MonoBehaviour
 	private void HandleNpcZombification(GameObject gameObject)
 	{
 		CleanUpNpc(gameObject.GetComponent<NpcController>());
-		//SpawnRandomNPC(true, gameObject.transform.position);
+		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), MovementType.randomAreaMove, gameObject.transform.position));
 	}
 	#endregion
 
-	#region debug editor spawner options
+	//editor methods
+	#region Create New Paths and Spawn Points From Editor
+	public void CreateNewPatrolPointPath()
+	{
+		GameObject patrolPath = (GameObject)PrefabUtility.InstantiatePrefab(patrolPathPrefab);
+		patrolPath.transform.SetParent(movementAreaAndPathsParent.transform);
+		patrolPath.transform.position = transform.position;
+		PatrolPathManager patrolPathManager = patrolPath.GetComponent<PatrolPathManager>();
+		PatrolPaths.Add(patrolPathManager);
+		patrolPath.name += $"{movementAreaAndPathsParent.transform.childCount - 1}"; //-1 due to area move manager
+		Selection.activeGameObject = patrolPath;
+	}
+	public void CreateNewSpawnPoint()
+	{
+		GameObject spawnPoint = (GameObject)PrefabUtility.InstantiatePrefab(spawnPointPrefab);
+		spawnPoint.transform.SetParent(spawnPointsParent.transform);
+		spawnPoint.transform.position = transform.position;
+		spawnPoint.name += $"{spawnPointsParent.transform.childCount}";
+		Selection.activeGameObject = spawnPoint;
+	}
+	#endregion
+
+	#region Spawn Random Or Specified Npcs From Editor
 	public void SpawnRandomSurvivorNpc(Teams team, MovementType movementType)
 	{
-		NpcDefinition npcToSpawn = survivorDefinitions[systemRandom.Next(0, survivorDefinitions.Count)];
-		PatrolPathManager patrolPathManager = AssignRandomPatrolPath();
-
-		if (!npcToSpawn.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
-			team = Teams.Zombie;
-
-		SpawnNPC(npcToSpawn, team, movementType, patrolPathManager, Vector3.zero);
+		SpawnNpc(new(AssignRandomNpc(survivorDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}
 	public void SpawnRandomZombieNpc(Teams team, MovementType movementType)
 	{
-		NpcDefinition npcToSpawn = zombieDefinitions[systemRandom.Next(0, zombieDefinitions.Count)];
-		PatrolPathManager patrolPathManager = AssignRandomPatrolPath();
-
-		if (!npcToSpawn.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
-			team = Teams.Zombie;
-
-		SpawnNPC(npcToSpawn, team, movementType, patrolPathManager, Vector3.zero);
+		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}
 	public void SpawnSpecifiedNpc(NpcDefinition npcDefinition, Teams team, MovementType movementType)
 	{
-		PatrolPathManager patrolPathManager = AssignRandomPatrolPath();
-		SpawnNPC(npcDefinition, team, movementType, patrolPathManager, Vector3.zero);
+		SpawnNpc(new(npcDefinition, team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}
 	#endregion
 }
@@ -318,6 +323,57 @@ public class NpcSpawnData
 	[Tooltip("Spawned patrol path, null = randomly chosen")]
 	public PatrolPathManager patrolPath;
 
-	[Tooltip("Spawned Npcs spawn point, null = spawner location")]
+	[Tooltip("Spawned Npcs spawn point, can use spawn point or patrol points to spawn on, null = spawner location")]
 	public Transform spawnPoint;
+	public Vector3 SpawnPosition { get; private set; }
+
+	[Tooltip("Spawns Npc as Invincible")]
+	public bool forceInvincible;
+
+	[Tooltip("Spawns Npc as alread dead")]
+	public bool forceDeath;
+
+	private readonly System.Random systemRandom = new();
+
+	public NpcSpawnData(NpcDefinition npcDefinition, MovementType movementType, Vector3 spawnPosition)
+	{
+		this.npcDefinition = npcDefinition;
+		team = AssignRandomTeam();
+		this.movementType = movementType;
+		patrolPath = null;
+		spawnPoint = null;
+		SpawnPosition = spawnPosition;
+		forceInvincible = false;
+		forceDeath = false;
+	}
+	public NpcSpawnData(NpcDefinition npcDefinition, Teams team, MovementType movementType, PatrolPathManager patrolPath, Vector3 spawnPosition)
+	{
+		this.npcDefinition = npcDefinition;
+
+		if (IsZombie())
+			this.team = Teams.Zombie;
+		else
+			this.team = team;
+
+		this.movementType = movementType;
+		this.patrolPath = patrolPath;
+		spawnPoint = null;
+		SpawnPosition = spawnPosition;
+		forceInvincible = false;
+		forceDeath = false;
+	}
+	private Teams AssignRandomTeam()
+	{
+		if (IsZombie())
+			return Teams.Zombie;
+
+		Array teams = Enum.GetValues(typeof(Teams));
+		return (Teams)teams.GetValue(systemRandom.Next(teams.Length));
+	}
+	private bool IsZombie()
+	{
+		if (npcDefinition.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie team
+			return false;
+		else return true;
+	}
 }

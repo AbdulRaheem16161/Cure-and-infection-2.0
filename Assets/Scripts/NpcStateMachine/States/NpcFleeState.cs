@@ -11,6 +11,7 @@ public class NpcFleeState : NpcBaseMovementState
 	{
 		directionToLookBackTo = stateMachine.NpcPerception.DetectedTarget.Transform.position;
 		FleeToNewDestination(stateMachine.NpcDefinition.SprintSpeed, directionToLookBackTo);
+		stateMachine.Beliefs.SetNewInvestigateLocation(null);
 	}
 
 	public override void Exit()

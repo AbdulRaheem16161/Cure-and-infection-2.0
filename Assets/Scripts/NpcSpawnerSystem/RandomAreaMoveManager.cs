@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 [ExecuteAlways] // this script willl now run both in Play Mode and in Edit Mode
@@ -10,13 +11,13 @@ public class RandomAreaMoveManager : MonoBehaviour
     public Color GizmosColor;
     public bool ShowGizmoz;
 
-    public void CreateAreaPoint() // will run on pressing the button
+    public void CreateNewAreaPoint() // will run on pressing the button
     {
-        GameObject pointInstance = new GameObject("Point");
-        pointInstance.transform.SetParent(AreaPointsFolder.transform);
-        pointInstance.transform.localPosition = Vector3.zero;
-
-        AreaPoints.Add(pointInstance);  
+		GameObject areaPoint = new($"Point{transform.childCount + 1}");
+		areaPoint.transform.SetParent(AreaPointsFolder.transform);
+		areaPoint.transform.localPosition = Vector3.zero;
+		Selection.activeGameObject = areaPoint;
+		AreaPoints.Add(areaPoint);  
     }
 
 	public Vector3 GetRandomLocationInArea()

@@ -39,7 +39,7 @@ public class NpcBeliefs : MonoBehaviour
 
 	#region Investigation Beliefs
 	public bool FreeToInvestigate => InvestigateLocation != null && !HasTarget;
-	public Vector3? InvestigateLocation;
+	public Vector3? InvestigateLocation { get; private set; }
 	#endregion
 
 	#region Target Beliefs
@@ -167,6 +167,13 @@ public class NpcBeliefs : MonoBehaviour
 			ConsumableThree = UpdateOrNullEquipmentReference(equipmentSlot, wasEquipped);
 			return;
 		}
+	}
+	#endregion
+
+	#region Update InvestigateLocation
+	public void SetNewInvestigateLocation(Vector3? location)
+	{
+		InvestigateLocation = location;
 	}
 	#endregion
 

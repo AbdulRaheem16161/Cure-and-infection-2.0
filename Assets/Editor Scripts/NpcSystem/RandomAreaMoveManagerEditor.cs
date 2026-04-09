@@ -12,8 +12,9 @@ public class RandomAreaMoveManagerEditor : Editor
 
         if (GUILayout.Button("Create Area Point"))
         {
-            areaGizmos.CreateAreaPoint();
-        }
-
+			Undo.RecordObject(areaGizmos, "Create Patrol Point");
+			areaGizmos.CreateNewAreaPoint();
+			EditorUtility.SetDirty(areaGizmos);
+		}
     }
 }

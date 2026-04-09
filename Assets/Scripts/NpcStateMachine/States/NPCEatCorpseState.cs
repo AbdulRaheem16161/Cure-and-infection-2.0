@@ -11,18 +11,22 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	/// ZombificationProgress is complete and ignore other state switching (subject to change)
 	/// </summary>
 
+	private bool eatingCorpse;
+	private bool ateCorpse;
 	private readonly float eatCorpseDuration = 5f;
 	private float eatCorpseTimer;
 
 	public override void Enter()
 	{
+		eatingCorpse = false;
+		ateCorpse = false;
 		eatCorpseTimer = eatCorpseDuration;
 		MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.NpcPerception.EatableTarget.Transform.position);
 	}
 
 	public override void Exit()
 	{
-
+		stateMachine.Agent.isStopped = false;
 	}
 
 	public override void Tick(float deltaTime)
@@ -30,14 +34,21 @@ public class NPCEatCorpseState : NpcBaseMovementState
 		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
 
 		// move to position of cropse
-		if (HasReachedDestination())
+		if (HasReachedCorpse()) //needs a litle more room then agent stopping distance 
+		{
+			eatingCorpse = true;
+		}
+		if (eatingCorpse)
 		{
 			eatCorpseTimer -= deltaTime;
+			stateMachine.Agent.isStopped = true;
 			if (eatCorpseTimer > 0) return;
 
-			Debug.LogError("timer done");
-			stateMachine.NpcPerception.EatableTarget.StatsHandler.CompleteZombification();
-			return;
+			if (!ateCorpse)
+			{
+				ateCorpse = true;
+				stateMachine.NpcPerception.EatableTarget.StatsHandler.CompleteZombification();
+			}
 		}
 	}
 }

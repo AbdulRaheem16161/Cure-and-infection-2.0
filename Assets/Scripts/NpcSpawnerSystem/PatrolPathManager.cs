@@ -9,14 +9,13 @@ public class PatrolPathManager : MonoBehaviour
     public Color GizmosColor;
     public bool ShowGizmoz;
 
-    public void CreateAreaPoint() // will run on pressing the button
+    public void CreateNewPatrolPoint()
     {
-        GameObject pointInstance = new("Point");
-        pointInstance.transform.SetParent(TrackPointsFolder.transform);
-        pointInstance.transform.localPosition = Vector3.zero;
-
-        TrackPoints.Add(pointInstance);
-    }
+		GameObject pointInstance = new($"Point{transform.childCount + 1}");
+		pointInstance.transform.SetParent(transform);
+		pointInstance.transform.localPosition = Vector3.zero;
+		TrackPoints.Add(pointInstance);
+	}
 
 	public Vector3 GetNextPatrolPointLocation(int index)
 	{

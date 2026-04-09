@@ -9,7 +9,7 @@ namespace Game.MyNPC
 
         public override void Enter()
         {
-			stateMachine.Beliefs.InvestigateLocation = null;
+			stateMachine.Beliefs.SetNewInvestigateLocation(null);
 			MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, stateMachine.NpcPerception.DetectedTarget.Transform.position);
         }
 

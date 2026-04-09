@@ -75,22 +75,16 @@ public class NPCSpawner_Editor : Editor
 		EditorGUILayout.LabelField("Patrol Path and Spawn Point Creation", EditorStyles.boldLabel);
 		if (GUILayout.Button("Create New Patrol Path"))
 		{
-			GameObject patrolPath = (GameObject)PrefabUtility.InstantiatePrefab(spawner.patrolPathPrefab);
-			patrolPath.transform.SetParent(spawner.movementAreaAndPathsParent.transform);
-			patrolPath.transform.position = spawner.transform.position;
-			PatrolPathManager patrolPathManager = patrolPath.GetComponent<PatrolPathManager>();
-			spawner.PatrolPaths.Add(patrolPathManager);
-			patrolPath.name += $"{spawner.movementAreaAndPathsParent.transform.childCount - 1}"; //-1 due to area move manager
-			Selection.activeGameObject = patrolPath;
+			Undo.RecordObject(spawner, "Create New Patrol Path");
+			spawner.CreateNewPatrolPointPath();
+			EditorUtility.SetDirty(spawner);
 		}
 
 		if (GUILayout.Button("Create New Spawn Point"))
 		{
-			GameObject spawnPoint = (GameObject)PrefabUtility.InstantiatePrefab(spawner.spawnPointPrefab);
-			spawnPoint.transform.SetParent(spawner.spawnPointsParent.transform);
-			spawnPoint.transform.position = spawner.transform.position;
-			spawnPoint.name += $"{spawner.spawnPointsParent.transform.childCount}";
-			Selection.activeGameObject = spawnPoint;
+			Undo.RecordObject(spawner, "Create New Spawn Point");
+			spawner.CreateNewSpawnPoint();
+			EditorUtility.SetDirty(spawner);
 		}
 		#endregion
 

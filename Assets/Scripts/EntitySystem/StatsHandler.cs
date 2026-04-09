@@ -159,4 +159,17 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		}
 	}
 	#endregion
+
+	#region Debug Kill
+	public void DebugKillNpc()
+	{
+		health = -1;
+
+		if (health <= 0 && lifeState != LifeState.dead)
+		{
+			lifeState = LifeState.dead;
+			OnDeath?.Invoke();
+		}
+	}
+	#endregion
 }

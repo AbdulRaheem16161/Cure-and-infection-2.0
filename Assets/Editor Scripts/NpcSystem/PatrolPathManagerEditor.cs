@@ -8,12 +8,13 @@ public class PatrolPathManagerEditor : Editor
     {
         DrawDefaultInspector();
 
-		PatrolPathManager TrackGizmos = (PatrolPathManager)target;
+		PatrolPathManager patrolPathManager = (PatrolPathManager)target;
 
         if (GUILayout.Button("Create Track Point"))
         {
-            TrackGizmos.CreateAreaPoint();
-        }
-
+			Undo.RecordObject(patrolPathManager, "Create Patrol Point");
+			patrolPathManager.CreateNewPatrolPoint();
+			EditorUtility.SetDirty(patrolPathManager);
+		}
     }
 }

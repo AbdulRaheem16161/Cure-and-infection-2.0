@@ -21,17 +21,17 @@ public class StatsHandlerEditor : Editor
 		if (!showDebugControls) return;
 
 		#region deal damage and kill 
-		if (GUILayout.Button("Damage Npc (25)"))
+		if (GUILayout.Button("Damage Npc For 50"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(new(25, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
+			stats.RecieveDamage(new(50, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
 		}
 		if (GUILayout.Button("Kill Npc"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			stats.RecieveDamage(new(stats.health + 1, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
+			stats.DebugKillNpc();
 		}
 		#endregion
 	}

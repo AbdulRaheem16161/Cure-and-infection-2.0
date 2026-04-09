@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5076224869628762941}
   m_Layer: 0
-  m_Name: Point
+  m_Name: Point1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -84,6 +84,9 @@ MonoBehaviour:
   - {fileID: 4304855453526436638}
   - {fileID: 6964396948563903857}
   - {fileID: 3966124884783634124}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   TrackPointsFolder: {fileID: 3964071398597378811}
   GizmosColor: {r: 0, g: 0.5019608, b: 1, a: 0.5019608}
   ShowGizmoz: 0
@@ -97,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8708199305378058556}
   m_Layer: 0
-  m_Name: Point
+  m_Name: Point4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -128,7 +131,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4612390518500252595}
   m_Layer: 0
-  m_Name: Point
+  m_Name: Point2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -159,7 +162,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7324027937763207262}
   m_Layer: 0
-  m_Name: Point
+  m_Name: Point3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

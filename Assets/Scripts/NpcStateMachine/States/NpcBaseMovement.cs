@@ -55,7 +55,7 @@ public class NpcBaseMovementState : NPCBaseState
 	/// <summary>
 	/// move to destination
 	/// </summary>
-	protected void MoveToDestination(float speed, Vector3 newDestination)
+	protected void MoveToDestination(float speed, Vector3 newDestination, bool isBasicMove = false)
 	{
 		stateMachine.CurrentDestination = newDestination;
 		stateMachine.Agent.isStopped = false;
@@ -139,6 +139,13 @@ public class NpcBaseMovementState : NPCBaseState
 	protected bool HasReachedDestination()
 	{
 		if (stateMachine.Agent.remainingDistance <= stateMachine.Agent.stoppingDistance)
+			return true;
+		else
+			return false;
+	}
+	protected bool HasReachedCorpse()
+	{
+		if (stateMachine.Agent.remainingDistance <= 2f)
 			return true;
 		else
 			return false;

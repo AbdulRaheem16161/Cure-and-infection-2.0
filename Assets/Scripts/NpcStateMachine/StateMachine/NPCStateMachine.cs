@@ -220,16 +220,16 @@ namespace Game.MyNPC
 		}
 		private bool ShouldEatCorpse()
 		{
-			return EnableEatCorpseState && !Beliefs.HasTarget && 
+			return EnableEatCorpseState && !Beliefs.HasTarget &&
 				StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.HasEatableTarget;
 		}
 		private bool ShouldInvestigate()
 		{
-			return EnableInvestigate && !Beliefs.HasTarget && Beliefs.FreeToInvestigate;
+			return EnableInvestigate && !Beliefs.HasTarget && !Beliefs.HasEatableTarget && Beliefs.FreeToInvestigate;
 		}
 		private bool ShouldMove()
 		{
-			return !Beliefs.HasTarget && !Beliefs.FreeToInvestigate &&
+			return !Beliefs.HasTarget && !Beliefs.HasEatableTarget && !Beliefs.FreeToInvestigate &&
 				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
 		}
 		private bool ShouldDrink()

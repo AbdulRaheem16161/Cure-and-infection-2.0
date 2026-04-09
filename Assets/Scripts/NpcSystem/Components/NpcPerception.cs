@@ -34,6 +34,11 @@ public class NpcPerception : MonoBehaviour
 	[ReadOnly] public TargetData DetectedTarget;
 	[ReadOnly] public bool IsEatableTargetDetected;
 	[ReadOnly] public TargetData EatableTarget;
+
+	public enum TargetTrackResult
+	{
+		valid, invalid, lost
+	}
 	#endregion
 
 	#region layer Masks
@@ -120,17 +125,17 @@ public class NpcPerception : MonoBehaviour
 	{
 		if (damageContext.Attacker == gameObject) return; //ignore damage from self
 		if (!Beliefs.Alert)
-			Beliefs.InvestigateLocation = damageContext.Attacker.transform.position;
+			Beliefs.SetNewInvestigateLocation(damageContext.Attacker.transform.position);
 	}
 	private void InvestigateLastSeenEnemyPosition(Vector3 position)
 	{
 		if (!Beliefs.HasTarget)
-			Beliefs.InvestigateLocation = position;
+			Beliefs.SetNewInvestigateLocation(position);
 	}
 	public void InvestigateSound(Vector3 position)
 	{
 		if (!Beliefs.Alert)
-			Beliefs.InvestigateLocation = position;
+			Beliefs.SetNewInvestigateLocation(position);
 	}
 	#endregion
 
@@ -180,10 +185,12 @@ public class NpcPerception : MonoBehaviour
 		//skip looking if target already found
 		if (IsTargetDetected)
 		{
-			Vector3 lastSeenPosition = DetectedTarget.Transform.position;
-			(DetectedTarget, IsTargetDetected) = TrackTarget(DetectedTarget, LifeState.alive);
-			if (!IsTargetDetected)
-				InvestigateLastSeenEnemyPosition(lastSeenPosition);
+			Vector3 lastKnownEnemyPositon = DetectedTarget.Transform.position;
+			TargetTrackResult trackResult;
+			(DetectedTarget, IsTargetDetected, trackResult) = TrackTarget(DetectedTarget, LifeState.alive);
+
+			if (trackResult == TargetTrackResult.lost)
+				InvestigateLastSeenEnemyPosition(lastKnownEnemyPositon);
 		}
 		else
 		{
@@ -205,7 +212,8 @@ public class NpcPerception : MonoBehaviour
 
 		if (IsEatableTargetDetected)
 		{
-			(EatableTarget, IsEatableTargetDetected) = TrackTarget(DetectedTarget, LifeState.dead);
+			TargetTrackResult trackResult; //not utilized
+			(EatableTarget, IsEatableTargetDetected, trackResult) = TrackTarget(EatableTarget, LifeState.dead);
 		}
 		else
 		{
@@ -317,18 +325,17 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region handle tracking found targets and loosing them
-	private (TargetData, bool) TrackTarget(TargetData trackedTarget, LifeState lifeState)
+	private (TargetData, bool, TargetTrackResult) TrackTarget(TargetData trackedTarget, LifeState lifeState)
 	{
-		if (trackedTarget.StatsHandler.LifeState != lifeState) //life state changed (died or zombieifed now)
-			return (null, false);
+		if (trackedTarget.StatsHandler.LifeState != lifeState) //life state changed (died or zombiefied now)
+			return (null, false, TargetTrackResult.invalid);
 
 		trackedTarget.UpdateTargetDistance(transform.position);
 		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
 		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, trackedTarget.Collider)) 
-			return (trackedTarget, true);
+			return (trackedTarget, true, TargetTrackResult.valid);
 
-		InvestigateLastSeenEnemyPosition(trackedTarget.Transform.position);
-		return (null, false); //no longer in vision cone or line of sight
+		return (null, false, TargetTrackResult.lost); //no longer in vision cone or line of sight
 	}
 	#endregion
 
