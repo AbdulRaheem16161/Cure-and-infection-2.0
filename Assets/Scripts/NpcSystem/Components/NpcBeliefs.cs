@@ -38,7 +38,7 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Investigation Beliefs
-	public bool FreeToInvestigate => InvestigateLocation != null && Target != null;
+	public bool FreeToInvestigate => InvestigateLocation != null && Target == null;
 	public Vector3? InvestigateLocation { get; private set; }
 	#endregion
 

@@ -278,7 +278,7 @@ public class NpcPerception : MonoBehaviour
 			if (requiredLifeState == LifeState.alive && target.LifeState != LifeState.dead) return true;
 
 			else if (requiredLifeState == LifeState.dead && target.LifeState == LifeState.dead && 
-				!target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie)) return true;
+				target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie)) return true;
 
 			else return false;
 		}
@@ -359,24 +359,3 @@ public class NpcPerception : MonoBehaviour
 	}
 }
 #endif
-
-[Serializable]
-public class TargetData
-{
-	public StatsHandler StatsHandler;
-	public Collider Collider;
-	public Transform Transform;
-	public float Distance;
-
-	public TargetData(StatsHandler statsHandler, Collider collider, Transform transform)
-	{
-		StatsHandler = statsHandler;
-		Collider = collider;
-		Transform = transform;
-	}
-
-	public void UpdateTargetDistance(Vector3 currentPosition)
-	{
-		Distance = (currentPosition - Transform.position).sqrMagnitude;
-	}
-}

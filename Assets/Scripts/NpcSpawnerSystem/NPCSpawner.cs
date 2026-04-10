@@ -55,7 +55,12 @@ public class NPCSpawner : MonoBehaviour
 	public List<NpcDefinition> survivorDefinitions = new();
 	public List<NpcDefinition> zombieDefinitions = new();
 
-	[InspectorLabel("Spawner Settings")]
+	[Header("Toggle Gizmos")]
+	public bool ShowAreaPoints;
+	public bool ShowAllPatrolPaths;
+	public bool ShowAllSpawnPoints;
+
+	[Header("Spawner Settings")]
 	public SpawnerType spawnerType;
 	public enum SpawnerType
 	{
@@ -306,74 +311,25 @@ public class NPCSpawner : MonoBehaviour
 		SpawnNpc(new(npcDefinition, team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}
 	#endregion
-}
 
-[Serializable]
-public class NpcSpawnData
-{
-	[Tooltip("Npc definition to spawn")]
-	public NpcDefinition npcDefinition;
-
-	[Tooltip("Spawned Npcs team")]
-	public Teams team;
-
-	[Tooltip("Spawned Npcs movement type. NPC handles fallback: Patrol > RandomArea > Random")]
-	public MovementType movementType;
-
-	[Tooltip("Spawned patrol path, null = randomly chosen")]
-	public PatrolPathManager patrolPath;
-
-	[Tooltip("Spawned Npcs spawn point, can use spawn point or patrol points to spawn on, null = spawner location")]
-	public Transform spawnPoint;
-	public Vector3 SpawnPosition { get; private set; }
-
-	[Tooltip("Spawns Npc as Invincible")]
-	public bool forceInvincible;
-
-	[Tooltip("Spawns Npc as alread dead")]
-	public bool forceDeath;
-
-	private readonly System.Random systemRandom = new();
-
-	public NpcSpawnData(NpcDefinition npcDefinition, MovementType movementType, Vector3 spawnPosition)
+	private void OnDrawGizmos()
 	{
-		this.npcDefinition = npcDefinition;
-		team = AssignRandomTeam();
-		this.movementType = movementType;
-		patrolPath = null;
-		spawnPoint = null;
-		SpawnPosition = spawnPosition;
-		forceInvincible = false;
-		forceDeath = false;
-	}
-	public NpcSpawnData(NpcDefinition npcDefinition, Teams team, MovementType movementType, PatrolPathManager patrolPath, Vector3 spawnPosition)
-	{
-		this.npcDefinition = npcDefinition;
+		if (ShowAreaPoints)
+			RandomAreaMoveManager.DrawAreaPoints();
 
-		if (IsZombie())
-			this.team = Teams.Zombie;
-		else
-			this.team = team;
+		if (ShowAllPatrolPaths)
+		{
+			foreach (PatrolPathManager patrolPath in PatrolPaths)
+				patrolPath.DrawPatrolPathPoints();
+		}
 
-		this.movementType = movementType;
-		this.patrolPath = patrolPath;
-		spawnPoint = null;
-		SpawnPosition = spawnPosition;
-		forceInvincible = false;
-		forceDeath = false;
-	}
-	private Teams AssignRandomTeam()
-	{
-		if (IsZombie())
-			return Teams.Zombie;
-
-		Array teams = Enum.GetValues(typeof(Teams));
-		return (Teams)teams.GetValue(systemRandom.Next(teams.Length));
-	}
-	private bool IsZombie()
-	{
-		if (npcDefinition.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie team
-			return false;
-		else return true;
+		if (ShowAllSpawnPoints)
+		{
+			for (int i = 0; i < spawnPointsParent.transform.childCount; i++)
+			{
+				Gizmos.color = new(1f, 0.85f, 0.1f); // warm amber
+				Gizmos.DrawSphere(spawnPointsParent.transform.GetChild(i).transform.position, 1f); //draw a Sphere on every point
+			}
+		}
 	}
 }

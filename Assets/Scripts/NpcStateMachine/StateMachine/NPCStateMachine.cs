@@ -200,7 +200,7 @@ namespace Game.MyNPC
 		#region State Transition Checks (based mostly on NpcBeliefs)
 		private bool ShouldHeal()
 		{
-			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Hurt && Beliefs.CanHeal;
+			return EnableConsumableUse && Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Hurt && Beliefs.CanHeal;
 		}
 		private bool ShouldFlee()
 		{
@@ -209,11 +209,13 @@ namespace Game.MyNPC
 		}
 		private bool ShouldRangedAttack()
 		{
-			return EnableRangedAttack && Beliefs.TargetFleeingFrom == null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
+			return EnableRangedAttack && Beliefs.TargetFleeingFrom == null && 
+				Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 		}
 		private bool ShouldMeleeAttack()
 		{
-			return EnableMeleeAttack && Beliefs.TargetFleeingFrom == null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
+			return EnableMeleeAttack && Beliefs.TargetFleeingFrom == null &&
+				Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
 		}
 		private bool ShouldChase()
 		{
@@ -236,11 +238,11 @@ namespace Game.MyNPC
 		}
 		private bool ShouldDrink()
 		{
-			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Thirsty && Beliefs.CanDrink;
+			return EnableConsumableUse && Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Thirsty && Beliefs.CanDrink;
 		}
 		private bool ShouldEat()
 		{
-			return EnableConsumableUse && !Beliefs.Alert && Beliefs.Hungry && Beliefs.CanEat;
+			return EnableConsumableUse && Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Hungry && Beliefs.CanEat;
 		}
 		#endregion
 

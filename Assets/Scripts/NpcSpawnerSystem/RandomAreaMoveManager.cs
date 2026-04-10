@@ -8,7 +8,6 @@ public class RandomAreaMoveManager : MonoBehaviour
 {
     public List<GameObject> AreaPoints;
     public GameObject AreaPointsFolder; 
-    public Color GizmosColor;
     public bool ShowGizmoz;
 
     public void CreateNewAreaPoint() // will run on pressing the button
@@ -17,7 +16,7 @@ public class RandomAreaMoveManager : MonoBehaviour
 		areaPoint.transform.SetParent(AreaPointsFolder.transform);
 		areaPoint.transform.localPosition = Vector3.zero;
 		Selection.activeGameObject = areaPoint;
-		AreaPoints.Add(areaPoint);  
+		AreaPoints.Add(areaPoint);
     }
 
 	public Vector3 GetRandomLocationInArea()
@@ -57,23 +56,20 @@ public class RandomAreaMoveManager : MonoBehaviour
 	private void OnDrawGizmos()
     {
         if (!ShowGizmoz) return;
-
-        Gizmos.color = GizmosColor;
-
-        for (int i = 0; i < AreaPoints.Count; i++) // loop through every point in Area Points
-        {
-            Gizmos.DrawSphere(AreaPoints[i].transform.position, 1f); // Draw a Sphere on every point (GameObject) in the List<AreaPoints>
-
-            // join every point (gameObject) in the List<AreaPoints> with a line
-
-            if (i == AreaPoints.Count - 1) // if its the last point, then join it with the first point (AreaPoints[0]) to complete the loop 
-            {
-                Gizmos.DrawLine(AreaPoints[i].transform.position, AreaPoints[0].transform.position);
-            }
-            else // otherwise Join every point with the next point
-            {
-                Gizmos.DrawLine(AreaPoints[i].transform.position, AreaPoints[i + 1].transform.position);
-            }
-        }
+		DrawAreaPoints();
     }
+	public void DrawAreaPoints()
+	{
+		Gizmos.color = new Color(0.2f, 1f, 0.4f);
+
+		for (int i = 0; i < AreaPoints.Count; i++)
+		{
+			Gizmos.DrawSphere(AreaPoints[i].transform.position, 1f); //draw a Sphere on every point
+
+			if (i == AreaPoints.Count - 1) //join patrol points together
+				Gizmos.DrawLine(AreaPoints[i].transform.position, AreaPoints[0].transform.position);
+			else
+				Gizmos.DrawLine(AreaPoints[i].transform.position, AreaPoints[i + 1].transform.position);
+		}
+	}
 }

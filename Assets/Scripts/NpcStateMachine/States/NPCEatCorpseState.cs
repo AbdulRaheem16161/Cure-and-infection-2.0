@@ -47,7 +47,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 			if (!ateCorpse)
 			{
 				ateCorpse = true;
-				stateMachine.Beliefs.Target.StatsHandler.CompleteZombification();
+				stateMachine.Beliefs.EatableTarget.StatsHandler.CompleteZombification();
 			}
 		}
 	}
