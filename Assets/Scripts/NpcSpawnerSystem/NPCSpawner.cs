@@ -39,6 +39,10 @@ public class NPCSpawner : MonoBehaviour
 	public GameObject patrolPathPrefab;
 	public GameObject spawnPointPrefab;
 
+	[Header("Npc Definition Lists")]
+	public List<NpcDefinition> survivorDefinitions = new();
+	public List<NpcDefinition> zombieDefinitions = new();
+
 	[Header("Spawner Child Objects")]
 	public GameObject movementAreaAndPathsParent;
 	public GameObject spawnPointsParent;
@@ -51,21 +55,23 @@ public class NPCSpawner : MonoBehaviour
 	[Header("Area Move Manager")]
 	public RandomAreaMoveManager RandomAreaMoveManager;
 
-	[Header("Npc Definition Lists")]
-	public List<NpcDefinition> survivorDefinitions = new();
-	public List<NpcDefinition> zombieDefinitions = new();
-
 	[Header("Toggle Gizmos")]
 	public bool ShowAreaPoints;
 	public bool ShowAllPatrolPaths;
 	public bool ShowAllSpawnPoints;
 
 	[Header("Spawner Settings")]
+	[Tooltip("bypasses checks that keep npcs spawned around player, and despawning when player is far away")]
+	public bool forceSpawnNpcs;
 	public SpawnerType spawnerType;
 	public enum SpawnerType
 	{
 		random, custom, both
 	}
+	public bool playerInValidSpawnZone;
+	public bool playerInBlockSpawnZone;
+	private bool SpawnNpcs => ShouldSpawnNpcs();
+	private bool respawnCustomNpcs;
 
 	[Header("Npcs To Spawn")]
 	public List<NpcSpawnData> CustomNpcsToSpawn = new();
@@ -86,6 +92,7 @@ public class NPCSpawner : MonoBehaviour
 
 	private void Awake()
 	{
+		respawnCustomNpcs = true;
 		StatsHandler.OnZombificationComplete += HandleNpcZombification;
 
 		if (minSpawnAmount > maxSpawnAmount)
@@ -104,15 +111,16 @@ public class NPCSpawner : MonoBehaviour
 		StatsHandler.OnZombificationComplete -= HandleNpcZombification;
 	}
 
-	private void Start()
-	{
-		if (spawnerType == SpawnerType.custom || spawnerType == SpawnerType.both)
-			SpawnCustomNpcs();
-	}
 	private void Update()
 	{
+		if (!SpawnNpcs) return;
 		if (spawnerType == SpawnerType.random || spawnerType == SpawnerType.both)
 			SpawnRandomNpcs();
+		if (spawnerType == SpawnerType.custom || spawnerType == SpawnerType.both)
+		{
+			if (respawnCustomNpcs)
+				SpawnCustomNpcs();
+		}
 	}
 
 	#region spawn npcs on start and update
@@ -127,6 +135,7 @@ public class NPCSpawner : MonoBehaviour
 	}
 	public void SpawnCustomNpcs()
 	{
+		respawnCustomNpcs = false;
 		foreach (NpcSpawnData npcSpawnData in CustomNpcsToSpawn)
 		{
 			if (npcSpawnData.npcDefinition == null)
@@ -245,10 +254,13 @@ public class NPCSpawner : MonoBehaviour
 	#endregion
 
 	#region npc clean up and repooling
-	public void CleanUpAllNpcs()
+	public void CleanUpAllNpcs(bool resetRespawnCustomNpcsBool = true)
 	{
 		for (int i = activeNpcs.Count - 1; i >= 0; i--)
 			CleanUpNpc(activeNpcs[i]);
+
+		if (resetRespawnCustomNpcsBool)
+			respawnCustomNpcs = true;
 	}
 	public void CleanUpDeadNpcs()
 	{
@@ -272,6 +284,20 @@ public class NPCSpawner : MonoBehaviour
 	{
 		CleanUpNpc(gameObject.GetComponent<NpcController>());
 		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), MovementType.randomAreaMove, gameObject.transform.position));
+	}
+	#endregion
+
+	#region
+	private bool ShouldSpawnNpcs()
+	{
+		if (forceSpawnNpcs)
+		{
+			Debug.LogError("true");
+			return true;
+		}
+		bool result = playerInValidSpawnZone && !playerInBlockSpawnZone;
+		Debug.LogError(result);
+		return result;
 	}
 	#endregion
 

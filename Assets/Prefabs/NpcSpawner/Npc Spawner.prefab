@@ -125,6 +125,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8917418661095594959}
+  - {fileID: 385350808108783537}
   - {fileID: 1436578941553581485}
   - {fileID: 2144181954484899225}
   - {fileID: 5507641976265187968}
@@ -145,13 +147,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolPathPrefab: {fileID: 3964071398597378811, guid: 51371b5f7b5490c40aa176a4c9f74a53, type: 3}
   spawnPointPrefab: {fileID: 6793302210893672624, guid: 1dccd2f52ae65b442870cb1f48cb477a, type: 3}
-  movementAreaAndPathsParent: {fileID: 1164409028040089770}
-  spawnPointsParent: {fileID: 8167753560602938505}
-  activeNpcsParent: {fileID: 2068737963083128657}
-  inactiveNpcsParent: {fileID: 1083894604578147318}
-  PatrolPaths:
-  - {fileID: 7250597809870208336}
-  RandomAreaMoveManager: {fileID: 8023601509976355756}
   survivorDefinitions:
   - {fileID: 11400000, guid: ea717fe8b586a464ab3581a477b1165d, type: 2}
   - {fileID: 11400000, guid: 4abe508b91cc1ae47b9e3882cf5ffae4, type: 2}
@@ -161,13 +156,162 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c71c26cc173d3c8429dcaff582f657e1, type: 2}
   - {fileID: 11400000, guid: 2b254af504bbd7b48ac8c0a381ff5598, type: 2}
   - {fileID: 11400000, guid: 357cc3d8d46d4e34587a7c42c554b06c, type: 2}
+  movementAreaAndPathsParent: {fileID: 1164409028040089770}
+  spawnPointsParent: {fileID: 8167753560602938505}
+  activeNpcsParent: {fileID: 2068737963083128657}
+  inactiveNpcsParent: {fileID: 1083894604578147318}
+  PatrolPaths:
+  - {fileID: 7250597809870208336}
+  RandomAreaMoveManager: {fileID: 8023601509976355756}
+  ShowAreaPoints: 0
+  ShowAllPatrolPaths: 0
+  ShowAllSpawnPoints: 0
+  forceSpawnNpcs: 0
   spawnerType: 0
+  outerCollider: {fileID: 0}
+  innerCollider: {fileID: 0}
+  playerInValidSpawnZone: 0
+  playerInBlockSpawnZone: 0
   CustomNpcsToSpawn: []
   NpcsToRandomSpawn: []
   minSpawnAmount: 5
   maxSpawnAmount: 10
   activeNpcs: []
   inactiveNpcs: []
+--- !u!1 &4452713545587274938
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8917418661095594959}
+  - component: {fileID: 466015788720324116}
+  - component: {fileID: 3759128838947042541}
+  m_Layer: 0
+  m_Name: ValidSpawnZoneCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8917418661095594959
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4452713545587274938}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7628308889328290875}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &466015788720324116
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4452713545587274938}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 500, y: 50, z: 500}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3759128838947042541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4452713545587274938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb8d93090fd605f40a5dc1db217d25b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnerColliderType: 0
+--- !u!1 &7509183331777110830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 385350808108783537}
+  - component: {fileID: 7537475981375976150}
+  - component: {fileID: 663187922983572782}
+  m_Layer: 0
+  m_Name: BlockSpawnZoneCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &385350808108783537
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7509183331777110830}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7628308889328290875}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7537475981375976150
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7509183331777110830}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 250, y: 50, z: 250}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &663187922983572782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7509183331777110830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb8d93090fd605f40a5dc1db217d25b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnerColliderType: 0
 --- !u!1 &8167753560602938505
 GameObject:
   m_ObjectHideFlags: 0
