@@ -9,8 +9,8 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return stateMachine.EnableChase && Beliefs.TargetFleeingFrom == null &&
-				Beliefs.Target != null && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
+			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.chase) 
+				&& Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
 		}
 
 		public override void Enter()
@@ -20,10 +20,10 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+			if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 			if (stateMachine.Beliefs.Target != null)
-				MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, stateMachine.Beliefs.Target.Transform.position);
+				MoveToDestination(stateMachine.Definition.SprintSpeed, stateMachine.Beliefs.Target.Transform.position);
         }
 
         public override void Exit()

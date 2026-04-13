@@ -49,7 +49,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public override void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
 	{
 		base.EquipItem(equipmentHandler, parentTransform);
-		if (equipmentHandler.StatsHandler.NpcDefinition.Player)
+		if (equipmentHandler.StatsHandler.Definition.Player)
 		{
 			//player manually reloads when unholstering equipped weapon
 		}
@@ -61,7 +61,7 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public override void UnEquipItem(EquipmentHandler equipmentHandler)
 	{
 		base.UnEquipItem(equipmentHandler);
-		if (equipmentHandler.StatsHandler.NpcDefinition.Player)
+		if (equipmentHandler.StatsHandler.Definition.Player)
 		{
 			equipmentHandler.InventoryHandler.AddNewItem(new(TypedDefinition.AmmoType, currentMagazineAmmo)); //return ammo in mag to inventory
 		}

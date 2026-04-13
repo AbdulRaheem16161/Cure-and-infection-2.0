@@ -12,8 +12,10 @@ public class NpcFleeState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		if (stateMachine.EnableFlee && Beliefs.TargetFleeingFrom != null) return true;
-		return stateMachine.EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.MeleeWeaponInHands;
+		if (stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee) && Beliefs.TargetFleeingFrom != null) return true;
+
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee) 
+			&& Beliefs.TargetInFleeRange && !Beliefs.MeleeWeaponInHands;
 	}
 
 	public override void Enter()
@@ -54,6 +56,6 @@ public class NpcFleeState : NpcBaseMovementState
 	{
 		fleeTimer = fleeCooldown;
 		directionToLookBackTo = stateMachine.Beliefs.TargetFleeingFrom.Transform.position;
-		FleeToNewDestination(stateMachine.NpcDefinition.SprintSpeed, directionToLookBackTo);
+		FleeToNewDestination(stateMachine.Definition.SprintSpeed, directionToLookBackTo);
 	}
 }

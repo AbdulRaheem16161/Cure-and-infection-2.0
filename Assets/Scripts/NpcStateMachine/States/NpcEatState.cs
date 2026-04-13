@@ -10,7 +10,8 @@ public class NpcEatState : NPCBaseState
 
 	public override bool IsValid()
 	{
-		return stateMachine.EnableConsumableUse && Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Hungry && Beliefs.CanEat;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.eat) 
+			&& Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Hungry && Beliefs.CanEat;
 	}
 
 	public override void Enter()

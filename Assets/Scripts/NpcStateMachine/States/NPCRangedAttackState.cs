@@ -14,8 +14,8 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return stateMachine.EnableRangedAttack && Beliefs.TargetFleeingFrom == null &&
-				Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
+			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && 
+				Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 		}
 
 		public override void Enter()
@@ -27,7 +27,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-            if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+            if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 			//logic to handle looking at target and handling shooting
 			HandleShootingBehaviour(deltaTime);

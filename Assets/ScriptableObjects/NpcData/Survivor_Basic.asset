@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac27273233fe9f341aa1732591f10740, type: 3}
+  m_Script: {fileID: 11500000, guid: 81e1ca600b11cbd408a3c75d84f8642b, type: 3}
   m_Name: Survivor_Basic
   m_EditorClassIdentifier: 
-  npcName: Survivor
+  entityName: Survivor Basic
   isPlayer: 0
   startingLifeState: 0
+  capabilities: 1983
   entityFlags: -1
-  supportsEquipmentModels: 1
   gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}
   maxHealth: 100
   maxWater: 100
@@ -36,10 +36,10 @@ MonoBehaviour:
   soundSensitivity: 0
   weaponOne: {fileID: 11400000, guid: 891c4fb4191ce7c479c3aa2c2a088c45, type: 2}
   weaponTwo: {fileID: 0}
-  meleeWeapon: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: a9fff7e107251f24aa8e897c12f7d775, type: 2}
   helmet: {fileID: 0}
   chest: {fileID: 0}
-  backpack: {fileID: 11400000, guid: 55d7cf881b8899c49b9c3a5ab2aae00a, type: 2}
-  consumableOne: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
-  consumableTwo: {fileID: 0}
-  consumableThree: {fileID: 0}
+  backpack: {fileID: 11400000, guid: d82a1822482222f498f1e2b61206aec4, type: 2}
+  consumableOne: {fileID: 11400000, guid: fe64440df4181d04f9752fb76b8ca258, type: 2}
+  consumableTwo: {fileID: 11400000, guid: 2439ce63286a12c44a2070d131b20313, type: 2}
+  consumableThree: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}

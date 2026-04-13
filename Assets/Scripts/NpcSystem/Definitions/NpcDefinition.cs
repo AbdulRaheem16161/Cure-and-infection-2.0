@@ -1,12 +1,11 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Npc", menuName = "ScriptableObjects/Npc")]
-public class NpcDefinition : ScriptableObject
+public class EntityDefinition : ScriptableObject
 {
 	#region npc info
-	[Header("Npc Info")]
-	[SerializeField] private string npcName;
+	[Header("Entity Info")]
+	[SerializeField] private string entityName;
 	[SerializeField] private bool isPlayer;
 
 	[SerializeField] private LifeState startingLifeState;
@@ -15,14 +14,30 @@ public class NpcDefinition : ScriptableObject
 		alive, dead, zombified
 	}
 
+	[SerializeField] private Capability capabilities;
+	[Flags]
+	public enum Capability
+	{
+		none = 0,
+		stunnable = 1 << 0,
+		heal = 1 << 1,
+		flee = 1 << 2,
+		rangedAttack = 1 << 3,
+		meleeAttack = 1 << 4,
+		chase = 1 << 5,
+		eatCorpse = 1 << 6,
+		investigate = 1 << 7,
+		drink = 1 << 8,
+		eat = 1 << 9,
+		move = 1 << 10
+	};
+
 	[SerializeField] private EntityFlags entityFlags;
 	[Flags]
 	public enum EntityFlags
 	{
-		none = 0, canRespawn = 1 << 0, canBecomeZombie = 1 << 1
+		none = 0, canBecomeZombie = 1 << 0
 	}
-
-	[SerializeField] private bool supportsEquipmentModels;
 	#endregion
 
 	#region definition prefab to use
@@ -32,29 +47,29 @@ public class NpcDefinition : ScriptableObject
 
 	#region Npc Stats
 	[Header("Npc Stats")]
-	[SerializeField] private int maxHealth;
-	[SerializeField] private int maxWater;
-	[SerializeField] private int maxFood;
-	[SerializeField] private int maxStamina;
+	[SerializeField] private int maxHealth = 100;
+	[SerializeField] private int maxWater = 100;
+	[SerializeField] private int maxFood = 100;
+	[SerializeField] private int maxStamina = 100;
 	#endregion
 
 	#region Npc Movement Behaviour
 	[Header("Npc Movement Behaviour")]
-	[SerializeField] private float walkSpeed;
-	[SerializeField] private float sprintSpeed;
-	[SerializeField] private float rotationSpeed;
-	[SerializeField] private float fleeDistance;
-	[SerializeField] private float minIdleTime;
-	[SerializeField] private float maxIdleTime;
+	[SerializeField] private float walkSpeed = 3;
+	[SerializeField] private float sprintSpeed = 5;
+	[SerializeField] private float rotationSpeed = 240;
+	[SerializeField] private float fleeDistance = 20;
+	[SerializeField] private float minIdleTime = 1;
+	[SerializeField] private float maxIdleTime = 3;
 	#endregion
 
 	#region NPC Perception Settings
 	[Header("NPC Perception Settings")]
-	[SerializeField] private float viewAngle = 45f;
-	[SerializeField] private float viewDistance = 5f;
-	[SerializeField] private float highAlertDuration = 5f;
+	[SerializeField] private float viewAngle = 120f;
+	[SerializeField] private float viewDistance = 30f;
+	[SerializeField] private float highAlertDuration = 10f;
 	[SerializeField] private float viewAngleMultiplier = 1.5f;
-	[SerializeField] private float viewDistanceMultiplier = 2f;
+	[SerializeField] private float viewDistanceMultiplier = 1.5f;
 	#endregion
 
 	#region npc sound detection
@@ -62,31 +77,12 @@ public class NpcDefinition : ScriptableObject
 	[SerializeField] private float soundSensitivity; //percentage chance divided by distance to sound source or something
 	#endregion
 
-	#region Npc Equipment
-	[Header("Npc Equipment")]
-	/// <summary>
-	/// for zombie ranged attacks we can create a unique WeaponRangedDefinition ZombieSpit as they should work fine if set up like a single shot gun
-	/// for zombie melee attacks we can create a unique WeaponMeleeDefinition that will do the same as above
-	/// </summary>
-	[SerializeField] private WeaponRangedDefinition weaponOne;
-	[SerializeField] private WeaponRangedDefinition weaponTwo;
-	[SerializeField] private WeaponMeleeDefinition meleeWeapon;
-
-	[SerializeField] private ArmourDefinition helmet;
-	[SerializeField] private ArmourDefinition chest;
-	[SerializeField] private ArmourDefinition backpack;
-
-	[SerializeField] private ConsumableDefinition consumableOne;
-	[SerializeField] private ConsumableDefinition consumableTwo;
-	[SerializeField] private ConsumableDefinition consumableThree;
-	#endregion
-
 	#region read only
-	public string NpcName => npcName;
+	public string Name => entityName;
 	public bool Player => isPlayer;
 	public LifeState StartingLifeState => startingLifeState;
+	public Capability Capabilities => capabilities;
 	public EntityFlags Flags => entityFlags;
-	public bool SupportsEquipmentModels => supportsEquipmentModels;
 
 	public GameObject GameObjectPrefab => gameObjectPrefab;
 
@@ -109,17 +105,5 @@ public class NpcDefinition : ScriptableObject
 	public float ViewDistanceMultiplier => viewDistanceMultiplier;
 
 	public float SoundSensitivity => soundSensitivity;
-
-	public WeaponRangedDefinition WeaponOne => weaponOne;
-	public WeaponRangedDefinition WeaponTwo => weaponTwo;
-	public WeaponMeleeDefinition MeleeWeapon => meleeWeapon;
-
-	public ArmourDefinition Helmet => helmet;
-	public ArmourDefinition Chest => chest;
-	public ArmourDefinition Backpack => backpack;
-
-	public ConsumableDefinition ConsumableOne => consumableOne;
-	public ConsumableDefinition ConsumableTwo => consumableTwo;
-	public ConsumableDefinition ConsumableThree => consumableThree;
 	#endregion
 }

@@ -97,7 +97,7 @@ public class EquipmentHandler : MonoBehaviour
 		if (!_Initialized)
 			InitializeEquipmentHandler(null);
 	}
-	public void InitializeEquipmentHandler(NpcDefinition npcDefinition)
+	public void InitializeEquipmentHandler(EntityDefinition definition)
 	{
 		_Initialized = true;
 
@@ -116,44 +116,45 @@ public class EquipmentHandler : MonoBehaviour
 			equippedItems.Add(equipmentSlot);
 		}
 
-		if (npcDefinition == null) return; //allows partial component testing
+		if (definition == null) return; //allows partial component testing
 
-		EquipNpcEquipment(npcDefinition);
+		EquipNpcEquipment(definition);
 	}
 	#endregion
 
 	#region auto equip npc starting equipment
-	private void EquipNpcEquipment(NpcDefinition npcDefinition)
+	private void EquipNpcEquipment(EntityDefinition definition)
 	{
-		if (npcDefinition == null) return;
+		if (definition == null) return;
+		if (definition is not HumanoidDefinition humanoid) return;
 
-		if (npcDefinition.MeleeWeapon != null) //auto equip melee to hands
+		if (humanoid.MeleeWeapon != null) //auto equip melee to hands
 		{
-			EquipItem(npcDefinition.MeleeWeapon, npcDefinition.MeleeWeapon.StackLimit, EquipmentType.weaponMelee);
+			EquipItem(humanoid.MeleeWeapon, humanoid.MeleeWeapon.StackLimit, EquipmentType.weaponMelee);
 			UnholsterWeapon(EquipmentType.weaponMelee);
 		}
 
-		if (npcDefinition.WeaponOne != null) //overwrite melee weapon (allows for melee only npcs)
+		if (humanoid.WeaponOne != null) //overwrite melee weapon (allows for melee only npcs)
 		{
-			EquipItem(npcDefinition.WeaponOne, npcDefinition.WeaponOne.StackLimit, EquipmentType.weaponOne);
+			EquipItem(humanoid.WeaponOne, humanoid.WeaponOne.StackLimit, EquipmentType.weaponOne);
 			UnholsterWeapon(EquipmentType.weaponOne);
 		}
-		if (npcDefinition.WeaponTwo != null)
-			EquipItem(npcDefinition.WeaponTwo, npcDefinition.WeaponTwo.StackLimit, EquipmentType.weaponTwo);
+		if (humanoid.WeaponTwo != null)
+			EquipItem(humanoid.WeaponTwo, humanoid.WeaponTwo.StackLimit, EquipmentType.weaponTwo);
 
-		if (npcDefinition.Helmet != null)
-			EquipItem(npcDefinition.Helmet, npcDefinition.Helmet.StackLimit, EquipmentType.helmet);
-		if (npcDefinition.Chest != null)
-			EquipItem(npcDefinition.Chest, npcDefinition.Chest.StackLimit, EquipmentType.chest);
-		if (npcDefinition.Backpack != null)
-			EquipItem(npcDefinition.Backpack, npcDefinition.Backpack.StackLimit, EquipmentType.backpack);
+		if (humanoid.Helmet != null)
+			EquipItem(humanoid.Helmet, humanoid.Helmet.StackLimit, EquipmentType.helmet);
+		if (humanoid.Chest != null)
+			EquipItem(humanoid.Chest, humanoid.Chest.StackLimit, EquipmentType.chest);
+		if (humanoid.Backpack != null)
+			EquipItem(humanoid.Backpack, humanoid.Backpack.StackLimit, EquipmentType.backpack);
 
-		if (npcDefinition.ConsumableOne != null)
-			EquipItem(npcDefinition.ConsumableOne, npcDefinition.ConsumableOne.StackLimit, EquipmentType.consumableOne);
-		if (npcDefinition.ConsumableTwo != null)
-			EquipItem(npcDefinition.ConsumableTwo, npcDefinition.ConsumableTwo.StackLimit, EquipmentType.consumableTwo);
-		if (npcDefinition.ConsumableThree != null)
-			EquipItem(npcDefinition.ConsumableThree, npcDefinition.ConsumableThree.StackLimit, EquipmentType.consumableThree);
+		if (humanoid.ConsumableOne != null)
+			EquipItem(humanoid.ConsumableOne, humanoid.ConsumableOne.StackLimit, EquipmentType.consumableOne);
+		if (humanoid.ConsumableTwo != null)
+			EquipItem(humanoid.ConsumableTwo, humanoid.ConsumableTwo.StackLimit, EquipmentType.consumableTwo);
+		if (humanoid.ConsumableThree != null)
+			EquipItem(humanoid.ConsumableThree, humanoid.ConsumableThree.StackLimit, EquipmentType.consumableThree);
 	}
 	#endregion
 

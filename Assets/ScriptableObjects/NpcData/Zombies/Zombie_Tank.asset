@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac27273233fe9f341aa1732591f10740, type: 3}
+  m_Script: {fileID: 11500000, guid: 81e1ca600b11cbd408a3c75d84f8642b, type: 3}
   m_Name: Zombie_Tank
   m_EditorClassIdentifier: 
-  npcName: Tank Zombie
+  entityName: Zombie Tank
   isPlayer: 0
   startingLifeState: 2
-  entityFlags: 1
-  supportsEquipmentModels: 0
+  capabilities: -1
+  entityFlags: 0
   gameObjectPrefab: {fileID: 4125029387023148961, guid: e4195ad6d3e19ff4695153d850c778cc, type: 3}
   maxHealth: 200
   maxWater: 100
@@ -24,19 +24,19 @@ MonoBehaviour:
   maxStamina: 100
   walkSpeed: 0.5
   sprintSpeed: 4
-  rotationSpeed: 240
+  rotationSpeed: 200
   fleeDistance: 0
   minIdleTime: 1
   maxIdleTime: 3
   viewAngle: 90
   viewDistance: 20
   highAlertDuration: 10
-  viewAngleMultiplier: 1.5
-  viewDistanceMultiplier: 1.5
+  viewAngleMultiplier: 1.35
+  viewDistanceMultiplier: 1.35
   soundSensitivity: 0
   weaponOne: {fileID: 0}
   weaponTwo: {fileID: 0}
-  meleeWeapon: {fileID: 11400000, guid: 0a034dc203bf43f46b5e2febc954dbb3, type: 2}
+  meleeWeapon: {fileID: 11400000, guid: 0edc719ebb5563748a05af044552a040, type: 2}
   helmet: {fileID: 0}
   chest: {fileID: 0}
   backpack: {fileID: 0}

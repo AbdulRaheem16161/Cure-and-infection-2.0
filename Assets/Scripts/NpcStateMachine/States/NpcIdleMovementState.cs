@@ -27,7 +27,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+			if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 			if (stateMachine.Animator.speed != stateMachine.CurrentSpeed)
 				stateMachine.Animator.SetFloat("Speed", stateMachine.CurrentSpeed);
@@ -50,7 +50,7 @@ namespace Game.MyNPC
 		{
 			stateMachine.Beliefs.Idling = false;
 			HandleMovementLogic();
-			idleTimer = Random.Range(stateMachine.NpcDefinition.MinIdleTime, stateMachine.NpcDefinition.MaxIdleTime);
+			idleTimer = Random.Range(stateMachine.Definition.MinIdleTime, stateMachine.Definition.MaxIdleTime);
 		}
 		private void BeginIdle()
 		{

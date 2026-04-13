@@ -1,12 +1,12 @@
 using UnityEngine;
 using System;
-using static NpcDefinition;
+using static EntityDefinition;
 
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
-	public NpcDefinition NpcDefinition { get; private set; }
+	public EntityDefinition Definition { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
 
@@ -50,20 +50,20 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		if (!_Initialized)
 			InitializeStats(Team, null);
 	}
-	public void InitializeStats(NPCSpawner.Teams team, NpcDefinition npcDefinition)
+	public void InitializeStats(NPCSpawner.Teams team, EntityDefinition definition)
 	{
 		OnInitialize?.Invoke();
 		_Initialized = true;
-		NpcDefinition = npcDefinition;
+		Definition = definition;
 		this.team = team;
 
-		if (npcDefinition == null) return; //keeps values in inspector and allows partial component testing
-		lifeState = npcDefinition.StartingLifeState;
+		if (definition == null) return; //keeps values in inspector and allows partial component testing
+		lifeState = definition.StartingLifeState;
 
-		health = npcDefinition.MaxHealth;
-		water = npcDefinition.MaxWater;
-		food = npcDefinition.MaxFood;
-		stamina = npcDefinition.MaxStamina;
+		health = definition.MaxHealth;
+		water = definition.MaxWater;
+		food = definition.MaxFood;
+		stamina = definition.MaxStamina;
 	}
 	#endregion
 

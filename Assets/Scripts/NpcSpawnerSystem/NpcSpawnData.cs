@@ -7,7 +7,7 @@ using static NPCSpawner;
 public class NpcSpawnData
 {
 	[Tooltip("Npc definition to spawn")]
-	public NpcDefinition npcDefinition;
+	public EntityDefinition Definition;
 
 	[Tooltip("Spawned Npcs team")]
 	public Teams team;
@@ -30,9 +30,9 @@ public class NpcSpawnData
 
 	private readonly System.Random systemRandom = new();
 
-	public NpcSpawnData(NpcDefinition npcDefinition, MovementType movementType, Vector3 spawnPosition)
+	public NpcSpawnData(EntityDefinition definition, MovementType movementType, Vector3 spawnPosition)
 	{
-		this.npcDefinition = npcDefinition;
+		Definition = definition;
 		team = AssignRandomTeam();
 		this.movementType = movementType;
 		patrolPath = null;
@@ -41,9 +41,9 @@ public class NpcSpawnData
 		forceInvincible = false;
 		forceDeath = false;
 	}
-	public NpcSpawnData(NpcDefinition npcDefinition, Teams team, MovementType movementType, PatrolPathManager patrolPath, Vector3 spawnPosition)
+	public NpcSpawnData(EntityDefinition definition, Teams team, MovementType movementType, PatrolPathManager patrolPath, Vector3 spawnPosition)
 	{
-		this.npcDefinition = npcDefinition;
+		Definition = definition;
 
 		if (IsZombie())
 			this.team = Teams.Zombie;
@@ -67,7 +67,7 @@ public class NpcSpawnData
 	}
 	private bool IsZombie()
 	{
-		if (npcDefinition.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie team
+		if (Definition.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie team
 			return false;
 		else return true;
 	}

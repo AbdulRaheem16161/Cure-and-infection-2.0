@@ -18,8 +18,8 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		return stateMachine.EnableEatCorpseState && Beliefs.Target == null &&
-			stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.eatCorpse) 
+			&& Beliefs.Target == null && stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
 	}
 
 	public override void Enter()
@@ -27,7 +27,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 		eatingCorpse = false;
 		ateCorpse = false;
 		eatCorpseTimer = eatCorpseDuration;
-		MoveToDestination(stateMachine.NpcDefinition.WalkSpeed, stateMachine.Beliefs.EatableTarget.Transform.position);
+		MoveToDestination(stateMachine.Definition.WalkSpeed, stateMachine.Beliefs.EatableTarget.Transform.position);
 	}
 
 	public override void Exit()
@@ -37,7 +37,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 		// move to position of cropse
 		if (HasReachedCorpse()) //needs a litle more room then agent stopping distance 

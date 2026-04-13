@@ -148,14 +148,14 @@ MonoBehaviour:
   patrolPathPrefab: {fileID: 3964071398597378811, guid: 51371b5f7b5490c40aa176a4c9f74a53, type: 3}
   spawnPointPrefab: {fileID: 6793302210893672624, guid: 1dccd2f52ae65b442870cb1f48cb477a, type: 3}
   survivorDefinitions:
-  - {fileID: 11400000, guid: ea717fe8b586a464ab3581a477b1165d, type: 2}
-  - {fileID: 11400000, guid: 4abe508b91cc1ae47b9e3882cf5ffae4, type: 2}
-  - {fileID: 11400000, guid: 674a7f0b80afafc479f6441cda267078, type: 2}
-  - {fileID: 11400000, guid: 55097276ec1d41f47a8a15e2fafdd5cc, type: 2}
+  - {fileID: 11400000, guid: 59edb73550432a24ba1f4de4d6b85a4f, type: 2}
+  - {fileID: 11400000, guid: 92156a5fc4607a945ab173b751c506da, type: 2}
+  - {fileID: 11400000, guid: a90b408ac04993846969736b1dd12b3b, type: 2}
+  - {fileID: 11400000, guid: b8b9292f6db342d49952e36354f125c0, type: 2}
   zombieDefinitions:
-  - {fileID: 11400000, guid: c71c26cc173d3c8429dcaff582f657e1, type: 2}
-  - {fileID: 11400000, guid: 2b254af504bbd7b48ac8c0a381ff5598, type: 2}
-  - {fileID: 11400000, guid: 357cc3d8d46d4e34587a7c42c554b06c, type: 2}
+  - {fileID: 11400000, guid: 63f08986a5dda44458303bb838d4e243, type: 2}
+  - {fileID: 11400000, guid: 555946faa0f3125499304fc5a629df44, type: 2}
+  - {fileID: 11400000, guid: 88529eba5b13c0846bd673e3412af86f, type: 2}
   movementAreaAndPathsParent: {fileID: 1164409028040089770}
   spawnPointsParent: {fileID: 8167753560602938505}
   activeNpcsParent: {fileID: 2068737963083128657}
@@ -168,8 +168,6 @@ MonoBehaviour:
   ShowAllSpawnPoints: 0
   forceSpawnNpcs: 0
   spawnerType: 0
-  outerCollider: {fileID: 0}
-  innerCollider: {fileID: 0}
   playerInValidSpawnZone: 0
   playerInBlockSpawnZone: 0
   CustomNpcsToSpawn: []

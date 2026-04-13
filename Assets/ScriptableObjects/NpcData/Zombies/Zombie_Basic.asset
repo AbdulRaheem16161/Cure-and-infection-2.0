@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac27273233fe9f341aa1732591f10740, type: 3}
+  m_Script: {fileID: 11500000, guid: 81e1ca600b11cbd408a3c75d84f8642b, type: 3}
   m_Name: Zombie_Basic
   m_EditorClassIdentifier: 
-  npcName: Zombie
+  entityName: Zombie Basic
   isPlayer: 0
   startingLifeState: 2
-  entityFlags: 1
-  supportsEquipmentModels: 0
+  capabilities: -1
+  entityFlags: 0
   gameObjectPrefab: {fileID: 4125029387023148961, guid: e4195ad6d3e19ff4695153d850c778cc, type: 3}
   maxHealth: 100
   maxWater: 100

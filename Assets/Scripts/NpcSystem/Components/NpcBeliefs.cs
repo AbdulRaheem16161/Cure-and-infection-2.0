@@ -14,7 +14,7 @@ public class NpcBeliefs : MonoBehaviour
 {
 	public NavMeshAgent Agent { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
-	public NpcDefinition NpcDefinition { get; private set; }
+	public EntityDefinition Definition { get; private set; }
 	public NpcPerception NpcPerception { get; private set; }
 	public StatsHandler StatsHandler { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
@@ -31,10 +31,10 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Stat Beliefs
-	public bool Hurt => StatsHandler.health <= NpcDefinition.MaxHealth * 0.8f;
-	public bool Thirsty => StatsHandler.water <= NpcDefinition.MaxWater * 0.6f;
-	public bool Hungry => StatsHandler.food <= NpcDefinition.MaxFood * 0.5f;
-	public bool Exhausted => StatsHandler.stamina <= NpcDefinition.MaxStamina * 0.1f;
+	public bool Hurt => StatsHandler.health <= Definition.MaxHealth * 0.8f;
+	public bool Thirsty => StatsHandler.water <= Definition.MaxWater * 0.6f;
+	public bool Hungry => StatsHandler.food <= Definition.MaxFood * 0.5f;
+	public bool Exhausted => StatsHandler.stamina <= Definition.MaxStamina * 0.1f;
 	#endregion
 
 	#region Investigation Beliefs
@@ -87,9 +87,9 @@ public class NpcBeliefs : MonoBehaviour
 		EquipmentHandler.OnEquippedItemChanges += OnEquippedItemChanges;
 		StatsHandler.OnHit += HandleOnHit;
 	}
-	public void InitializeBeliefs(NpcDefinition npcDefinition)
+	public void InitializeBeliefs(EntityDefinition definition)
 	{
-		NpcDefinition = npcDefinition;
+		Definition = definition;
 		InvestigateLocation = null;
 	}
 
@@ -142,7 +142,7 @@ public class NpcBeliefs : MonoBehaviour
 		{
 			TargetFleeingFrom.UpdateTargetDistance(transform.position);
 
-			if (TargetFleeingFrom.Distance < NpcDefinition.FleeDistance)
+			if (TargetFleeingFrom.Distance < Definition.FleeDistance)
 			{
 				if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < TargetFleeingFrom.Distance) //switch to flee from closer threat
 					TargetFleeingFrom = ClosestFleeTarget;
@@ -151,7 +151,7 @@ public class NpcBeliefs : MonoBehaviour
 			}
 		}
 
-		if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < NpcDefinition.FleeDistance) //start fleeing if not already
+		if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < Definition.FleeDistance) //start fleeing if not already
 		{
 			TargetFleeingFrom = ClosestFleeTarget;
 			return true;

@@ -65,7 +65,7 @@ public class NpcBeliefsEditor : Editor
 		#region Target Beliefs
 		EditorGUILayout.LabelField("Target Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
-		if (beliefs.StatsHandler.LifeState == NpcDefinition.LifeState.zombified)
+		if (beliefs.StatsHandler.LifeState == EntityDefinition.LifeState.zombified)
 			DrawTargetData("Eatable Target", beliefs.EatableTarget);
 
 		DrawTargetData("Target", beliefs.Target);

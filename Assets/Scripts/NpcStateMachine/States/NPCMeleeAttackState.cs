@@ -18,8 +18,8 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return stateMachine.EnableMeleeAttack && Beliefs.TargetFleeingFrom == null &&
-				Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
+			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.meleeAttack) && 
+				Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
 		}
 
 		public override void Enter()
@@ -31,7 +31,7 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-			if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+			if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 			//attack logic
 			HandleMeleeAttack(deltaTime);

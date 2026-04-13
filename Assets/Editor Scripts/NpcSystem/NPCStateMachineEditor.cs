@@ -29,12 +29,7 @@ public class NPCStateMachineEditor : Editor
 		#region State Toggles
 		EditorGUILayout.LabelField("State Toggles", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
-		npc.EnableFlee = EditorGUILayout.Toggle("Enable Flee", npc.EnableFlee);
-		npc.EnableRangedAttack = EditorGUILayout.Toggle("Enable Ranged Attack", npc.EnableRangedAttack);
-		npc.EnableMeleeAttack = EditorGUILayout.Toggle("Enable Melee Attack", npc.EnableMeleeAttack);
-		npc.EnableChase = EditorGUILayout.Toggle("Enable Chase", npc.EnableChase);
-		npc.EnableInvestigate = EditorGUILayout.Toggle("Enable Investigate", npc.EnableInvestigate);
-		npc.EnableEatCorpseState = EditorGUILayout.Toggle("Enable Eat Corpse", npc.EnableEatCorpseState);
+		npc.capabilityOverrides = (EntityDefinition.Capability)EditorGUILayout.EnumPopup("Enable Flee", npc.capabilityOverrides);
 		EditorGUI.indentLevel--;
 		#endregion
 

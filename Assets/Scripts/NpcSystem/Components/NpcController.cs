@@ -12,7 +12,7 @@ public class NpcController : MonoBehaviour
 {
 	private bool _initialized = false;
 
-	public NpcDefinition NpcDefinition;
+	public EntityDefinition Definition;
 
 	public StatsHandler StatsHandler { get; private set; }
 	public NpcBeliefs Beliefs { get; private set; }
@@ -34,30 +34,30 @@ public class NpcController : MonoBehaviour
 	{
 		if (!_initialized)
 		{
-			if (NpcDefinition != null)
-				InitializeNpc(NpcDefinition, StatsHandler.Team); //keep current team
+			if (Definition != null)
+				InitializeNpc(Definition, StatsHandler.Team); //keep current team
 			else
-				Debug.LogError($"{typeof(NpcDefinition)} null, assign reference in inspector when not using a NpcSpawner");
+				Debug.LogError($"{typeof(EntityDefinition)} null, assign reference in inspector when not using a NpcSpawner");
 		}
 	}
 
-	public void InitializeNpc(NpcDefinition npcDefinition, Teams team)
+	public void InitializeNpc(EntityDefinition npcDefinition, Teams team)
 	{
 		if (npcDefinition == null)
 		{
-			Debug.LogError($"{typeof(NpcDefinition)} null, NpcSpawner failed to assign definition");
+			Debug.LogError($"{typeof(EntityDefinition)} null, NpcSpawner failed to assign definition");
 			return;
 		}
 
-		NpcDefinition = npcDefinition;
-		gameObject.name = NpcDefinition.NpcName;
+		Definition = npcDefinition;
+		gameObject.name = Definition.Name;
 
-		StatsHandler.InitializeStats(team, NpcDefinition);
+		StatsHandler.InitializeStats(team, Definition);
 		InventoryHandler.InitializeInventoryHandler();
-		EquipmentHandler.InitializeEquipmentHandler(NpcDefinition);
-		Beliefs.InitializeBeliefs(NpcDefinition);
-		StateMachine.InitializeStateMachine(NpcDefinition);
-		NpcPerception.Initialize(NpcDefinition);
+		EquipmentHandler.InitializeEquipmentHandler(Definition);
+		Beliefs.InitializeBeliefs(Definition);
+		StateMachine.InitializeStateMachine(Definition);
+		NpcPerception.Initialize(Definition);
 		_initialized = true;
 	}
 }

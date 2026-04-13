@@ -40,8 +40,8 @@ public class NPCSpawner : MonoBehaviour
 	public GameObject spawnPointPrefab;
 
 	[Header("Npc Definition Lists")]
-	public List<NpcDefinition> survivorDefinitions = new();
-	public List<NpcDefinition> zombieDefinitions = new();
+	public List<EntityDefinition> survivorDefinitions = new();
+	public List<EntityDefinition> zombieDefinitions = new();
 
 	[Header("Spawner Child Objects")]
 	public GameObject movementAreaAndPathsParent;
@@ -79,7 +79,7 @@ public class NPCSpawner : MonoBehaviour
 	[Header("Random Npcs To Spawn")]
 	private readonly float spawnTimerCooldown = 1f;
 	private float spawnTimer;
-	public List<NpcDefinition> NpcsToRandomSpawn = new();
+	public List<EntityDefinition> NpcsToRandomSpawn = new();
 	public int minSpawnAmount;
 	public int maxSpawnAmount;
 
@@ -138,7 +138,7 @@ public class NPCSpawner : MonoBehaviour
 		respawnCustomNpcs = false;
 		foreach (NpcSpawnData npcSpawnData in CustomNpcsToSpawn)
 		{
-			if (npcSpawnData.npcDefinition == null)
+			if (npcSpawnData.Definition == null)
 			{ Debug.LogError($"npcSpawnData.npcDefinition is null, skipping, assign one in inspector"); continue; }
 
 			PatrolPathManager patrolPath = npcSpawnData.patrolPath;
@@ -158,20 +158,20 @@ public class NPCSpawner : MonoBehaviour
 	{
 		NpcSpawnData spawnData = new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPosition());
 
-		if (!spawnData.npcDefinition.Flags.HasFlag(NpcDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
+		if (!spawnData.Definition.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
 			spawnData.team = Teams.Zombie;
 
 		SpawnNpc(spawnData); //path null as randoms spawns dont have paths for now
 	}
 	private void SpawnNpc(NpcSpawnData npcSpawnData)
 	{
-		if (npcSpawnData.npcDefinition == null)
+		if (npcSpawnData.Definition == null)
 		{
 			Debug.LogError("NpcDefinition null in spawn data assign a reference");
 			return;
 		}
 
-		NpcController npcController = GetNpc(npcSpawnData.npcDefinition);
+		NpcController npcController = GetNpc(npcSpawnData.Definition);
 		NPCStateMachine stateMachine = npcController.StateMachine;
 		npcController.transform.SetParent(activeNpcsParent.transform);
 
@@ -199,7 +199,7 @@ public class NPCSpawner : MonoBehaviour
 		else if (npcSpawnData.movementType == MovementType.randomMove)
 			stateMachine.SetMovementType(npcSpawnData.movementType);
 
-		npcController.InitializeNpc(npcSpawnData.npcDefinition, npcSpawnData.team);
+		npcController.InitializeNpc(npcSpawnData.Definition, npcSpawnData.team);
 		activeNpcs.Add(npcController);
 
 		if (npcSpawnData.forceInvincible)
@@ -210,7 +210,7 @@ public class NPCSpawner : MonoBehaviour
 	#endregion
 
 	#region npc spawner helpers
-	public NpcDefinition AssignRandomNpc(List<NpcDefinition> npcDefinitions)
+	public EntityDefinition AssignRandomNpc(List<EntityDefinition> npcDefinitions)
 	{
 		if (npcDefinitions.Count == 0)
 		{ Debug.LogError("npcDefinitions.Count == 0, assign definition references to list"); return null; }
@@ -229,13 +229,13 @@ public class NPCSpawner : MonoBehaviour
 	#endregion
 
 	#region fetching valid npc from pooling, or instantiating new one
-	private NpcController GetNpc(NpcDefinition npcDefinition)
+	private NpcController GetNpc(EntityDefinition npcDefinition)
     {
 		NpcController npc = null;
 
 		for (int i = inactiveNpcs.Count - 1; i >= 0; i--)
 		{
-			if (inactiveNpcs[i].NpcDefinition.StartingLifeState != npcDefinition.StartingLifeState) continue;
+			if (inactiveNpcs[i].Definition.StartingLifeState != npcDefinition.StartingLifeState) continue;
 
 			npc = inactiveNpcs[i];
 			inactiveNpcs.RemoveAt(i);
@@ -266,7 +266,7 @@ public class NPCSpawner : MonoBehaviour
 	{
 		for (int i = activeNpcs.Count - 1; i >= 0; i--)
 		{
-			if (activeNpcs[i].StatsHandler.LifeState != NpcDefinition.LifeState.dead) continue;
+			if (activeNpcs[i].StatsHandler.LifeState != EntityDefinition.LifeState.dead) continue;
 			CleanUpNpc(activeNpcs[i]);
 		}
 	}
@@ -291,10 +291,8 @@ public class NPCSpawner : MonoBehaviour
 	private bool ShouldSpawnNpcs()
 	{
 		if (forceSpawnNpcs)
-		{
-			Debug.LogError("true");
 			return true;
-		}
+
 		bool result = playerInValidSpawnZone && !playerInBlockSpawnZone;
 		Debug.LogError(result);
 		return result;
@@ -332,7 +330,7 @@ public class NPCSpawner : MonoBehaviour
 	{
 		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}
-	public void SpawnSpecifiedNpc(NpcDefinition npcDefinition, Teams team, MovementType movementType)
+	public void SpawnSpecifiedNpc(EntityDefinition npcDefinition, Teams team, MovementType movementType)
 	{
 		SpawnNpc(new(npcDefinition, team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
 	}

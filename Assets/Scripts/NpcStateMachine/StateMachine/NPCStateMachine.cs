@@ -17,7 +17,7 @@ namespace Game.MyNPC
 	[RequireComponent(typeof(InventoryHandler))]
     public class NPCStateMachine : StateMachine
 	{
-		public NpcDefinition NpcDefinition { get; private set; }
+		public EntityDefinition Definition { get; private set; }
 		public Animator Animator { get; private set; }
 		public NavMeshAgent Agent { get; private set; }
 		public NpcController NpcController { get; private set; }
@@ -53,13 +53,7 @@ namespace Game.MyNPC
 
 		#region Npc State Toggles
 		[Header("Npc State Toggles")]
-		public bool EnableConsumableUse;
-		public bool EnableFlee;
-		public bool EnableRangedAttack;
-		public bool EnableMeleeAttack;
-		public bool EnableChase;
-		public bool EnableEatCorpseState;
-		public bool EnableInvestigate;
+		public EntityDefinition.Capability capabilityOverrides;
 		#endregion
 
 		#region Movement State Toggles
@@ -99,17 +93,9 @@ namespace Game.MyNPC
 			InventoryHandler = GetComponent<InventoryHandler>();
 		}
 
-		public void InitializeStateMachine(NpcDefinition npcDefinition)
+		public void InitializeStateMachine(EntityDefinition definition)
 		{
-			NpcDefinition = npcDefinition;
-
-			EnableConsumableUse = true;
-			EnableFlee = true;
-			EnableRangedAttack = true;
-			EnableMeleeAttack = true;
-			EnableChase = true;
-			EnableInvestigate = true;
-			EnableMovement = true;
+			Definition = definition;
 
 			stunnedState = new NpcStunnedState(this, 100);
 			healState = new NpcHealState(this, 95);
@@ -135,11 +121,9 @@ namespace Game.MyNPC
 			states.Add(eatState);
 			states.Add(moveState);
 
-			if (npcDefinition.StartingLifeState == NpcDefinition.LifeState.zombified)
-				EnableEatCorpseState = true;
-
-			Agent.speed = npcDefinition.WalkSpeed;
-			Agent.angularSpeed = npcDefinition.RotationSpeed;
+			capabilityOverrides = Definition.Capabilities;
+			Agent.speed = Definition.WalkSpeed;
+			Agent.angularSpeed = Definition.RotationSpeed;
 
 			SwitchState(moveState);
 			Agent.enabled = true;

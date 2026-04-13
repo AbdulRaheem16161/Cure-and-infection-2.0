@@ -5,7 +5,7 @@ using Game.MyNPC;
 [CustomEditor(typeof(NPCSpawner))]
 public class NPCSpawner_Editor : Editor
 {
-	private NpcDefinition npcDefinition;
+	private EntityDefinition Definition;
 	private NPCSpawner.Teams team;
 	private NPCStateMachine.MovementType moveType;
 
@@ -44,14 +44,14 @@ public class NPCSpawner_Editor : Editor
 		#region Npc Spawning
 		EditorGUILayout.LabelField("Npc Spawning", EditorStyles.boldLabel);
 
-		npcDefinition = (NpcDefinition)EditorGUILayout.ObjectField("Npc Definition", npcDefinition, typeof(NpcDefinition), true);
+		Definition = (EntityDefinition)EditorGUILayout.ObjectField("Npc Definition", Definition, typeof(EntityDefinition), true);
 		team = (NPCSpawner.Teams)EditorGUILayout.EnumPopup("Npcs Team", team);
 		moveType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", moveType);
 
 		if (GUILayout.Button("Spawn Npc Based On Definition"))
 		{
 			if (!ApplicationPlaying()) return;
-			spawner.SpawnSpecifiedNpc(npcDefinition, team, moveType);
+			spawner.SpawnSpecifiedNpc(Definition, team, moveType);
 		}
 
 		EditorGUILayout.Space(10);

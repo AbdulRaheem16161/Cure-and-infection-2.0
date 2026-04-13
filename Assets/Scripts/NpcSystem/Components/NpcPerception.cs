@@ -1,19 +1,16 @@
 #if UNITY_EDITOR
-using Game.Core;
 using Game.MyNPC;
-using System;
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static NpcDefinition;
+using static EntityDefinition;
 
 [RequireComponent(typeof(NpcBeliefs))]
 [RequireComponent(typeof(NPCStateMachine))]
 [RequireComponent(typeof(StatsHandler))]
 public class NpcPerception : MonoBehaviour
 {
-	public NpcDefinition NpcDefinition {  get; private set; }
+	public EntityDefinition Definition {  get; private set; }
 	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 	public StatsHandler StatsHandler { get; private set; }
@@ -84,14 +81,14 @@ public class NpcPerception : MonoBehaviour
 
 		StatsHandler.OnHit += InvestigateWhereHitFrom;
 	}
-	public void Initialize(NpcDefinition npcDefinition)
+	public void Initialize(EntityDefinition definition)
 	{
 		if (rayViewPoint == null)
 			Debug.LogError("rayViewPoint null, assign empty object where vision raycasts should start from");
 
-		NpcDefinition = npcDefinition;
-		viewAngle = NpcDefinition.ViewAngle;
-		viewDistance = NpcDefinition.ViewDistance;
+		Definition = definition;
+		viewAngle = Definition.ViewAngle;
+		viewDistance = Definition.ViewDistance;
 	}
 	#endregion
 
@@ -152,14 +149,14 @@ public class NpcPerception : MonoBehaviour
 	}
 	private void UpdateVisionBasedOnAlertState(bool alert)
 	{
-		float angleMultiplier = alert ? NpcDefinition.ViewAngleMultiplier : 1f;
-		float distanceMultiplier = alert ? NpcDefinition.ViewDistanceMultiplier : 1f;
+		float angleMultiplier = alert ? Definition.ViewAngleMultiplier : 1f;
+		float distanceMultiplier = alert ? Definition.ViewDistanceMultiplier : 1f;
 
 		if (glancing)
-			angleMultiplier = NpcDefinition.ViewAngleMultiplier + 0.5f;
+			angleMultiplier = Definition.ViewAngleMultiplier + 0.5f;
 
-		viewAngle = NpcDefinition.ViewAngle * angleMultiplier;
-		viewDistance = NpcDefinition.ViewDistance * distanceMultiplier;
+		viewAngle = Definition.ViewAngle * angleMultiplier;
+		viewDistance = Definition.ViewDistance * distanceMultiplier;
 	}
 	#endregion
 
@@ -278,7 +275,7 @@ public class NpcPerception : MonoBehaviour
 			if (requiredLifeState == LifeState.alive && target.LifeState != LifeState.dead) return true;
 
 			else if (requiredLifeState == LifeState.dead && target.LifeState == LifeState.dead && 
-				target.NpcDefinition.Flags.HasFlag(EntityFlags.canBecomeZombie)) return true;
+				target.Definition.Flags.HasFlag(EntityFlags.canBecomeZombie)) return true;
 
 			else return false;
 		}

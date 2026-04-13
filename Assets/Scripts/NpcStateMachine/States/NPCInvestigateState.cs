@@ -11,7 +11,8 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		return stateMachine.EnableInvestigate && Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.investigate) 
+			&& Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
 	}
 
 	public override void Enter()
@@ -19,7 +20,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 		glanceStarted = false;
 		glanceDone = false;
 		glancingDelay = 2f;
-		MoveToDestination(stateMachine.NpcDefinition.SprintSpeed, (Vector3)stateMachine.Beliefs.InvestigateLocation);
+		MoveToDestination(stateMachine.Definition.SprintSpeed, (Vector3)stateMachine.Beliefs.InvestigateLocation);
 	}
 
 	public override void Exit()
@@ -30,7 +31,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.dead) return;
+		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 		// ----------- Investigate to idle after simulated glancing in both directions -------------
 
