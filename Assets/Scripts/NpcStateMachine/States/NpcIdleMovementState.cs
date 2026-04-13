@@ -5,10 +5,17 @@ namespace Game.MyNPC
 {
     public class NpcIdleMovementState : NpcBaseMovementState
 	{
+		public NpcIdleMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
+
 		private float idleTimer;
 
-		public NpcIdleMovementState(NPCStateMachine stateMachine) : base(stateMachine) { }
-        public override void Enter()
+		public override bool IsValid()
+		{
+			return Beliefs.Target == null && Beliefs.EatableTarget == null && !Beliefs.FreeToInvestigate &&
+				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
+		}
+
+		public override void Enter()
         {
 			stateMachine.Agent.ResetPath();
         }

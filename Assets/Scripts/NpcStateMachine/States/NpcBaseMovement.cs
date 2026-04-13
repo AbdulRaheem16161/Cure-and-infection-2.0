@@ -10,8 +10,12 @@ public class NpcBaseMovementState : NPCBaseState
 	{
 		regularMove, moveToTarget, moveToInvestigate, moveToCorpse, fleeFromTarget
 	}
+	public NpcBaseMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
-	public NpcBaseMovementState(NPCStateMachine stateMachine) : base(stateMachine) { }
+	public override bool IsValid()
+	{
+		return false;
+	}
 
 	public override void Enter()
 	{

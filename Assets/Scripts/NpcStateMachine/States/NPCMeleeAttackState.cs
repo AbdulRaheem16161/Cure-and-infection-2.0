@@ -4,9 +4,7 @@ namespace Game.MyNPC
 {
     public class NPCMeleeAttackState : NPCBaseState
     {
-        #region Constructor
-        public NPCMeleeAttackState(NPCStateMachine stateMachine) : base(stateMachine) { }
-		#endregion
+		public NPCMeleeAttackState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 		private WeaponMelee EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponMelee;
 		private float randomSwingDelay;
@@ -17,6 +15,12 @@ namespace Game.MyNPC
 		/// some way to have attack with weapon animation speed set to weapon attack speed + random swing delay
 		/// then not being able to exiting this state till animation is complete
 		/// </summary>
+
+		public override bool IsValid()
+		{
+			return stateMachine.EnableMeleeAttack && Beliefs.TargetFleeingFrom == null &&
+				Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
+		}
 
 		public override void Enter()
         {

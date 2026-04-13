@@ -7,7 +7,12 @@ public class NPCInvestigateState : NpcBaseMovementState
 	private bool glanceDone;
 	private float glancingDelay;
 
-	public NPCInvestigateState(NPCStateMachine stateMachine) : base(stateMachine) { }
+	public NPCInvestigateState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
+
+	public override bool IsValid()
+	{
+		return stateMachine.EnableInvestigate && Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
+	}
 
 	public override void Enter()
 	{

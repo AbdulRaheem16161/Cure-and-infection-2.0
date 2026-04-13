@@ -4,19 +4,21 @@ namespace Game.MyNPC
 {
     public class NPCRangedAttackState : NpcBaseMovementState
     {
-        #region Constructor
-        public NPCRangedAttackState(NPCStateMachine stateMachine) : base(stateMachine) { }
-        #endregion
+		public NPCRangedAttackState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
-        #region Fields
-        private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponRanged;
+		private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponRanged;
 		private float shotsToBurstFireCount;
 		private float randomShotDelay;
-		#endregion
 
 		private readonly System.Random systemRandom = new();
 
-        public override void Enter()
+		public override bool IsValid()
+		{
+			return stateMachine.EnableRangedAttack && Beliefs.TargetFleeingFrom == null &&
+				Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
+		}
+
+		public override void Enter()
         {
 			lookingAtTarget = false;
 			stateMachine.Beliefs.SetNewInvestigateLocation(null);

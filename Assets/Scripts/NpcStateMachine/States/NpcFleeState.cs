@@ -8,7 +8,13 @@ public class NpcFleeState : NpcBaseMovementState
 	private readonly float fleeCooldown = 2f;
 	private float fleeTimer;
 
-	public NpcFleeState(NPCStateMachine stateMachine) : base(stateMachine) { }
+	public NpcFleeState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
+
+	public override bool IsValid()
+	{
+		if (stateMachine.EnableFlee && Beliefs.TargetFleeingFrom != null) return true;
+		return stateMachine.EnableFlee && Beliefs.TargetInFleeRange && !Beliefs.MeleeWeaponInHands;
+	}
 
 	public override void Enter()
 	{

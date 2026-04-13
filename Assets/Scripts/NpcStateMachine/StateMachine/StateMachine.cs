@@ -1,13 +1,14 @@
+using Game.MyNPC;
 using UnityEngine;
 
 namespace Game.Core
 {
     public abstract class StateMachine : MonoBehaviour
     {
-        protected State currentState;
-		public State CurrentState => currentState;
+        protected NPCBaseState currentState;
+		public NPCBaseState CurrentState => currentState;
 
-        public void SwitchState(State newState, bool logStateSwitch = false)
+        public void SwitchState(NPCBaseState newState, bool logStateSwitch = false)
         {
 			if (logStateSwitch)
 				Debug.Log($"switched from state: {currentState} to {newState}");

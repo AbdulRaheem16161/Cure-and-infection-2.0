@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class NPCEatCorpseState : NpcBaseMovementState
 {
-	public NPCEatCorpseState(NPCStateMachine stateMachine) : base(stateMachine) { }
+	public NPCEatCorpseState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 	/// <summary>
 	/// for now just use timer, later it would be better to have a stat in StateHandler like float ZombificationProgress.
@@ -15,6 +15,12 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	private bool ateCorpse;
 	private readonly float eatCorpseDuration = 5f;
 	private float eatCorpseTimer;
+
+	public override bool IsValid()
+	{
+		return stateMachine.EnableEatCorpseState && Beliefs.Target == null &&
+			stateMachine.StatsHandler.LifeState == NpcDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
+	}
 
 	public override void Enter()
 	{

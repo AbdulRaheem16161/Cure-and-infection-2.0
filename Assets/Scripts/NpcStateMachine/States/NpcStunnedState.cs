@@ -6,7 +6,12 @@ public class NpcStunnedState : NPCBaseState
 	private readonly float stunCooldown = 2f;
 	private float stunTimer;
 
-	public NpcStunnedState(NPCStateMachine stateMachine) : base(stateMachine) { }
+	public NpcStunnedState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
+
+	public override bool IsValid()
+	{
+		return stateMachine.Beliefs.Stunned;
+	}
 
 	public override void Enter()
 	{
