@@ -43,7 +43,7 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.Toggle("Hurt", beliefs.Hurt);
 		EditorGUILayout.Toggle("Thirsty", beliefs.Thirsty);
 		EditorGUILayout.Toggle("Hungry", beliefs.Hungry);
-		EditorGUILayout.Toggle("Exhausted", beliefs.Exhausted);
+		EditorGUILayout.Toggle("IsExhausted", beliefs.IsExhausted);
 		EditorGUI.indentLevel--;
 		#endregion
 

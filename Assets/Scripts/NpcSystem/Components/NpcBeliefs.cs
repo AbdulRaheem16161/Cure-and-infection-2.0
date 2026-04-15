@@ -34,7 +34,7 @@ public class NpcBeliefs : MonoBehaviour
 	public bool Hurt => StatsHandler.health <= Definition.MaxHealth * 0.8f;
 	public bool Thirsty => StatsHandler.water <= Definition.MaxWater * 0.6f;
 	public bool Hungry => StatsHandler.food <= Definition.MaxFood * 0.5f;
-	public bool Exhausted => StatsHandler.stamina <= Definition.MaxStamina * 0.1f;
+	public bool IsExhausted => StatsHandler.IsExhausted;
 	#endregion
 
 	#region Investigation Beliefs

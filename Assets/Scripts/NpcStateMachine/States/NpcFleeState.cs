@@ -42,12 +42,9 @@ public class NpcFleeState : NpcBaseMovementState
 		else
 		{
 			LookAtDirection(directionToLookBackTo);
-			Debug.LogError("rotating to look at target");
-
 			if (!lookingAtTarget) return;
 
 			stateMachine.Beliefs.UpdateTargetFleeingFrom(null);
-			Debug.LogError("looking at target, null");
 			return;
 		}
 	}
@@ -56,6 +53,6 @@ public class NpcFleeState : NpcBaseMovementState
 	{
 		fleeTimer = fleeCooldown;
 		directionToLookBackTo = stateMachine.Beliefs.TargetFleeingFrom.Transform.position;
-		FleeToNewDestination(stateMachine.Definition.SprintSpeed, directionToLookBackTo);
+		FleeToNewDestination(directionToLookBackTo);
 	}
 }

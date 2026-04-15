@@ -1,12 +1,15 @@
 using UnityEngine;
 using System;
 using static EntityDefinition;
+using UnityEngine.AI;
+using Game.MyNPC;
 
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
 	public EntityDefinition Definition { get; private set; }
+	public NPCStateMachine NpcStateMachine { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
 
@@ -27,6 +30,13 @@ public class StatsHandler : MonoBehaviour, IDamageable
 
 	public float headProtection;
 	public float chestProtection;
+
+	private float waterDrainTimer;
+	private float foodDrainTimer;
+	private float staminaDrainTimer;
+	private float staminaRegenTimer;
+
+	public bool IsExhausted { get; private set; }
 	#endregion
 
 	#region debug options
@@ -36,6 +46,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#endregion
 
 	#region events
+	public event Action<bool> OnExhausted;
 	public event Action<DamageContext> OnHit;
 	public event Action OnInitialize;
 	public event Action OnDeath;
@@ -45,6 +56,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region awake + Initialize stats handler method
 	private void Awake()
 	{
+		NpcStateMachine = GetComponent<NPCStateMachine>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		if (!_Initialized)
@@ -77,6 +89,83 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	{
 		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
 		EquipmentHandler.OnConsumableUsed -= UseConsumable;
+	}
+	#endregion
+
+	private void Update()
+	{
+		HandleWaterDrain();
+		HandleFoodDrain();
+
+		if (NpcStateMachine != null) //npc handle move intent
+		{
+			if (NpcStateMachine.IsSprinting)
+				HandleStaminaDrain();
+			else
+				HandleStaminaRegen();
+		}
+		else
+		{
+			//would be player so handle reading player movement intent here
+		}
+	}
+
+	#region Stats Drain Handlers
+	private void HandleWaterDrain()
+	{
+		if (lifeState == LifeState.zombified) return;
+
+		waterDrainTimer -= Time.deltaTime;
+		if (waterDrainTimer < 0)
+		{
+			waterDrainTimer = Definition.WaterDrainSeconds;
+			water -= (int)Definition.WaterDrainAmount;
+		}
+	}
+	private void HandleFoodDrain()
+	{
+		if (lifeState == LifeState.zombified) return;
+
+		foodDrainTimer -= Time.deltaTime;
+		if (foodDrainTimer < 0)
+		{
+			foodDrainTimer = Definition.FoodDrainSeconds;
+			food -= (int)Definition.FoodDrainAmount;
+		}
+	}
+	private void HandleStaminaDrain()
+	{
+		if (lifeState == LifeState.zombified) return;
+
+		staminaDrainTimer -= Time.deltaTime;
+		if (staminaDrainTimer < 0)
+		{
+			staminaDrainTimer = Definition.StaminaDrainSeconds;
+			stamina -= (int)Definition.StaminaDrainAmount;
+
+			if (!IsExhausted && stamina <= 0)
+			{
+				IsExhausted = true;
+				OnExhausted?.Invoke(true);
+			}
+		}
+	}
+	private void HandleStaminaRegen()
+	{
+		if (lifeState == LifeState.zombified) return;
+
+		staminaRegenTimer -= Time.deltaTime;
+		if (staminaRegenTimer < 0)
+		{
+			staminaRegenTimer = Definition.StaminaRegenSeconds;
+			stamina += (int)Definition.StaminaRegenAmount;
+
+			if (IsExhausted && stamina >= (Definition.ExhaustToSprintThreshold * Definition.MaxStamina))
+			{
+				IsExhausted = false;
+				OnExhausted?.Invoke(false);
+			}
+		}
 	}
 	#endregion
 

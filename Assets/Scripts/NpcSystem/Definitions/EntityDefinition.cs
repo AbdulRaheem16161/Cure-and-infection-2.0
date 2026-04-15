@@ -46,17 +46,30 @@ public class EntityDefinition : ScriptableObject
 	#endregion
 
 	#region Npc Stats
-	[Header("Npc Stats")]
+	[Header("Npc Main Stats")]
 	[SerializeField] private int maxHealth = 100;
 	[SerializeField] private int maxWater = 100;
 	[SerializeField] private int maxFood = 100;
 	[SerializeField] private int maxStamina = 100;
+
+	[Header("Npc Stats Drain")]
+	[SerializeField] private float waterDrainSeconds = 15;
+	[SerializeField] private float waterDrainAmount = 1;
+	[SerializeField] private float foodDrainSeconds = 25;
+	[SerializeField] private float foodDrainAmount = 1;
+
+	[Header("Npc Stamina Drain")]
+	[SerializeField] private float staminaDrainSeconds = 0.4f;
+	[SerializeField] private float staminaDrainAmount = 1;
+	[SerializeField] private float staminaRegenSeconds = 1f;
+	[SerializeField] private float staminaRegenAmount = 1;
+	[SerializeField] private float exhaustToSprintThreshold = 0.15f;
 	#endregion
 
 	#region Npc Movement Behaviour
 	[Header("Npc Movement Behaviour")]
-	[SerializeField] private float walkSpeed = 3;
-	[SerializeField] private float sprintSpeed = 5;
+	[SerializeField] private float walkSpeed = 2.5f;
+	[SerializeField] private float sprintSpeed = 5.5f;
 	[SerializeField] private float rotationSpeed = 240;
 	[SerializeField] private float fleeDistance = 20;
 	[SerializeField] private float minIdleTime = 1;
@@ -90,6 +103,17 @@ public class EntityDefinition : ScriptableObject
 	public int MaxWater => maxWater;
 	public int MaxFood => maxFood;
 	public int MaxStamina => maxStamina;
+
+	public float WaterDrainSeconds => waterDrainSeconds;
+	public float WaterDrainAmount => waterDrainAmount;
+	public float FoodDrainSeconds => foodDrainSeconds;
+	public float FoodDrainAmount => foodDrainAmount;
+
+	public float StaminaDrainSeconds => staminaDrainSeconds;
+	public float StaminaDrainAmount => staminaDrainAmount;
+	public float StaminaRegenSeconds => staminaRegenSeconds;
+	public float StaminaRegenAmount => staminaRegenAmount;
+	public float ExhaustToSprintThreshold => exhaustToSprintThreshold;
 
 	public float WalkSpeed => walkSpeed;
 	public float SprintSpeed => sprintSpeed;

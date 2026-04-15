@@ -5,11 +5,8 @@ using UnityEngine.AI;
 public class NpcBaseMovementState : NPCBaseState
 {
 	protected bool lookingAtTarget;
+	public enum MoveType { walk, sprint }
 
-	public enum NpcMoveType
-	{
-		regularMove, moveToTarget, moveToInvestigate, moveToCorpse, fleeFromTarget
-	}
 	public NpcBaseMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 	public override bool IsValid()
@@ -48,12 +45,12 @@ public class NpcBaseMovementState : NPCBaseState
 			}
 
 			Vector3 destination = stateMachine.PatrolPathManager.GetNextPatrolPointLocation(stateMachine.currentPatrolPoint);
-			MoveToDestination(stateMachine.Definition.WalkSpeed, destination);
+			MoveToDestination(destination, MoveType.walk);
 		}
 		else if (HasValidAreaMove())
-			MoveToDestination(stateMachine.Definition.WalkSpeed, stateMachine.RandomAreaMoveManager.GetRandomLocationInArea());
+			MoveToDestination(stateMachine.RandomAreaMoveManager.GetRandomLocationInArea(), MoveType.walk);
 		else
-			MoveToDestination(stateMachine.Definition.WalkSpeed, GetMoveLocationAroundNpc());
+			MoveToDestination(GetMoveLocationAroundNpc(), MoveType.walk);
 	}
 	#endregion
 
@@ -61,7 +58,7 @@ public class NpcBaseMovementState : NPCBaseState
 	/// <summary>
 	/// flee from passed in vector 3 argument, with a randomization angle
 	/// </summary>
-	protected void FleeToNewDestination(float speed, Vector3 positionToFleeFrom)
+	protected void FleeToNewDestination(Vector3 positionToFleeFrom)
 	{
 		//calculate flee direction with some randomization with angle
 		Vector3 fleeDirection = (stateMachine.transform.position - positionToFleeFrom).normalized;
@@ -70,7 +67,7 @@ public class NpcBaseMovementState : NPCBaseState
 		Vector3 randomFleeDirection = rotation * fleeDirection;
 		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.Definition.FleeDistance * 2);
 
-		MoveToDestination(speed, fleeDestination);
+		MoveToDestination(fleeDestination, MoveType.sprint);
 	}
 	#endregion
 
@@ -78,13 +75,30 @@ public class NpcBaseMovementState : NPCBaseState
 	/// <summary>
 	/// move to destination
 	/// </summary>
-	protected void MoveToDestination(float speed, Vector3 newDestination, bool isBasicMove = false)
+	protected void MoveToDestination(Vector3 newDestination, MoveType moveIntent)
 	{
 		stateMachine.CurrentDestination = newDestination;
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.updatePosition = true;
-		stateMachine.Agent.speed = speed;
+
+		UpdateMoveSpeed(moveIntent);
 		stateMachine.Agent.SetDestination(newDestination);
+	}
+	/// <summary>
+	/// set move speed to walk/sprint speed based on intent and npc exhaustion state
+	/// </summary>
+	public void UpdateMoveSpeed(MoveType moveIntent)
+	{
+		bool canSprint = moveIntent == MoveType.sprint && !stateMachine.StatsHandler.IsExhausted;
+
+		stateMachine.Agent.speed = moveIntent switch
+		{
+			MoveType.sprint when canSprint => stateMachine.Definition.SprintSpeed,
+			_ => stateMachine.Definition.WalkSpeed
+		};
+
+		stateMachine.moveIntent = moveIntent;
+		stateMachine.IsSprinting = canSprint;
 	}
 	#endregion
 

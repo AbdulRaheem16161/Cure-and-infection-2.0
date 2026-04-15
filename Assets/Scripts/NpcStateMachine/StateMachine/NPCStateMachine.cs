@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static NpcBaseMovementState;
 
 namespace Game.MyNPC
 {
@@ -30,6 +31,8 @@ namespace Game.MyNPC
 		#region Runtime Info
 		[Header("Runtime Info")]
 		public string CurrentStateName;
+		[HideInInspector] public MoveType moveIntent;
+		[HideInInspector] public bool IsSprinting;
 		public float CurrentSpeed;
 		public Vector3 CurrentDestination;
 		[Space(10)]
@@ -151,10 +154,12 @@ namespace Game.MyNPC
 		private void OnEnable()
 		{
 			StatsHandler.OnDeath += HandleDeath;
+			StatsHandler.OnExhausted += HandleExhausted;
 		}
 		private void OnDisable()
 		{
 			StatsHandler.OnDeath -= HandleDeath;
+			StatsHandler.OnExhausted -= HandleExhausted;
 		}
 		#endregion
 
@@ -202,7 +207,15 @@ namespace Game.MyNPC
         }
 		#endregion
 
-		#region death event listener
+		#region Handle Exhausted Event Listener
+		protected void HandleExhausted(bool exhausted)
+		{
+			if (currentState is NpcBaseMovementState baseMovementState)
+				baseMovementState.UpdateMoveSpeed(moveIntent);
+		}
+		#endregion
+
+		#region Handle Death Event Listener
 		private void HandleDeath()
         {
 			if (Agent != null)

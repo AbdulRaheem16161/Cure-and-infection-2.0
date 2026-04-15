@@ -27,7 +27,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 		eatingCorpse = false;
 		ateCorpse = false;
 		eatCorpseTimer = eatCorpseDuration;
-		MoveToDestination(stateMachine.Definition.WalkSpeed, stateMachine.Beliefs.EatableTarget.Transform.position);
+		MoveToDestination(stateMachine.Beliefs.EatableTarget.Transform.position, MoveType.walk);
 	}
 
 	public override void Exit()

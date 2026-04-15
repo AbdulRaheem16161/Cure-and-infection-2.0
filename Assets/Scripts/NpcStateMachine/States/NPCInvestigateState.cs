@@ -20,7 +20,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 		glanceStarted = false;
 		glanceDone = false;
 		glancingDelay = 2f;
-		MoveToDestination(stateMachine.Definition.SprintSpeed, (Vector3)stateMachine.Beliefs.InvestigateLocation);
+		MoveToDestination((Vector3)stateMachine.Beliefs.InvestigateLocation, MoveType.sprint);
 	}
 
 	public override void Exit()
