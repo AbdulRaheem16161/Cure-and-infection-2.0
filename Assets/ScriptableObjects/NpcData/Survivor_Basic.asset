@@ -22,8 +22,17 @@ MonoBehaviour:
   maxWater: 100
   maxFood: 100
   maxStamina: 100
-  walkSpeed: 3
-  sprintSpeed: 5
+  waterDrainSeconds: 15
+  waterDrainAmount: 1
+  foodDrainSeconds: 25
+  foodDrainAmount: 1
+  staminaDrainSeconds: 0.4
+  staminaDrainAmount: 1
+  staminaRegenSeconds: 1
+  staminaRegenAmount: 1
+  exhaustToSprintThreshold: 0.15
+  walkSpeed: 2.5
+  sprintSpeed: 5.5
   rotationSpeed: 240
   fleeDistance: 20
   minIdleTime: 1

@@ -36,6 +36,12 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	private float staminaDrainTimer;
 	private float staminaRegenTimer;
 
+	private float healthDrainTimer;
+	private readonly float dehydratedHealthLoss = 3;
+	private readonly float starvingHealthLoss = 1;
+
+	public bool IsDehydrated => water <= 0;
+	public bool IsStarving => food <= 0;
 	public bool IsExhausted { get; private set; }
 	#endregion
 
@@ -94,6 +100,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 
 	private void Update()
 	{
+		HandleHealthDrain();
 		HandleWaterDrain();
 		HandleFoodDrain();
 
@@ -104,13 +111,36 @@ public class StatsHandler : MonoBehaviour, IDamageable
 			else
 				HandleStaminaRegen();
 		}
-		else
+		else if (NpcStateMachine == null)
 		{
-			//would be player so handle reading player movement intent here
+			//would be player so handle reading player movement intent here, for now log state machine not existing
+			Debug.LogError($"Missing Entity movement of {typeof(NPCStateMachine)} or 'not implemented yet' one is expected");
+		}
+		else //log error as 1 should exist outside of testing.
+		{
+			Debug.LogError($"Missing Entity movement of {typeof(NPCStateMachine)} or 'not implemented yet' one is expected");
 		}
 	}
 
 	#region Stats Drain Handlers
+	private void HandleHealthDrain()
+	{
+		healthDrainTimer -= Time.deltaTime;
+		if (healthDrainTimer < 0)
+		{
+			float healthDrain = 0;
+
+			healthDrainTimer = 1f;
+			if (IsDehydrated)
+				healthDrain += dehydratedHealthLoss;
+			if (IsStarving)
+				healthDrain += starvingHealthLoss;
+
+			health -= (int)healthDrain;
+			health = Mathf.Clamp(health, 0, Definition.MaxHealth);
+			EvaluateDeath();
+		}
+	}
 	private void HandleWaterDrain()
 	{
 		if (lifeState == LifeState.zombified) return;
@@ -120,6 +150,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		{
 			waterDrainTimer = Definition.WaterDrainSeconds;
 			water -= (int)Definition.WaterDrainAmount;
+			water = Mathf.Clamp(water, 0, Definition.MaxWater);
 		}
 	}
 	private void HandleFoodDrain()
@@ -131,6 +162,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		{
 			foodDrainTimer = Definition.FoodDrainSeconds;
 			food -= (int)Definition.FoodDrainAmount;
+			food = Mathf.Clamp(food, 0, Definition.MaxFood);
 		}
 	}
 	private void HandleStaminaDrain()
@@ -142,6 +174,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		{
 			staminaDrainTimer = Definition.StaminaDrainSeconds;
 			stamina -= (int)Definition.StaminaDrainAmount;
+			stamina = Mathf.Clamp(stamina, 0, Definition.MaxStamina);
 
 			if (!IsExhausted && stamina <= 0)
 			{
@@ -159,6 +192,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		{
 			staminaRegenTimer = Definition.StaminaRegenSeconds;
 			stamina += (int)Definition.StaminaRegenAmount;
+			stamina = Mathf.Clamp(stamina, 0, Definition.MaxStamina);
 
 			if (IsExhausted && stamina >= (Definition.ExhaustToSprintThreshold * Definition.MaxStamina))
 			{
@@ -199,9 +233,17 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		}
 
 		health -= Mathf.RoundToInt(damageRecieved);
+		EvaluateDeath();
+	}
+	#endregion
 
-		if (invincible) return;
-		if (health <= 0 && lifeState != LifeState.dead)
+	#region Handle Entity Death 
+	private void EvaluateDeath(bool ignoreInvincible = false)
+	{
+		if (lifeState == LifeState.dead) return;
+		if (!ignoreInvincible && invincible) return;
+
+		if (health <= 0)
 		{
 			lifeState = LifeState.dead;
 			OnDeath?.Invoke();
@@ -252,13 +294,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region Debug Kill
 	public void DebugKillNpc()
 	{
-		health = -1;
-
-		if (health <= 0 && lifeState != LifeState.dead)
-		{
-			lifeState = LifeState.dead;
-			OnDeath?.Invoke();
-		}
+		health = 0;
+		EvaluateDeath(true);
 	}
 	#endregion
 }
