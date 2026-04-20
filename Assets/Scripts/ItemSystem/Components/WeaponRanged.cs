@@ -21,9 +21,9 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
 
 	#region Initialize Item Override
-	public override void InitializeItem(WeaponRangedDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition, itemModel, itemStack);
+		base.InitializeItem(definition, itemStack);
 
 		//weapon-specific setup here
 		if (ModelReference == null)
@@ -49,6 +49,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public override void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
 	{
 		base.EquipItem(equipmentHandler, parentTransform);
+		WeaponView.ChangeAnimation("Equip", 0, true);
+
 		if (equipmentHandler.StatsHandler.Definition.Player)
 		{
 			//player manually reloads when unholstering equipped weapon
@@ -61,6 +63,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	public override void UnEquipItem(EquipmentHandler equipmentHandler)
 	{
 		base.UnEquipItem(equipmentHandler);
+		WeaponView.ChangeAnimation("Unequip", 0, true);
+
 		if (equipmentHandler.StatsHandler.Definition.Player)
 		{
 			equipmentHandler.InventoryHandler.AddNewItem(new(TypedDefinition.AmmoType, currentMagazineAmmo)); //return ammo in mag to inventory
@@ -97,13 +101,18 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 	#region weapon shooting (TODO add sfx, vfx and animations + recoil and accuracy adjustments)
 	public void Shoot()
 	{
-		if (MagazineEmpty) return;
+		if (MagazineEmpty) { WeaponView.ChangeAnimation("DryFire", 0, true); return; }
 		if (IsReloading) return;
 		if (!CanShoot) return;
 
 		currentMagazineAmmo--;
 		accuracyModifer += TypedDefinition.SpreadIncreasePerShot;
 		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
+
+		if (currentMagazineAmmo == 0)
+			WeaponView.ChangeAnimation("FireToEmpty", 0, true);
+		else
+			WeaponView.ChangeAnimation("Fire", 0, true);
 	}
 	#endregion
 
@@ -120,7 +129,8 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 
 	private IEnumerator ReloadAmmo(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
 	{
-		#region ReloadAmmo
+		WeaponView.ChangeAnimation("Reload", 0, true);
+
 		IsReloading = true;
 		yield return new WaitForSeconds(TypedDefinition.ReloadTime);
 
@@ -130,7 +140,6 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 			currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize);
 
 		IsReloading = false;
-		#endregion
 	}
 	#endregion
 
@@ -210,6 +219,17 @@ public class WeaponRanged : Item<WeaponRangedDefinition>
 
 		if (bullet != null)
 			Destroy(bullet);
+	}
+	#endregion
+
+	#region Editor Debug Options
+	public void ResetAnimation()
+	{
+		WeaponView.ResetAnimation();
+	}
+	public void PlayAnimation(string animation)
+	{
+		WeaponView.PlayAnimation(animation);
 	}
 	#endregion
 }

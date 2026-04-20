@@ -7,7 +7,7 @@ public abstract class Item<T> : Item where T : ItemDefinition
 	public override ItemDefinition ItemDefinition => TypedDefinition;
 
 	#region initialize item
-	public override void InitializeItem(ItemDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(ItemDefinition definition, int itemStack)
 	{
 		if (definition is not T typedDef)
 		{
@@ -15,9 +15,9 @@ public abstract class Item<T> : Item where T : ItemDefinition
 			return;
 		}
 
-		InitializeItem(typedDef, itemModel, itemStack);
+		InitializeItem(typedDef, itemStack);
 	}
-	public virtual void InitializeItem(T definition, GameObject itemModel, int itemStack)
+	public virtual void InitializeItem(T definition, int itemStack)
 	{
 		TypedDefinition = definition;
 		gameObject.name = TypedDefinition.ItemName;
@@ -26,35 +26,36 @@ public abstract class Item<T> : Item where T : ItemDefinition
 		IsEquipped = false;
 		IsInHands = false;
 
-		UpdateItemModel(definition, itemModel);
+		UpdateItemModel(definition);
 		gameObject.SetActive(true);
 	}
 	#endregion
 
 	#region update item model
-	private void UpdateItemModel(T definition, GameObject itemModel)
+	private void UpdateItemModel(T definition)
 	{
-		if (itemModel == null && definition.ModelPrefab != null)
-		{
-			Debug.LogError($"{TypedDefinition.ItemName} model expected but none provided. ItemSpawner or pooling system failed.");
-			return;
-		}
-		else if (itemModel == null && definition.ModelPrefab == null)
+		if (definition.ModelPrefab == null)
 		{
 			Debug.LogWarning($"{TypedDefinition.ItemName} model not assigned ignore if intended or lacks model and isnt required.");
+			if (ModelReference != null)
+				Destroy(ModelReference);
 			return;
 		}
-
+		else
+		{
+			if (ModelReference != null)
+				Destroy(ModelReference);
+			ModelReference = Instantiate(definition.ModelPrefab);
+		}
 		/* remove old model, separate model pooling kept for potential future use but not required with current 1:1 items planned.
 		if (ModelReference != null)
 			CleanUpItemModel();
 		*/
 
-		itemModel.transform.SetParent(gameObject.transform);
-		itemModel.transform.localScale = Vector3.one;
-		itemModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-		itemModel.SetActive(true);
-		ModelReference = itemModel;
+		ModelReference.transform.SetParent(gameObject.transform);
+		ModelReference.transform.localScale = Vector3.one;
+		ModelReference.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		ModelReference.SetActive(true);
 	}
 	#endregion
 }
@@ -74,7 +75,7 @@ public abstract class Item : MonoBehaviour
 	public static event Action<Item> OnCleanUpItem;
 	public static event Action<ItemDefinition, GameObject> OnCleanUpItemModel;
 
-	public abstract void InitializeItem(ItemDefinition definition, GameObject itemModel, int itemStack);
+	public abstract void InitializeItem(ItemDefinition definition, int itemStack);
 
 	#region base equip/unequip methods
 	public virtual void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)

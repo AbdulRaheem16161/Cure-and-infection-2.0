@@ -125,6 +125,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region Stats Drain Handlers
 	private void HandleHealthDrain()
 	{
+		if (lifeState == LifeState.zombified) return;
+
 		healthDrainTimer -= Time.deltaTime;
 		if (healthDrainTimer < 0)
 		{

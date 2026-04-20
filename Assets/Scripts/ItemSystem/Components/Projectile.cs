@@ -6,9 +6,9 @@ public class Projectile : Item<ProjectileDefinition>
 
 	public ProjectileDefinition ProjectileDefinition => projectileDefinition;
 
-	public override void InitializeItem(ProjectileDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(ProjectileDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition, itemModel, itemStack);
+		base.InitializeItem(definition, itemStack);
 		projectileDefinition = definition;
 
 		//projectile-specific setup here

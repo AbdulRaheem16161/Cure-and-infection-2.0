@@ -11,9 +11,9 @@ public class WeaponMelee : Item<WeaponMeleeDefinition>
 	public float swingCooldownTimer;
 
 	#region Initialize Item Override
-	public override void InitializeItem(WeaponMeleeDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(WeaponMeleeDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition, itemModel, itemStack);
+		base.InitializeItem(definition, itemStack);
 
 		//weapon-specific setup here
 		if (ModelReference == null)

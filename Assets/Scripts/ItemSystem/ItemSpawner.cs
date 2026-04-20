@@ -57,29 +57,19 @@ public class ItemSpawner : MonoBehaviour
 		item.gameObject.transform.SetParent(parent);
 		item.gameObject.SetActive(true);
 
-		GameObject modelReference = item.ModelReference;
-
-		if (modelReference == null && definition.ModelPrefab != null) //logs handled in items
-		{
-			if (definition.ModelPrefab == null)
-				Debug.LogWarning($"{definition.ItemName} has no model assigned in definition (maybe intentional or not yet created).");
-			else
-				modelReference = Instantiate(definition.ModelPrefab);
-		}
-
-		item.InitializeItem(definition, modelReference, stackCount);
+		item.InitializeItem(definition, stackCount);
 
 		if (item is Item<WeaponRangedDefinition> weaponRanged)
-			weaponRanged.InitializeItem(definition, modelReference,  stackCount);
+			weaponRanged.InitializeItem(definition,  stackCount);
 
 		else if (item is Item<WeaponMeleeDefinition> weaponMelee)
-			weaponMelee.InitializeItem(definition, modelReference, stackCount);
+			weaponMelee.InitializeItem(definition, stackCount);
 
 		else if (item is Item<ArmourDefinition> armour)
-			armour.InitializeItem(definition, modelReference, stackCount);
+			armour.InitializeItem(definition, stackCount);
 
 		else if (item is Item<ConsumableDefinition> consumable)
-			consumable.InitializeItem(definition, modelReference, stackCount);
+			consumable.InitializeItem(definition, stackCount);
 
 		else
 		{

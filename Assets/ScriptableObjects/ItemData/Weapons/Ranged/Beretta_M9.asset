@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18415577feb680f4a85a1f6c7219209d, type: 3}
+  m_Name: Beretta_M9
+  m_EditorClassIdentifier: 
+  itemId: Beretta_M9
+  itemName: Beretta M9
+  itemDescription: Reliable sidearm with high capacity and manageable recoil.
+  itemPrice: 160
+  tradable: 0
+  allowedSlots: 3
+  allowedEquipmentSlots: 3
+  stackLimit: 1
+  itemWeight: 2.2
+  modelPrefab: {fileID: 362726111258847574, guid: fc63e5d2e38c2c045bca7617f9461f30, type: 3}
+  itemUiIcon: {fileID: 0}
+  weaponType: 2
+  impactType: 0
+  damage: 25
+  magazineSize: 17
+  fireMode: 2
+  fireRateRPM: 400
+  reloadTime: 1.5
+  effectiveRange: 200
+  aimTime: 0
+  moveSpeedModifier: 0
+  aimMoveSpeedModifer: 0
+  hipFireSpread: 0
+  adsSpread: 0
+  spreadIncreasePerShot: 0
+  spreadRecoveryRate: 0
+  maxSpread: 0
+  recoilPerShot: {x: 0, y: 0}
+  recoilPattern:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  recoilRecoveryRate: 0
+  ammoType: {fileID: 11400000, guid: 948da52156225bc4f8229e48462d7096, type: 2}
+  bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
+  bulletVisualSpeed: 50
+  fireSfx: {fileID: 0}
+  reloadSfx: {fileID: 0}
+  muzzleFlashVfx: {fileID: 0}
+  impactVfx: {fileID: 0}

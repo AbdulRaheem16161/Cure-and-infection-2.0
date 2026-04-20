@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Consumable : Item<ConsumableDefinition>
 {
-	public override void InitializeItem(ConsumableDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(ConsumableDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition, itemModel, itemStack);
+		base.InitializeItem(definition, itemStack);
 
 		//consumable-specific setup here
 	}

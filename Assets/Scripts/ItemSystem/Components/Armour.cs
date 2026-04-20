@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Armour : Item<ArmourDefinition>
 {
-	public override void InitializeItem(ArmourDefinition definition, GameObject itemModel, int itemStack)
+	public override void InitializeItem(ArmourDefinition definition, int itemStack)
 	{
-		base.InitializeItem(definition, itemModel, itemStack);
+		base.InitializeItem(definition, itemStack);
 
 		// armour-specific setup here
 	}
