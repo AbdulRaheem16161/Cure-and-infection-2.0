@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 16
   stackLimit: 1
   itemWeight: 6.8
-  itemPrefab: {fileID: 0}
+  modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
   armourType: 2
   protectionProvided: 0.35

@@ -6,7 +6,7 @@ namespace Game.MyNPC
     {
 		public NPCRangedAttackState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
-		private WeaponRanged EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponRanged;
+		private RangedWeaponItem EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as RangedWeaponItem;
 		private float shotsToBurstFireCount;
 		private float randomShotDelay;
 

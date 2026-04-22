@@ -3,8 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Humanoid", menuName = "ScriptableObjects/Entities/Humanoids")]
 public class HumanoidDefinition : EntityDefinition
 {
-	#region Equipment
-	[Header("Equipment")]
+	#region Humanoid Equipment
+	[Header("Humanoid Equipment")]
 	/// <summary>
 	/// for zombie ranged attacks we can create a unique WeaponRangedDefinition ZombieSpit as they should work fine if set up like a single shot gun
 	/// for zombie melee attacks we can create a unique WeaponMeleeDefinition that will do the same as above

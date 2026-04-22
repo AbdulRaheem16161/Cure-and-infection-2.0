@@ -5,11 +5,11 @@ using UnityEngine;
 /// </summary>
 public class MeleeWeaponView : MonoBehaviour
 {
-	private WeaponMelee weaponMelee;
+	private MeleeWeaponItem weaponMelee;
 
 	public BoxCollider hitCollider;
 
-	public void EnableHitCollider(WeaponMelee weaponMelee)
+	public void EnableHitCollider(MeleeWeaponItem weaponMelee)
 	{
 		this.weaponMelee = weaponMelee;
 		hitCollider.enabled = true;

@@ -59,6 +59,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public static event Action<GameObject> OnZombificationComplete;
 	#endregion
 
+	System.Random systemRandom = new System.Random();
+
 	#region awake + Initialize stats handler method
 	private void Awake()
 	{
@@ -249,6 +251,20 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		{
 			lifeState = LifeState.dead;
 			OnDeath?.Invoke();
+			DropDeathItems();
+		}
+	}
+	#endregion
+
+	#region Handle Dropping Death Items 
+	private void DropDeathItems()
+	{
+		if (Definition.ItemsDroppedOnDeath.Count == 0) return;
+
+		foreach (ItemDropData dropData in Definition.ItemsDroppedOnDeath)
+		{
+			int amountToDrop = systemRandom.Next(dropData.MinDropAmount, dropData.MaxDropAmount + 1);
+			ItemSpawner.GetItem(dropData.Item, amountToDrop, null, transform.position, Quaternion.identity);
 		}
 	}
 	#endregion

@@ -36,7 +36,7 @@ public class NpcFleeState : NpcBaseMovementState
 		{
 			fleeTimer -= deltaTime;
 
-			if (fleeTimer <= 0)
+			if (fleeTimer <= 0 || IsWithinDistanceOfDestination(2f))
 				UpdateFleeingDirection();
 		}
 		else

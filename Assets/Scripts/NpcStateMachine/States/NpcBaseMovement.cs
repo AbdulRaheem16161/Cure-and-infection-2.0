@@ -1,4 +1,6 @@
 using Game.MyNPC;
+using System.IO;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,7 +8,7 @@ public class NpcBaseMovementState : NPCBaseState
 {
 	protected bool lookingAtTarget;
 	public enum MoveType { walk, sprint }
-
+	private readonly float[] navMeshSamplingRadius = { 1f, 5f, 10f};
 	public NpcBaseMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 	public override bool IsValid()
@@ -65,7 +67,7 @@ public class NpcBaseMovementState : NPCBaseState
 		float randomAngle = Random.Range(-45f, 45f);
 		Quaternion rotation = Quaternion.Euler(0, randomAngle, 0);
 		Vector3 randomFleeDirection = rotation * fleeDirection;
-		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * (stateMachine.Definition.FleeDistance * 2);
+		Vector3 fleeDestination = stateMachine.transform.position + randomFleeDirection * 10;
 
 		MoveToDestination(fleeDestination, MoveType.sprint);
 	}
@@ -77,12 +79,48 @@ public class NpcBaseMovementState : NPCBaseState
 	/// </summary>
 	protected void MoveToDestination(Vector3 newDestination, MoveType moveIntent)
 	{
-		stateMachine.CurrentDestination = newDestination;
+		if (!TrySampleMovePosition(newDestination, out Vector3 sampledPosition))
+		{
+			Debug.LogError($"NavMesh sampling failed for destination: {newDestination}\n" +
+				$"Agent Pos: {stateMachine.Agent.transform.position}\n Max Radius Tried: {navMeshSamplingRadius[^1]}");
+			return;
+		}
+
+		if (!GetValidMovePath(sampledPosition, out NavMeshPath path))
+		{
+			Debug.LogWarning($"No valid path found for destination {newDestination}");
+			return;
+		}
+
+		stateMachine.CurrentDestination = sampledPosition;
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.updatePosition = true;
 
 		UpdateMoveSpeed(moveIntent);
-		stateMachine.Agent.SetDestination(newDestination);
+		stateMachine.Agent.SetPath(path);
+	}
+	private bool GetValidMovePath(Vector3 sampledPosition, out NavMeshPath path)
+	{
+		path = new NavMeshPath();
+		bool pathCalculated = NavMesh.CalculatePath(stateMachine.transform.position, sampledPosition, NavMesh.AllAreas, path);
+
+		if (!pathCalculated || path.status != NavMeshPathStatus.PathComplete) //path invalid or incomplete
+			return false;
+
+		return true;
+	}
+	private bool TrySampleMovePosition(Vector3 newDestination, out Vector3 sampledPosition)
+	{
+		foreach (float radius in navMeshSamplingRadius)
+		{
+			if (NavMesh.SamplePosition(newDestination, out NavMeshHit hit, radius, NavMesh.AllAreas))
+			{
+				sampledPosition = hit.position;
+				return true;
+			}
+		}
+		sampledPosition = Vector3.zero;
+		return false;
 	}
 	/// <summary>
 	/// set move speed to walk/sprint speed based on intent and npc exhaustion state
@@ -163,9 +201,9 @@ public class NpcBaseMovementState : NPCBaseState
 		else
 			return false;
 	}
-	protected bool HasReachedCorpse()
+	protected bool IsWithinDistanceOfDestination(float distanceThreshold)
 	{
-		if (stateMachine.Agent.remainingDistance <= 2f)
+		if (stateMachine.Agent.remainingDistance <= distanceThreshold)
 			return true;
 		else
 			return false;

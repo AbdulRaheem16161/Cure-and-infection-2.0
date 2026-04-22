@@ -21,7 +21,7 @@ MonoBehaviour:
   allowedEquipmentSlots: 448
   stackLimit: 10
   itemWeight: 0.05
-  itemPrefab: {fileID: 0}
+  modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
   restorationType: 2
   healthRestored: 60

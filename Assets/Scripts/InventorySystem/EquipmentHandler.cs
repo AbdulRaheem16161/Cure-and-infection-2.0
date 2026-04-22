@@ -311,10 +311,10 @@ public class EquipmentHandler : MonoBehaviour
 	}
 	private Transform GetParentForSlot(Item item)
 	{
-		if (item is WeaponRanged || item is WeaponMelee)
+		if (item is RangedWeaponItem || item is MeleeWeaponItem)
 			return equippedWeaponsParent.transform;
 
-		else if (item is Armour armour)
+		else if (item is ArmourItem armour)
 		{
 			return armour.TypedDefinition.ArmourSlot switch
 			{
@@ -325,7 +325,7 @@ public class EquipmentHandler : MonoBehaviour
 			};
 		}
 
-		else if (item is Consumable)
+		else if (item is ConsumableItem)
 			return null;
 
 		else

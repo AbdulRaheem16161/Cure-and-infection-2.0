@@ -127,6 +127,8 @@ namespace Game.MyNPC
 			capabilityOverrides = Definition.Capabilities;
 			Agent.speed = Definition.WalkSpeed;
 			Agent.angularSpeed = Definition.RotationSpeed;
+			Agent.acceleration = Definition.Acceleration;
+			Agent.stoppingDistance = Definition.StoppingDistance;
 
 			SwitchState(moveState);
 			Agent.enabled = true;
@@ -165,6 +167,8 @@ namespace Game.MyNPC
 
 		protected override void Update()
 		{
+			if (StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+
 			if (currentState != null && currentState.IsValid()) { currentState.Tick(Time.deltaTime); return; }
 			HandlePriorityStateSwitches();
 		}

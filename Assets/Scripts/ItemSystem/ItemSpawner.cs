@@ -16,6 +16,7 @@ public class ItemSpawner : MonoBehaviour
 	public GameObject meleeWeaponPrefab;
 	public GameObject armourPrefab;
 	public GameObject consumablePrefab;
+	public GameObject itemPrefab;
 
 	//Debug editor controls
 	[HideInInspector] public ItemDefinition itemToSpawn;
@@ -54,27 +55,11 @@ public class ItemSpawner : MonoBehaviour
 	{
 		Item item = Instance.TryGetItemFromObjectPooling(definition, position, rotation);
 
-		item.gameObject.transform.SetParent(parent);
+		if (parent != null)
+			item.gameObject.transform.SetParent(parent);
+
 		item.gameObject.SetActive(true);
-
 		item.InitializeItem(definition, stackCount);
-
-		if (item is Item<WeaponRangedDefinition> weaponRanged)
-			weaponRanged.InitializeItem(definition,  stackCount);
-
-		else if (item is Item<WeaponMeleeDefinition> weaponMelee)
-			weaponMelee.InitializeItem(definition, stackCount);
-
-		else if (item is Item<ArmourDefinition> armour)
-			armour.InitializeItem(definition, stackCount);
-
-		else if (item is Item<ConsumableDefinition> consumable)
-			consumable.InitializeItem(definition, stackCount);
-
-		else
-		{
-			Debug.LogError($"Item prefab does not match definition type {typeof(T)}");
-		}
 
 		return item;
 	}
@@ -108,6 +93,9 @@ public class ItemSpawner : MonoBehaviour
 
 			else if (itemDefinition is ConsumableDefinition)
 				return Instantiate(consumablePrefab, position, rotation).GetComponent<Item>();
+
+			else if (itemDefinition != null)
+				return Instantiate(itemPrefab, position, rotation).GetComponent<Item>();
 
 			else
 			{

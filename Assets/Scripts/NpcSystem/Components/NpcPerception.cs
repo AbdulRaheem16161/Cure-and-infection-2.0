@@ -30,10 +30,10 @@ public class NpcPerception : MonoBehaviour
 		valid, invalid, lost
 	}
 
-	#region layer Masks
+	#region layer Masks (internal config)
 	[Header("Layer Masks")]
-	[SerializeField] private LayerMask targetMask;
-	[SerializeField] private LayerMask lineOfSightMask;
+	private LayerMask targetMask;
+	private LayerMask lineOfSightMask;
 	#endregion
 
 	#region Runtime Targets
@@ -78,6 +78,9 @@ public class NpcPerception : MonoBehaviour
 		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
 		StatsHandler = GetComponent<StatsHandler>();
+
+		targetMask = LayerMask.GetMask("CharacterDetection");
+		lineOfSightMask = LayerMask.GetMask("Environment", "CharacterDetection");
 
 		StatsHandler.OnHit += InvestigateWhereHitFrom;
 	}

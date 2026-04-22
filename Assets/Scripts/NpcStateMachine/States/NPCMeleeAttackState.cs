@@ -6,7 +6,7 @@ namespace Game.MyNPC
     {
 		public NPCMeleeAttackState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
-		private WeaponMelee EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as WeaponMelee;
+		private MeleeWeaponItem EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as MeleeWeaponItem;
 		private float randomSwingDelay;
 
 		private readonly System.Random systemRandom = new();

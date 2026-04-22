@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EntityDefinition : ScriptableObject
 {
-	#region npc info
+	#region Entity Info
 	[Header("Entity Info")]
 	[SerializeField] private string entityName;
 	[SerializeField] private bool isPlayer;
@@ -40,25 +41,30 @@ public class EntityDefinition : ScriptableObject
 	}
 	#endregion
 
-	#region definition prefab to use
+	#region Definition Prefab To Use
 	[Header("Definition Prefab To Use")]
 	public GameObject gameObjectPrefab;
 	#endregion
 
-	#region Npc Stats
-	[Header("Npc Main Stats")]
+	#region Items Dropped On Death
+	[Header("Items Dropped On Death")]
+	[SerializeField] private List<ItemDropData> itemsDroppedOnDeath = new();
+	#endregion
+
+	#region Entity Stats
+	[Header("Entity Stats")]
 	[SerializeField] private int maxHealth = 100;
 	[SerializeField] private int maxWater = 100;
 	[SerializeField] private int maxFood = 100;
 	[SerializeField] private int maxStamina = 100;
 
-	[Header("Npc Stats Drain")]
+	[Header("Entity Stats Drain")]
 	[SerializeField] private float waterDrainSeconds = 15;
 	[SerializeField] private float waterDrainAmount = 1;
 	[SerializeField] private float foodDrainSeconds = 25;
 	[SerializeField] private float foodDrainAmount = 1;
 
-	[Header("Npc Stamina Drain")]
+	[Header("Entity Stamina Drain")]
 	[SerializeField] private float staminaDrainSeconds = 0.4f;
 	[SerializeField] private float staminaDrainAmount = 1;
 	[SerializeField] private float staminaRegenSeconds = 1f;
@@ -66,18 +72,20 @@ public class EntityDefinition : ScriptableObject
 	[SerializeField] private float exhaustToSprintThreshold = 0.15f;
 	#endregion
 
-	#region Npc Movement Behaviour
-	[Header("Npc Movement Behaviour")]
+	#region Entity Movement Behaviour
+	[Header("Entity Movement Behaviour")]
 	[SerializeField] private float walkSpeed = 2.5f;
 	[SerializeField] private float sprintSpeed = 5.5f;
 	[SerializeField] private float rotationSpeed = 240;
+	[SerializeField] private float acceleration = 10;
+	[SerializeField] private float stoppingDistance = 1;
 	[SerializeField] private float fleeDistance = 20;
 	[SerializeField] private float minIdleTime = 1;
 	[SerializeField] private float maxIdleTime = 3;
 	#endregion
 
-	#region NPC Perception Settings
-	[Header("NPC Perception Settings")]
+	#region Entity Perception Settings
+	[Header("Entity Perception Settings")]
 	[SerializeField] private float viewAngle = 120f;
 	[SerializeField] private float viewDistance = 30f;
 	[SerializeField] private float highAlertDuration = 10f;
@@ -85,8 +93,8 @@ public class EntityDefinition : ScriptableObject
 	[SerializeField] private float viewDistanceMultiplier = 1.5f;
 	#endregion
 
-	#region npc sound detection
-	[Header("NPC Sound Detection")]
+	#region Entity Sound Detection
+	[Header("Entity Sound Detection")]
 	[SerializeField] private float soundSensitivity; //percentage chance divided by distance to sound source or something
 	#endregion
 
@@ -98,6 +106,8 @@ public class EntityDefinition : ScriptableObject
 	public EntityFlags Flags => entityFlags;
 
 	public GameObject GameObjectPrefab => gameObjectPrefab;
+
+	public List<ItemDropData> ItemsDroppedOnDeath => itemsDroppedOnDeath;
 
 	public int MaxHealth => maxHealth;
 	public int MaxWater => maxWater;
@@ -118,6 +128,8 @@ public class EntityDefinition : ScriptableObject
 	public float WalkSpeed => walkSpeed;
 	public float SprintSpeed => sprintSpeed;
 	public float RotationSpeed => rotationSpeed;
+	public float Acceleration => acceleration;
+	public float StoppingDistance => stoppingDistance;
 	public float FleeDistance => fleeDistance;
 	public float MinIdleTime => minIdleTime;
 	public float MaxIdleTime => maxIdleTime;
@@ -130,4 +142,12 @@ public class EntityDefinition : ScriptableObject
 
 	public float SoundSensitivity => soundSensitivity;
 	#endregion
+}
+
+[Serializable]
+public class ItemDropData
+{
+	public ItemDefinition Item;
+	public int MinDropAmount;
+	public int MaxDropAmount;
 }

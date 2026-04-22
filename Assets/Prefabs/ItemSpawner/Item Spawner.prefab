@@ -48,3 +48,8 @@ MonoBehaviour:
   meleeWeaponPrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
   armourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
   consumablePrefab: {fileID: 7577775180019769632, guid: 15b5f0b6435ca1e438a8438d85bbfc17, type: 3}
+  itemPrefab: {fileID: 4955749087793942894, guid: 83f0ac3cde4ba5b428587609d0a517e0, type: 3}
+  itemToSpawn: {fileID: 0}
+  itemCountToSpawn: 0
+  locationToSpawnItem: {x: 0, y: 0, z: 0}
+  worldItemToCleanUp: {fileID: 0}

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(WeaponRanged))]
+[CustomEditor(typeof(RangedWeaponItem))]
 public class WeaponRangedEditor : Editor, IAmmoGiver
 {
 	private bool showDebugControls;
@@ -12,7 +12,7 @@ public class WeaponRangedEditor : Editor, IAmmoGiver
 	{
 		base.OnInspectorGUI();
 
-		WeaponRanged weapon = (WeaponRanged)target;
+		RangedWeaponItem weapon = (RangedWeaponItem)target;
 
 		GUILayout.Space(10);
 		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);

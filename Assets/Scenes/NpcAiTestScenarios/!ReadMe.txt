@@ -2,11 +2,6 @@ Test Npc Ai behaviour and parts of behaviour
 outlines of what should happen for each test:
 
 CONSIDERATIONS AND BUGS ILL CHANGE LATER:
-NPCS PATHING OUT OF BOUNDS IN GENERAL:
-	currently paths are not checked to see if they are valid, atm in a testing envireoment, only flee behaviour has this issue.
-	i will assume random move (nor random area move) will have this same issue if npc is at the edge of walkable navmesh surface.
-	will update pathing later to validate path and that destination is reachable before moving there.
-
 NPCS RANDOM AREA MOVE "BUG":
 	currently doesnt support complex shapes with more then 4 corners, id like to add that functionality but its low on priority
 

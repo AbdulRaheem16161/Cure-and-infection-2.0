@@ -56,8 +56,8 @@ public class NpcBeliefs : MonoBehaviour
 	#endregion
 
 	#region Equipment Beliefs
-	public bool RangedWeaponInHands => EquipmentHandler.itemInHands is WeaponRanged;
-	public bool MeleeWeaponInHands => EquipmentHandler.itemInHands is WeaponMelee;
+	public bool RangedWeaponInHands => EquipmentHandler.itemInHands is RangedWeaponItem;
+	public bool MeleeWeaponInHands => EquipmentHandler.itemInHands is MeleeWeaponItem;
 	public bool CanHeal => Hurt && HealableItem != null;
 	public bool CanDrink => Thirsty && DrinkableItem != null;
 	public bool CanEat => Hungry && EatableItem != null;
@@ -124,7 +124,7 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (Target == null || !RangedWeaponInHands) return false;
 
-		WeaponRanged weaponRanged = EquipmentHandler.itemInHands as WeaponRanged;
+		RangedWeaponItem weaponRanged = EquipmentHandler.itemInHands as RangedWeaponItem;
 
 		if (Target.Distance < weaponRanged.TypedDefinition.EffectiveRange)
 			return true;

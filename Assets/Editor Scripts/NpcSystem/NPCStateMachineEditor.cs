@@ -29,7 +29,8 @@ public class NPCStateMachineEditor : Editor
 		#region State Toggles
 		EditorGUILayout.LabelField("State Toggles", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
-		npc.capabilityOverrides = (EntityDefinition.Capability)EditorGUILayout.EnumPopup("Enable Flee", npc.capabilityOverrides);
+		SerializedProperty capabilityProp = serializedObject.FindProperty("capabilityOverrides");
+		EditorGUILayout.PropertyField(capabilityProp);
 		EditorGUI.indentLevel--;
 		#endregion
 

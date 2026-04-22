@@ -19,11 +19,11 @@ public class PlayerController : MonoBehaviour
 
 	public void PlayerMouseLeftClick()
 	{
-		if (EquipmentHandler.itemInHands is WeaponRanged weaponRanged)
+		if (EquipmentHandler.itemInHands is RangedWeaponItem weaponRanged)
 		{
 			weaponRanged.Shoot();
 		}
-		else if (EquipmentHandler.itemInHands is WeaponMelee weaponMelee)
+		else if (EquipmentHandler.itemInHands is MeleeWeaponItem weaponMelee)
 		{
 			weaponMelee.LightAttack();
 		}
@@ -35,14 +35,14 @@ public class PlayerController : MonoBehaviour
 	/// </summary>
 	public void ItemPickUpInteract<T>(Item<T> item, int inputKey) where T : ItemDefinition
 	{
-		if (item is WeaponRanged ranged)
+		if (item is RangedWeaponItem ranged)
 		{
 			if (inputKey == 0) // 0 = input key f for example
 				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponOne); //equip directly
 			else if (inputKey == 1) // 1 = input key e for example
 				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponTwo); //equip directly
 		}
-		else if (item is WeaponMelee melee)
+		else if (item is MeleeWeaponItem melee)
 		{
 			EquipmentHandler.EquipItem(melee.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponMelee); //equip directly
 		}

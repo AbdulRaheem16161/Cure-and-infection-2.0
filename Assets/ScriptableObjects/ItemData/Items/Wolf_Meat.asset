@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4672d854f3c1de740a35afdb9f6c33d2, type: 3}
+  m_Name: Wolf_Meat
+  m_EditorClassIdentifier: 
+  itemId: Wolf_Meat
+  itemName: Wolf Meat
+  itemDescription: Meat from a wolf
+  itemPrice: 80
+  tradable: 1
+  allowedSlots: 1
+  allowedEquipmentSlots: 0
+  stackLimit: 10
+  itemWeight: 0.75
+  modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
+  itemUiIcon: {fileID: 0}

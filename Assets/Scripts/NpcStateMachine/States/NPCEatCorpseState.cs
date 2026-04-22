@@ -40,10 +40,9 @@ public class NPCEatCorpseState : NpcBaseMovementState
 		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
 		// move to position of cropse
-		if (HasReachedCorpse()) //needs a litle more room then agent stopping distance 
-		{
+		if (IsWithinDistanceOfDestination(2f))
 			eatingCorpse = true;
-		}
+
 		if (eatingCorpse)
 		{
 			eatCorpseTimer -= deltaTime;
