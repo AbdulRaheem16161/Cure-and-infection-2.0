@@ -177,9 +177,9 @@ Material:
     - _LeafSmoothness: 0.2
     - _Leaf_Ambient_Occlusion_Intensity: 0.5
     - _Leaf_Flat_Color: 1
-    - _Leaf_Metallic: 0
+    - _Leaf_Metallic: 0.246
     - _Leaf_Normal_Strength: 0.3
-    - _Leaf_Smoothness: 0.2
+    - _Leaf_Smoothness: 0
     - _Light_Wind_Strength: 0.5
     - _Light_Wind_Use_Leaf_Fade: 1
     - _Light_Wind_Y_Offset: 0
@@ -275,9 +275,9 @@ Material:
     - _LeafNoiseColour: {r: 0.33124158, g: 0.4117647, b: 0.082352936, a: 1}
     - _LeafNoiseLargeColour: {r: 0.3237108, g: 0.43137255, b: 0, a: 1}
     - _LeafTint: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
-    - _Leaf_Base_Color: {r: 0.1254902, g: 0.16862746, b: 0.039215688, a: 1}
-    - _Leaf_Noise_Color: {r: 0.4039216, g: 0.48235297, b: 0.09411766, a: 1}
-    - _Leaf_Noise_Large_Color: {r: 0.46929136, g: 0.58431375, b: 0.058823515, a: 1}
+    - _Leaf_Base_Color: {r: 0.6603774, g: 0.46333203, b: 0.17132434, a: 1}
+    - _Leaf_Noise_Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Leaf_Noise_Large_Color: {r: 0, g: 0, b: 0, a: 1}
     - _Leaf_Normal_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Leaf_Normal_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Leaf_Offset: {r: 0, g: 0, b: 0, a: 0}

@@ -150,7 +150,7 @@ Material:
     - _VertexExtrusionSmoothNormals: 0
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Base_Color: {r: 0.2831488, g: 0.39157256, b: 0.65837497, a: 1}
     - _ColorDim: {r: 1, g: 1, b: 1, a: 1}
     - _ColorDimCurve: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
@@ -164,7 +164,7 @@ Material:
     - _Fresnel_Color: {r: 0.47161147, g: 0.432696, b: 0.894, a: 1}
     - _Light_Direction_Override: {r: 0, g: 0, b: -0.62, a: 0}
     - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _Scattering_Color: {r: 0.9811321, g: 0.41189036, b: 0.6313466, a: 0}
     - _Top_Color: {r: 0.9911022, g: 0.6514058, b: 0.8549928, a: 1}
     - _UnityShadowColor: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}

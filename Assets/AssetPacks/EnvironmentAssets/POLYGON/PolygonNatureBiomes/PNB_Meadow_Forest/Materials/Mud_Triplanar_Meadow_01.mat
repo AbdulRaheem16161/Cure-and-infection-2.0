@@ -303,7 +303,7 @@ Material:
     - _AO_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Alpha_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Alpha_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Base_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Base_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
@@ -323,7 +323,7 @@ Material:
     - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
     - _Normal_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Normal_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _Overlay_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Overlay_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Snow_Color: {r: 1, g: 1, b: 1, a: 0}

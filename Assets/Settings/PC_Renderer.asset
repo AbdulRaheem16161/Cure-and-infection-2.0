@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 576f949be0794f548b825c9ce6f556db, type: 3}
   m_Name: Flat Kit Per Object Outline
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: RenderObjectsFeature
     Event: 300
@@ -43,7 +43,15 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
-  materials: []
+  materials:
+  - {fileID: 2100000, guid: c6030e4939d206544a563fc12dc8518f, type: 2}
+  - {fileID: 2100000, guid: 6c8508cd3dd08984b963030722be1510, type: 2}
+  - {fileID: 2100000, guid: 4cd6b947be71ef340944f2ad3053194b, type: 2}
+  - {fileID: 2100000, guid: cf5d83e5457e78f4991c93e26f06da1f, type: 2}
+  - {fileID: 2100000, guid: b635a8976224c5a4fad12d705bcf5e00, type: 2}
+  - {fileID: 2100000, guid: c0552542bb6acd441b86be350635b09b, type: 2}
+  - {fileID: 2100000, guid: ec0a4f0953908a441bfa225eea26fbe4, type: 2}
+  - {fileID: 2100000, guid: d45c1b3e52c0d13499a18b8c53400754, type: 2}
   autoReferenceMaterials: 1
 --- !u!114 &11400000
 MonoBehaviour:
@@ -110,7 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f62c9c65cf3354c93be831c8bc075510, type: 3}
   m_Name: ScreenSpaceAmbientOcclusion
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_Settings:
     AOMethod: 0
     Downsample: 0

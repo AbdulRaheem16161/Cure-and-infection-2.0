@@ -53,6 +53,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
+  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -259,11 +260,11 @@ Material:
     m_Colors:
     - _AO_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _AO_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+    - _BaseColor: {r: 0, g: 0.24528301, b: 0.12877354, a: 1}
     - _Base_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Base_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorDim: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDim: {r: 0, g: 0.3301887, b: 0.28833374, a: 1}
     - _ColorDimCurve: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
     - _ColorDimExtra: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
     - _ColorDimSteps: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
@@ -280,7 +281,7 @@ Material:
     - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
     - _Normal_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Normal_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _Overlay_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Overlay_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Snow_Color: {r: 1, g: 1, b: 1, a: 0}

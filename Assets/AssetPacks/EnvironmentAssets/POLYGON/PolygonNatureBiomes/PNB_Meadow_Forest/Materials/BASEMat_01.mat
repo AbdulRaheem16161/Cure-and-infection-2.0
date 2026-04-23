@@ -40,6 +40,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
+  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -322,7 +323,7 @@ Material:
     - _tempNoise: 0.29
     - _worldScale: 0.67
     m_Colors:
-    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+    - _BaseColor: {r: 0.4156863, g: 0.7843138, b: 0.627451, a: 1}
     - _BaseColour: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 1, g: 1, b: 1, a: 0}
@@ -359,7 +360,7 @@ Material:
     - _Leaf_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Leaf_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SnowColour: {r: 1, g: 1, b: 1, a: 0}
     - _Tint: {r: 0, g: 0, b: 0, a: 0}
     - _TrunkBaseColour: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}

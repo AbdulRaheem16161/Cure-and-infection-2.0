@@ -27,6 +27,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
+  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -309,13 +310,13 @@ Material:
     - _tempNoise: 0.29
     - _worldScale: 0.67
     m_Colors:
-    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+    - _BaseColor: {r: 0.38679248, g: 0.16018678, b: 0, a: 1}
     - _BaseColour: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 1, g: 1, b: 1, a: 0}
-    - _ColorDim: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDim: {r: 0.2924528, g: 0.06945754, b: 0, a: 1}
     - _ColorDimCurve: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
-    - _ColorDimExtra: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
+    - _ColorDimExtra: {r: 0, g: 0, b: 0, a: 1}
     - _ColorDimSteps: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
     - _ColorGradient: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _DetailMapColor: {r: 1, g: 1, b: 1, a: 1}
@@ -328,8 +329,8 @@ Material:
     - _Emissive_Mask_2_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Emissive_Mask_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Emissive_Mask_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _FlatRimColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
-    - _FlatSpecularColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _FlatRimColor: {r: 0.6509434, g: 0.3585705, b: 0, a: 1}
+    - _FlatSpecularColor: {r: 0.6509434, g: 0.3585705, b: 0, a: 1}
     - _FrostingColour: {r: 1, g: 1, b: 1, a: 0}
     - _Frosting_Color: {r: 1, g: 1, b: 1, a: 0}
     - _GustHighlight: {r: 0, g: 0, b: 0, a: 0}
@@ -346,7 +347,7 @@ Material:
     - _Leaf_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Leaf_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SnowColour: {r: 1, g: 1, b: 1, a: 0}
     - _Tint: {r: 0, g: 0, b: 0, a: 0}
     - _TrunkBaseColour: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}

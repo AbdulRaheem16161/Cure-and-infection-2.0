@@ -268,9 +268,9 @@ Material:
     - _LeafNoiseColour: {r: 0.68709713, g: 0.7735849, b: 0, a: 0}
     - _LeafNoiseLargeColour: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
     - _LeafTint: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
-    - _Leaf_Base_Color: {r: 1, g: 1, b: 1, a: 0}
-    - _Leaf_Noise_Color: {r: 0.9004406, g: 1, b: 0.10849059, a: 0}
-    - _Leaf_Noise_Large_Color: {r: 1, g: 0.88875324, b: 0.8537736, a: 0}
+    - _Leaf_Base_Color: {r: 0.6603774, g: 0.46333203, b: 0.17132434, a: 1}
+    - _Leaf_Noise_Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Leaf_Noise_Large_Color: {r: 0, g: 0, b: 0, a: 1}
     - _Leaf_Normal_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Leaf_Normal_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Leaf_Offset: {r: 0, g: 0, b: 0, a: 0}
