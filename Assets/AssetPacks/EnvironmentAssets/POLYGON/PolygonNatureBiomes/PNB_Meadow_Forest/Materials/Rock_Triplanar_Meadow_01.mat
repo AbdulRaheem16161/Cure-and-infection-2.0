@@ -21,12 +21,18 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Rock_Triplanar_Meadow_01
-  m_Shader: {fileID: -6465566751694194690, guid: 19e269a311c45cd4482cf0ac0e694503, type: 3}
+  m_Shader: {fileID: 4800000, guid: bee44b4a58655ee4cbff107302a3e131, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _OVERLAY_UV_CHANNEL_UV0
-  m_InvalidKeywords: []
+  - DR_OUTLINE_ON
+  - _CELPRIMARYMODE_SINGLE
+  - _DETAILMAPBLENDINGMODE_MULTIPLY
+  - _GRADIENTSPACE_WORLD
+  - _OUTLINESPACE_SCREEN
+  - _TEXTUREBLENDINGMODE_MULTIPLY
+  m_InvalidKeywords:
+  - _UNITYSHADOWMODE_NONE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -42,7 +48,31 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Base_Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CelCurveTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CelStepTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -59,6 +89,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Overlay_Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Triplanar_Emission_Texture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -101,7 +135,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _AO_Intensity: 1
+    - _AlphaClip: 1
     - _AlphaCutoff: 0.5
+    - _AlphaToMask: 1
     - _Alpha_Clip_Threshold: 0.5
     - _Alpha_Transparency: 1
     - _Ambient_Occlusion: 1
@@ -116,10 +152,21 @@ Material:
     - _BUILTIN_ZTest: 4
     - _BUILTIN_ZWrite: 1
     - _BUILTIN_ZWriteControl: 0
+    - _BaseMapPremultiply: 0
+    - _Blend: 0
+    - _BlendModePreserveSpecular: 0
     - _Bottom_Metallic: 0
     - _Bottom_Smoothness: 0
     - _BumpScale: 1
+    - _CameraDistanceImpact: 0
+    - _CastShadows: 1
+    - _CelExtraEnabled: 0
+    - _CelNumSteps: 3
+    - _CelPrimaryMode: 1
+    - _Cull: 2
     - _Cutoff: 0.5
+    - _DetailMapBlendingMode: 0
+    - _DetailMapImpact: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Enable_Alpha_Texture: 0
@@ -140,21 +187,49 @@ Material:
     - _FallOff: 10
     - _FallOff1: 40.1
     - _FallOff2: 100
+    - _FlatRimEdgeSmoothness: 0.5
+    - _FlatRimLightAlign: 0
+    - _FlatRimSize: 0.5
+    - _FlatSpecularEdgeSmoothness: 0
+    - _FlatSpecularSize: 0.1
+    - _Flatness: 1
+    - _FlatnessExtra: 1
     - _Generate_From_Base_Normals: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _GradientAngle: 0
+    - _GradientCenterX: 0
+    - _GradientCenterY: 0
+    - _GradientEnabled: 0
+    - _GradientSize: 10
+    - _GradientSpace: 0
+    - _LightContribution: 0
+    - _LightFalloffSize: 0
+    - _LightmapDirectionPitch: 0
+    - _LightmapDirectionYaw: 0
     - _Metallic: 0
     - _Mode: 0
     - _Normal_Intensity: 1
     - _OVERLAY_UV_CHANNEL: 0
     - _OcclusionStrength: 1
+    - _OutlineDepthOffset: 0
+    - _OutlineEnabled: 1
+    - _OutlineScale: 1
+    - _OutlineSpace: 0
+    - _OutlineWidth: 1
     - _Overlay_Intensity: 1
+    - _OverrideLightmapDir: 0
     - _Parallax: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _RimEnabled: 0
     - _Sea_Level: 0
+    - _SelfShadingSize: 0.5
+    - _SelfShadingSizeExtra: 0.6
+    - _ShadowEdgeSize: 0.05
+    - _ShadowEdgeSizeExtra: 0.05
     - _Side_Metallic: 0
     - _Side_Smoothness: 0
     - _Smoothness: 0.2
@@ -172,13 +247,20 @@ Material:
     - _Snow_Transition_Threshold: 1
     - _Snow_Transition_Threshold_Step_Count: 4
     - _Snow_Transition_Threshold_Steps: 0
+    - _Snow_Use_World_Up: 1
+    - _SpecularEnabled: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _Surface: 0
+    - _TextureBlendingMode: 0
+    - _TextureImpact: 1
     - _Tiling: 0.2
     - _Top_Metallic: 0
     - _Top_Smoothness: 0
+    - _Triplanar_Emission_Blend: 1
     - _Triplanar_Emission_Fade: 1
     - _Triplanar_Emission_Intensity: 1
+    - _Triplanar_Emission_Tiling: 0.25
     - _Triplanar_Emission_Top_To_Side_Difference: 0
     - _Triplanar_Fade: 1
     - _Triplanar_Intensity: 1
@@ -189,26 +271,46 @@ Material:
     - _Triplanar_Normal_Top_To_Side_Difference: 0.2
     - _Triplanar_Top_To_Side_Difference: 0.2
     - _UVSec: 0
+    - _UnityShadowMode: 0
+    - _UnityShadowOcclusion: 0
+    - _UnityShadowPower: 0.2
+    - _UnityShadowSharpness: 1
+    - _VertexColorsEnabled: 0
+    - _VertexExtrusionSmoothNormals: 0
     - _Wave_Object_Offset: 0
     - _Wave_Scale: 1
     - _Wave_Speed: 1
+    - _WorkflowMode: 1
+    - _ZTest: 4
     - _ZWrite: 1
+    - _ZWriteControl: 0
     - __dirty: 0
     m_Colors:
     - _AO_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _AO_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Alpha_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Alpha_Tiling: {r: 1, g: 1, b: 0, a: 0}
+    - _BaseColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
     - _Base_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Base_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDim: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDimCurve: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
+    - _ColorDimExtra: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
+    - _ColorDimSteps: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
+    - _ColorGradient: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _Color_Tint: {r: 1, g: 1, b: 1, a: 0}
+    - _DetailMapColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Emission_Color_Tint: {r: 0, g: 0, b: 0, a: 0}
     - _Emission_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Emission_Tiling: {r: 1, g: 1, b: 0, a: 0}
+    - _FlatRimColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _FlatSpecularColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
     - _Normal_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Normal_Tiling: {r: 1, g: 1, b: 0, a: 0}
+    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
     - _Overlay_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Overlay_Tiling: {r: 1, g: 1, b: 0, a: 0}
     - _Snow_Color: {r: 1, g: 1, b: 1, a: 0}
@@ -239,6 +341,7 @@ Material:
     - _Triplanar_Tiling_Side: {r: 20, g: 20, b: 0, a: 0}
     - _Triplanar_Tiling_Top: {r: 20, g: 20, b: 0, a: 0}
     - _UVPan: {r: 0, g: 0, b: 0, a: 0}
+    - _UnityShadowColor: {r: 0.85023, g: 0.85034, b: 0.8504499, a: 0.85056}
     - _Wave_Direction_Vector: {r: 0, g: 1, b: 0, a: 0}
     - _Wave_Noise_Tiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
