@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LightingManager : MonoBehaviour
 {
@@ -11,7 +11,14 @@ public class LightingManager : MonoBehaviour
 
     [Header("Time")]
     [SerializeField, Range(0, 24)] private float timeOfDay;
-    [SerializeField] private float dayLengthMinutes;
+    [SerializeField] private float dayLengthMinutes = 5f;
+
+    [Header("Moon Settings")]
+    [SerializeField] private Color moonColor;
+    [SerializeField] private float moonMaxIntensity;
+
+    [Header("Night Ambient")]
+    [SerializeField] private Color nightAmbient;
 
     private float timeRate;
 
@@ -33,13 +40,18 @@ public class LightingManager : MonoBehaviour
 
     void UpdateLighting(float timePercent)
     {
-        RenderSettings.ambientLight = preset.AmbientColor.Evaluate(timePercent);
+        float sunAmount = Mathf.Clamp01(Mathf.Sin(timePercent * Mathf.PI));
+        float moonAmount = 1f - sunAmount;
+
+        Color dayAmbient = preset.AmbientColor.Evaluate(timePercent);
+        RenderSettings.ambientLight = Color.Lerp(nightAmbient, dayAmbient, sunAmount);
+
         RenderSettings.fogColor = preset.FogColor.Evaluate(timePercent);
 
         if (sun != null)
         {
             sun.color = preset.DirectionalColor.Evaluate(timePercent);
-            sun.intensity = preset.LightIntensity.Evaluate(timePercent);
+            sun.intensity = preset.LightIntensity.Evaluate(timePercent) * sunAmount;
 
             sun.transform.rotation =
                 Quaternion.Euler((timePercent * 360f) - 90f, 170f, 0);
@@ -47,7 +59,8 @@ public class LightingManager : MonoBehaviour
 
         if (moon != null)
         {
-            moon.intensity = 1 - preset.LightIntensity.Evaluate(timePercent);
+            moon.color = moonColor;
+            moon.intensity = moonAmount * moonMaxIntensity;
 
             moon.transform.rotation =
                 Quaternion.Euler((timePercent * 360f) + 90f, 170f, 0);
