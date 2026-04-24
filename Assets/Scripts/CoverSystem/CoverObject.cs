@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class CoverObject : MonoBehaviour
 {
 	private Collider sourceCollider;
@@ -28,7 +29,7 @@ public class CoverObject : MonoBehaviour
 
 	private void Awake()
 	{
-		sourceCollider = GetComponent<Collider>();
+		AssignSourceCollider();
 		UpdateCoverPoint();
 
 		if (gameObject.layer != LayerMask.NameToLayer("Environment"))
@@ -36,6 +37,12 @@ public class CoverObject : MonoBehaviour
 
 		if (coverPoints.Count <= 0)
 			Debug.LogWarning($"CoverObject '{name}' has no cover points, either add them or remove the component.");
+	}
+
+	private void AssignSourceCollider()
+	{
+		if (sourceCollider == null)
+			sourceCollider = GetComponent<Collider>();
 	}
 
 	public Vector3 GetClosestPoint(Vector3 position)
@@ -115,11 +122,7 @@ public class CoverObject : MonoBehaviour
 	#region Cover Point Management
 	public void AutoGenerateCoverPoints(bool removeExistingPoints)
 	{
-		if (sourceCollider == null)
-		{
-			Debug.LogError("No collider assigned for cover generation.");
-			return;
-		}
+		AssignSourceCollider();
 
 		if (removeExistingPoints)
 			ClearAllCoverPoints(true);
