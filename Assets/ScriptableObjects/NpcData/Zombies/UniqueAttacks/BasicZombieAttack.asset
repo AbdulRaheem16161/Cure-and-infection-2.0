@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b76c873d305c9d342a1d5ed670b72db0, type: 3}
+  m_Script: {fileID: 11500000, guid: 05efffdedd6c8b543b5fca547b265441, type: 3}
   m_Name: BasicZombieAttack
   m_EditorClassIdentifier: 
-  itemId: 
+  itemId: BasicZombieAttack
   itemName: BasicZombieAttack
   itemDescription: 
   itemPrice: 0
@@ -20,12 +20,13 @@ MonoBehaviour:
   allowedSlots: 4
   allowedEquipmentSlots: 4
   stackLimit: 1
-  itemWeight: 0
+  itemWeight: 1
   modelPrefab: {fileID: 7249631763097740997, guid: 13476e64ba788c14a8e08be3fae59515, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 0
-  damage: 35
-  lightSwingSpeed: 0
-  lightSwingCooldown: 0
-  heavySwingSpeed: 0
-  heavySwingCooldown: 0
+  weaponType: 1
+  damage: 30
+  impactType: 2
+  lightSwingSpeed: 1
+  lightSwingCooldown: 1
+  heavySwingSpeed: 2
+  heavySwingCooldown: 2

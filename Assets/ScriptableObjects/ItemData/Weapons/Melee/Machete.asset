@@ -9,23 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b76c873d305c9d342a1d5ed670b72db0, type: 3}
+  m_Script: {fileID: 11500000, guid: 05efffdedd6c8b543b5fca547b265441, type: 3}
   m_Name: Machete
   m_EditorClassIdentifier: 
   itemId: Machete
   itemName: Machete
   itemDescription: 
-  itemPrice: 130
-  tradable: 0
-  allowedSlots: 5
+  itemPrice: 150
+  tradable: 1
+  allowedSlots: 4
   allowedEquipmentSlots: 4
   stackLimit: 1
-  itemWeight: 2.3
-  modelPrefab: {fileID: 8972777865294516069, guid: 181b55f9c40e5431ea7722ec76d64448, type: 3}
+  itemWeight: 0
+  modelPrefab: {fileID: 1372033673433234044, guid: b9fc4949094b04727a8db89069ae9fda, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 1
-  damage: 45
+  damage: 25
+  impactType: 2
   lightSwingSpeed: 1
   lightSwingCooldown: 1
-  heavySwingSpeed: 1
-  heavySwingCooldown: 2
+  heavySwingSpeed: 1.5
+  heavySwingCooldown: 1.5

@@ -9,35 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18415577feb680f4a85a1f6c7219209d, type: 3}
+  m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
   m_Name: Karabiner_98k
   m_EditorClassIdentifier: 
-  itemId: Karabiner_98k
-  itemName: Karabiner 98k
-  itemDescription: High-damage precision weapon rewarding careful shot placement.
-  itemPrice: 920
-  tradable: 0
+  itemId: 
+  itemName: 
+  itemDescription: 
+  itemPrice: 300
+  tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
   stackLimit: 1
-  itemWeight: 9.3
+  itemWeight: 0
   modelPrefab: {fileID: 1829597508155286, guid: 7359baf27e84aa44cafac3788c8be0f1, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 7
-  damage: 70
+  impactType: 1
+  damage: 65
   magazineSize: 5
-  fireMode: 8
-  fireRateRPM: 15
+  fireMode: 2
+  fireRateRPM: 20
   reloadTime: 3.5
-  effectiveRange: 750
+  effectiveRange: 1000
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0
-  hipFireSpread: 0
-  adsSpread: 0
-  spreadIncreasePerShot: 0
-  spreadRecoveryRate: 0
-  maxSpread: 0
+  hipFireSpread: 0.05
+  adsSpread: 0.05
+  spreadIncreasePerShot: 0.1
+  spreadRecoveryRate: 0.5
+  maxSpread: 5
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2

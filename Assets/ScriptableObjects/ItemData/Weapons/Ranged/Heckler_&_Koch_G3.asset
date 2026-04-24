@@ -9,36 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18415577feb680f4a85a1f6c7219209d, type: 3}
+  m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
   m_Name: Heckler_&_Koch_G3
   m_EditorClassIdentifier: 
-  itemId: Heckler_&_Koch_G3
-  itemName: Heckler & Koch G3
-  itemDescription: Hard-hitting automatic rifle with strong recoil. Best for deliberate
-    bursts.
-  itemPrice: 650
-  tradable: 0
+  itemId: 
+  itemName: 
+  itemDescription: 
+  itemPrice: 300
+  tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
   stackLimit: 1
-  itemWeight: 7.8
+  itemWeight: 0
   modelPrefab: {fileID: 1117582899397640, guid: 689946d975a0e55449b1e7ae41933e73, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 4
-  damage: 40
+  weaponType: 5
+  impactType: 1
+  damage: 30
   magazineSize: 20
   fireMode: 4
   fireRateRPM: 550
   reloadTime: 2.5
-  effectiveRange: 400
+  effectiveRange: 600
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0
-  hipFireSpread: 0
-  adsSpread: 0
-  spreadIncreasePerShot: 0
-  spreadRecoveryRate: 0
-  maxSpread: 0
+  hipFireSpread: 0.05
+  adsSpread: 0.05
+  spreadIncreasePerShot: 0.1
+  spreadRecoveryRate: 0.5
+  maxSpread: 5
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2

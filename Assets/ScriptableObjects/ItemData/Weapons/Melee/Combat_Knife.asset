@@ -9,23 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b76c873d305c9d342a1d5ed670b72db0, type: 3}
+  m_Script: {fileID: 11500000, guid: 05efffdedd6c8b543b5fca547b265441, type: 3}
   m_Name: Combat_Knife
   m_EditorClassIdentifier: 
   itemId: Combat_Knife
   itemName: Combat Knife
   itemDescription: 
-  itemPrice: 70
-  tradable: 0
-  allowedSlots: 5
+  itemPrice: 150
+  tradable: 1
+  allowedSlots: 4
   allowedEquipmentSlots: 4
   stackLimit: 1
-  itemWeight: 1.1
+  itemWeight: 0
   modelPrefab: {fileID: 1274142545500504308, guid: 3cfc4713418924499bc31f35f36c1c3d, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 1
-  damage: 30
+  damage: 25
+  impactType: 2
   lightSwingSpeed: 1
   lightSwingCooldown: 1
-  heavySwingSpeed: 1
-  heavySwingCooldown: 2
+  heavySwingSpeed: 1.5
+  heavySwingCooldown: 1.5

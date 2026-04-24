@@ -9,35 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18415577feb680f4a85a1f6c7219209d, type: 3}
+  m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
   m_Name: Ruger_Mini-14
   m_EditorClassIdentifier: 
-  itemId: Ruger_Mini-14
-  itemName: Ruger Mini-14
-  itemDescription: Accurate mid-range rifle for controlled shots and versatility.
-  itemPrice: 600
-  tradable: 0
+  itemId: 
+  itemName: 
+  itemDescription: 
+  itemPrice: 300
+  tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
   stackLimit: 1
-  itemWeight: 7.2
+  itemWeight: 0
   modelPrefab: {fileID: 1829597508155286, guid: 7359baf27e84aa44cafac3788c8be0f1, type: 3}
   itemUiIcon: {fileID: 0}
   weaponType: 6
+  impactType: 1
   damage: 45
   magazineSize: 20
   fireMode: 2
   fireRateRPM: 120
-  reloadTime: 2.4
-  effectiveRange: 500
+  reloadTime: 2.2
+  effectiveRange: 600
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0
-  hipFireSpread: 0
-  adsSpread: 0
-  spreadIncreasePerShot: 0
-  spreadRecoveryRate: 0
-  maxSpread: 0
+  hipFireSpread: 0.05
+  adsSpread: 0.05
+  spreadIncreasePerShot: 0.1
+  spreadRecoveryRate: 0.5
+  maxSpread: 5
   recoilPerShot: {x: 0, y: 0}
   recoilPattern:
     serializedVersion: 2
