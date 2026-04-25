@@ -37,7 +37,7 @@ public class EntityDefinition : ScriptableObject
 	[Flags]
 	public enum EntityFlags
 	{
-		none = 0, canBecomeZombie = 1 << 0
+		none = 0, canBecomeZombie = 1 << 0, canUtilizeCover = 1 << 1
 	}
 	#endregion
 

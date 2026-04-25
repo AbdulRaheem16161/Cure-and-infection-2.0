@@ -26,6 +26,13 @@ public class NPCStateMachineEditor : Editor
 
 		EditorGUILayout.Space(10);
 
+		#region Npc Range Consideration Toggles
+		npc.showUnholsteredWeaponRange = EditorGUILayout.Toggle("Show Unholstered Weapon Range", npc.showUnholsteredWeaponRange);
+		npc.showFleeRange = EditorGUILayout.Toggle("Show Flee Range", npc.showFleeRange);
+		#endregion
+
+		EditorGUILayout.Space(10);
+
 		#region State Toggles
 		EditorGUILayout.LabelField("State Toggles", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;

@@ -120,7 +120,7 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.ObjectField("Transform", target.Transform, typeof(Transform), true);
 		EditorGUILayout.ObjectField("Collider", target.Collider, typeof(Collider), true);
 		EditorGUILayout.ObjectField("Stats Handler", target.StatsHandler, typeof(StatsHandler), true);
-		EditorGUILayout.FloatField("Distance", target.Distance);
+		EditorGUILayout.FloatField("Distance", target.SquaredDistance);
 
 		EditorGUI.indentLevel--;
 	}

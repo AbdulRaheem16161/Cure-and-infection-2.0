@@ -114,10 +114,8 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (Target == null || !MeleeWeaponInHands) return false;
 
-		if (Target.Distance < Agent.stoppingDistance + 0.1f)
-			return true;
-		else
-			return false;
+		float stoppingDistanceSqr = Agent.stoppingDistance * Agent.stoppingDistance + 0.25f;
+		return Target.SquaredDistance < stoppingDistanceSqr;
 	}
 
 	private bool TargetInShootingRangeCheck()
@@ -125,11 +123,8 @@ public class NpcBeliefs : MonoBehaviour
 		if (Target == null || !RangedWeaponInHands) return false;
 
 		RangedWeaponItem weaponRanged = EquipmentHandler.itemInHands as RangedWeaponItem;
-
-		if (Target.Distance < weaponRanged.TypedDefinition.EffectiveRange)
-			return true;
-		else
-			return false;
+		float weaponRangeSqr = weaponRanged.TypedDefinition.EffectiveRange * weaponRanged.TypedDefinition.EffectiveRange;
+		return Target.SquaredDistance < weaponRangeSqr;
 	}
 	#endregion
 
@@ -138,20 +133,22 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (MeleeWeaponInHands) return false;
 
+		float fleeDistanceSqr = Definition.FleeDistance * Definition.FleeDistance;
+
 		if (TargetFleeingFrom != null) //flee
 		{
 			TargetFleeingFrom.UpdateTargetDistance(transform.position);
 
-			if (TargetFleeingFrom.Distance < Definition.FleeDistance)
+			if (TargetFleeingFrom.SquaredDistance < fleeDistanceSqr)
 			{
-				if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < TargetFleeingFrom.Distance) //switch to flee from closer threat
+				if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < TargetFleeingFrom.SquaredDistance) //switch to flee from closer threat
 					TargetFleeingFrom = ClosestFleeTarget;
 
 				return true;
 			}
 		}
 
-		if (ClosestFleeTarget != null && ClosestFleeTarget.Distance < Definition.FleeDistance) //start fleeing if not already
+		if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < fleeDistanceSqr) //start fleeing if not already
 		{
 			TargetFleeingFrom = ClosestFleeTarget;
 			return true;

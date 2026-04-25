@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
   m_Name: Ruger_Mini-14
   m_EditorClassIdentifier: 
-  itemId: 
-  itemName: 
+  itemId: Ruger_Mini-14
+  itemName: Ruger Mini-14
   itemDescription: 
   itemPrice: 300
   tradable: 1
@@ -30,7 +30,7 @@ MonoBehaviour:
   fireMode: 2
   fireRateRPM: 120
   reloadTime: 2.2
-  effectiveRange: 600
+  effectiveRange: 60
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0

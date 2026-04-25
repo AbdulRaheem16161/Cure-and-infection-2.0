@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
   m_Name: Sterling_L2A3
   m_EditorClassIdentifier: 
-  itemId: 
-  itemName: 
+  itemId: Sterling_L2A3
+  itemName: Sterling L2A3
   itemDescription: 
   itemPrice: 300
   tradable: 1
@@ -30,7 +30,7 @@ MonoBehaviour:
   fireMode: 4
   fireRateRPM: 650
   reloadTime: 2
-  effectiveRange: 400
+  effectiveRange: 30
   aimTime: 0
   moveSpeedModifier: 0
   aimMoveSpeedModifer: 0

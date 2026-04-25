@@ -77,6 +77,12 @@ namespace Game.MyNPC
 		public RandomAreaMoveManager RandomAreaMoveManager;
 		#endregion
 
+		#region Npc Range Consideration Toggles
+		[Header("Npc Range Consideration Toggles")]
+		[HideInInspector] public bool showUnholsteredWeaponRange;
+		[HideInInspector] public bool showFleeRange;
+		#endregion
+
 		public event Action<NpcController> OnDeathComplete;
 
 		///<summery>
@@ -231,6 +237,28 @@ namespace Game.MyNPC
 
 			if (Animator != null)
 				Animator.SetTrigger("Died");
+		}
+		#endregion
+
+		#region Gizmos
+		private void OnDrawGizmos()
+		{
+			if (showUnholsteredWeaponRange)
+			{
+				Gizmos.color = Color.green;
+
+				if (EquipmentHandler == null || EquipmentHandler.itemInHands == null) return;
+
+				if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition weaponRanged)
+					Gizmos.DrawWireSphere(transform.position, weaponRanged.EffectiveRange);
+			}
+
+			if (showFleeRange)
+			{
+				Gizmos.color = Color.red;
+				if (Definition == null) return;
+				Gizmos.DrawWireSphere(transform.position, Definition.FleeDistance);
+			}
 		}
 		#endregion
 	}

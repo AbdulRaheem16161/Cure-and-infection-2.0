@@ -18,6 +18,7 @@ MonoBehaviour:
   capabilities: 1983
   entityFlags: -1
   gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}
+  itemsDroppedOnDeath: []
   maxHealth: 100
   maxWater: 100
   maxFood: 100
@@ -34,7 +35,9 @@ MonoBehaviour:
   walkSpeed: 2.5
   sprintSpeed: 5.5
   rotationSpeed: 240
-  fleeDistance: 20
+  acceleration: 10
+  stoppingDistance: 1
+  fleeDistance: 10
   minIdleTime: 1
   maxIdleTime: 3
   viewAngle: 120
