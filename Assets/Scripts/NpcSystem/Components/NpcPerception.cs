@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using Game.MyNPC;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using static EntityDefinition;
@@ -8,12 +10,14 @@ using static EntityDefinition;
 [RequireComponent(typeof(NpcBeliefs))]
 [RequireComponent(typeof(NPCStateMachine))]
 [RequireComponent(typeof(StatsHandler))]
+[RequireComponent(typeof(EquipmentHandler))]
 public class NpcPerception : MonoBehaviour
 {
 	public EntityDefinition Definition {  get; private set; }
 	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 	public StatsHandler StatsHandler { get; private set; }
+	public EquipmentHandler EquipmentHandler{ get; private set; }
 
 	public GameObject rayViewPoint;
 
@@ -34,6 +38,7 @@ public class NpcPerception : MonoBehaviour
 	[Header("Layer Masks")]
 	private LayerMask targetMask;
 	private LayerMask lineOfSightMask;
+	private LayerMask coverMask;
 	#endregion
 
 	#region Runtime Targets
@@ -78,9 +83,11 @@ public class NpcPerception : MonoBehaviour
 		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
 		StatsHandler = GetComponent<StatsHandler>();
+		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		targetMask = LayerMask.GetMask("CharacterDetection");
-		lineOfSightMask = LayerMask.GetMask("Environment", "CharacterDetection");
+		lineOfSightMask = LayerMask.GetMask("Environment", "EnvironmentCover", "CharacterDetection");
+		coverMask = LayerMask.GetMask("EnvironmentCover");
 
 		StatsHandler.OnHit += InvestigateWhereHitFrom;
 	}
@@ -188,7 +195,7 @@ public class NpcPerception : MonoBehaviour
 		{
 			Vector3 lastRecordedPosition = Beliefs.Target.Transform.position;
 			TargetTrackResult trackResult;
-			(Target, trackResult) = TrackTarget(Target, LifeState.alive);
+			(Target, trackResult) = TrackTarget(Target, LifeState.alive, LifeState.zombified);
 
 			if (trackResult == TargetTrackResult.lost)
 				InvestigateLastSeenEnemyPosition(lastRecordedPosition);
@@ -326,9 +333,9 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region handle tracking found targets and loosing them
-	private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, LifeState lifeState)
+	private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, params LifeState[] validStates)
 	{
-		if (trackedTarget.StatsHandler.LifeState != lifeState) //life state changed (died or zombiefied now)
+		if (!validStates.Contains(trackedTarget.StatsHandler.LifeState))
 			return (null, TargetTrackResult.invalid);
 
 		trackedTarget.UpdateTargetDistance(transform.position);
@@ -337,6 +344,63 @@ public class NpcPerception : MonoBehaviour
 			return (trackedTarget, TargetTrackResult.valid);
 
 		return (null, TargetTrackResult.lost); //no longer in vision cone or line of sight
+	}
+	#endregion
+
+	#region Handle looking for valid cover position when requested
+	public bool FindValidCover(TargetData threat, out Vector3? coverMovePosition)
+	{
+		List<CoverObject> validCovers = new();
+		coverMovePosition = null;
+
+		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, coverMask); i++)
+		{
+			if (ColliderHits[i].TryGetComponent(out CoverObject cover)) //filter 
+				validCovers.Add(cover);
+		}
+
+		validCovers = FilterAndSortCovers(validCovers);
+
+		foreach (CoverObject cover in validCovers)
+		{
+			if (cover.GetClosestPointBehindCover(transform.position, threat.Transform.position, out Vector3? coverPosition))
+			{
+				coverMovePosition = coverPosition;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private List<CoverObject> FilterAndSortCovers(List<CoverObject> foundCovers)
+	{
+		for (int i = foundCovers.Count - 1; i >= 0; i--)
+		{
+			float coverSqrDistance = (foundCovers[i].transform.position - transform.position).sqrMagnitude;
+			if (coverSqrDistance + 1 < Definition.FleeSqrDistance)
+			{
+				foundCovers.RemoveAt(i);
+				continue;
+			}
+			if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition rangedWeapon)
+			{
+				if (coverSqrDistance > rangedWeapon.EffectiveSqrRange)
+				{
+					foundCovers.RemoveAt(i);
+					continue;
+				}
+			}
+		}
+
+		foundCovers.Sort((a, b) =>
+		{
+			float aSqrDistance = (a.transform.position - transform.position).sqrMagnitude;
+			float bSqrDistance = (b.transform.position - transform.position).sqrMagnitude;
+			return aSqrDistance.CompareTo(bSqrDistance);
+		});
+
+		return foundCovers;
 	}
 	#endregion
 

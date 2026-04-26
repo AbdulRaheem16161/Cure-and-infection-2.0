@@ -601,7 +601,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b808c453afa2d041ad1c293b4333f4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NpcDefinition: {fileID: 0}
+  Definition: {fileID: 0}
 --- !u!114 &5667844373502233258
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -614,6 +614,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556762a593628674da71c4a27adcac09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MovingToCover: 0
+  InCover: 0
 --- !u!114 &1864734135541436750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -627,22 +629,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentStateName: 
+  moveIntent: 0
+  IsSprinting: 0
   CurrentSpeed: 0
   CurrentDestination: {x: 0, y: 0, z: 0}
-  EnableFlee: 0
-  EnableRangedAttack: 0
-  EnableMeleeAttack: 0
-  EnableChase: 0
-  EnableEatCorpseState: 0
-  EnableInvestigate: 0
+  capabilityOverrides: 0
   EnableMovement: 0
-  useBackupMovement: 0
-  moveOnRandomPath: 0
-  RandomMovementManager: {fileID: 0}
-  moveOnPatrolPath: 0
-  PatrolPoints: {fileID: 0}
+  movementType: 0
+  PatrolPathManager: {fileID: 0}
   currentPatrolPoint: 0
   reachedCurrentControlPoint: 0
+  RandomAreaMoveManager: {fileID: 0}
+  showUnholsteredWeaponRange: 0
+  showFleeRange: 0
 --- !u!114 &3271726425788272760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -659,24 +658,6 @@ MonoBehaviour:
   viewAngle: 45
   viewDistance: 5
   showVision: 0
-  IsTargetDetected: 0
-  DetectedTarget:
-    StatsHandler: {fileID: 0}
-    Collider: {fileID: 0}
-    Transform: {fileID: 0}
-    Distance: 0
-  IsEatableTargetDetected: 0
-  EatableTarget:
-    StatsHandler: {fileID: 0}
-    Collider: {fileID: 0}
-    Transform: {fileID: 0}
-    Distance: 0
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 64
-  lineOfSightMask:
-    serializedVersion: 2
-    m_Bits: 72
 --- !u!114 &8402613863463263392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -711,17 +692,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edda677364658b744ba34b0e7a8ea499, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentSlots: []
+  WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
+  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
+  ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
   equippedHelmetParent: {fileID: 6955574495004589466}
   equippedChestpieceParent: {fileID: 5539106965887995012}
   equippedBackpackParent: {fileID: 6581287174850449170}
   equippedWeaponsParent: {fileID: 1968249813969630262}
   ItemsInHandsParent: {fileID: 3316105784211575187}
-  rangedWeaponInHands: {fileID: 0}
-  meleeWeaponInHands: {fileID: 0}
-  WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
-  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
-  ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
+  equippedItems: []
+  itemInHands: {fileID: 0}
   itemToEquip: {fileID: 0}
   itemToEquipCount: 0
   slotToEquipItemTo: 0
@@ -1604,7 +1584,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7974067048834509544}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: RayCastPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

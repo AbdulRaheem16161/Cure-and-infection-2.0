@@ -32,8 +32,8 @@ public class CoverObject : MonoBehaviour
 		AssignSourceCollider();
 		UpdateCoverPoint();
 
-		if (gameObject.layer != LayerMask.NameToLayer("Environment"))
-			Debug.LogError($"CoverObject '{name}' is not on 'Environment' layer, set it to 'Environment'.");
+		if (gameObject.layer != LayerMask.NameToLayer("EnvironmentCover"))
+			Debug.LogError($"CoverObject '{name}' is not on 'Environment' layer, set it to 'EnvironmentCover'.");
 
 		if (coverPoints.Count <= 0)
 			Debug.LogWarning($"CoverObject '{name}' has no cover points, either add them or remove the component.");
@@ -45,13 +45,15 @@ public class CoverObject : MonoBehaviour
 			sourceCollider = GetComponent<Collider>();
 	}
 
-	public Vector3 GetClosestPoint(Vector3 position)
+	public bool GetClosestPointBehindCover(Vector3 position, Vector3 threatPosition, out Vector3? coverPosition)
 	{
 		float bestDist = float.MaxValue;
-		Vector3 bestPoint = Vector3.zero;
+		coverPosition = null;
 
 		for (int i = 0; i < coverPoints.Count - 1; i++)
 		{
+			//add logic to ensure point is between threat and position
+
 			Vector3 a = coverPoints[i].position;
 			Vector3 b = coverPoints[i + 1].position;
 
@@ -61,11 +63,11 @@ public class CoverObject : MonoBehaviour
 			if (dist < bestDist)
 			{
 				bestDist = dist;
-				bestPoint = point;
+				coverPosition = point;
 			}
 		}
 
-		return bestPoint;
+		return coverPosition != null;
 	}
 	private Vector3 GetClosestPointOnSegment(Vector3 a, Vector3 b, Vector3 p)
 	{
@@ -73,50 +75,6 @@ public class CoverObject : MonoBehaviour
 		float t = Vector3.Dot(p - a, ab) / ab.sqrMagnitude;
 		t = Mathf.Clamp01(t);
 		return a + ab * t;
-	}
-
-	public Vector3 GetBestCoverPoint(Vector3 threatPosition, int samplesPerSegment = 3)
-	{
-		float bestScore = float.MinValue;
-		Vector3 bestPoint = Vector3.zero;
-
-		for (int i = 0; i < coverPoints.Count - 1; i++)
-		{
-			Vector3 a = coverPoints[i].position;
-			Vector3 b = coverPoints[i + 1].position;
-
-			for (int j = 0; j <= samplesPerSegment; j++)
-			{
-				float t = j / (float)samplesPerSegment;
-				Vector3 sample = Vector3.Lerp(a, b, t);
-
-				if (!IsPointInCover(sample, threatPosition))
-					continue;
-
-				float score = -Vector3.Distance(sample, threatPosition);
-
-				if (score > bestScore)
-				{
-					bestScore = score;
-					bestPoint = sample;
-				}
-			}
-		}
-
-		return bestPoint;
-	}
-
-	public bool IsPointInCover(Vector3 point, Vector3 threatPosition)
-	{
-		Vector3 dir = (point - threatPosition).normalized;
-		float dist = Vector3.Distance(threatPosition, point);
-
-		if (Physics.Raycast(threatPosition, dir, out RaycastHit hit, dist))
-		{
-			return hit.transform == transform; // or compare layers/tags
-		}
-
-		return false;
 	}
 
 	#region Cover Point Management

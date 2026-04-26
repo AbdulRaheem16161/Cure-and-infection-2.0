@@ -62,6 +62,16 @@ public class NpcBeliefsEditor : Editor
 
 		EditorGUILayout.Space(10);
 
+		#region Cover Beliefs
+		EditorGUILayout.LabelField("Investigation Beliefs", EditorStyles.boldLabel);
+		EditorGUI.indentLevel++;
+		EditorGUILayout.Toggle("Moving To Cover", beliefs.MovingToCover);
+		EditorGUILayout.Toggle("In Cover", beliefs.InCover);
+		EditorGUI.indentLevel--;
+		#endregion
+
+		EditorGUILayout.Space(10);
+
 		#region Target Beliefs
 		EditorGUILayout.LabelField("Target Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;

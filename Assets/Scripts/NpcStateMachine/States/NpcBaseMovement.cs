@@ -92,6 +92,7 @@ public class NpcBaseMovementState : NPCBaseState
 			return;
 		}
 
+		stateMachine.Beliefs.InCover = false;
 		stateMachine.CurrentDestination = sampledPosition;
 		stateMachine.Agent.isStopped = false;
 		stateMachine.Agent.updatePosition = true;

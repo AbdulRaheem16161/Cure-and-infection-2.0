@@ -9,6 +9,7 @@ namespace Game.MyNPC
 		private RangedWeaponItem EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as RangedWeaponItem;
 		private float shotsToBurstFireCount;
 		private float randomShotDelay;
+		private float coverSearchDelay;
 
 		private readonly System.Random systemRandom = new();
 
@@ -21,7 +22,10 @@ namespace Game.MyNPC
 		public override void Enter()
         {
 			lookingAtTarget = false;
-			stateMachine.Beliefs.SetNewInvestigateLocation(null);
+			Beliefs.SetNewInvestigateLocation(null);
+			Beliefs.MovingToCover = false;
+			Beliefs.InCover = false;
+			coverSearchDelay = 0f;
 			BurstFireBehaviour();
 		}
 
@@ -29,9 +33,19 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			//logic to handle looking at target and handling shooting
+			HandleFindingAndMovingToCover(deltaTime);
+
+			if (Beliefs.MovingToCover && HasReachedDestination())
+			{
+				Beliefs.InCover = true; 
+				Beliefs.MovingToCover = false; 
+				return; 
+			}
+
+			if (Beliefs.MovingToCover) return;
+
+			LookAtDirection(Beliefs.Target.Transform.position);
 			HandleShootingBehaviour(deltaTime);
-			LookAtDirection(stateMachine.Beliefs.Target.Transform.position);
 		}
 
         public override void Exit()
@@ -40,14 +54,49 @@ namespace Game.MyNPC
 			stateMachine.Agent.isStopped = false;
 		}
 
+		#region Handle Finding And Moving To Cover
+		private void HandleFindingAndMovingToCover(float deltaTime)
+		{
+			if (!ShouldUseCover() || Beliefs.InCover || Beliefs.MovingToCover) return;
+
+			coverSearchDelay -= deltaTime;
+			if (coverSearchDelay > 0f)
+				return;
+
+			coverSearchDelay = 2f;
+
+			if (stateMachine.NpcPerception.FindValidCover(Beliefs.Target, out Vector3? coverMovePosition))
+			{
+				MoveToDestination(coverMovePosition.Value, MoveType.sprint);
+				lookingAtTarget = false;
+				Beliefs.MovingToCover = true;
+			}
+		}
+		#endregion
+
+		#region Should Use Cover Logic Check
+		//limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
+		private bool ShouldUseCover()
+		{
+			EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
+			if (targetDefinition is HumanoidDefinition humanoid)
+			{
+				if (humanoid.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie))
+					return true;
+			}
+
+			return false;
+		}
+		#endregion
+
 		#region Handle Shooting behaviour
 		private void HandleShootingBehaviour(float deltaTime)
 		{
-			if (!lookingAtTarget) return;
-
 			randomShotDelay -= deltaTime;
 			if (randomShotDelay > 0f)
 				return;
+
+			if (!lookingAtTarget) return;
 
 			if (EquippedWeapon.MagazineEmpty)
 				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);

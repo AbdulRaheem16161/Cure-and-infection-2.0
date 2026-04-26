@@ -39,6 +39,11 @@ MovementTypesTest:
 3 npcs spawn in set to each of the movement types, 1 will patrol around on a set blue patrol path, one will move randomly around itself,
 another will move around randomly in a set green area. (see NPCS RANDOM AREA MOVE "BUG" comment at top)
 
+NpcCoverTests:
+Contains 2 tests, one for showing how npcs wont use cover if not needed (engaging zombies or animals for example)
+and another for showing how npcs will utilize cover (engaging other survivors for example)
+In the cover test npcs will spawn see one another, seek to find cover first before shooting. (of course ones facing zombies will shoot straight away)
+
 ReactingToSoundAndHurtTest:
 2 npcs spawn, one infront of the other, the one behind will shoot the one in front, on hit they will go to investigate the direction they were shot from
 quickly spotting the one that shot them. (once sound is properly set up i will add a 3rd npc that will hear the gunshot and investigate)

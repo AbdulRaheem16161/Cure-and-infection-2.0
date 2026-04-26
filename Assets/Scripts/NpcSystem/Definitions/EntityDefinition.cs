@@ -131,6 +131,7 @@ public class EntityDefinition : ScriptableObject
 	public float Acceleration => acceleration;
 	public float StoppingDistance => stoppingDistance;
 	public float FleeDistance => fleeDistance;
+	public float FleeSqrDistance => fleeDistance * fleeDistance;
 	public float MinIdleTime => minIdleTime;
 	public float MaxIdleTime => maxIdleTime;
 

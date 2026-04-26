@@ -42,6 +42,11 @@ public class NpcBeliefs : MonoBehaviour
 	public Vector3? InvestigateLocation { get; private set; }
 	#endregion
 
+	#region Cover Beliefs
+	public bool MovingToCover;
+	public bool InCover;
+	#endregion
+
 	#region Target Beliefs
 	public TargetData Target => NpcPerception.Target;
 	public TargetData EatableTarget => NpcPerception.EatableTarget;
@@ -123,8 +128,7 @@ public class NpcBeliefs : MonoBehaviour
 		if (Target == null || !RangedWeaponInHands) return false;
 
 		RangedWeaponItem weaponRanged = EquipmentHandler.itemInHands as RangedWeaponItem;
-		float weaponRangeSqr = weaponRanged.TypedDefinition.EffectiveRange * weaponRanged.TypedDefinition.EffectiveRange;
-		return Target.SquaredDistance < weaponRangeSqr;
+		return Target.SquaredDistance < weaponRanged.TypedDefinition.EffectiveSqrRange;
 	}
 	#endregion
 
@@ -133,13 +137,11 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (MeleeWeaponInHands) return false;
 
-		float fleeDistanceSqr = Definition.FleeDistance * Definition.FleeDistance;
-
 		if (TargetFleeingFrom != null) //flee
 		{
 			TargetFleeingFrom.UpdateTargetDistance(transform.position);
 
-			if (TargetFleeingFrom.SquaredDistance < fleeDistanceSqr)
+			if (TargetFleeingFrom.SquaredDistance < Definition.FleeSqrDistance)
 			{
 				if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < TargetFleeingFrom.SquaredDistance) //switch to flee from closer threat
 					TargetFleeingFrom = ClosestFleeTarget;
@@ -148,7 +150,7 @@ public class NpcBeliefs : MonoBehaviour
 			}
 		}
 
-		if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < fleeDistanceSqr) //start fleeing if not already
+		if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < Definition.FleeSqrDistance) //start fleeing if not already
 		{
 			TargetFleeingFrom = ClosestFleeTarget;
 			return true;

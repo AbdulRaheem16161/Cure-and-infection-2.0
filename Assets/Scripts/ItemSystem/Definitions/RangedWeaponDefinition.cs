@@ -77,6 +77,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	public int FireRateRPM => fireRateRPM;
 	public float ReloadTime => reloadTime;
 	public int EffectiveRange => effectiveRange;
+	public int EffectiveSqrRange => effectiveRange * effectiveRange;
 
 	//handling
 	public float AimTime => aimTime;
