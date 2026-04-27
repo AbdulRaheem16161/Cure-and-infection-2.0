@@ -42,7 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -120,14 +121,12 @@ NavMeshSettings:
   m_NavMeshData: {fileID: 0}
 --- !u!4 &31819701 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: bdf908190a7ed4fe7b6dfd69e04f6f28,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: bdf908190a7ed4fe7b6dfd69e04f6f28, type: 3}
   m_PrefabInstance: {fileID: 500073213}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &117223636 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6, type: 3}
   m_PrefabInstance: {fileID: 738836113}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &170076733
@@ -809,8 +808,7 @@ MonoBehaviour:
   pipelineAsset: {fileID: 11400000, guid: ecbd363870e07455ea237f5753668d30, type: 2}
 --- !u!4 &407214962 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6, type: 3}
   m_PrefabInstance: {fileID: 228007254}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &500073213
@@ -1986,8 +1984,7 @@ MonoBehaviour:
     m_ContrastAdaptiveSharpening: 0
 --- !u!4 &2045271438 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: e04be998d717248f8bde6d98b4038eb6, type: 3}
   m_PrefabInstance: {fileID: 1172465493}
   m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
