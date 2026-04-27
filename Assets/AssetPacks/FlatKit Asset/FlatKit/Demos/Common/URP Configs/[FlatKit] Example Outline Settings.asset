@@ -44,8 +44,8 @@ Material:
     m_Floats:
     - _ColorThresholdMax: 0.25
     - _ColorThresholdMin: 0
-    - _DepthThresholdMax: 0.1
-    - _DepthThresholdMin: 0.1
+    - _DepthThresholdMax: 2
+    - _DepthThresholdMin: 0
     - _FadeRangeEnd: 50
     - _FadeRangeStart: 10
     - _NormalThresholdMax: 2
@@ -74,8 +74,8 @@ MonoBehaviour:
   fadeRangeStart: 10
   fadeRangeEnd: 50
   useDepth: 1
-  minDepthThreshold: 0.1
-  maxDepthThreshold: 0.1
+  minDepthThreshold: 0
+  maxDepthThreshold: 2
   useNormals: 1
   minNormalsThreshold: 0
   maxNormalsThreshold: 2
