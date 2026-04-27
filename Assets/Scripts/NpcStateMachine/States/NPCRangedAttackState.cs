@@ -11,10 +11,16 @@ namespace Game.MyNPC
 		private float randomShotDelay;
 		private float coverSearchDelay;
 
+		private Vector3 directionToLookBackTo;
+
 		private readonly System.Random systemRandom = new();
 
 		public override bool IsValid()
 		{
+			if (stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && 
+				Beliefs.MovingToCover && Beliefs.TargetFleeingFrom == null)
+				return true;
+
 			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && 
 				Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 		}
@@ -37,9 +43,16 @@ namespace Game.MyNPC
 
 			if (Beliefs.MovingToCover && HasReachedDestination())
 			{
-				Beliefs.InCover = true; 
-				Beliefs.MovingToCover = false; 
-				return; 
+				LookAtDirection(directionToLookBackTo);
+
+				if (lookingAtTarget)
+				{
+					Beliefs.InCover = true;
+					Beliefs.MovingToCover = false;
+					lookingAtTarget = false;
+				}
+
+				return;
 			}
 
 			if (Beliefs.MovingToCover) return;
@@ -67,6 +80,7 @@ namespace Game.MyNPC
 
 			if (stateMachine.NpcPerception.FindValidCover(Beliefs.Target, out Vector3? coverMovePosition))
 			{
+				directionToLookBackTo = Beliefs.Target.Transform.position;
 				MoveToDestination(coverMovePosition.Value, MoveType.sprint);
 				lookingAtTarget = false;
 				Beliefs.MovingToCover = true;
@@ -78,6 +92,8 @@ namespace Game.MyNPC
 		//limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
 		private bool ShouldUseCover()
 		{
+			if (Beliefs.MovingToCover && Beliefs.Target == null) return true;
+
 			EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
 			if (targetDefinition is HumanoidDefinition humanoid)
 			{

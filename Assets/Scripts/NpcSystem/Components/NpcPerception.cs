@@ -359,7 +359,7 @@ public class NpcPerception : MonoBehaviour
 				validCovers.Add(cover);
 		}
 
-		validCovers = FilterAndSortCovers(validCovers);
+		validCovers = FilterAndSortCovers(threat, validCovers);
 
 		foreach (CoverObject cover in validCovers)
 		{
@@ -373,23 +373,19 @@ public class NpcPerception : MonoBehaviour
 		return false;
 	}
 
-	private List<CoverObject> FilterAndSortCovers(List<CoverObject> foundCovers)
+	private List<CoverObject> FilterAndSortCovers(TargetData threat, List<CoverObject> foundCovers)
 	{
 		for (int i = foundCovers.Count - 1; i >= 0; i--)
 		{
-			float coverSqrDistance = (foundCovers[i].transform.position - transform.position).sqrMagnitude;
-			if (coverSqrDistance + 1 < Definition.FleeSqrDistance)
+			float coverSqrDistanceToSelf = (foundCovers[i].transform.position - transform.position).sqrMagnitude;
+			float coverSqrDistanceToThreat = (foundCovers[i].transform.position - threat.Transform.position).sqrMagnitude;
+
+			if (CoverObjectWithinSquaredDistance(Definition.FleeSqrDistance, coverSqrDistanceToSelf) ||
+				CoverObjectWithinSquaredDistance(threat.SquaredDistance, coverSqrDistanceToThreat) ||
+				CoverObjectOutsideEquippedWeaponRange(coverSqrDistanceToSelf))
 			{
 				foundCovers.RemoveAt(i);
 				continue;
-			}
-			if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition rangedWeapon)
-			{
-				if (coverSqrDistance > rangedWeapon.EffectiveSqrRange)
-				{
-					foundCovers.RemoveAt(i);
-					continue;
-				}
 			}
 		}
 
@@ -401,6 +397,18 @@ public class NpcPerception : MonoBehaviour
 		});
 
 		return foundCovers;
+	}
+
+	private bool CoverObjectWithinSquaredDistance(float squaredDistance, float coverSqrDistance)
+	{
+		return coverSqrDistance + 1 < squaredDistance;
+	}
+	private bool CoverObjectOutsideEquippedWeaponRange(float coverSqrDistance)
+	{
+		if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition rangedWeapon)
+			return coverSqrDistance > rangedWeapon.EffectiveSqrRange;
+		else
+			return false;
 	}
 	#endregion
 

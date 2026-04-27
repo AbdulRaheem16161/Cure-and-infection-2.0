@@ -190,7 +190,7 @@ public class NpcBaseMovementState : NPCBaseState
 		}
 
 		float angle = Quaternion.Angle(stateMachine.transform.rotation, targetRotation);
-		lookingAtTarget = angle < 5f; // If angle below 2 degrees, its looking at target
+		lookingAtTarget = angle < 5f; // If angle below 5 degrees, its looking at target
 	}
 	#endregion
 

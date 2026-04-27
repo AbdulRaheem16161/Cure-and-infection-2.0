@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class NpcFleeState : NpcBaseMovementState
 {
-	Vector3 directionToLookBackTo;
+	private Vector3 directionToLookBackTo;
 
 	private readonly float fleeCooldown = 2f;
 	private float fleeTimer;

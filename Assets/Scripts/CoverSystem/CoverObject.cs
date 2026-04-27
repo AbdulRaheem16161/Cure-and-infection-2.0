@@ -8,6 +8,7 @@ public class CoverObject : MonoBehaviour
 {
 	private Collider sourceCollider;
 	private GameObject coverPointsParent;
+	private LayerMask coverBetweenThreatMask;
 
 	[Header("Cover Points Auto Generation Settings")]
 	[SerializeField] private float spacing = 2f;
@@ -29,6 +30,7 @@ public class CoverObject : MonoBehaviour
 
 	private void Awake()
 	{
+		coverBetweenThreatMask = LayerMask.GetMask("Environment", "EnvironmentCover", "CharacterDetection");
 		AssignSourceCollider();
 		UpdateCoverPoint();
 
@@ -58,6 +60,10 @@ public class CoverObject : MonoBehaviour
 			Vector3 b = coverPoints[i + 1].position;
 
 			Vector3 point = GetClosestPointOnSegment(a, b, position);
+
+			if (!Physics.Linecast(threatPosition, point, coverBetweenThreatMask))
+				continue;
+
 			float dist = Vector3.Distance(position, point);
 
 			if (dist < bestDist)
