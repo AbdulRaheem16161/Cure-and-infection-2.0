@@ -44,6 +44,11 @@ Contains 2 tests, one for showing how npcs wont use cover if not needed (engagin
 and another for showing how npcs will utilize cover (engaging other survivors for example)
 In the cover test npcs will spawn see one another, seek to find cover first before shooting. (of course ones facing zombies will shoot straight away)
 
+CoverFarAwayTest:
+2 npcs spawn away from each other, 1 pair with cover infront of them that will move to and shoot at other pair, 
+the other pair has cover behind them, the pair will move to cover behind them, and semi randomly shoot back while moving to cover. 
+(wanted to simulate more human behaviour when cover is far away)
+
 ReactingToSoundAndHurtTest:
 2 npcs spawn, one infront of the other, the one behind will shoot the one in front, on hit they will go to investigate the direction they were shot from
 quickly spotting the one that shot them. (once sound is properly set up i will add a 3rd npc that will hear the gunshot and investigate)

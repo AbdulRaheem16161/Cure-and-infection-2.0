@@ -40,11 +40,14 @@ public class NpcBeliefs : MonoBehaviour
 	#region Investigation Beliefs
 	public bool FreeToInvestigate => InvestigateLocation != null && Target == null;
 	public Vector3? InvestigateLocation { get; private set; }
+	public Vector3? LookDirection { get; private set; }
 	#endregion
 
 	#region Cover Beliefs
-	public bool MovingToCover;
-	public bool InCover;
+	public bool MovingToCover => CoverPosition.HasValue;
+	[NonSerialized] public bool ReturnFire;
+	[NonSerialized] public bool InCover;
+	public Vector3? CoverPosition { get; private set; }
 	#endregion
 
 	#region Target Beliefs
@@ -57,7 +60,7 @@ public class NpcBeliefs : MonoBehaviour
 	#region Flee Beliefs
 	public bool TargetInFleeRange => TargetInFleeRangeCheck();
 	public TargetData ClosestFleeTarget => NpcPerception.ClosestFleeTarget; //not shown
-	public TargetData TargetFleeingFrom { get; private set; }
+	public TargetData FleeTarget { get; private set; }
 	#endregion
 
 	#region Equipment Beliefs
@@ -96,6 +99,7 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		Definition = definition;
 		InvestigateLocation = null;
+		LookDirection = null;
 	}
 
 	private void OnDestroy()
@@ -137,14 +141,14 @@ public class NpcBeliefs : MonoBehaviour
 	{
 		if (MeleeWeaponInHands) return false;
 
-		if (TargetFleeingFrom != null) //flee
+		if (FleeTarget != null) //flee
 		{
-			TargetFleeingFrom.UpdateTargetDistance(transform.position);
+			FleeTarget.UpdateTargetDistance(transform.position);
 
-			if (TargetFleeingFrom.SquaredDistance < Definition.FleeSqrDistance)
+			if (FleeTarget.SquaredDistance < Definition.FleeSqrDistance)
 			{
-				if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < TargetFleeingFrom.SquaredDistance) //switch to flee from closer threat
-					TargetFleeingFrom = ClosestFleeTarget;
+				if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < FleeTarget.SquaredDistance) //switch to flee from closer threat
+					FleeTarget = ClosestFleeTarget;
 
 				return true;
 			}
@@ -152,15 +156,15 @@ public class NpcBeliefs : MonoBehaviour
 
 		if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < Definition.FleeSqrDistance) //start fleeing if not already
 		{
-			TargetFleeingFrom = ClosestFleeTarget;
+			FleeTarget = ClosestFleeTarget;
 			return true;
 		}
 
 		return false;
 	}
-	public void UpdateTargetFleeingFrom(TargetData targetData)
+	public void UpdateFleeTarget(TargetData targetData)
 	{
-		TargetFleeingFrom = targetData;
+		FleeTarget = targetData;
 	}
 	#endregion
 
@@ -187,10 +191,24 @@ public class NpcBeliefs : MonoBehaviour
 	}
 	#endregion
 
+	#region Update Cover Object
+	public void UpdateCoverPosition(Vector3? coverPosition)
+	{
+		CoverPosition = coverPosition;
+	}
+	#endregion
+
 	#region Update InvestigateLocation
 	public void SetNewInvestigateLocation(Vector3? location)
 	{
 		InvestigateLocation = location;
+	}
+	#endregion
+
+	#region Update LookDirection
+	public void SetNewLookDirection(Vector3? location)
+	{
+		LookDirection = location;
 	}
 	#endregion
 

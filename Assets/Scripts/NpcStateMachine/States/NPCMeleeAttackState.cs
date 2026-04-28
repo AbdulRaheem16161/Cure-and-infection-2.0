@@ -18,8 +18,8 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.meleeAttack) && 
-				Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
+			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.meleeAttack) && Beliefs.FleeTarget == null && 
+				Beliefs.Target != null && Beliefs.TargetInMeleeRange && Beliefs.MeleeWeaponInHands;
 		}
 
 		public override void Enter()

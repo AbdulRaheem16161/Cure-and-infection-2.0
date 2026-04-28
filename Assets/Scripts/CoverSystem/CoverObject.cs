@@ -54,8 +54,6 @@ public class CoverObject : MonoBehaviour
 
 		for (int i = 0; i < coverPoints.Count - 1; i++)
 		{
-			//add logic to ensure point is between threat and position
-
 			Vector3 a = coverPoints[i].position;
 			Vector3 b = coverPoints[i + 1].position;
 

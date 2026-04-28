@@ -10,8 +10,8 @@ public class NpcHealState : NPCBaseState
 
 	public override bool IsValid()
 	{
-		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.heal) 
-			&& Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Hurt && Beliefs.CanHeal;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.heal) && Beliefs.FleeTarget == null &&
+			Beliefs.Target == null && Beliefs.Hurt && Beliefs.CanHeal;
 	}
 
 	public override void Enter()

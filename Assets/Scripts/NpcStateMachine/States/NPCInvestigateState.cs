@@ -11,8 +11,8 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.investigate) 
-			&& Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.investigate) && Beliefs.FleeTarget == null &&
+			Beliefs.Target == null && Beliefs.EatableTarget == null && Beliefs.FreeToInvestigate;
 	}
 
 	public override void Enter()
@@ -20,13 +20,15 @@ public class NPCInvestigateState : NpcBaseMovementState
 		glanceStarted = false;
 		glanceDone = false;
 		glancingDelay = 2f;
-		MoveToDestination((Vector3)stateMachine.Beliefs.InvestigateLocation, MoveType.sprint);
+
+		if (Beliefs.InvestigateLocation.HasValue)
+			MoveToDestination(Beliefs.InvestigateLocation.Value, MoveType.sprint);
 	}
 
 	public override void Exit()
 	{
 		//null on exit incase enemy spotted before glancing finished
-		stateMachine.Beliefs.SetNewInvestigateLocation(null);
+		Beliefs.SetNewInvestigateLocation(null);
 	}
 
 	public override void Tick(float deltaTime)
@@ -51,7 +53,7 @@ public class NPCInvestigateState : NpcBaseMovementState
 			}
 
 			if (glanceDone)
-				stateMachine.Beliefs.SetNewInvestigateLocation(null);
+				Beliefs.SetNewInvestigateLocation(null);
 		}
 	}
 }

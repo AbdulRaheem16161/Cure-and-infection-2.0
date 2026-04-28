@@ -10,8 +10,8 @@ public class NpcDrinkState : NPCBaseState
 
 	public override bool IsValid()
 	{
-		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.drink) 
-			&& Beliefs.TargetFleeingFrom == null && Beliefs.Target == null && Beliefs.Thirsty && Beliefs.CanDrink;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.drink) && Beliefs.FleeTarget == null &&
+			Beliefs.Target == null && Beliefs.Thirsty && Beliefs.CanDrink;
 	}
 
 	public override void Enter()

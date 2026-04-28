@@ -9,8 +9,8 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.chase) 
-				&& Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && !Beliefs.TargetInShootingRange && !Beliefs.TargetInMeleeRange;
+			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.chase) &&
+				Beliefs.FleeTarget == null && Beliefs.Target != null;
 		}
 
 		public override void Enter()

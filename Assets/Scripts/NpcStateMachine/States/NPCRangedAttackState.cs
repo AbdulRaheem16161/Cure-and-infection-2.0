@@ -7,58 +7,39 @@ namespace Game.MyNPC
 		public NPCRangedAttackState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 		private RangedWeaponItem EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as RangedWeaponItem;
-		private float shotsToBurstFireCount;
-		private float randomShotDelay;
-		private float coverSearchDelay;
 
-		private Vector3 directionToLookBackTo;
+		private float shotsToBurstFireCount;
+		private float burstFireDelay;
+		private float shotDelay;
 
 		private readonly System.Random systemRandom = new();
 
 		public override bool IsValid()
 		{
-			if (stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && 
-				Beliefs.MovingToCover && Beliefs.TargetFleeingFrom == null)
-				return true;
+			bool canShoot = stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && Beliefs.FleeTarget == null &&
+				Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
 
-			return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.rangedAttack) && 
-				Beliefs.TargetFleeingFrom == null && Beliefs.Target != null && Beliefs.TargetInShootingRange && Beliefs.RangedWeaponInHands;
+			return canShoot && (!Beliefs.MovingToCover || Beliefs.ReturnFire);
 		}
 
 		public override void Enter()
         {
-			lookingAtTarget = false;
 			Beliefs.SetNewInvestigateLocation(null);
-			Beliefs.MovingToCover = false;
-			Beliefs.InCover = false;
-			coverSearchDelay = 0f;
-			BurstFireBehaviour();
+			lookingAtTarget = false;
+			shotDelay = 0f;
+			burstFireDelay = 0f;
+			shotsToBurstFireCount = GetBurstFireCount();
 		}
 
         public override void Tick(float deltaTime)
         {
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			HandleFindingAndMovingToCover(deltaTime);
-
-			if (Beliefs.MovingToCover && HasReachedDestination())
-			{
-				LookAtDirection(directionToLookBackTo);
-
-				if (lookingAtTarget)
-				{
-					Beliefs.InCover = true;
-					Beliefs.MovingToCover = false;
-					lookingAtTarget = false;
-				}
-
-				return;
-			}
-
-			if (Beliefs.MovingToCover) return;
+			ShotDelayTimer(deltaTime);
+			BurstFireDelayTimer(deltaTime);
 
 			LookAtDirection(Beliefs.Target.Transform.position);
-			HandleShootingBehaviour(deltaTime);
+			HandleShootingBehaviour();
 		}
 
         public override void Exit()
@@ -67,87 +48,62 @@ namespace Game.MyNPC
 			stateMachine.Agent.isStopped = false;
 		}
 
-		#region Handle Finding And Moving To Cover
-		private void HandleFindingAndMovingToCover(float deltaTime)
-		{
-			if (!ShouldUseCover() || Beliefs.InCover || Beliefs.MovingToCover) return;
-
-			coverSearchDelay -= deltaTime;
-			if (coverSearchDelay > 0f)
-				return;
-
-			coverSearchDelay = 2f;
-
-			if (stateMachine.NpcPerception.FindValidCover(Beliefs.Target, out Vector3? coverMovePosition))
-			{
-				directionToLookBackTo = Beliefs.Target.Transform.position;
-				MoveToDestination(coverMovePosition.Value, MoveType.sprint);
-				lookingAtTarget = false;
-				Beliefs.MovingToCover = true;
-			}
-		}
-		#endregion
-
-		#region Should Use Cover Logic Check
-		//limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
-		private bool ShouldUseCover()
-		{
-			if (Beliefs.MovingToCover && Beliefs.Target == null) return true;
-
-			EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
-			if (targetDefinition is HumanoidDefinition humanoid)
-			{
-				if (humanoid.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie))
-					return true;
-			}
-
-			return false;
-		}
-		#endregion
-
 		#region Handle Shooting behaviour
-		private void HandleShootingBehaviour(float deltaTime)
+		private void HandleShootingBehaviour()
 		{
-			randomShotDelay -= deltaTime;
-			if (randomShotDelay > 0f)
-				return;
-
 			if (!lookingAtTarget) return;
 
 			if (EquippedWeapon.MagazineEmpty)
 				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
 			else
 			{
+				if (shotDelay > 0f || burstFireDelay > 0f)
+					return;
+
 				EquippedWeapon.Shoot();
-				shotsToBurstFireCount--;
-				BurstFireBehaviour();
+				HandlePerShotBehaviour();
+				HandleBurstFireBehaviour();
 			}
 		}
 		#endregion
 
-		#region human burst fire behaviour
-		///<summery>
-		/// simulate human shooting with short bursts (full auto gets longer bursts)
-		/// extra delay for every shot to simulate npc recoil/aiming recovery with non full auto fire modes
-		/// add longer pause after every burst fire (bolts ignore this)
-		///<summery>
-		private void BurstFireBehaviour()
-        {
-			if (EquippedWeapon.TypedDefinition.FireMode != WeaponRangedDefinition.FireModeType.fullAuto)
-				randomShotDelay = GetRandomShotDelay();
+		#region Burst Fire and Per Shot Behaviour (simulates more human behaviour)
+		private void HandleBurstFireBehaviour()
+		{
+			shotsToBurstFireCount--;
 
-			if (shotsToBurstFireCount <= 0)
-			{
-				if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
-					randomShotDelay = GetRandomShotDelay(); //gets skipped above, set full auto here
+			if (shotsToBurstFireCount > 0) return;
 
-				if (EquippedWeapon.TypedDefinition.Weapon != WeaponRangedDefinition.WeaponType.boltActionRifle)
-					randomShotDelay *= 3;
+			burstFireDelay = GetShotDelay() * 3;// longer delay after burst fire
+			shotsToBurstFireCount = GetBurstFireCount();
 
-				shotsToBurstFireCount = GetBurstFireCount();
-			}
+			if (Beliefs.ReturnFire)
+				Beliefs.ReturnFire = false;
 		}
-        private float GetRandomShotDelay()
+		private void HandlePerShotBehaviour()
+		{
+			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
+				shotDelay = 0;
+			else
+				shotDelay = GetShotDelay();
+		}
+		#endregion
+
+		#region Burst And Shot Delay Timers
+		private bool BurstFireDelayTimer(float deltaTime)
+		{
+			burstFireDelay -= deltaTime;
+			return burstFireDelay > 0f;
+		}
+		private bool ShotDelayTimer(float deltaTime)
+		{
+			shotDelay -= deltaTime;
+			return shotDelay > 0f;
+		}
+		#endregion
+
+		#region Get Shot Delay (reused for burst fire too)
+		private float GetShotDelay()
 		{
 			float minFireDelay = 0;
 			float maxFireDelay = 0;
@@ -182,7 +138,10 @@ namespace Game.MyNPC
 
 			return (float)(systemRandom.NextDouble() * (maxFireDelay - minFireDelay) + minFireDelay);
 		}
-        private int GetBurstFireCount()
+		#endregion
+
+		#region Get Burst Fire Count
+		private int GetBurstFireCount()
         {
 			int minShots = 0;
 			int maxShots = 0;
@@ -191,35 +150,35 @@ namespace Game.MyNPC
 			{
 				case WeaponRangedDefinition.WeaponType.handgun:
 				minShots = 2;
-				maxShots = 5;
-				break;
-				case WeaponRangedDefinition.WeaponType.shotgun:
-				minShots = 2;
 				maxShots = 4;
 				break;
+				case WeaponRangedDefinition.WeaponType.shotgun:
+				minShots = 1;
+				maxShots = 3;
+				break;
 				case WeaponRangedDefinition.WeaponType.smg:
-				minShots = 2;
+				minShots = 3;
 				maxShots = 5;
 				break;
 				case WeaponRangedDefinition.WeaponType.assaultRifle:
 				minShots = 2;
-				maxShots = 5;
+				maxShots = 4;
 				break;
 				case WeaponRangedDefinition.WeaponType.marksmanRifle:
 				minShots = 2;
 				maxShots = 4;
 				break;
 				case WeaponRangedDefinition.WeaponType.boltActionRifle:
-				minShots = 0;
-				maxShots = 0;
+				minShots = 1;
+				maxShots = 1;
 				break;
 			}
 
 			//bigger bursts for full auto guns
 			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
 			{
-				minShots *= 2;
-				maxShots *= 2;
+				minShots += 2;
+				maxShots += 3;
 			}
 
 			return systemRandom.Next(minShots, maxShots);

@@ -60,7 +60,7 @@ public class NpcBaseMovementState : NPCBaseState
 	/// <summary>
 	/// flee from passed in vector 3 argument, with a randomization angle
 	/// </summary>
-	protected void FleeToNewDestination(Vector3 positionToFleeFrom)
+	protected void FleeFromPosition(Vector3 positionToFleeFrom)
 	{
 		//calculate flee direction with some randomization with angle
 		Vector3 fleeDirection = (stateMachine.transform.position - positionToFleeFrom).normalized;

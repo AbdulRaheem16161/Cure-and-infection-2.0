@@ -77,6 +77,11 @@ public class NpcPerception : MonoBehaviour
 	private float fleeTargetTimer;
 	#endregion
 
+	#region cover object timer
+	private readonly float coverSearchCooldown = 2f;
+	private float coverSearchDelay;
+	#endregion
+
 	#region awake + Initialize
 	private void Awake()
 	{
@@ -120,6 +125,7 @@ public class NpcPerception : MonoBehaviour
 		SearchForLivingTarget();
 		SearchForEatableTarget();
 		SearchForClosestFleeTarget();
+		SearchForCoverObject();
 	}
 
 	/// <summary>
@@ -183,7 +189,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	#region timed target search types
+	#region Timer Search Types (Target, EatableTarget, FleeTarget, CoverObject)
 	private void SearchForLivingTarget()
 	{
 		detectTargetTimer -= Time.deltaTime;
@@ -226,6 +232,20 @@ public class NpcPerception : MonoBehaviour
 		fleeTargetTimer = fleeTargetCooldown;
 
 		ClosestFleeTarget = SearchForClosestTarget(LifeState.alive);
+	}
+	private void SearchForCoverObject()
+	{
+		if (!ShouldUseCover()) return;
+
+		coverSearchDelay -= Time.deltaTime;
+		if (coverSearchDelay > 0) return;
+		coverSearchDelay = coverSearchCooldown;
+
+		if (FindValidCover(out Vector3? coverMovePosition))
+		{
+			Beliefs.UpdateCoverPosition(coverMovePosition);
+			return;
+		}
 	}
 	#endregion
 
@@ -348,7 +368,7 @@ public class NpcPerception : MonoBehaviour
 	#endregion
 
 	#region Handle looking for valid cover position when requested
-	public bool FindValidCover(TargetData threat, out Vector3? coverMovePosition)
+	private bool FindValidCover(out Vector3? coverMovePosition)
 	{
 		List<CoverObject> validCovers = new();
 		coverMovePosition = null;
@@ -359,17 +379,16 @@ public class NpcPerception : MonoBehaviour
 				validCovers.Add(cover);
 		}
 
-		validCovers = FilterAndSortCovers(threat, validCovers);
+		validCovers = FilterAndSortCovers(Beliefs.Target, validCovers);
 
 		foreach (CoverObject cover in validCovers)
 		{
-			if (cover.GetClosestPointBehindCover(transform.position, threat.Transform.position, out Vector3? coverPosition))
+			if (cover.GetClosestPointBehindCover(transform.position, Beliefs.Target.Transform.position, out Vector3? coverPosition))
 			{
 				coverMovePosition = coverPosition;
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -380,9 +399,8 @@ public class NpcPerception : MonoBehaviour
 			float coverSqrDistanceToSelf = (foundCovers[i].transform.position - transform.position).sqrMagnitude;
 			float coverSqrDistanceToThreat = (foundCovers[i].transform.position - threat.Transform.position).sqrMagnitude;
 
-			if (CoverObjectWithinSquaredDistance(Definition.FleeSqrDistance, coverSqrDistanceToSelf) ||
-				CoverObjectWithinSquaredDistance(threat.SquaredDistance, coverSqrDistanceToThreat) ||
-				CoverObjectOutsideEquippedWeaponRange(coverSqrDistanceToSelf))
+			if (CoverWithinSquaredDistance(Definition.FleeSqrDistance, coverSqrDistanceToThreat) ||
+				CoverOutsideEquippedWeaponRange(coverSqrDistanceToSelf))
 			{
 				foundCovers.RemoveAt(i);
 				continue;
@@ -399,16 +417,33 @@ public class NpcPerception : MonoBehaviour
 		return foundCovers;
 	}
 
-	private bool CoverObjectWithinSquaredDistance(float squaredDistance, float coverSqrDistance)
+	private bool CoverWithinSquaredDistance(float squaredDistance, float coverSqrDistance)
 	{
 		return coverSqrDistance + 1 < squaredDistance;
 	}
-	private bool CoverObjectOutsideEquippedWeaponRange(float coverSqrDistance)
+	private bool CoverOutsideEquippedWeaponRange(float coverSqrDistance)
 	{
 		if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition rangedWeapon)
 			return coverSqrDistance > rangedWeapon.EffectiveSqrRange;
-		else
-			return false;
+
+		return false;
+	}
+	#endregion
+
+	#region Should Use Cover Logic Check
+	//limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
+	private bool ShouldUseCover()
+	{
+		if (Beliefs.Target == null) return false;
+
+		EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
+		if (targetDefinition is HumanoidDefinition humanoid)
+		{
+			if (humanoid.Flags.HasFlag(EntityFlags.canBecomeZombie))
+				return true;
+		}
+
+		return false;
 	}
 	#endregion
 

@@ -42,8 +42,9 @@ namespace Game.MyNPC
 		public List<NPCBaseState> states = new();
 
 		private NpcStunnedState stunnedState;
-		private NpcHealState healState;
 		private NpcFleeState fleeState;
+		private NpcMoveToCoverState moveToCoverState;
+		private NpcHealState healState;
 		private NPCRangedAttackState rangedAttackState;
 		private NPCMeleeAttackState meleeAttackState;
 		private NPCChaseState chaseState;
@@ -107,8 +108,9 @@ namespace Game.MyNPC
 			Definition = definition;
 
 			stunnedState = new NpcStunnedState(this, 100);
-			healState = new NpcHealState(this, 95);
-			fleeState = new NpcFleeState(this, 90);
+			fleeState = new NpcFleeState(this, 95);
+			moveToCoverState = new NpcMoveToCoverState(this, 90);
+			healState = new NpcHealState(this, 85);
 			rangedAttackState = new NPCRangedAttackState(this, 75);
 			meleeAttackState = new NPCMeleeAttackState(this, 70);
 			chaseState = new NPCChaseState(this, 60);
@@ -119,8 +121,9 @@ namespace Game.MyNPC
 			moveState = new NpcIdleMovementState(this, 10);
 
 			states.Add(stunnedState);
-			states.Add(healState);
 			states.Add(fleeState);
+			states.Add(moveToCoverState);
+			states.Add(healState);
 			states.Add(rangedAttackState);
 			states.Add(meleeAttackState);
 			states.Add(chaseState);
@@ -175,7 +178,13 @@ namespace Game.MyNPC
 		{
 			if (StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			if (currentState != null && currentState.IsValid()) { currentState.Tick(Time.deltaTime); return; }
+			///<summary>
+			/// old way, if performance becomes an issue, revert back to this. only ticking currentState IsValid before priority switching
+			/// all states IsValid methods would need updating to include more complex checks (chase state checking melee/weapon range etc)
+			/// if (currentState != null && currentState.IsValid()) { currentState.Tick(Time.deltaTime); return; }
+			/// </summary>
+
+			currentState?.Tick(Time.deltaTime);
 			HandlePriorityStateSwitches();
 		}
 
@@ -194,6 +203,7 @@ namespace Game.MyNPC
 			foreach (NPCBaseState state in states)
 			{
 				if (!state.IsValid()) continue;
+
 				if (state.Priority > bestPriority)
 				{
 					bestState = state;

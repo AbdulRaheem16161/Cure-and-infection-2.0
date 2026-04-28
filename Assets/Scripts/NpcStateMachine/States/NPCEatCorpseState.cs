@@ -18,8 +18,8 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.eatCorpse) 
-			&& Beliefs.Target == null && stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.eatCorpse) && Beliefs.FleeTarget == null && 
+			Beliefs.Target == null && stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.zombified && Beliefs.EatableTarget != null;
 	}
 
 	public override void Enter()

@@ -57,16 +57,25 @@ public class NpcBeliefsEditor : Editor
 			EditorGUILayout.TextField("No Investigate Location");
 		else
 			EditorGUILayout.Vector3Field("Investigate Location", (Vector3)beliefs.InvestigateLocation);
+		if (beliefs.LookDirection == null)
+			EditorGUILayout.TextField("No Look Direction");
+		else
+			EditorGUILayout.Vector3Field("Look Direction", (Vector3)beliefs.LookDirection);
 		EditorGUI.indentLevel--;
 		#endregion
 
 		EditorGUILayout.Space(10);
 
 		#region Cover Beliefs
-		EditorGUILayout.LabelField("Investigation Beliefs", EditorStyles.boldLabel);
+		EditorGUILayout.LabelField("Cover Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
+		EditorGUILayout.Toggle("Return Fire", beliefs.ReturnFire);
 		EditorGUILayout.Toggle("Moving To Cover", beliefs.MovingToCover);
 		EditorGUILayout.Toggle("In Cover", beliefs.InCover);
+		if (beliefs.CoverPosition == null)
+			EditorGUILayout.TextField("No Cover Position");
+		else
+			EditorGUILayout.Vector3Field("Cover Position", (Vector3)beliefs.CoverPosition);
 		EditorGUI.indentLevel--;
 		#endregion
 
@@ -90,7 +99,7 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.LabelField("Flee Beliefs", EditorStyles.boldLabel);
 		EditorGUI.indentLevel++;
 		EditorGUILayout.Toggle("Target In Flee Range", beliefs.TargetInFleeRange);
-		DrawTargetData("Target Fleeing From", beliefs.TargetFleeingFrom);
+		DrawTargetData("Flee Target", beliefs.FleeTarget);
 		EditorGUI.indentLevel--;
 		#endregion
 

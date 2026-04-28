@@ -11,8 +11,7 @@ namespace Game.MyNPC
 
 		public override bool IsValid()
 		{
-			return Beliefs.Target == null && Beliefs.EatableTarget == null && !Beliefs.FreeToInvestigate &&
-				!Beliefs.CanHeal && !Beliefs.CanDrink && !Beliefs.CanEat;
+			return true; //always valid, with lowest priority
 		}
 
 		public override void Enter()

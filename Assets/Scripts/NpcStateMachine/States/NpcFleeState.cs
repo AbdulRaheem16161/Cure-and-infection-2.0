@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class NpcFleeState : NpcBaseMovementState
 {
-	private Vector3 directionToLookBackTo;
-
 	private readonly float fleeCooldown = 2f;
 	private float fleeTimer;
 
@@ -12,9 +10,10 @@ public class NpcFleeState : NpcBaseMovementState
 
 	public override bool IsValid()
 	{
-		if (stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee) && Beliefs.TargetFleeingFrom != null) return true;
+		if (stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee) && Beliefs.FleeTarget != null)
+			return true;
 
-		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee) 
+		return stateMachine.capabilityOverrides.HasFlag(EntityDefinition.Capability.flee)
 			&& Beliefs.TargetInFleeRange && !Beliefs.MeleeWeaponInHands;
 	}
 
@@ -32,7 +31,7 @@ public class NpcFleeState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.Beliefs.TargetInFleeRange)
+		if (Beliefs.TargetInFleeRange)
 		{
 			fleeTimer -= deltaTime;
 
@@ -41,18 +40,21 @@ public class NpcFleeState : NpcBaseMovementState
 		}
 		else
 		{
-			LookAtDirection(directionToLookBackTo);
-			if (!lookingAtTarget) return;
+			if (Beliefs.LookDirection.HasValue)
+			{
+				LookAtDirection(Beliefs.LookDirection.Value);
+				if (!lookingAtTarget) return;
+			}
 
-			stateMachine.Beliefs.UpdateTargetFleeingFrom(null);
-			return;
+			Beliefs.UpdateFleeTarget(null);
+			Beliefs.SetNewLookDirection(null);
 		}
 	}
 
 	private void UpdateFleeingDirection()
 	{
 		fleeTimer = fleeCooldown;
-		directionToLookBackTo = stateMachine.Beliefs.TargetFleeingFrom.Transform.position;
-		FleeToNewDestination(directionToLookBackTo);
+		Beliefs.SetNewLookDirection(Beliefs.FleeTarget.Transform.position);
+		FleeFromPosition(Beliefs.FleeTarget.Transform.position);
 	}
 }
