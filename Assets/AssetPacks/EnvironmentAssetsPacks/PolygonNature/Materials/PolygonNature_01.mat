@@ -128,7 +128,7 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Shininess: 0
-    - _Smoothness: 0
+    - _Smoothness: 1
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SnowLevel: 11.27
@@ -143,9 +143,9 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Vector3_B9EF5167: {r: 0.4, g: 1, b: 0, a: 0}
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 1}
+    - _Color: {r: 0.37735847, g: 0.37735847, b: 0.37735847, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SpecColor: {r: 0.19999978, g: 0.19999978, b: 0.19999978, a: 0}
+    - _SpecColor: {r: 0.1999993, g: 0.1999993, b: 0.1999993, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
