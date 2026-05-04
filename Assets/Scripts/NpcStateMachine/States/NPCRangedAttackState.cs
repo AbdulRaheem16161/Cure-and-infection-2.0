@@ -38,6 +38,8 @@ namespace Game.MyNPC
 			ShotDelayTimer(deltaTime);
 			BurstFireDelayTimer(deltaTime);
 
+			if (Beliefs.Target == null) return;
+
 			LookAtDirection(Beliefs.Target.Transform.position);
 			HandleShootingBehaviour();
 		}
