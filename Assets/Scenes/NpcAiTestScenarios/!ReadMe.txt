@@ -1,10 +1,6 @@
 Test Npc Ai behaviour and parts of behaviour
 outlines of what should happen for each test:
 
-CONSIDERATIONS AND BUGS ILL CHANGE LATER:
-NPCS RANDOM AREA MOVE "BUG":
-	currently doesnt support complex shapes with more then 4 corners, id like to add that functionality but its low on priority
-
 NPCS MELEE STATE ISSUES:
 	currently without proper models, animations etc... making melee weapons collider reliably with hit colliders is a pain
 	and will need tweaking anyway once they are finished and so not worth putting too much time in, but when melee weapon hit collider does
@@ -37,7 +33,8 @@ once npc disspears behind the wall again, it will enter investigate state and mo
 
 MovementTypesTest:
 3 npcs spawn in set to each of the movement types, 1 will patrol around on a set blue patrol path, one will move randomly around itself,
-another will move around randomly in a set green area. (see NPCS RANDOM AREA MOVE "BUG" comment at top)
+another will move around randomly in a set dark blue area split into triagnles, npc will still move out of the given area to reach
+a point within the area, but should never be given a point to move to outside of said area.
 
 NpcCoverTests:
 Contains 2 tests, one for showing how npcs wont use cover if not needed (engaging zombies or animals for example)

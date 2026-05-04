@@ -537,7 +537,7 @@ MonoBehaviour:
   HasSourceProject: 0
   HasPlatforms: 0
   sourceProjectPath: 
-  sourceBankPath: Assets/Plugins/FMOD
+  sourceBankPath: D:/Unity/Unity Projects/Cure-and-infection-2.0/Assets/Plugins/FMOD
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 1

@@ -339,7 +339,7 @@ public class NPCSpawner : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 		if (ShowAreaPoints)
-			RandomAreaMoveManager.DrawAreaPoints();
+			RandomAreaMoveManager.DrawAreaPointsAndTriangles();
 
 		if (ShowAllPatrolPaths)
 		{
