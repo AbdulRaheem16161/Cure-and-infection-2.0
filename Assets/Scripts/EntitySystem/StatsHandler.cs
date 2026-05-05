@@ -22,7 +22,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public LifeState LifeState => lifeState;
 
 	#region stats
-	[Header("Stats")]
+	[Header("Stats")] //for now leave them public so inspector can easily change them ( make them [SerializeField, ReadOnly] private fields)
 	public int health;
 	public int water;
 	public int food;
@@ -30,6 +30,11 @@ public class StatsHandler : MonoBehaviour, IDamageable
 
 	public float headProtection;
 	public float chestProtection;
+
+	[Header("Zombification Process")]
+	public float zombificationPercentage;
+	public bool ZombificationStarted => zombificationPercentage <= 0;
+	public bool ZombificationComplete => zombificationPercentage >= 1;
 
 	private float waterDrainTimer;
 	private float foodDrainTimer;
@@ -59,7 +64,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	public static event Action<GameObject> OnZombificationComplete;
 	#endregion
 
-	System.Random systemRandom = new System.Random();
+	readonly System.Random systemRandom = new();
 
 	#region awake + Initialize stats handler method
 	private void Awake()
@@ -84,6 +89,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		water = definition.MaxWater;
 		food = definition.MaxFood;
 		stamina = definition.MaxStamina;
+		zombificationPercentage = 0;
 	}
 	#endregion
 
@@ -127,6 +133,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region Stats Drain Handlers
 	private void HandleHealthDrain()
 	{
+		if (Definition is AnimalDefinition) return;
 		if (lifeState == LifeState.zombified) return;
 
 		healthDrainTimer -= Time.deltaTime;
@@ -147,6 +154,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	private void HandleWaterDrain()
 	{
+		if (Definition is AnimalDefinition) return;
 		if (lifeState == LifeState.zombified) return;
 
 		waterDrainTimer -= Time.deltaTime;
@@ -159,6 +167,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	private void HandleFoodDrain()
 	{
+		if (Definition is AnimalDefinition) return;
 		if (lifeState == LifeState.zombified) return;
 
 		foodDrainTimer -= Time.deltaTime;
@@ -207,10 +216,15 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	}
 	#endregion
 
-	#region Zombification complete event invoking
-	public void CompleteZombification()
+	#region Zombification tick process
+	public void TickZombificationProcess()
 	{
-		OnZombificationComplete?.Invoke(gameObject);
+		if (zombificationPercentage >= 1) return; //stop event spam after 1st
+
+		zombificationPercentage += 0.05f;    //uses linear scaling (more zombies = faster process)
+
+		if (zombificationPercentage >= 1)
+			OnZombificationComplete?.Invoke(gameObject);
 	}
 	#endregion
 

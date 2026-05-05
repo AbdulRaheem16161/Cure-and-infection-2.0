@@ -20,8 +20,9 @@ NPC TEST TO ADD:
 all teams should move towards the center, spotting and engaging the closest enemy in a 4 way shoot out till 1 team is left.
 
 EatCorpseTest:
-1 survivor npc should spawn in dead along with 1 zombie npc, zombie npc will walk to dead npc corpse (no eat anim atm).
-after 2-3 seconds of stopping, survivor corpse should despawn and another zombie should spawn in its place (no zombification process anims etc...)
+1 survivor npc should spawn in dead along with 2 zombie npcs, zombie npcs will walk to dead npc corpse (no eat anim atm).
+then both will tick zombification progress up on dead corpse, (with 2 zombies takes 10s), once complete corpse dissapears
+and a new zombie is spawned in (again lacks proper animations for these)
 
 FleeAndChaseTest:
 zombie spawns in flee range of survivor npc, npc should flee semi randomly away from zombie npc. flee direction should update every 2-3 seconds.

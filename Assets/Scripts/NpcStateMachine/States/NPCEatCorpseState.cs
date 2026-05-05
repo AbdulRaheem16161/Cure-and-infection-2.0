@@ -12,9 +12,8 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	/// </summary>
 
 	private bool eatingCorpse;
-	private bool ateCorpse;
-	private readonly float eatCorpseDuration = 5f;
-	private float eatCorpseTimer;
+	private readonly float zombificationTickCooldown = 1f;
+	private float zombificationTickTimer;
 
 	public override bool IsValid()
 	{
@@ -25,8 +24,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	public override void Enter()
 	{
 		eatingCorpse = false;
-		ateCorpse = false;
-		eatCorpseTimer = eatCorpseDuration;
+		zombificationTickTimer = zombificationTickCooldown;
 		MoveToDestination(stateMachine.Beliefs.EatableTarget.Transform.position, MoveType.walk);
 	}
 
@@ -45,15 +43,14 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 		if (eatingCorpse)
 		{
-			eatCorpseTimer -= deltaTime;
+			zombificationTickTimer -= deltaTime;
 			stateMachine.Agent.isStopped = true;
-			if (eatCorpseTimer > 0) return;
 
-			if (!ateCorpse)
-			{
-				ateCorpse = true;
-				stateMachine.Beliefs.EatableTarget.StatsHandler.CompleteZombification();
-			}
+			if (zombificationTickTimer > 0) return;
+			if (Beliefs.EatableTarget == null) return;
+
+			zombificationTickTimer = zombificationTickCooldown;
+			Beliefs.EatableTarget.StatsHandler.TickZombificationProcess();
 		}
 	}
 }
