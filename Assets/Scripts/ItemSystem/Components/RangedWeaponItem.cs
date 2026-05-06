@@ -1,4 +1,6 @@
+using Mono.Cecil;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -7,18 +9,28 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 {
 	public RangedWeaponView WeaponView;
 
+	public bool IsShooting { get; private set; }
+
+	#region reloading and magazine count fields
 	public bool IsReloading { get; private set; }
 	public bool MagazineFull => currentMagazineAmmo == TypedDefinition.MagazineSize;
 	public bool MagazineEmpty => currentMagazineAmmo <= 0;
-	public int currentMagazineAmmo; //track mag ammo count at runtime
+	public int currentMagazineAmmo;
+	#endregion
 
-	public bool CanShoot => fireRateCooldownTimer <= 0;
+	#region fire rate fields
+	private bool CanShoot => fireRateCooldownTimer <= 0;
+	private float FireRateCooldown;
+	private float fireRateCooldownTimer;
+	#endregion
 
-	public float FireRateCooldown;
-	public float fireRateCooldownTimer;
+	#region accuracy and recoil fields
+	private float accuracyModifer;
 
-	public float accuracyModifer;
-	private float recoilModifer; //adjusted based on weapon definiton + how player is moving or firing
+	private Vector3 targetRecoil;
+	private Vector3 currentRecoil;
+	private int recoilIndex = 0;
+	#endregion
 
 	#region Initialize Item Override
 	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
@@ -91,6 +103,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		if (!IsInHands) return;
 		HandleFireRate();
 		HandleBulletAccuracyRecovery();
+		NormalizeRecoil();
 	}
 
 	public void AimDownSight()
@@ -98,21 +111,28 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		//ads and modify accuracy and move speed etc...
 	}
 
-	#region weapon shooting (TODO add sfx, vfx and animations + recoil and accuracy adjustments)
+	#region Handle Shooting and Stop Shooting Weapon Behaviour
 	public void Shoot()
 	{
 		if (MagazineEmpty) { WeaponView.ChangeAnimation("DryFire", 0, true); return; }
 		if (IsReloading) return;
 		if (!CanShoot) return;
 
+		IsShooting = true;
 		currentMagazineAmmo--;
 		accuracyModifer += TypedDefinition.SpreadIncreasePerShot;
 		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
+		AdjustRecoilOnShoot();
 
-		if (currentMagazineAmmo == 0)
+		if (currentMagazineAmmo != 0)
 			WeaponView.ChangeAnimation("FireToEmpty", 0, true);
 		else
-			WeaponView.ChangeAnimation("Fire", 0, true);
+		WeaponView.ChangeAnimation("Fire", 0, true);
+	}
+	public void StopShooting()
+	{
+		IsShooting = false;
+		recoilIndex = 0;
 	}
 	#endregion
 
@@ -143,10 +163,22 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
-	public void AdjustRecoil()
+	#region Handle Physical gun recoil 
+	public void AdjustRecoilOnShoot()
 	{
-		//update recoil while firing
+		if (TypedDefinition.RecoilPattern.Count == 0) return;
+
+		recoilIndex = Mathf.Min(recoilIndex, TypedDefinition.RecoilPattern.Count - 1);
+		targetRecoil += TypedDefinition.RecoilPattern[recoilIndex];
+		recoilIndex++;
 	}
+	public void NormalizeRecoil()
+	{
+		targetRecoil = Vector3.Lerp(targetRecoil, Vector3.zero, Time.deltaTime * TypedDefinition.RecoilRecoveryRate);
+		currentRecoil = Vector3.Lerp(currentRecoil, targetRecoil, Time.deltaTime * TypedDefinition.RecoilSnappiness);
+		ModelReference.transform.localRotation = Quaternion.Euler(currentRecoil);
+	}
+	#endregion
 
 	#region Handle Fire Rate
 	private void HandleFireRate()

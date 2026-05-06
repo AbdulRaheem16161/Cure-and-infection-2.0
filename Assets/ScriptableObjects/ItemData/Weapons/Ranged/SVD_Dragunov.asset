@@ -36,17 +36,16 @@ MonoBehaviour:
   aimMoveSpeedModifer: 0
   hipFireSpread: 0.05
   adsSpread: 0.05
-  spreadIncreasePerShot: 0.1
-  spreadRecoveryRate: 0.5
-  maxSpread: 5
-  recoilPerShot: {x: 0, y: 0}
-  recoilPattern:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  spreadIncreasePerShot: 0.02
+  maxSpread: 3
+  recoilSnappiness: 15
   recoilRecoveryRate: 0
+  recoilPattern:
+  - {x: 3.5900467e-12, y: 8.81e-43, z: -2.6426362e-34}
+  - {x: 8.76e-43, y: 3.5900536e-12, z: 8.81e-43}
+  - {x: -2.6426362e-34, y: 8.76e-43, z: 3.5900605e-12}
+  - {x: 8.81e-43, y: -2.6426362e-34, z: 8.76e-43}
+  - {x: 3.5900675e-12, y: 8.81e-43, z: -2.6426362e-34}
   ammoType: {fileID: 11400000, guid: dd3556abc8561bb4a8257db32aa1da4d, type: 2}
   bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
   bulletVisualSpeed: 50

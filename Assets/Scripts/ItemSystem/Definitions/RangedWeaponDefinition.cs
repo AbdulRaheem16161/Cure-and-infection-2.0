@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static DamageContext;
 
@@ -40,15 +41,14 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private float hipFireSpread;
 	[SerializeField] private float adsSpread;
 	[SerializeField] private float spreadIncreasePerShot;
-	[SerializeField] private float spreadRecoveryRate;
 	[SerializeField] private float maxSpread;
 	#endregion
 
 	#region weapon recoil
 	[Header("Weapon Recoil")]
-	[SerializeField] private Vector2 recoilPerShot;
-	[SerializeField] private AnimationCurve recoilPattern;
-	[SerializeField] private float recoilRecoveryRate;
+	[SerializeField] private float recoilSnappiness = 15f;
+	[SerializeField] private float recoilRecoveryRate = 10f;
+	[SerializeField] private List<Vector3> recoilPattern;
 	#endregion
 
 	#region weapon projectile properties
@@ -88,13 +88,12 @@ public class WeaponRangedDefinition : ItemDefinition
 	public float HipFireSpread => hipFireSpread;
 	public float AdsSpread => adsSpread;
 	public float SpreadIncreasePerShot => spreadIncreasePerShot;
-	public float SpreadRecoveryRate => spreadRecoveryRate;
 	public float MaxSpread => maxSpread;
 
 	//recoil
-	public Vector2 RecoilPerShot => recoilPerShot;
-	public AnimationCurve RecoilPattern => recoilPattern;
+	public float RecoilSnappiness => recoilSnappiness;
 	public float RecoilRecoveryRate => recoilRecoveryRate;
+	public List<Vector3> RecoilPattern => recoilPattern;
 
 	//weapon sfx/vfx
 	public AudioClip FireSfx => fireSfx;

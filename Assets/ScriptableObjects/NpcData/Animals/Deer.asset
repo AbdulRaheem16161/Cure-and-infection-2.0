@@ -40,7 +40,7 @@ MonoBehaviour:
   rotationSpeed: 240
   acceleration: 10
   stoppingDistance: 1
-  fleeDistance: 50
+  fleeDistance: 25
   minIdleTime: 3
   maxIdleTime: 4
   viewAngle: 120

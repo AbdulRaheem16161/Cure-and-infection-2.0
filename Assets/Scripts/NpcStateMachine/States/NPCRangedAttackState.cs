@@ -53,14 +53,20 @@ namespace Game.MyNPC
 		#region Handle Shooting behaviour
 		private void HandleShootingBehaviour()
 		{
-			if (!lookingAtTarget) return;
+			if (!lookingAtTarget)
+			{
+				EquippedWeapon.StopShooting();
+				return;
+			}
 
 			if (EquippedWeapon.MagazineEmpty)
+			{
+				EquippedWeapon.StopShooting();
 				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
+			}
 			else
 			{
-				if (shotDelay > 0f || burstFireDelay > 0f)
-					return;
+				if (shotDelay > 0f || burstFireDelay > 0f) return;
 
 				EquippedWeapon.Shoot();
 				HandlePerShotBehaviour();
@@ -78,6 +84,7 @@ namespace Game.MyNPC
 
 			burstFireDelay = GetShotDelay() * 3;// longer delay after burst fire
 			shotsToBurstFireCount = GetBurstFireCount();
+			EquippedWeapon.StopShooting();
 
 			if (Beliefs.ReturnFire)
 				Beliefs.ReturnFire = false;
