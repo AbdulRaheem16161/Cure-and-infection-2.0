@@ -31,21 +31,29 @@ MonoBehaviour:
   fireRateRPM: 90
   reloadTime: 3
   effectiveRange: 80
-  aimTime: 0
-  moveSpeedModifier: 0
-  aimMoveSpeedModifer: 0
-  hipFireSpread: 0.05
-  adsSpread: 0.05
-  spreadIncreasePerShot: 0.02
-  maxSpread: 3
+  adsTime: 2.2
+  hipfireBulletSpreadMultiplier: 1
+  adsBulletSpreadMultiplier: 0.4
+  hipfireRecoilMultiplier: 1
+  adsRecoilMultiplier: 0.8
+  moveSpeedModifier: 1
+  adsMoveSpeedModifer: 0.4
+  baseSpread: 0.005
+  maxSpread: 5
+  spreadIncreasePerShot: 0.01
   recoilSnappiness: 15
-  recoilRecoveryRate: 0
+  recoilRecoveryRate: 10
   recoilPattern:
-  - {x: 3.5900467e-12, y: 8.81e-43, z: -2.6426362e-34}
-  - {x: 8.76e-43, y: 3.5900536e-12, z: 8.81e-43}
-  - {x: -2.6426362e-34, y: 8.76e-43, z: 3.5900605e-12}
-  - {x: 8.81e-43, y: -2.6426362e-34, z: 8.76e-43}
-  - {x: 3.5900675e-12, y: 8.81e-43, z: -2.6426362e-34}
+  - {x: 0.4, y: 0.2, z: 0}
+  - {x: 0.9, y: 0.4, z: 0}
+  - {x: 1.5, y: -0.3, z: 0}
+  - {x: 2.2, y: 0.5, z: 0}
+  - {x: 3.1, y: 0.9, z: 0}
+  - {x: 4.2, y: -0.6, z: 0}
+  - {x: 5.4, y: 0.7, z: 0}
+  - {x: 6.7, y: 1.1, z: 0}
+  - {x: 8.1, y: -1, z: 0}
+  - {x: 9.6, y: 1.3, z: 0}
   ammoType: {fileID: 11400000, guid: dd3556abc8561bb4a8257db32aa1da4d, type: 2}
   bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
   bulletVisualSpeed: 50

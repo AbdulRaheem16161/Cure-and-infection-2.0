@@ -31,17 +31,24 @@ public class WeaponRangedDefinition : ItemDefinition
 
 	#region weapon handling
 	[Header("Weapon Handling")]
-	[SerializeField] private float aimTime;
-	[SerializeField] private float moveSpeedModifier;
-	[SerializeField] private float aimMoveSpeedModifer;
+	[SerializeField] private float adsTime = 2.2f;
+	[SerializeField] private float hipfireBulletSpreadMultiplier = 1;
+	[SerializeField] private float adsBulletSpreadMultiplier = 0.4f;
+	[SerializeField] private float hipfireRecoilMultiplier = 1;
+	[SerializeField] private float adsRecoilMultiplier = 0.8f;
+	#endregion
+
+	#region weapon movement
+	[Header("Weapon Movement")]
+	[SerializeField] private float moveSpeedModifier = 1f;
+	[SerializeField] private float adsMoveSpeedModifer = 0.4f;
 	#endregion
 
 	#region weapon accuracy
 	[Header("Weapon Accuracy")]
-	[SerializeField] private float hipFireSpread;
-	[SerializeField] private float adsSpread;
-	[SerializeField] private float spreadIncreasePerShot;
-	[SerializeField] private float maxSpread;
+	[SerializeField] private float baseSpread = 0.005f;
+	[SerializeField] private float maxSpread = 5; //also limits bullet spread from flinch impact type, consider seperating them later.
+	[SerializeField] private float spreadIncreasePerShot = 0.01f;
 	#endregion
 
 	#region weapon recoil
@@ -80,15 +87,20 @@ public class WeaponRangedDefinition : ItemDefinition
 	public int EffectiveSqrRange => effectiveRange * effectiveRange;
 
 	//handling
-	public float AimTime => aimTime;
+	public float AdsTime => adsTime;
+	public float HipfireBulletSpreadMultiplier => hipfireBulletSpreadMultiplier;
+	public float AdsBulletSpreadMultiplier => adsBulletSpreadMultiplier;
+	public float HipfireRecoilMultiplier => hipfireRecoilMultiplier;
+	public float AdsRecoilMultiplier => adsRecoilMultiplier;
+
+	//movement
 	public float MoveSpeedModifier => moveSpeedModifier;
-	public float AimMoveSpeedModifer => aimMoveSpeedModifer;
+	public float AdsMoveSpeedModifer => adsMoveSpeedModifer;
 
 	//accuracy
-	public float HipFireSpread => hipFireSpread;
-	public float AdsSpread => adsSpread;
-	public float SpreadIncreasePerShot => spreadIncreasePerShot;
+	public float BaseSpread => baseSpread;
 	public float MaxSpread => maxSpread;
+	public float SpreadIncreasePerShot => spreadIncreasePerShot;
 
 	//recoil
 	public float RecoilSnappiness => recoilSnappiness;

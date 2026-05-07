@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class RangedWeaponItem : Item<WeaponRangedDefinition>
@@ -10,6 +11,16 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public RangedWeaponView WeaponView;
 
 	public bool IsShooting { get; private set; }
+
+	#region aiming down sights
+	public AimState Aim;
+	public enum AimState
+	{
+		hipfire, ads, EnterAds, ExitAds
+	}
+	public float enterAdsTimer;
+	public float exitAdsTimer;
+	#endregion
 
 	#region reloading and magazine count fields
 	public bool IsReloading { get; private set; }
@@ -19,16 +30,19 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	#endregion
 
 	#region fire rate fields
-	private bool CanShoot => fireRateCooldownTimer <= 0;
-	private float FireRateCooldown;
-	private float fireRateCooldownTimer;
+	public bool canShoot;
+	private bool CanShoot => fireRateCooldownTimer <= 0 && (Aim == AimState.hipfire || Aim == AimState.ads);
+	public float FireRateCooldown;
+	public float fireRateCooldownTimer;
 	#endregion
 
 	#region accuracy and recoil fields
-	private float accuracyModifer;
+	public float BulletSpreadMultiplier => CurrentBulletSpreadMultipler();
+	public float accuracyModifier;
 
-	private Vector3 targetRecoil;
-	private Vector3 currentRecoil;
+	public float RecoilMultiplier => CurrentRecoilMultipler();
+	public Vector3 targetRecoil;
+	public Vector3 currentRecoil;
 	private int recoilIndex = 0;
 	#endregion
 
@@ -53,7 +67,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		}
 
 		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
-		accuracyModifer = TypedDefinition.HipFireSpread;
+		accuracyModifier = TypedDefinition.BaseSpread;
 	}
 	#endregion
 
@@ -92,24 +106,59 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public override void OnHit(DamageContext damageContext)
 	{
 		if (damageContext.ImpactType == DamageContext.HitImpact.flinch)
-			accuracyModifer += 0.25f;
+			accuracyModifier += 0.25f;
 		else if (damageContext.ImpactType == DamageContext.HitImpact.knockback)
-			accuracyModifer += 5f;
+			accuracyModifier += 5f;
 	}
 	#endregion
 
 	private void Update()
 	{
 		if (!IsInHands) return;
+
+		canShoot = CanShoot;
 		HandleFireRate();
-		HandleBulletAccuracyRecovery();
+		HandleBulletSpreadRecovery();
 		NormalizeRecoil();
+		EnterAimDownSightsTimer();
+		ExitAimDownSightsTimer();
 	}
 
-	public void AimDownSight()
+	#region Handle Begin/End Adsing + transition states
+	public void EnterAimDownSights()
 	{
-		//ads and modify accuracy and move speed etc...
+		if (Aim != AimState.hipfire) return;
+
+		enterAdsTimer = TypedDefinition.AdsTime;
+		Aim = AimState.EnterAds;
 	}
+	public void ExitAimDownSights()
+	{
+		if (Aim != AimState.ads) return;
+
+		exitAdsTimer = TypedDefinition.AdsTime * 0.5f; //quicker
+		Aim = AimState.ExitAds;
+	}
+	private void EnterAimDownSightsTimer()
+	{
+		if (Aim != AimState.EnterAds) return;
+
+		enterAdsTimer -= Time.deltaTime;
+
+		if (enterAdsTimer <= 0f)
+			Aim = AimState.ads;
+	}
+
+	private void ExitAimDownSightsTimer()
+	{
+		if (Aim != AimState.ExitAds) return;
+
+		exitAdsTimer -= Time.deltaTime;
+
+		if (exitAdsTimer <= 0f)
+			Aim = AimState.hipfire;
+	}
+	#endregion
 
 	#region Handle Shooting and Stop Shooting Weapon Behaviour
 	public void Shoot()
@@ -120,14 +169,16 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 		IsShooting = true;
 		currentMagazineAmmo--;
-		accuracyModifer += TypedDefinition.SpreadIncreasePerShot;
+		fireRateCooldownTimer = FireRateCooldown;
 		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
+
+		HandleBulletSpreadIncrease();
 		AdjustRecoilOnShoot();
 
-		if (currentMagazineAmmo != 0)
+		if (currentMagazineAmmo == 0)
 			WeaponView.ChangeAnimation("FireToEmpty", 0, true);
 		else
-		WeaponView.ChangeAnimation("Fire", 0, true);
+			WeaponView.ChangeAnimation("Fire", 0, true);
 	}
 	public void StopShooting()
 	{
@@ -163,13 +214,57 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
-	#region Handle Physical gun recoil 
+	#region Handle Fire Rate
+	private void HandleFireRate()
+	{
+		if (fireRateCooldownTimer > 0f)
+			fireRateCooldownTimer -= Time.deltaTime;
+	}
+	#endregion
+
+	#region handle Tracking Bullet spread and recoil multipliers
+	private float CurrentBulletSpreadMultipler()
+	{
+		float multiplier = 1f;
+
+		multiplier *= Aim == AimState.ads ? TypedDefinition.AdsBulletSpreadMultiplier : TypedDefinition.HipfireBulletSpreadMultiplier;
+
+		return multiplier;
+	}
+	private float CurrentRecoilMultipler()
+	{
+		float multiplier = 1f;
+
+		multiplier *= Aim == AimState.ads ? TypedDefinition.AdsRecoilMultiplier : TypedDefinition.HipfireRecoilMultiplier;
+
+		return multiplier;
+	}
+	#endregion
+
+	#region Handle Bullet Spread Changes
+	private void HandleBulletSpreadIncrease()
+	{
+		accuracyModifier += TypedDefinition.SpreadIncreasePerShot * BulletSpreadMultiplier;
+	}
+	private void HandleBulletSpreadRecovery()
+	{
+		accuracyModifier -= Time.deltaTime;
+		accuracyModifier = Mathf.Clamp(accuracyModifier, TypedDefinition.BaseSpread, TypedDefinition.MaxSpread);
+	}
+	#endregion
+
+	#region Handle Physical gun recoil
+	/// <summary>
+	/// will need updating to handle player input and allow them to counteract recoil, something like this
+	/// currentPitch += mouseY;			currentYaw += mouseX;
+	/// modelReference.localRotation = Quaternion.Euler(currentPitch, currentYaw, 0f) * Quaternion.Euler(currentRecoil);
+	/// </summary>
 	public void AdjustRecoilOnShoot()
 	{
 		if (TypedDefinition.RecoilPattern.Count == 0) return;
 
 		recoilIndex = Mathf.Min(recoilIndex, TypedDefinition.RecoilPattern.Count - 1);
-		targetRecoil += TypedDefinition.RecoilPattern[recoilIndex];
+		targetRecoil += TypedDefinition.RecoilPattern[recoilIndex] * RecoilMultiplier;
 		recoilIndex++;
 	}
 	public void NormalizeRecoil()
@@ -177,25 +272,6 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		targetRecoil = Vector3.Lerp(targetRecoil, Vector3.zero, Time.deltaTime * TypedDefinition.RecoilRecoveryRate);
 		currentRecoil = Vector3.Lerp(currentRecoil, targetRecoil, Time.deltaTime * TypedDefinition.RecoilSnappiness);
 		ModelReference.transform.localRotation = Quaternion.Euler(currentRecoil);
-	}
-	#endregion
-
-	#region Handle Fire Rate
-	private void HandleFireRate()
-	{
-		if (CanShoot) return;
-
-		fireRateCooldownTimer -= Time.deltaTime;
-		if (fireRateCooldownTimer > 0f) return;
-		fireRateCooldownTimer = FireRateCooldown;
-	}
-	#endregion
-
-	#region Handle Bullet Accuracy Recovery
-	private void HandleBulletAccuracyRecovery()
-	{
-		accuracyModifer -= Time.deltaTime;
-		accuracyModifer = Mathf.Clamp(accuracyModifer, TypedDefinition.AdsSpread, TypedDefinition.MaxSpread);
 	}
 	#endregion
 
@@ -208,8 +284,8 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 		//apply random spread
 		direction = Quaternion.Euler(
-			Random.Range(-accuracyModifer, accuracyModifer),
-			Random.Range(-accuracyModifer, accuracyModifer),
+			Random.Range(-accuracyModifier, accuracyModifier),
+			Random.Range(-accuracyModifier, accuracyModifier),
 			0) * direction;
 
 		if (Physics.Raycast(startPos, direction, out RaycastHit hit, 

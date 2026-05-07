@@ -13,6 +13,8 @@ namespace Game.MyNPC
 		private float shotDelay;
 
 		private readonly System.Random systemRandom = new();
+		private readonly float DebugChanceToAds = 0.5f;
+
 
 		public override bool IsValid()
 		{
@@ -24,6 +26,21 @@ namespace Game.MyNPC
 
 		public override void Enter()
         {
+			bool shouldBeAds = ShouldAds();
+
+			if (shouldBeAds != (EquippedWeapon.Aim == RangedWeaponItem.AimState.ads))
+			{
+				if (shouldBeAds)
+					EquippedWeapon.EnterAimDownSights();
+				else
+					EquippedWeapon.ExitAimDownSights();
+			}
+
+			if (shouldBeAds && EquippedWeapon.Aim == RangedWeaponItem.AimState.hipfire)
+				EquippedWeapon.EnterAimDownSights();
+			else if (!shouldBeAds && EquippedWeapon.Aim == RangedWeaponItem.AimState.ads)
+				EquippedWeapon.ExitAimDownSights();
+
 			Beliefs.SetNewInvestigateLocation(null);
 			lookingAtTarget = false;
 			shotDelay = 0f;
@@ -50,6 +67,26 @@ namespace Game.MyNPC
 			stateMachine.Agent.isStopped = false;
 		}
 
+		#region Handle Should Ads
+		/// <summary>
+		/// should npc ads check, will need to eventually be called every 1s (or similar) + more complex considerations for npc
+		/// like not adsing if in cover and target close. or different distance scailing based on weapon type like nearly always
+		/// aiming with a pistol and sniper rifle, shotgun/smgs having lower thresholds etc...
+		/// </summary>
+		/// <returns></returns>
+		private bool ShouldAds()
+		{
+			if (Beliefs.MovingToCover && Beliefs.ReturnFire) return false; //never ads when moving to cover and returning fire
+
+			if (Beliefs.InCover) return true; //always ads from cover (change later)
+
+			//always ads when target above 1/3 of weapons effective range (can be switched to percentage + base it on weapon type more)
+			if (Beliefs.Target.SquaredDistance > (EquippedWeapon.TypedDefinition.EffectiveSqrRange * 0.33)) return true;
+
+			return systemRandom.NextDouble() < DebugChanceToAds; //random chance for now (replace with better considerations later)
+		}
+		#endregion
+
 		#region Handle Shooting behaviour
 		private void HandleShootingBehaviour()
 		{
@@ -63,11 +100,11 @@ namespace Game.MyNPC
 			{
 				EquippedWeapon.StopShooting();
 				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
+				return;
 			}
-			else
-			{
-				if (shotDelay > 0f || burstFireDelay > 0f) return;
 
+			if (EquippedWeapon.canShoot && shotDelay <= 0 && burstFireDelay <= 0)
+			{
 				EquippedWeapon.Shoot();
 				HandlePerShotBehaviour();
 				HandleBurstFireBehaviour();
@@ -99,15 +136,15 @@ namespace Game.MyNPC
 		#endregion
 
 		#region Burst And Shot Delay Timers
-		private bool BurstFireDelayTimer(float deltaTime)
+		private void BurstFireDelayTimer(float deltaTime)
 		{
+			if (burstFireDelay <= 0f) return;
 			burstFireDelay -= deltaTime;
-			return burstFireDelay > 0f;
 		}
-		private bool ShotDelayTimer(float deltaTime)
+		private void ShotDelayTimer(float deltaTime)
 		{
+			if (shotDelay <= 0f) return;
 			shotDelay -= deltaTime;
-			return shotDelay > 0f;
 		}
 		#endregion
 
@@ -159,7 +196,7 @@ namespace Game.MyNPC
 			{
 				case WeaponRangedDefinition.WeaponType.handgun:
 				minShots = 2;
-				maxShots = 4;
+				maxShots = 3;
 				break;
 				case WeaponRangedDefinition.WeaponType.shotgun:
 				minShots = 1;
@@ -175,7 +212,7 @@ namespace Game.MyNPC
 				break;
 				case WeaponRangedDefinition.WeaponType.marksmanRifle:
 				minShots = 2;
-				maxShots = 4;
+				maxShots = 3;
 				break;
 				case WeaponRangedDefinition.WeaponType.boltActionRifle:
 				minShots = 1;
@@ -186,7 +223,7 @@ namespace Game.MyNPC
 			//bigger bursts for full auto guns
 			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
 			{
-				minShots += 2;
+				minShots += 1;
 				maxShots += 3;
 			}
 

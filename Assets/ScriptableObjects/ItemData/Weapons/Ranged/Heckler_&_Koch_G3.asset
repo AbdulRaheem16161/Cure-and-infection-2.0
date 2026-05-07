@@ -31,13 +31,16 @@ MonoBehaviour:
   fireRateRPM: 550
   reloadTime: 2.5
   effectiveRange: 45
-  aimTime: 0
-  moveSpeedModifier: 0
-  aimMoveSpeedModifer: 0
-  hipFireSpread: 0.05
-  adsSpread: 0.05
-  spreadIncreasePerShot: 0.02
-  maxSpread: 3
+  adsTime: 2.2
+  hipfireBulletSpreadMultiplier: 1
+  adsBulletSpreadMultiplier: 0.4
+  hipfireRecoilMultiplier: 1
+  adsRecoilMultiplier: 0.8
+  moveSpeedModifier: 1
+  adsMoveSpeedModifer: 0.4
+  baseSpread: 0.005
+  maxSpread: 5
+  spreadIncreasePerShot: 0.01
   recoilSnappiness: 15
   recoilRecoveryRate: 10
   recoilPattern:
