@@ -18,11 +18,15 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private int damage;
 	[SerializeField] private int magazineSize;
 
-	[SerializeField] private FireModeType fireMode;
+	[SerializeField] private FireModeType allowedFireModes;
 	[Flags]
 	public enum FireModeType
 	{
-		pumpAction = 1, semiAuto = 2, fullAuto = 4, boltAction = 8
+		none = 0,
+		pumpAction = 1 << 0,
+		semiAuto = 1 << 1,
+		fullAuto = 1 << 2,
+		boltAction = 1 << 3
 	}
 	[SerializeField] private int fireRateRPM;
 	[SerializeField] private float reloadTime;
@@ -80,7 +84,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	public int Damage => damage;
 	public int MagazineSize => magazineSize;
 
-	public FireModeType FireMode => fireMode;
+	public FireModeType AllowedFireModes => allowedFireModes;
 	public int FireRateRPM => fireRateRPM;
 	public float ReloadTime => reloadTime;
 	public int EffectiveRange => effectiveRange;

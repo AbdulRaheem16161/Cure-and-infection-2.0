@@ -1,10 +1,7 @@
-using Mono.Cecil;
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
+using static WeaponRangedDefinition;
 
 public class RangedWeaponItem : Item<WeaponRangedDefinition>
 {
@@ -27,6 +24,17 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public bool MagazineFull => currentMagazineAmmo == TypedDefinition.MagazineSize;
 	public bool MagazineEmpty => currentMagazineAmmo <= 0;
 	public int currentMagazineAmmo;
+	#endregion
+
+	#region fire mode fields
+	public FireModeType CurrentFireMode {  get; private set; }
+	private static readonly FireModeType[] fireModeOrder =
+	{
+		FireModeType.pumpAction,
+		FireModeType.semiAuto,
+		FireModeType.fullAuto,
+		FireModeType.boltAction
+	};
 	#endregion
 
 	#region fire rate fields
@@ -66,6 +74,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 			return;
 		}
 
+		SetInitialFireMode();
 		FireRateCooldown = 60 / (float)TypedDefinition.FireRateRPM;
 		accuracyModifier = TypedDefinition.BaseSpread;
 	}
@@ -214,6 +223,47 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
+	#region Handle Cycling FireMode
+	private void SetInitialFireMode()
+	{
+		if (TypedDefinition.AllowedFireModes == FireModeType.none)
+		{
+			Debug.LogError("Weapon fire modes configured incorrectly. none should not be selected, defaulting to semiAuto");
+			CurrentFireMode = FireModeType.semiAuto;
+			return;
+		}
+
+		for (int i = fireModeOrder.Length - 1; i >= 0; i--)
+		{
+			if ((TypedDefinition.AllowedFireModes & fireModeOrder[i]) == 0) continue;
+
+			CurrentFireMode = fireModeOrder[i];
+			return;
+		}
+	}
+	public void CycleFireMode()
+	{
+		int currentIndex = Array.IndexOf(fireModeOrder, CurrentFireMode);
+
+		if (currentIndex == -1)
+		{
+			SetInitialFireMode();
+			return;
+		}
+
+		for (int i = 1; i <= fireModeOrder.Length; i++)
+		{
+			FireModeType next = fireModeOrder[(currentIndex + i) % fireModeOrder.Length];
+
+			if (TypedDefinition.AllowedFireModes.HasFlag(next))
+			{
+				CurrentFireMode = next;
+				return;
+			}
+		}
+	}
+	#endregion
+
 	#region Handle Fire Rate
 	private void HandleFireRate()
 	{
@@ -284,8 +334,8 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 		//apply random spread
 		direction = Quaternion.Euler(
-			Random.Range(-accuracyModifier, accuracyModifier),
-			Random.Range(-accuracyModifier, accuracyModifier),
+			UnityEngine.Random.Range(-accuracyModifier, accuracyModifier),
+			UnityEngine.Random.Range(-accuracyModifier, accuracyModifier),
 			0) * direction;
 
 		if (Physics.Raycast(startPos, direction, out RaycastHit hit, 

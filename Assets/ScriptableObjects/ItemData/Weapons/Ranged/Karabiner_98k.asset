@@ -27,10 +27,10 @@ MonoBehaviour:
   impactType: 1
   damage: 65
   magazineSize: 5
-  fireMode: 8
+  allowedFireModes: 8
   fireRateRPM: 20
   reloadTime: 3.5
-  effectiveRange: 120
+  effectiveRange: 90
   adsTime: 2.2
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4

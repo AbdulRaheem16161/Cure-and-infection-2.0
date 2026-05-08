@@ -27,7 +27,7 @@ MonoBehaviour:
   impactType: 1
   damage: 65
   magazineSize: 10
-  fireMode: 2
+  allowedFireModes: 2
   fireRateRPM: 90
   reloadTime: 3
   effectiveRange: 80

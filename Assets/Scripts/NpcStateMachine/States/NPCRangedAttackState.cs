@@ -1,4 +1,7 @@
+using Unity.Burst.Intrinsics;
+using Unity.VisualScripting;
 using UnityEngine;
+using static WeaponRangedDefinition;
 
 namespace Game.MyNPC
 {
@@ -8,13 +11,17 @@ namespace Game.MyNPC
 
 		private RangedWeaponItem EquippedWeapon => stateMachine.EquipmentHandler.itemInHands as RangedWeaponItem;
 
+		//ads fields
+		private float adsScore;
+		private readonly float shouldAdsCooldown = 1f;
+		private float shouldAdsTimer;
+
+		//burst fire/shot delay fields
 		private float shotsToBurstFireCount;
 		private float burstFireDelay;
 		private float shotDelay;
 
 		private readonly System.Random systemRandom = new();
-		private readonly float DebugChanceToAds = 0.5f;
-
 
 		public override bool IsValid()
 		{
@@ -26,25 +33,11 @@ namespace Game.MyNPC
 
 		public override void Enter()
         {
-			bool shouldBeAds = ShouldAds();
-
-			if (shouldBeAds != (EquippedWeapon.Aim == RangedWeaponItem.AimState.ads))
-			{
-				if (shouldBeAds)
-					EquippedWeapon.EnterAimDownSights();
-				else
-					EquippedWeapon.ExitAimDownSights();
-			}
-
-			if (shouldBeAds && EquippedWeapon.Aim == RangedWeaponItem.AimState.hipfire)
-				EquippedWeapon.EnterAimDownSights();
-			else if (!shouldBeAds && EquippedWeapon.Aim == RangedWeaponItem.AimState.ads)
-				EquippedWeapon.ExitAimDownSights();
-
 			Beliefs.SetNewInvestigateLocation(null);
 			lookingAtTarget = false;
-			shotDelay = 0f;
+			shouldAdsTimer = 0f;
 			burstFireDelay = 0f;
+			shotDelay = 0f;
 			shotsToBurstFireCount = GetBurstFireCount();
 		}
 
@@ -52,6 +45,7 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
+			ShouldAdsCheckTimer(deltaTime);
 			ShotDelayTimer(deltaTime);
 			BurstFireDelayTimer(deltaTime);
 
@@ -67,23 +61,77 @@ namespace Game.MyNPC
 			stateMachine.Agent.isStopped = false;
 		}
 
-		#region Handle Should Ads
-		/// <summary>
-		/// should npc ads check, will need to eventually be called every 1s (or similar) + more complex considerations for npc
-		/// like not adsing if in cover and target close. or different distance scailing based on weapon type like nearly always
-		/// aiming with a pistol and sniper rifle, shotgun/smgs having lower thresholds etc...
-		/// </summary>
-		/// <returns></returns>
+		#region Ads check timer
+		private void ShouldAdsCheckTimer(float deltaTime)
+		{
+			if (shouldAdsTimer <= 0)
+			{
+				bool shouldBeAds = ShouldAds();
+
+				Debug.LogError("should be ads: " + shouldBeAds);
+				Debug.LogError("ads score: " + adsScore);
+
+				if (shouldBeAds != (EquippedWeapon.Aim == RangedWeaponItem.AimState.ads))
+				{
+					if (shouldBeAds)
+						EquippedWeapon.EnterAimDownSights();
+					else
+						EquippedWeapon.ExitAimDownSights();
+				}
+
+				shouldAdsTimer = shouldAdsCooldown;
+			}
+
+			if (shouldAdsTimer > 0)
+				shouldAdsTimer -= deltaTime;
+		}
+		#endregion
+
+		#region Ads checks
 		private bool ShouldAds()
 		{
-			if (Beliefs.MovingToCover && Beliefs.ReturnFire) return false; //never ads when moving to cover and returning fire
+			if (Beliefs.MovingToCover && Beliefs.ReturnFire) return false;
 
-			if (Beliefs.InCover) return true; //always ads from cover (change later)
+			adsScore = Beliefs.InCover ? 0.15f : 0f; //more likely to ads in cover
+			adsScore += GetAdsScoreBasedOnDistance();
 
-			//always ads when target above 1/3 of weapons effective range (can be switched to percentage + base it on weapon type more)
-			if (Beliefs.Target.SquaredDistance > (EquippedWeapon.TypedDefinition.EffectiveSqrRange * 0.33)) return true;
+			bool currentlyAds = EquippedWeapon.Aim == RangedWeaponItem.AimState.ads;
+			float threshold = currentlyAds ? 0.6f : 0.7f; //ads above 0.7f, stay ads'd till lower then 0.6f
 
-			return systemRandom.NextDouble() < DebugChanceToAds; //random chance for now (replace with better considerations later)
+			return adsScore >= threshold;
+		}
+		/// <summary>
+		/// values need proper tweaking but they were roughly tweaked (and more tweaking if other considerations are added)
+		/// consider adding an ads cost timer, so smgs ads a little more aggressively (independent of effective range) due to low ads time
+		/// compared to longer ads times of assault rifles. + rifles will stay ads's more aggressively due to long ads times and having to un ads.
+		/// </summary>
+		private float GetAdsScoreBasedOnDistance()
+		{
+			float normalizedDistance = Beliefs.Target.SquaredDistance / EquippedWeapon.TypedDefinition.EffectiveSqrRange;
+
+			switch (EquippedWeapon.TypedDefinition.Weapon)
+			{
+				case WeaponType.handgun:
+				return normalizedDistance * 1.8f; //mostly ads due to low aim times and general weapon closeness
+
+				case WeaponType.shotgun:
+				return normalizedDistance * 0.8f; //hardly ever aim
+
+				case WeaponType.smg:
+				return normalizedDistance * 1.3f; //aim based roughly on when weapon type starts missing shots
+
+				case WeaponType.assaultRifle:
+				return normalizedDistance * 1.5f; //aim based roughly on when weapon type starts missing shots
+
+				case WeaponType.marksmanRifle:
+				return normalizedDistance * 5f; //always aim for the majority of there range
+
+				case WeaponType.boltActionRifle:
+				return normalizedDistance * 5f; //always aim for the majority of there range
+
+				default:
+				return normalizedDistance;
+			}
 		}
 		#endregion
 
@@ -128,7 +176,7 @@ namespace Game.MyNPC
 		}
 		private void HandlePerShotBehaviour()
 		{
-			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
+			if (EquippedWeapon.CurrentFireMode == FireModeType.fullAuto)
 				shotDelay = 0;
 			else
 				shotDelay = GetShotDelay();
@@ -156,27 +204,27 @@ namespace Game.MyNPC
 
 			switch (EquippedWeapon.TypedDefinition.Weapon)
 			{
-				case WeaponRangedDefinition.WeaponType.handgun:
+				case WeaponType.handgun:
 				minFireDelay = 0.25f;
 				maxFireDelay = 0.35f;
 				break;
-				case WeaponRangedDefinition.WeaponType.shotgun:
+				case WeaponType.shotgun:
 				minFireDelay = 0.6f;
 				maxFireDelay = 0.8f;
 				break;
-				case WeaponRangedDefinition.WeaponType.smg:
+				case WeaponType.smg:
 				minFireDelay = 0.18f;
 				maxFireDelay = 0.25f;
 				break;
-				case WeaponRangedDefinition.WeaponType.assaultRifle:
+				case WeaponType.assaultRifle:
 				minFireDelay = 0.2f;
 				maxFireDelay = 0.3f;
 				break;
-				case WeaponRangedDefinition.WeaponType.marksmanRifle:
+				case WeaponType.marksmanRifle:
 				minFireDelay = 0.45f;
 				maxFireDelay = 0.55f;
 				break;
-				case WeaponRangedDefinition.WeaponType.boltActionRifle:
+				case WeaponType.boltActionRifle:
 				minFireDelay = 1.2f;
 				maxFireDelay = 1.5f;
 				break;
@@ -194,34 +242,34 @@ namespace Game.MyNPC
 
 			switch (EquippedWeapon.TypedDefinition.Weapon)
 			{
-				case WeaponRangedDefinition.WeaponType.handgun:
+				case WeaponType.handgun:
 				minShots = 2;
 				maxShots = 3;
 				break;
-				case WeaponRangedDefinition.WeaponType.shotgun:
+				case WeaponType.shotgun:
 				minShots = 1;
 				maxShots = 3;
 				break;
-				case WeaponRangedDefinition.WeaponType.smg:
+				case WeaponType.smg:
 				minShots = 3;
 				maxShots = 5;
 				break;
-				case WeaponRangedDefinition.WeaponType.assaultRifle:
+				case WeaponType.assaultRifle:
 				minShots = 2;
 				maxShots = 4;
 				break;
-				case WeaponRangedDefinition.WeaponType.marksmanRifle:
+				case WeaponType.marksmanRifle:
 				minShots = 2;
 				maxShots = 3;
 				break;
-				case WeaponRangedDefinition.WeaponType.boltActionRifle:
+				case WeaponType.boltActionRifle:
 				minShots = 1;
 				maxShots = 1;
 				break;
 			}
 
 			//bigger bursts for full auto guns
-			if (EquippedWeapon.TypedDefinition.FireMode == WeaponRangedDefinition.FireModeType.fullAuto)
+			if (EquippedWeapon.CurrentFireMode == FireModeType.fullAuto)
 			{
 				minShots += 1;
 				maxShots += 3;
