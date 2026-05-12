@@ -68,9 +68,6 @@ namespace Game.MyNPC
 			{
 				bool shouldBeAds = ShouldAds();
 
-				Debug.LogError("should be ads: " + shouldBeAds);
-				Debug.LogError("ads score: " + adsScore);
-
 				if (shouldBeAds != (EquippedWeapon.Aim == RangedWeaponItem.AimState.ads))
 				{
 					if (shouldBeAds)

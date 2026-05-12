@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(EquipmentHandler))]
-public class InventoryHandler : MonoBehaviour, IAmmoGiver
+public class InventoryHandler : MonoBehaviour, IAmmoGiver, IInteractable
 {
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
@@ -16,10 +16,10 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
     #region inventory readonly settings
 	public int Money => money;
 	public ItemContainer ItemContainer => itemContainer;
-	#endregion
+    #endregion
 
-	#region debug settings
-	[Header("Debug Settings")]
+    #region debug settings
+    [Header("Debug Settings")]
 	[HideInInspector] public int addMoney;
 	[HideInInspector] public int modifyInventorySizeByThis;
 	[HideInInspector] public bool actionEffectsStack = false;
@@ -88,7 +88,7 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 		switch (slot.EquipmentType)
 		{
 			case EquipmentHandler.EquipmentType.backpack:
-			itemContainer.ModifySize(GetInventorySizeModifier(armourDefinition.InventorySlotsProvided, wasEquipped));
+			itemContainer.ModifySize(GetInventorySizeModifier(armourDefinition.InventorySlotsProvided, wasEquipped), transform.position);
 			break;
 		}
 	}
@@ -109,19 +109,31 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	}
 	#endregion
 
-	#region item pickup (TODO handle destroying world items/leaving them if stack count not 0)
-	/// <summary>
-	/// add new items to inventory, by default trying to stack them
-	/// </summary>
-	public void AddNewItem(InventoryItem newItem, bool tryStack = true)
+	#region inventory interact interface methods (TODO: make them actually open inventories)
+	public void InteractPress(Interactor interactor)
+    {
+		//open both this inventory + interactor.Inventory in ui
+		Debug.LogError("Needs implementation");
+		return;
+    }
+
+    public void InteractHoldComplete(Interactor interactor)
+    {
+		return;
+    }
+    #endregion
+
+    #region adding new item
+    /// <summary>
+    /// add new items to inventory, by default trying to stack them
+    /// </summary>
+    public void AddNewItem(InventoryItem newItem, bool tryStack = true)
 	{
 		itemContainer.AddNewItem(newItem, tryStack);
-
-		//destroy world item
 	}
 	#endregion
 
-	#region move items to specific slot methods
+	#region moving items in slots
 	public void SwapItemsInSlots(int currentSlot, int newSlot)
 	{
 		itemContainer.SwapItemsInSlots(currentSlot, newSlot);
@@ -135,12 +147,10 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	}
 	#endregion
 
-	#region dropping items (TODO: update so world item is spawned)
+	#region dropping items
 	public void DropItem(int slot, bool dropStack)
 	{
-		itemContainer.DropItem(slot, dropStack);
-
-		//spawn world item
+		itemContainer.DropItem(slot, dropStack, transform.position);
 	}
 	#endregion
 
@@ -167,5 +177,5 @@ public class InventoryHandler : MonoBehaviour, IAmmoGiver
 	{
 		itemContainer.ResetContainer();
 	}
-	#endregion
+    #endregion
 }

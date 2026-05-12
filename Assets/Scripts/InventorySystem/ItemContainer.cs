@@ -25,12 +25,12 @@ public class ItemContainer : IAmmoGiver
 	#endregion
 
 	#region adjust container size
-	public void ModifySize(int sizeAdjustment)
+	public void ModifySize(int sizeAdjustment, Vector3 dropPosition)
 	{
 		if (sizeAdjustment > 0)
 			IncreaseSize(items.Length + sizeAdjustment);
 		else
-			DecreaseSize(items.Length + sizeAdjustment);
+			DecreaseSize(items.Length + sizeAdjustment, dropPosition);
 
 		OnContainerSizeChanged?.Invoke(items.Length);
 	}
@@ -43,7 +43,7 @@ public class ItemContainer : IAmmoGiver
 
 		items = newInventory;
 	}
-	private void DecreaseSize(int newSize)
+	private void DecreaseSize(int newSize, Vector3 dropPosition)
 	{
 		InventoryItem[] newInventory = new InventoryItem[newSize];
 
@@ -55,7 +55,7 @@ public class ItemContainer : IAmmoGiver
 			if (ItemExists(items[i]))
 			{
 				Debug.LogWarning($"Item {items[i].ItemDefinition.ItemName} was dropped on the ground");
-				DropItem(i, true);
+				DropItem(i, true, dropPosition);
 			}
 		}
 
@@ -203,8 +203,8 @@ public class ItemContainer : IAmmoGiver
 	}
 	#endregion
 
-	#region dropping items (TODO: update so world item is spawned)
-	public void DropItem(int slot, bool dropStack)
+	#region dropping items
+	public void DropItem(int slot, bool dropStack, Vector3 dropPosition)
 	{
 		if (!SlotExists(slot) || !ItemExists(items[slot]))
 		{
@@ -219,7 +219,7 @@ public class ItemContainer : IAmmoGiver
 		else
 			RemoveItemsFromSlot(slot, 1);
 
-		//spawn world item
+		ItemSpawner.GetItem(itemToDrop.ItemDefinition, itemToDrop.CurrentStack, null, dropPosition, Quaternion.identity);
 	}
 	#endregion
 

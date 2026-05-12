@@ -1,15 +1,11 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(InventoryHandler))]
 public class InventoryHandlerEditor : Editor
 {
 	private bool showDebugControls;
-	private bool showMoneyControls;
-	private bool showInventoryResizingControls;
-	private bool showAddingItemsControls;
-	private bool showInventorySlotControls;
-	private bool showShopControls;
 
 	public override void OnInspectorGUI()
 	{
@@ -26,145 +22,119 @@ public class InventoryHandlerEditor : Editor
 
 		GUILayout.Space(10);
 
-		showMoneyControls = EditorGUILayout.Toggle("Show Money Controls", showMoneyControls);
+		#region modifying money buttons
+		GUILayout.Label("Debug money", EditorStyles.boldLabel);
+		inventory.addMoney = EditorGUILayout.IntField("Add money", inventory.addMoney);
 
-		if (showMoneyControls)
+		if (GUILayout.Button("Modify Money"))
 		{
-			#region modifying money buttons
-			GUILayout.Label("Debug money", EditorStyles.boldLabel);
-			inventory.addMoney = EditorGUILayout.IntField("Add money", inventory.addMoney);
+			if (!ApplicationPlaying()) return;
 
-			if (GUILayout.Button("Modify Money"))
-			{
-				if (!ApplicationPlaying()) return;
-
-				inventory.AddMoney(inventory.addMoney);
-			}
-			#endregion
+			inventory.AddMoney(inventory.addMoney);
 		}
+		#endregion
 
 		GUILayout.Space(10);
 
-		showInventoryResizingControls = EditorGUILayout.Toggle("Show Inventory Resizing Controls", showInventoryResizingControls);
+		#region inventory resize buttons
+		GUILayout.Label("Inventory Resizing", EditorStyles.boldLabel);
+		inventory.modifyInventorySizeByThis = EditorGUILayout.IntField("Modify Inventory By", inventory.modifyInventorySizeByThis);
 
-		if (showInventoryResizingControls)
+		if (GUILayout.Button("Modify Inventory Size"))
 		{
-			#region inventory resize buttons
-			GUILayout.Label("Inventory Resizing", EditorStyles.boldLabel);
-			inventory.modifyInventorySizeByThis = EditorGUILayout.IntField("Modify Inventory By", inventory.modifyInventorySizeByThis);
+			if (!ApplicationPlaying()) return;
 
-			if (GUILayout.Button("Modify Inventory Size"))
+			if (inventory.ItemContainer.ContainerSize + inventory.modifyInventorySizeByThis <= 0)
 			{
-				if (!ApplicationPlaying()) return;
-
-				if (inventory.ItemContainer.ContainerSize + inventory.modifyInventorySizeByThis <= 0)
-				{
-					Debug.LogWarning("minimum inventory size is 1");
-					return;
-				}
-
-				inventory.ItemContainer.ModifySize(inventory.modifyInventorySizeByThis);
+				Debug.LogWarning("minimum inventory size is 1");
+				return;
 			}
-			#endregion
+
+			inventory.ItemContainer.ModifySize(inventory.modifyInventorySizeByThis, inventory.transform.position);
 		}
+		#endregion
 
 		GUILayout.Space(10);
 
-		showAddingItemsControls = EditorGUILayout.Toggle("Show Adding Items Controls", showAddingItemsControls);
+		#region adding items to inventory buttons
+		GUILayout.Label("Item Adding", EditorStyles.boldLabel);
+		inventory.itemToSpawn = (ItemDefinition)EditorGUILayout.ObjectField("Item To Spawn", inventory.itemToSpawn, typeof(ItemDefinition), false);
+		inventory.itemToSpawnCount = EditorGUILayout.IntField("Item To Spawn Count", inventory.itemToSpawnCount);
 
-		if (showAddingItemsControls)
+		if (GUILayout.Button("Pick Up Specific Item"))
 		{
-			#region adding items to inventory buttons
-			GUILayout.Label("Item Adding", EditorStyles.boldLabel);
-			inventory.itemToSpawn = (ItemDefinition)EditorGUILayout.ObjectField("Item To Spawn", inventory.itemToSpawn, typeof(ItemDefinition), false);
-			inventory.itemToSpawnCount = EditorGUILayout.IntField("Item To Spawn Count", inventory.itemToSpawnCount);
+			if (!ApplicationPlaying()) return;
 
-			if (GUILayout.Button("Pick Up Specific Item"))
+			if (inventory.itemToSpawn == null)
 			{
-				if (!ApplicationPlaying()) return;
-
-				if (inventory.itemToSpawn == null)
-				{
-					Debug.LogError("no item specified in itemToSpawn field");
-					return;
-				}
-
-				if (inventory.itemToSpawnCount > inventory.itemToSpawn.StackLimit)
-					inventory.itemToSpawnCount = inventory.itemToSpawn.StackLimit;
-				else if (inventory.itemToSpawnCount <= 0)
-					inventory.itemToSpawnCount = 1;
-
-				inventory.ItemContainer.AddNewItem(
-					TestInventoryManager.GenerateSpecificInventoryItem(inventory.itemToSpawn, inventory.itemToSpawnCount));
+				Debug.LogError("no item specified in itemToSpawn field");
+				return;
 			}
 
-			if (GUILayout.Button("Pick Up Random Item"))
-			{
-				if (!ApplicationPlaying()) return;
+			if (inventory.itemToSpawnCount > inventory.itemToSpawn.StackLimit)
+				inventory.itemToSpawnCount = inventory.itemToSpawn.StackLimit;
+			else if (inventory.itemToSpawnCount <= 0)
+				inventory.itemToSpawnCount = 1;
 
-				inventory.ItemContainer.AddNewItem(TestInventoryManager.GenerateRandomInventoryItem());
-			}
-			#endregion
+			inventory.ItemContainer.AddNewItem(new(inventory.itemToSpawn, ItemSpawner.GetItemStackCount(inventory.itemToSpawn)));
 		}
+
+		if (GUILayout.Button("Pick Up Random Item"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			inventory.ItemContainer.AddNewItem(ItemSpawner.GetRandomInventoryItem());
+		}
+		#endregion
 
 		GUILayout.Space(10);
 
-		showInventorySlotControls = EditorGUILayout.Toggle("Show Inventory Slot Controls", showInventorySlotControls);
+		#region debugging specified slot options
+		GUILayout.Label("Debug Specific Slot", EditorStyles.boldLabel);
+		inventory.actionEffectsStack = EditorGUILayout.Toggle("Action Effects Stack", inventory.actionEffectsStack);
+		inventory.slotIndex = EditorGUILayout.IntField("Slot Index (0 = base)", inventory.slotIndex);
+		#endregion
 
-		if (showInventorySlotControls)
+		#region destroy item button (TODO update to a proper way to destroy item)
+		if (GUILayout.Button("Destory Item/stack"))
 		{
-			#region debugging specified slot options
-			GUILayout.Label("Debug Specific Slot", EditorStyles.boldLabel);
-			inventory.actionEffectsStack = EditorGUILayout.Toggle("Action Effects Stack", inventory.actionEffectsStack);
-			inventory.slotIndex = EditorGUILayout.IntField("Slot Index (0 = base)", inventory.slotIndex);
-			#endregion
+			if (!ApplicationPlaying()) return;
 
-			#region destroy item button (TODO update to a proper way to destroy item)
-			if (GUILayout.Button("Destory Item/stack"))
-			{
-				if (!ApplicationPlaying()) return;
-
-				inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
-			}
-			#endregion
-
-			#region drop item button (TODO: may need updating once drop item actually drops items)
-			if (GUILayout.Button("Drop Item"))
-			{
-				if (!ApplicationPlaying()) return;
-
-				inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
-			}
-			#endregion
+			inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
 		}
+		#endregion
+
+		#region drop item button (TODO: may need updating once drop item actually drops items)
+		if (GUILayout.Button("Drop Item"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
+		}
+		#endregion
 
 		GUILayout.Space(10);
 
-		showShopControls = EditorGUILayout.Toggle("Show Buy/Sell Controls", showShopControls);
+		#region buy/sell debug buttons
+		GUILayout.Label("Debug Sell/buy", EditorStyles.boldLabel);
+		inventory.actionEffectsStack = EditorGUILayout.Toggle("Action Effects Stack", inventory.actionEffectsStack);
+		inventory.slotIndex = EditorGUILayout.IntField("Slot Index (0 = base)", inventory.slotIndex);
 
-		if (showShopControls)
+		if (GUILayout.Button("Sell Item In Player inventory Slot"))
 		{
-			#region buy/sell debug buttons
-			GUILayout.Label("Debug Sell/buy", EditorStyles.boldLabel);
-			inventory.actionEffectsStack = EditorGUILayout.Toggle("Action Effects Stack", inventory.actionEffectsStack);
-			inventory.slotIndex = EditorGUILayout.IntField("Slot Index (0 = base)", inventory.slotIndex);
+			if (!ApplicationPlaying()) return;
 
-			if (GUILayout.Button("Sell Item In Player inventory Slot"))
-			{
-				if (!ApplicationPlaying()) return;
-
-				InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
-				inventory.SellItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
-			}
-			if (GUILayout.Button("Buy Item In NPC Inventory Slot"))
-			{
-				if (!ApplicationPlaying()) return;
-
-				InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
-				inventory.BuyItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
-			}
-			#endregion
+			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			inventory.SellItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
 		}
+		if (GUILayout.Button("Buy Item In NPC Inventory Slot"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			inventory.BuyItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
+		}
+		#endregion
 
 		GUILayout.Space(10);
 

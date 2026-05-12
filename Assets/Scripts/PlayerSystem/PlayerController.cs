@@ -31,8 +31,10 @@ public class PlayerController : MonoBehaviour
 
 	/// <summary>
 	/// inputKey would be passed in via PlayerInputs for example F to interact is base, but looking at a ranged weapon with multiple destinations
-	/// will also give the option of pressing f/e 
+	/// will also give the option of pressing f/e
+	/// TEST EXAMPLE OUTDATED DUE TO ITEM PICK UP CHANGE + INTERACT SYSTEM IMPLEMENTATION
 	/// </summary>
+	/*
 	public void ItemPickUpInteract<T>(Item<T> item, int inputKey) where T : ItemDefinition
 	{
 		if (item is RangedWeaponItem ranged)
@@ -49,6 +51,7 @@ public class PlayerController : MonoBehaviour
 		else
 			item.PickUp(InventoryHandler);
 	}
+	*/
 
 	//holsters weapon on key press if same weapon already equipped. if not unholsters that weapon (internal logic should handle things)
 

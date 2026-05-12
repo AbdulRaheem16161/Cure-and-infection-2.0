@@ -60,7 +60,7 @@ public abstract class Item<T> : Item where T : ItemDefinition
 	#endregion
 }
 
-public abstract class Item : MonoBehaviour
+public abstract class Item : MonoBehaviour, IInteractable
 {
 	public abstract ItemDefinition ItemDefinition { get; }
 	[HideInInspector] public GameObject ModelReference { get; protected set; }
@@ -75,7 +75,7 @@ public abstract class Item : MonoBehaviour
 	public static event Action<Item> OnCleanUpItem;
 	public static event Action<ItemDefinition, GameObject> OnCleanUpItemModel;
 
-	public abstract void InitializeItem(ItemDefinition definition, int itemStack);
+    public abstract void InitializeItem(ItemDefinition definition, int itemStack);
 
 	#region base equip/unequip methods
 	public virtual void EquipItem(EquipmentHandler equipmentHandler, Transform parentTransform)
@@ -112,15 +112,31 @@ public abstract class Item : MonoBehaviour
 	{
 
 	}
-	#endregion
+    #endregion
 
-	#region item pickup
-	public virtual void PickUp(InventoryHandler inventory)
+    #region item pickup
+    public void InteractPress(Interactor interactor)
+    {
+		PickUpItem(interactor);
+        return;
+    }
+
+    public void InteractHoldComplete(Interactor interactor)
+    {
+        return;
+    }
+    public virtual void PickUpItem(Interactor interactor)
 	{
-		InventoryItem newItem = new(ItemDefinition, CurrentItemStack);
-		inventory.AddNewItem(newItem);
-		CleanUpItem();
-	}
+        if (interactor.Inventory == null)
+		{
+            Debug.LogError($"{typeof(InventoryHandler)} component doesnt exist on object. failed to pick up item");
+            return;
+        }
+
+        InventoryItem newItem = new(ItemDefinition, CurrentItemStack);
+        interactor.Inventory.AddNewItem(newItem);
+        CleanUpItem();
+    }
 	#endregion
 
 	#region item and model clean up calls
@@ -136,5 +152,5 @@ public abstract class Item : MonoBehaviour
 		OnCleanUpItemModel?.Invoke(ItemDefinition, ModelReference);
 		ModelReference = null;
 	}
-	#endregion
+    #endregion
 }

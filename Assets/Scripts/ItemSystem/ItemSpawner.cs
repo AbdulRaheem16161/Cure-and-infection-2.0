@@ -18,14 +18,19 @@ public class ItemSpawner : MonoBehaviour
 	public GameObject consumablePrefab;
 	public GameObject itemPrefab;
 
-	//Debug editor controls
-	[HideInInspector] public ItemDefinition itemToSpawn;
+    [Header("Item Definition List")]
+	public List<ItemDefinition> itemDefinitionList = new();
+
+    //Debug editor controls
+    [HideInInspector] public ItemDefinition itemToSpawn;
 	[HideInInspector] public int itemCountToSpawn;
 	[HideInInspector] public Vector3 locationToSpawnItem;
 
 	[HideInInspector] public Item worldItemToCleanUp;
 
-	private void Awake()
+    private static readonly System.Random systemRandom = new();
+
+    private void Awake()
 	{
 		if (Instance == null)
 		{
@@ -63,10 +68,22 @@ public class ItemSpawner : MonoBehaviour
 
 		return item;
 	}
-	#endregion
+    #endregion
 
-	#region item object pooling
-	private Item TryGetItemFromObjectPooling(ItemDefinition itemDefinition, Vector3 position, Quaternion rotation)
+    #region create random inventory item
+    public static InventoryItem GetRandomInventoryItem()
+    {
+		ItemDefinition itemDefinition = Instance.itemDefinitionList[systemRandom.Next(0, Instance.itemDefinitionList.Count)];
+        return new(itemDefinition, GetItemStackCount(itemDefinition));
+    }
+    public static int GetItemStackCount(ItemDefinition itemDefinition)
+    {
+        return systemRandom.Next(1, itemDefinition.StackLimit + 1);
+    }
+    #endregion
+
+    #region item object pooling
+    private Item TryGetItemFromObjectPooling(ItemDefinition itemDefinition, Vector3 position, Quaternion rotation)
 	{
 		if (!itemObjectPooling.TryGetValue(itemDefinition, out List<Item> itemList))
 		{
