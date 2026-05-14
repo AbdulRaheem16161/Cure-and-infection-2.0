@@ -92,7 +92,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		}
 		else
 		{
-			Reload(equipmentHandler.InventoryHandler, true); //npcs auto reload for free when equipping weapon
+			Reload(equipmentHandler.InventoryHandler.ItemContainer, true); //npcs auto reload for free when equipping weapon
 		}
 	}
 	public override void UnEquipItem(EquipmentHandler equipmentHandler)
@@ -102,7 +102,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 		if (equipmentHandler.StatsHandler.Definition.Player)
 		{
-			equipmentHandler.InventoryHandler.AddNewItem(new(TypedDefinition.AmmoType, currentMagazineAmmo)); //return ammo in mag to inventory
+			equipmentHandler.InventoryHandler.ItemContainer.AddNewItem(new(TypedDefinition.AmmoType, currentMagazineAmmo)); //return ammo in mag to inventory
 		}
 		else
 		{

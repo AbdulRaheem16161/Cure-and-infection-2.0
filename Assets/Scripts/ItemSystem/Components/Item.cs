@@ -134,7 +134,7 @@ public abstract class Item : MonoBehaviour, IInteractable
         }
 
         InventoryItem newItem = new(ItemDefinition, CurrentItemStack);
-        interactor.Inventory.AddNewItem(newItem);
+        interactor.Inventory.ItemContainer.AddNewItem(newItem);
         CleanUpItem();
     }
 	#endregion

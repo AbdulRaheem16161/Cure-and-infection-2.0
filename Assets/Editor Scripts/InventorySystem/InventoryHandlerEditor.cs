@@ -44,14 +44,8 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			if (inventory.ItemContainer.ContainerSize + inventory.modifyInventorySizeByThis <= 0)
-			{
-				Debug.LogWarning("minimum inventory size is 1");
-				return;
-			}
-
-			inventory.ItemContainer.ModifySize(inventory.modifyInventorySizeByThis, inventory.transform.position);
-		}
+			InventoryService.ModifyContainerSize(inventory.ItemContainer, inventory.modifyInventorySizeByThis, inventory.transform.position);
+        }
 		#endregion
 
 		GUILayout.Space(10);
@@ -100,7 +94,10 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
+			if (inventory.actionEffectsStack)
+				inventory.ItemContainer.RemoveItemsFromSlot(inventory.slotIndex, 1, true);
+			else
+                inventory.ItemContainer.RemoveItemsFromSlot(inventory.slotIndex, 1, false);
 		}
 		#endregion
 
@@ -109,8 +106,8 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.DropItem(inventory.slotIndex, inventory.actionEffectsStack);
-		}
+            InventoryService.DropItem(inventory.transform.position, inventory.ItemContainer, inventory.slotIndex, inventory.actionEffectsStack);
+        }
 		#endregion
 
 		GUILayout.Space(10);
@@ -124,15 +121,19 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
-			inventory.SellItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
+			Debug.LogError("Debug Sell Item Not Implemented");
+
+			//InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			//inventory.ItemContainer.SellItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
 		}
 		if (GUILayout.Button("Buy Item In NPC Inventory Slot"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
-			inventory.BuyItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
+            Debug.LogError("Debug Buy Item Not Implemented");
+
+            //InventoryHandler npcInventory = TestInventoryManager.Instance.npcObj.GetComponent<InventoryHandler>();
+			//inventory.ItemContainer.BuyItemInSlot(npcInventory, inventory.slotIndex, inventory.actionEffectsStack);
 		}
 		#endregion
 

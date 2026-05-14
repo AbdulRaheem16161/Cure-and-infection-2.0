@@ -144,7 +144,7 @@ namespace Game.MyNPC
 			if (EquippedWeapon.MagazineEmpty)
 			{
 				EquippedWeapon.StopShooting();
-				EquippedWeapon.Reload(stateMachine.InventoryHandler, true);
+				EquippedWeapon.Reload(stateMachine.InventoryHandler.ItemContainer, true);
 				return;
 			}
 

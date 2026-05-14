@@ -203,7 +203,7 @@ public class EquipmentHandler : MonoBehaviour
 		}
 
 		HandleItemEquipping(itemToEquip, slot);
-		InventoryHandler.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack);
+		InventoryHandler.ItemContainer.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack, false);
 	}
 	/// <summary>
 	/// equip item from equipment, swapping item places if slot matches

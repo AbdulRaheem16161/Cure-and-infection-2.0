@@ -25,42 +25,16 @@ public class ItemContainer : IAmmoGiver
 	#endregion
 
 	#region adjust container size
-	public void ModifySize(int sizeAdjustment, Vector3 dropPosition)
+	public void SetContainerSize(int newSize)
 	{
-		if (sizeAdjustment > 0)
-			IncreaseSize(items.Length + sizeAdjustment);
-		else
-			DecreaseSize(items.Length + sizeAdjustment, dropPosition);
+        InventoryItem[] newInventory = new InventoryItem[newSize];
 
-		OnContainerSizeChanged?.Invoke(items.Length);
-	}
-	private void IncreaseSize(int newSize)
-	{
-		InventoryItem[] newInventory = new InventoryItem[newSize];
+        for (int i = 0; i < Mathf.Min(items.Length, newSize); i++)
+            newInventory[i] = items[i];
 
-		for (int i = 0; i < items.Length; i++) //copy items
-			newInventory[i] = items[i];
-
-		items = newInventory;
-	}
-	private void DecreaseSize(int newSize, Vector3 dropPosition)
-	{
-		InventoryItem[] newInventory = new InventoryItem[newSize];
-
-		for (int i = 0; i < newSize; i++)
-			newInventory[i] = items[i];  //copy items
-
-		for (int i = newSize; i < items.Length; i++) //drop items on floor if they dont fit
-		{
-			if (ItemExists(items[i]))
-			{
-				Debug.LogWarning($"Item {items[i].ItemDefinition.ItemName} was dropped on the ground");
-				DropItem(i, true, dropPosition);
-			}
-		}
-
-		items = newInventory;
-	}
+        items = newInventory;
+        OnContainerSizeChanged?.Invoke(items.Length);
+    }
 	#endregion
 
 	#region ammo counting + checking
@@ -203,28 +177,8 @@ public class ItemContainer : IAmmoGiver
 	}
 	#endregion
 
-	#region dropping items
-	public void DropItem(int slot, bool dropStack, Vector3 dropPosition)
-	{
-		if (!SlotExists(slot) || !ItemExists(items[slot]))
-		{
-			Debug.LogError($"no item exists in slot {slot}");
-			return;
-		}
-
-		InventoryItem itemToDrop = items[slot];
-
-		if (dropStack)
-			RemoveItemsFromSlot(slot, itemToDrop.CurrentStack);
-		else
-			RemoveItemsFromSlot(slot, 1);
-
-		ItemSpawner.GetItem(itemToDrop.ItemDefinition, itemToDrop.CurrentStack, null, dropPosition, Quaternion.identity);
-	}
-	#endregion
-
 	#region removing items
-	public void RemoveItemsFromSlot(int slot, int stackToRemove)
+	public void RemoveItemsFromSlot(int slot, int stackToRemove, bool effectsStack)
 	{
 		if (!SlotExists(slot) || !ItemExists(items[slot]))
 		{
@@ -232,64 +186,18 @@ public class ItemContainer : IAmmoGiver
 			return;
 		}
 		InventoryItem item = items[slot];
+
+		if (effectsStack)
+		{
+            RemoveInventoryItemFromSlot(slot);
+            return;
+		}
 
 		item.RemoveItemStack(stackToRemove);
 		OnContainerItemChanged?.Invoke(slot, item);
 
 		if (item.CurrentStack <= 0)
 			RemoveInventoryItemFromSlot(slot);
-	}
-	#endregion
-
-	#region buying/selling items
-	public void BuyItemInSlot(InventoryHandler inventory, InventoryHandler otherInventory, int slot, bool buyingStack)
-	{
-		if (ContainerFull() || otherInventory.ItemContainer.ContainerFull()) return;
-		if (!otherInventory.ItemContainer.SlotExists(slot) || !ItemExists(otherInventory.ItemContainer.Items[slot]))
-		{
-			Debug.LogError($"no item exists in slot {slot}");
-			return;
-		}
-
-		InventoryItem item = otherInventory.ItemContainer.Items[slot];
-		ProcessTransaction(inventory, otherInventory, item, slot, buyingStack);
-	}
-	public void SellItemInSlot(InventoryHandler inventory, InventoryHandler otherInventory, int slot, bool sellingStack)
-	{
-		if (ContainerFull() || otherInventory.ItemContainer.ContainerFull()) return;
-		if (!SlotExists(slot) || !ItemExists(items[slot]))
-		{
-			Debug.LogError($"no item exists in slot {slot}");
-			return;
-		}
-
-		InventoryItem item = items[slot];
-		ProcessTransaction(otherInventory, inventory, item, slot, sellingStack);
-	}
-	private void ProcessTransaction(InventoryHandler buyer, InventoryHandler seller, InventoryItem item, int slot, bool fullStack)
-	{
-		int stackCount = fullStack ? item.CurrentStack : 1;
-		int price = item.ItemDefinition.ItemPrice * stackCount;
-
-		if (!buyer.HasEnoughMoney(price))
-		{
-			Debug.LogWarning($"Buyer cannot afford {stackCount}x {item.ItemDefinition.ItemName} ({buyer.Money}/{price})");
-			return;
-		}
-
-		if (buyer.ItemContainer.ContainerFull())
-		{
-			Debug.LogWarning("Buyer inventory full.");
-			return;
-		}
-
-		//money transfer
-		buyer.RemoveMoney(price);
-		seller.AddMoney(price);
-
-		//item transfer
-		buyer.ItemContainer.AddNewItem(new(item.ItemDefinition, stackCount));
-		seller.RemoveItemsFromSlot(slot, stackCount);
 	}
 	#endregion
 

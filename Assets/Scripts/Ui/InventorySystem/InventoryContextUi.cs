@@ -235,7 +235,7 @@ public class InventoryContextUi : MonoBehaviour
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
-		slot.InventoryRef.SplitItem(slot.SlotIndex);
+		slot.InventoryRef.ItemContainer.SplitItem(slot.SlotIndex);
 		HideContextPanel();
 	}
 	private void DropItem(InventorySlotUi slot, bool dropStack)
@@ -246,7 +246,7 @@ public class InventoryContextUi : MonoBehaviour
 		}
 		else if (slot.InventoryRef != null)
 		{
-			slot.InventoryRef.DropItem(slot.SlotIndex, dropStack);
+			InventoryService.DropItem(slot.InventoryRef.transform.position, slot.InventoryRef.ItemContainer, slot.SlotIndex, dropStack);
 		}
 		HideContextPanel();
 	}
