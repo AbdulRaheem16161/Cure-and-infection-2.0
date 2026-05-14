@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{bc795e7d-7647-40a1-8b5d-5c19f548e4cb}">
+		<property name="assetPath">
+			<value>Music/Mus_Prison_Zone/C&amp;I_Prison_Loop - C&amp;I_Prison_Layer_3.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>222.21485260770976</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{948197ba-7d96-43b8-b3ba-814c374beb46}</destination>
+		</relationship>
+	</object>
+</objects>

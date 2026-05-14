@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{7ba816da-6cbf-4189-9293-7ab46162c845}">
+		<property name="assetPath">
+			<value>SFX/SFX_Player/146421-Human_heartbeat_pulsating_and_throbbing_slowly_in_a_loop.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>31.126349206349207</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{948197ba-7d96-43b8-b3ba-814c374beb46}</destination>
+		</relationship>
+	</object>
+</objects>

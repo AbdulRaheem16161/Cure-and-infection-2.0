@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{1c43cee3-f765-437d-9756-198e5426eb97}">
+		<property name="assetPath">
+			<value>Music/Mus_Survivor_Camp_Zone/C&amp;I_Survivor_Camp_Loop - Survivor_Camp_Loop_2.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>182.79435374149659</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{948197ba-7d96-43b8-b3ba-814c374beb46}</destination>
+		</relationship>
+	</object>
+</objects>

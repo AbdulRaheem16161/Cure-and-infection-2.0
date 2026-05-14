@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{d4c15c56-91e7-44e2-8ccd-d052ea901d71}">
+		<property name="name">
+			<value>Elite_Or_Horde</value>
+		</property>
+		<relationship name="folder">
+			<destination>{77778c4a-5d46-4ecb-8d5e-d06302db5b6d}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{0fae1b32-fe00-4223-885e-860aae1cc87e}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{0fae1b32-fe00-4223-885e-860aae1cc87e}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

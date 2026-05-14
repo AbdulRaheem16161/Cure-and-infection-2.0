@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{b88497e6-7b39-48e5-952c-16a6324115cc}">
+		<property name="name">
+			<value>Player_Low_Health_Heartbeat</value>
+		</property>
+		<relationship name="folder">
+			<destination>{77778c4a-5d46-4ecb-8d5e-d06302db5b6d}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{fd1cec9e-0012-4d79-8329-d66b78372359}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{fd1cec9e-0012-4d79-8329-d66b78372359}">
+		<property name="maximum">
+			<value>100</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>
