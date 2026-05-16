@@ -45,7 +45,7 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			ShouldAdsCheckTimer(deltaTime);
+            ShouldAdsCheckTimer(deltaTime);
 			ShotDelayTimer(deltaTime);
 			BurstFireDelayTimer(deltaTime);
 

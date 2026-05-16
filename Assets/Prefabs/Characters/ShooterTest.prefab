@@ -464,6 +464,7 @@ GameObject:
   - component: {fileID: 8402613863463263392}
   - component: {fileID: 417494239959303289}
   - component: {fileID: 1585906986943235660}
+  - component: {fileID: 5314400014239446297}
   m_Layer: 6
   m_Name: ShooterTest
   m_TagString: Team 2
@@ -614,8 +615,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556762a593628674da71c4a27adcac09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MovingToCover: 0
-  InCover: 0
 --- !u!114 &1864734135541436750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -658,6 +657,7 @@ MonoBehaviour:
   viewAngle: 45
   viewDistance: 5
   showVision: 0
+  interactables: []
 --- !u!114 &8402613863463263392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -678,6 +678,7 @@ MonoBehaviour:
   stamina: 0
   headProtection: 0
   chestProtection: 0
+  zombificationPercentage: 0
   invincible: 0
   forceRespawn: 0
 --- !u!114 &417494239959303289
@@ -731,6 +732,22 @@ MonoBehaviour:
   slotIndex: 0
   itemToSpawn: {fileID: 0}
   itemToSpawnCount: 0
+--- !u!114 &5314400014239446297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 837096600775374618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebaab38a47678b745b7c908cd4cf4876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdTime: 1
+  interactLayerMask:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &978393333062714387
 GameObject:
   m_ObjectHideFlags: 0

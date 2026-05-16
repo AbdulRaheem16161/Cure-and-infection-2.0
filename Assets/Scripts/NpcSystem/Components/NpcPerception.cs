@@ -39,51 +39,61 @@ public class NpcPerception : MonoBehaviour
 	private LayerMask targetMask;
 	private LayerMask lineOfSightMask;
 	private LayerMask coverMask;
-	#endregion
+    private LayerMask interactablesMask;
+    #endregion
 
-	#region Runtime Targets
-	[Header("Runtime Targets")]
+    #region Runtime Targets
+    [Header("Runtime Targets")]
 	public TargetData Target {get; private set;}
 	public TargetData EatableTarget {get; private set;}
 	public TargetData ClosestFleeTarget { get; private set;}
 	#endregion
 
-	private Color normalColor = Color.green;
+	#region Found Interactables
+	[Header("Found Interactables")]
+	public List<InteractContext> interactables = new();
+    #endregion
+
+    private Color normalColor = Color.green;
 	private Color detectedColor = Color.red;
 	private readonly float colorAlpha = 0.25f;
 
 	private readonly Collider[] ColliderHits = new Collider[100];
 	private readonly RaycastHit[] RaycastHits = new RaycastHit[100];
 
-	#region alert mode timer;
+	#region alert mode timer + Coroutine;
 	private readonly float alertModeCooldown = 5f;
 	private float alertModeTimer;
-	#endregion
+    public Coroutine alertModeCoroutine;
+    #endregion
 
-	public Coroutine alertModeCoroutine;
-
-	#region detect target timer
-	private readonly float detectTargetCooldown = 0.1f;
+    #region living target search timer
+    private readonly float detectTargetCooldown = 0.1f;
 	private float detectTargetTimer;
-	#endregion
+    #endregion
 
-	#region detect eatable target timer
-	private readonly float detectEatableTargetCooldown = 0.5f;
+    #region eatable target search timer
+    private readonly float detectEatableTargetCooldown = 0.5f;
 	private float detectEatableTargetTimer;
-	#endregion
+    #endregion
 
-	#region flee target timer
-	private readonly float fleeTargetCooldown = 0.25f;
+    #region flee target search timer
+    private readonly float fleeTargetCooldown = 0.25f;
 	private float fleeTargetTimer;
-	#endregion
+    #endregion
 
-	#region cover object timer
-	private readonly float coverSearchCooldown = 2f;
+    #region cover object search timer
+    private readonly float coverSearchCooldown = 2f;
 	private float coverSearchDelay;
-	#endregion
+    #endregion
 
-	#region awake + Initialize
-	private void Awake()
+    #region interactables search timer
+    private readonly float interactablesSearchCooldown = 1f;
+    private float interactablesSearchDelay;
+    #endregion
+
+    #region awake + Initialize
+    private void Awake()
 	{
 		Beliefs = GetComponent<NpcBeliefs>();
 		StateMachine = GetComponent<NPCStateMachine>();
@@ -93,8 +103,16 @@ public class NpcPerception : MonoBehaviour
 		targetMask = LayerMask.GetMask("CharacterDetection");
 		lineOfSightMask = LayerMask.GetMask("Environment", "EnvironmentCover", "CharacterDetection");
 		coverMask = LayerMask.GetMask("EnvironmentCover");
+		interactablesMask = LayerMask.GetMask("Interactable");
 
-		StatsHandler.OnHit += InvestigateWhereHitFrom;
+		//randomize initial timer to mitigate lag spikes
+        detectTargetTimer = Random.Range(0f, detectTargetCooldown);
+        detectEatableTargetTimer = Random.Range(0f, detectEatableTargetCooldown);
+        fleeTargetTimer = Random.Range(0f, fleeTargetCooldown);
+        coverSearchDelay = Random.Range(0f, coverSearchCooldown);
+        interactablesSearchDelay = Random.Range(0f, interactablesSearchCooldown);
+
+        StatsHandler.OnHit += InvestigateWhereHitFrom;
 	}
 	public void Initialize(EntityDefinition definition)
 	{
@@ -126,6 +144,7 @@ public class NpcPerception : MonoBehaviour
 		SearchForEatableTarget();
 		SearchForClosestFleeTarget();
 		SearchForCoverObject();
+		SearchForInteractables();
 	}
 
 	/// <summary>
@@ -134,7 +153,7 @@ public class NpcPerception : MonoBehaviour
 	/// hearing a sound (could specify sounds, or filter sounds made by player (if not zombie) or npcs on same team)
 	/// </summary>
 
-	#region npc investigation triggers
+	#region Npc Investigation Triggers
 	private void InvestigateWhereHitFrom(DamageContext damageContext)
 	{
 		if (damageContext.Attacker == gameObject) return; //ignore damage from self
@@ -153,7 +172,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	#region npc alert mode timer + state handler
+	#region Npc Alert Mode Timer + Updating Vision State
 	private void AlertModeTimer()
 	{
 		if (Beliefs.InAlertState)
@@ -176,7 +195,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	#region npc glance simulation
+	#region Npc Glance Simulation (nice to have head glance animation)
 	public void SimulateNpcGlancing(float glanceDuration)
 	{
 		StartCoroutine(SimulateNpcGlancingAround(glanceDuration));
@@ -189,51 +208,54 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	#region Timer Search Types (Target, EatableTarget, FleeTarget, CoverObject)
+	#region Timer Searches For Targets (LivingTarget, EatableTarget, FleeTarget)
 	private void SearchForLivingTarget()
-	{
-		detectTargetTimer -= Time.deltaTime;
-		if (detectTargetTimer > 0) return;
-		detectTargetTimer = detectTargetCooldown;
+    {
+        detectTargetTimer -= Time.deltaTime;
+        if (detectTargetTimer > 0) return;
+        detectTargetTimer = detectTargetCooldown;
 
-		//skip looking if target already found
-		if (Target != null)
-		{
-			Vector3 lastRecordedPosition = Beliefs.Target.Transform.position;
-			TargetTrackResult trackResult;
-			(Target, trackResult) = TrackTarget(Target, LifeState.alive, LifeState.zombified);
+        //skip looking if target already found
+        if (Target != null)
+        {
+            Vector3 lastRecordedPosition = Beliefs.Target.Transform.position;
+            TargetTrackResult trackResult;
+            (Target, trackResult) = TrackTarget(Target, LifeState.alive, LifeState.zombified);
 
-			if (trackResult == TargetTrackResult.lost)
-				InvestigateLastSeenEnemyPosition(lastRecordedPosition);
-		}
-		else
-			Target = SearchForClosestTarget(LifeState.alive);
-	}
-	private void SearchForEatableTarget()
-	{
-		if (StatsHandler.LifeState != LifeState.zombified) return;
+            if (trackResult == TargetTrackResult.lost)
+                InvestigateLastSeenEnemyPosition(lastRecordedPosition);
+        }
+        else
+            Target = SearchForClosestTarget(LifeState.alive);
+    }
+    private void SearchForEatableTarget()
+    {
+        if (StatsHandler.LifeState != LifeState.zombified) return;
 
-		detectEatableTargetTimer -= Time.deltaTime;
-		if (detectEatableTargetTimer > 0) return;
-		detectEatableTargetTimer = detectEatableTargetCooldown;
+        detectEatableTargetTimer -= Time.deltaTime;
+        if (detectEatableTargetTimer > 0) return;
+        detectEatableTargetTimer = detectEatableTargetCooldown;
 
-		if (EatableTarget != null)
-		{
-			TargetTrackResult trackResult;
-			(EatableTarget, trackResult) = TrackTarget(EatableTarget, LifeState.dead);
-		}
-		else
-			EatableTarget = SearchForClosestTarget(LifeState.dead);
-	}
-	private void SearchForClosestFleeTarget()
-	{
-		fleeTargetTimer -= Time.deltaTime;
-		if (fleeTargetTimer > 0) return;
-		fleeTargetTimer = fleeTargetCooldown;
+        if (EatableTarget != null)
+        {
+            TargetTrackResult trackResult;
+            (EatableTarget, trackResult) = TrackTarget(EatableTarget, LifeState.dead);
+        }
+        else
+            EatableTarget = SearchForClosestTarget(LifeState.dead);
+    }
+    private void SearchForClosestFleeTarget()
+    {
+        fleeTargetTimer -= Time.deltaTime;
+        if (fleeTargetTimer > 0) return;
+        fleeTargetTimer = fleeTargetCooldown;
 
-		ClosestFleeTarget = SearchForClosestTarget(LifeState.alive);
-	}
-	private void SearchForCoverObject()
+        ClosestFleeTarget = SearchForClosestTarget(LifeState.alive);
+    }
+    #endregion
+
+    #region Timer Searches For Utility Things (CoverObject, Interactables)
+    private void SearchForCoverObject()
 	{
 		if (!ShouldUseCover()) return;
 
@@ -247,18 +269,26 @@ public class NpcPerception : MonoBehaviour
 			return;
 		}
 	}
-	#endregion
+    private void SearchForInteractables()
+    {
+        interactablesSearchDelay -= Time.deltaTime;
+        if (interactablesSearchDelay > 0) return;
+        interactablesSearchDelay = interactablesSearchCooldown;
+		FindInteractables();
+    }
+    #endregion
 
-	#region search for closest target base method
-	/// <summary>
-	/// base search method, returns closest valid target after line of sight and filter checks
-	/// </summary>
-	private TargetData SearchForClosestTarget(LifeState lifeState)
+    #region Shared Search For Closest Target Method
+    /// <summary>
+    /// base search method, returns closest valid target after line of sight and filter checks
+    /// </summary>
+    private TargetData SearchForClosestTarget(LifeState lifeState)
 	{
-		float closestSqrDistance = viewDistance * viewDistance;
+		int count = Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, targetMask);
+        float closestSqrDistance = viewDistance * viewDistance;
 		TargetData closestTarget = null;
 
-		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, targetMask); i++)
+		for (int i = 0; i < count; i++)
 		{
 			Collider collider = ColliderHits[i];
 			GameObject go = collider.gameObject;
@@ -290,10 +320,10 @@ public class NpcPerception : MonoBehaviour
 
 		return closestTarget;
 	}
-	#endregion
+    #endregion
 
-	#region search type filter and vision checks
-	private bool FilterSearch(StatsHandler target, LifeState requiredLifeState)
+    #region Handle Target Types Filtering
+    private bool FilterSearch(StatsHandler target, LifeState requiredLifeState)
 	{
 		//filter null and teams
 		if (target == null) return false;
@@ -312,7 +342,10 @@ public class NpcPerception : MonoBehaviour
 
 		return LifeStateValid(target, requiredLifeState);
 	}
-	private bool TargetInVisionConeAngle(Vector3 dirToTarget)
+    #endregion
+
+    #region Handle Target Vision Cone/Line of Sight Filtering
+    private bool TargetInVisionConeAngle(Vector3 dirToTarget)
 	{
 		float dot = Vector3.Dot(transform.forward, dirToTarget);
 		float cosHalfView = Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad);
@@ -324,13 +357,11 @@ public class NpcPerception : MonoBehaviour
 	}
 	private bool TargetInLineOfSight(Vector3 dirToTarget, LayerMask mask, Collider collider)
 	{
-		int hitCount = Physics.RaycastNonAlloc(
-			rayViewPoint.transform.position, dirToTarget, RaycastHits, viewDistance, mask, QueryTriggerInteraction.Ignore);
-
+		int count = Physics.RaycastNonAlloc(rayViewPoint.transform.position, dirToTarget, RaycastHits, viewDistance, mask, QueryTriggerInteraction.Ignore);
 		float closestTargetDistance = viewDistance;
 		float closestBlockingDistance = viewDistance;
 
-		for (int i = 0; i < hitCount; i++)
+		for (int i = 0; i < count; i++)
 		{
 			RaycastHit hit = RaycastHits[i];
 
@@ -352,7 +383,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	#endregion
 
-	#region handle tracking found targets and loosing them
+	#region Handle tracking found targets and loosing them
 	private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, params LifeState[] validStates)
 	{
 		if (!validStates.Contains(trackedTarget.StatsHandler.LifeState))
@@ -370,10 +401,11 @@ public class NpcPerception : MonoBehaviour
 	#region Handle looking for valid cover position when requested
 	private bool FindValidCover(out Vector3? coverMovePosition)
 	{
-		List<CoverObject> validCovers = new();
+        int count = Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, coverMask);
+        List<CoverObject> validCovers = new();
 		coverMovePosition = null;
 
-		for (int i = 0; i < Physics.OverlapSphereNonAlloc(transform.position, viewDistance, ColliderHits, coverMask); i++)
+        for (int i = 0; i < count; i++)
 		{
 			if (ColliderHits[i].TryGetComponent(out CoverObject cover)) //filter 
 				validCovers.Add(cover);
@@ -428,26 +460,72 @@ public class NpcPerception : MonoBehaviour
 
 		return false;
 	}
-	#endregion
+    #endregion
 
-	#region Should Use Cover Logic Check
-	//limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
-	private bool ShouldUseCover()
+    #region Should Use Cover Logic Check
+    //limits use of cover when target is a non zombified humanoid (ignores animals/zombies basically)
+    private bool ShouldUseCover()
+    {
+        if (Beliefs.Target == null) return false;
+
+        EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
+        if (targetDefinition is HumanoidDefinition humanoid)
+        {
+            if (humanoid.Flags.HasFlag(EntityFlags.canBecomeZombie))
+                return true;
+        }
+
+        return false;
+    }
+    #endregion
+
+    #region Handle Looking for interactables
+	public void FindInteractables()
 	{
-		if (Beliefs.Target == null) return false;
+        int count = Physics.OverlapSphereNonAlloc(transform.position, 25f, ColliderHits, interactablesMask);
+        HashSet<IInteractable> newSet = new();
+        List<InteractContext> newList = new();
 
-		EntityDefinition targetDefinition = Beliefs.Target.StatsHandler.Definition;
-		if (targetDefinition is HumanoidDefinition humanoid)
-		{
-			if (humanoid.Flags.HasFlag(EntityFlags.canBecomeZombie))
-				return true;
-		}
+        for (int i = 0; i < count; i++)
+        {
+            Collider collider = ColliderHits[i];
 
-		return false;
-	}
-	#endregion
+			if (collider.TryGetComponent(out IInteractable interactable))
+            {
+                newSet.Add(interactable);
+                newList.Add(new InteractContext(interactable, collider, transform.position));
+            }
+        }
 
-	private void OnDrawGizmos()
+        //remove old ones not in new list
+        for (int i = interactables.Count - 1; i >= 0; i--)
+        {
+            if (!newSet.Contains(interactables[i].interactable))
+                interactables.RemoveAt(i);
+        }
+
+        //add new ones not in old list
+        for (int i = 0; i < newList.Count; i++)
+        {
+            bool exists = false;
+
+            for (int j = 0; j < interactables.Count; j++)
+            {
+                if (interactables[j].interactable == newList[i].interactable) //already exists so update
+                {
+					interactables[j].UpdateDistance(transform.position);
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+                interactables.Add(newList[i]);
+        }
+    }
+    #endregion
+
+    private void OnDrawGizmos()
 	{
 		//draw vision cone for debugging
 		if (!showVision) return;

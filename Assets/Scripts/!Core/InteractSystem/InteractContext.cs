@@ -1,0 +1,51 @@
+using UnityEngine;
+
+[System.Serializable]
+public class InteractContext
+{
+    public string name;
+    public IInteractable interactable;
+    public Collider collider;
+    public LootState lootState;
+    public float squaredDistance;
+
+    public enum LootState
+    {
+        unSet, notLootable, LootableButBlocked, Lootable, alreadyLooted
+    }
+
+    public InteractContext(IInteractable interactable, Collider collider, Vector3 npcPosition)
+    {
+        name = collider.name;
+        this.interactable = interactable;
+        this.collider = collider;
+        lootState = LootState.unSet;
+        CheckIfLootable();
+        UpdateDistance(npcPosition);
+    }
+
+    public void CheckIfLootable()
+    {
+        if (lootState == LootState.notLootable || lootState == LootState.alreadyLooted) return;
+
+        if (interactable is ILootContainer loot)
+        {
+            if (loot.CanLoot)
+                lootState = LootState.Lootable;
+            else
+                lootState = LootState.LootableButBlocked;
+        }
+        else
+            lootState = LootState.notLootable;
+    }
+
+    public void MarkAsAlreadyLooted()
+    {
+        lootState = LootState.alreadyLooted;
+    }
+
+    public void UpdateDistance(Vector3 currentPosition)
+    {
+        squaredDistance = (currentPosition - collider.transform.position).sqrMagnitude;
+    }
+}

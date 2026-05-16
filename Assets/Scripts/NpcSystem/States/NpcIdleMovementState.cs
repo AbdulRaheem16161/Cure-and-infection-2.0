@@ -5,7 +5,7 @@ namespace Game.MyNPC
 {
     public class NpcIdleMovementState : NpcBaseMovementState
 	{
-		public NpcIdleMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
+        public NpcIdleMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
 
 		private float idleTimer;
 
@@ -26,12 +26,11 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-			if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+            if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			if (stateMachine.Animator.speed != stateMachine.CurrentSpeed)
-				stateMachine.Animator.SetFloat("Speed", stateMachine.CurrentSpeed);
+			DoorInMovePathCheck();
 
-			if (stateMachine.Beliefs.Idling)
+            if (stateMachine.Beliefs.Idling)
 			{
 				idleTimer -= deltaTime;
 

@@ -33,11 +33,9 @@ public class NPCInvestigateState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+        if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-		// ----------- Investigate to idle after simulated glancing in both directions -------------
-
-		if (HasReachedDestination())
+        if (HasReachedDestination())
 		{
 			if (!glanceStarted)
 			{

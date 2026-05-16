@@ -31,7 +31,9 @@ public class NpcFleeState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (Beliefs.TargetInFleeRange)
+        if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+
+        if (Beliefs.TargetInFleeRange)
 		{
 			fleeTimer -= deltaTime;
 

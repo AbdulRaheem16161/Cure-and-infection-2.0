@@ -30,9 +30,9 @@ public class NpcMoveToCoverState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+        if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-		HandleReachingCover(deltaTime);
+        HandleReachingCover(deltaTime);
 	}
 
 	#region Move To Cover

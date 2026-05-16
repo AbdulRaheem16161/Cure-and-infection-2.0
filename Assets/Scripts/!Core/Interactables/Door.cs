@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Door : MonoBehaviour, IInteractable
 {
-    private bool open;
+    public bool Open { get; private set; }
 
     [SerializeField] private Transform doorHinge;
 
@@ -21,13 +22,13 @@ public class Door : MonoBehaviour, IInteractable
 
     private void Update()
     {
-        Quaternion target = open ? openRotation : closedRotation;
+        Quaternion target = Open ? openRotation : closedRotation;
         doorHinge.localRotation = Quaternion.Slerp(doorHinge.localRotation, target, Time.deltaTime * speed);
     }
 
     public void InteractPress(Interactor interactor)
     {
-        open = !open;
+        Open = !Open;
     }
     public void InteractHoldComplete(Interactor interactor)
     {

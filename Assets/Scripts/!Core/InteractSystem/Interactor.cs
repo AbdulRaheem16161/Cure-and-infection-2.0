@@ -16,12 +16,12 @@ public class Interactor : MonoBehaviour
     public event Action<float> OnHoldProgress;
     public event Action OnInteractChanged;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Inventory = GetComponent<InventoryHandler>();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         SetCurrentInteractable(FindInteractable());
         HandleInput();

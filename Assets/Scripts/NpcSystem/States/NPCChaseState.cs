@@ -20,9 +20,9 @@ namespace Game.MyNPC
 
         public override void Tick(float deltaTime)
         {
-			if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+            if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			if (stateMachine.Beliefs.Target != null)
+            if (stateMachine.Beliefs.Target != null)
 				MoveToDestination(stateMachine.Beliefs.Target.Transform.position, MoveType.sprint);
         }
 

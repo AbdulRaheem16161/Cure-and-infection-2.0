@@ -35,10 +35,10 @@ public class NPCEatCorpseState : NpcBaseMovementState
 
 	public override void Tick(float deltaTime)
 	{
-		if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
+        if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-		// move to position of cropse
-		if (IsWithinDistanceOfDestination(2f))
+        // move to position of cropse
+        if (IsWithinDistanceOfDestination(2f))
 			eatingCorpse = true;
 
 		if (eatingCorpse)

@@ -6,7 +6,11 @@ using UnityEngine.AI;
 
 public class NpcBaseMovementState : NPCBaseState
 {
-	protected bool lookingAtTarget;
+	private Door doorInMovePath;
+
+	private LayerMask interactablesLineOfSightMask = LayerMask.GetMask("Environment", "EnvironmentCover", "Interactable");
+
+    protected bool lookingAtTarget;
 	public enum MoveType { walk, sprint }
 	private readonly float[] navMeshSamplingRadius = { 1f, 5f, 10f};
 	public NpcBaseMovementState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
@@ -56,7 +60,7 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region move to flee position
+	#region Flee Position Logic
 	/// <summary>
 	/// flee from passed in vector 3 argument, with a randomization angle
 	/// </summary>
@@ -141,7 +145,7 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region move to follow point checks
+	#region Valid Patrol and Area Move Point Checks
 	private bool HasValidPatrolPoints()
 	{
 		if (stateMachine.movementType == NPCStateMachine.MovementType.patrolMove && stateMachine.PatrolPathManager != null)
@@ -159,7 +163,7 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region look around logic
+	#region Look At Angle/Direction Logic
 	/// <summary>
 	/// adjust look direction based on angle given in 360 degrees
 	/// </summary>
@@ -194,7 +198,7 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region destination reached check
+	#region Destination Reached and Distance Checks
 	protected bool HasReachedDestination()
 	{
 		if (stateMachine.Agent.remainingDistance <= stateMachine.Agent.stoppingDistance)
@@ -211,10 +215,10 @@ public class NpcBaseMovementState : NPCBaseState
 	}
 	#endregion
 
-	#region backup movement location (useful for drag and drop testing when not using a npc spawner)
+	#region Backup Move Locations (useful for drag and drop testing when not using a npc spawner)
 	private Vector3 GetMoveLocationAroundNpc()
 	{
-		float radius = 10f;
+		float radius = 25f;
 		Vector3 randomDirection = Random.insideUnitSphere * radius + stateMachine.transform.position;
 
 		while (true)
@@ -223,5 +227,34 @@ public class NpcBaseMovementState : NPCBaseState
 				return navHit.position;  // Valid position found, return it
 		}
 	}
-	#endregion
+    #endregion
+
+    #region Door In Move Path Check
+    public void DoorInMovePathCheck()
+	{
+		if (!IsTurning()) return;
+
+        Vector3 direction = stateMachine.Agent.desiredVelocity.normalized;
+		Debug.DrawRay(stateMachine.transform.position, direction * 2f, Color.green);
+
+        if (Physics.Raycast(stateMachine.transform.position, direction, out RaycastHit hit, 1000, interactablesLineOfSightMask))
+        {
+			if (hit.transform.TryGetComponent(out Door door))
+			{
+                doorInMovePath = door;
+                Debug.Log($"Hit: {hit.collider.name}");
+            }
+        }
+	}
+    private bool IsTurning(float angleThreshold = 1f)
+    {
+        Vector3 desiredDir = stateMachine.Agent.desiredVelocity;
+
+        if (desiredDir.sqrMagnitude < 0.01f)
+            return false;
+
+        float angle = Vector3.Angle(stateMachine.transform.forward, desiredDir.normalized);
+        return angle > angleThreshold;
+    }
+    #endregion
 }

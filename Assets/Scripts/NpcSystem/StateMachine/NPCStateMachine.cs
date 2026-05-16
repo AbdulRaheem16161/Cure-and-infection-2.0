@@ -18,7 +18,9 @@ namespace Game.MyNPC
 	[RequireComponent(typeof(InventoryHandler))]
     public class NPCStateMachine : StateMachine
 	{
-		public EntityDefinition Definition { get; private set; }
+        private static readonly int SpeedHash = Animator.StringToHash("Speed");
+
+        public EntityDefinition Definition { get; private set; }
 		public Animator Animator { get; private set; }
 		public NavMeshAgent Agent { get; private set; }
 		public NpcController NpcController { get; private set; }
@@ -223,7 +225,7 @@ namespace Game.MyNPC
 			if (Agent != null && Agent.enabled)
 				CurrentSpeed = Mathf.Lerp(CurrentSpeed, Agent.velocity.magnitude, Time.deltaTime / smoothTime);
 
-			Animator.SetFloat("Speed", CurrentSpeed);
+			Animator.SetFloat(SpeedHash, CurrentSpeed);
         }
 		#endregion
 
