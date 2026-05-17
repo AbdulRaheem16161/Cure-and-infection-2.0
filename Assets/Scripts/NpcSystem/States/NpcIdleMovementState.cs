@@ -28,8 +28,6 @@ namespace Game.MyNPC
         {
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
-			DoorInMovePathCheck();
-
             if (stateMachine.Beliefs.Idling)
 			{
 				idleTimer -= deltaTime;

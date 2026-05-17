@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 using static EntityDefinition;
 
 [RequireComponent(typeof(NpcBeliefs))]
@@ -19,7 +20,7 @@ public class NpcPerception : MonoBehaviour
 	public StatsHandler StatsHandler { get; private set; }
 	public EquipmentHandler EquipmentHandler{ get; private set; }
 
-	public GameObject rayViewPoint;
+    public GameObject rayViewPoint;
 
 	#region Runtime Vision Values
 	[Header("Runtime Vision Values")]
@@ -52,6 +53,7 @@ public class NpcPerception : MonoBehaviour
 	#region Found Interactables
 	[Header("Found Interactables")]
 	public List<InteractContext> interactables = new();
+    public List<InteractContext> doorsInPath = new();
     #endregion
 
     private Color normalColor = Color.green;
@@ -521,6 +523,30 @@ public class NpcPerception : MonoBehaviour
 
             if (!exists)
                 interactables.Add(newList[i]);
+        }
+    }
+    #endregion
+
+    #region Handle Looking for doors along valid move path
+    public void CheckPathForDoors(NavMeshPath path)
+    {
+        doorsInPath.Clear();
+
+        for (int i = 0; i < path.corners.Length - 1; i++)
+        {
+            if (i + 1 > path.corners.Length - 1) break; //no more corners to check between
+            Vector3 cornerOne = new(path.corners[i].x, path.corners[i].y + 1, path.corners[i].z);
+            Vector3 cornerTwo = new(path.corners[i + 1].x, path.corners[i + 1].y + 1, path.corners[i + 1].z);
+
+            int count = Physics.RaycastNonAlloc(cornerOne, cornerTwo, RaycastHits, 100f, interactablesMask, QueryTriggerInteraction.Ignore);
+
+            for (int j = 0; j < count; j++)
+            {
+                Collider collider = RaycastHits[j].collider;
+
+                if (collider.TryGetComponent(out Door door))
+                    doorsInPath.Add(new(door, collider, transform.position));
+            }
         }
     }
     #endregion

@@ -16,6 +16,7 @@ namespace Game.MyNPC
 	[RequireComponent(typeof(StatsHandler))]
 	[RequireComponent(typeof(EquipmentHandler))]
 	[RequireComponent(typeof(InventoryHandler))]
+	[RequireComponent(typeof(Interactor))]
     public class NPCStateMachine : StateMachine
 	{
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -29,6 +30,7 @@ namespace Game.MyNPC
 		public StatsHandler StatsHandler { get; private set; }
         public EquipmentHandler EquipmentHandler { get; private set; }
         public InventoryHandler InventoryHandler { get; private set; }
+		public Interactor Interactor { get; private set; }
 
 		#region Runtime Info
 		[Header("Runtime Info")]
@@ -37,11 +39,16 @@ namespace Game.MyNPC
 		[HideInInspector] public bool IsSprinting;
 		public float CurrentSpeed;
 		public Vector3 CurrentDestination;
-		[Space(10)]
 		#endregion
 
-		#region NpcStates;
-		public List<NPCBaseState> states = new();
+		#region Door In Path
+		[Header("Door In Path")]
+		public InteractContext DoorInPath;
+        [Space(10)]
+        #endregion
+
+        #region NpcStates;
+        protected List<NPCBaseState> states = new();
 
 		private NpcStunnedState stunnedState;
 		private NpcFleeState fleeState;
@@ -55,16 +62,11 @@ namespace Game.MyNPC
 		private NpcDrinkState drinkState;
 		private NpcEatState eatState;
 		private NpcIdleMovementState moveState;
-		#endregion
+        #endregion
 
-		#region Npc State Toggles
-		[Header("Npc State Toggles")]
-		public EntityDefinition.Capability capabilityOverrides;
-		#endregion
+        #region Npc Capabilities And Movement Toggles
+        public EntityDefinition.Capability capabilityOverrides;
 
-		#region Movement State Toggles
-		[Header("Movement State Toggles")]
-		public bool EnableMovement;
 		public MovementType movementType;
 		public enum MovementType
 		{
@@ -103,6 +105,7 @@ namespace Game.MyNPC
 			StatsHandler = GetComponent<StatsHandler>();
 			EquipmentHandler = GetComponent<EquipmentHandler>();
 			InventoryHandler = GetComponent<InventoryHandler>();
+			Interactor = GetComponent<Interactor>();
 		}
 
 		public void InitializeStateMachine(EntityDefinition definition)
@@ -186,6 +189,9 @@ namespace Game.MyNPC
 			/// if (currentState != null && currentState.IsValid()) { currentState.Tick(Time.deltaTime); return; }
 			/// </summary>
 
+			DoorInPath = UpdateNextDoorInPath();
+			OpenDoorInPath();
+
 			currentState?.Tick(Time.deltaTime);
 			HandlePriorityStateSwitches();
 		}
@@ -250,10 +256,35 @@ namespace Game.MyNPC
 			if (Animator != null)
 				Animator.SetTrigger("Died");
 		}
-		#endregion
+        #endregion
 
-		#region Gizmos
-		private void OnDrawGizmos()
+        #region Handle Next Door In Path
+		private InteractContext UpdateNextDoorInPath()
+		{
+			if (NpcPerception.doorsInPath.Count == 0 || NpcPerception.doorsInPath[0] == null)
+				return null;
+			else
+				return NpcPerception.doorsInPath[0];
+        }
+        private bool OpenDoorInPath()
+        {
+			if (DoorInPath == null || DoorInPath.interactable is not Door door || door.Open) return false;
+
+            DoorInPath.UpdateDistance(transform.position);
+
+            if (DoorInPath.squaredDistance < 7.5f)
+            {
+                DoorInPath.interactable.InteractPress(Interactor);
+				NpcPerception.doorsInPath.RemoveAt(0);
+                return true;
+            }
+            else
+                return false;
+        }
+        #endregion
+
+        #region Gizmos
+        private void OnDrawGizmos()
 		{
 			if (showUnholsteredWeaponRange)
 			{

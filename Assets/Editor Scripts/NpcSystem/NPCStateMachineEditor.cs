@@ -26,48 +26,48 @@ public class NPCStateMachineEditor : Editor
 
 		EditorGUILayout.Space(10);
 
-		#region Npc Range Consideration Toggles
-		npc.showUnholsteredWeaponRange = EditorGUILayout.Toggle("Show Unholstered Weapon Range", npc.showUnholsteredWeaponRange);
-		npc.showFleeRange = EditorGUILayout.Toggle("Show Flee Range", npc.showFleeRange);
-		#endregion
+        #region Npc Capabilities And Movement Toggles
+        EditorGUILayout.LabelField("Npc Capabilities", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        SerializedProperty capabilityProp = serializedObject.FindProperty("capabilityOverrides");
+        EditorGUILayout.PropertyField(capabilityProp);
 
-		EditorGUILayout.Space(10);
-
-		#region State Toggles
-		EditorGUILayout.LabelField("State Toggles", EditorStyles.boldLabel);
-		EditorGUI.indentLevel++;
-		SerializedProperty capabilityProp = serializedObject.FindProperty("capabilityOverrides");
-		EditorGUILayout.PropertyField(capabilityProp);
-		EditorGUI.indentLevel--;
-		#endregion
-
-		EditorGUILayout.Space(10);
-
-		#region Movement State Toggles
-		EditorGUILayout.LabelField("Movement State Toggles", EditorStyles.boldLabel);
-        npc.EnableMovement = EditorGUILayout.Toggle("Enable Movement", npc.EnableMovement);
-
-		if (npc.EnableMovement)
+        EditorGUILayout.LabelField("Movement Toggles", EditorStyles.boldLabel);
+        npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
+        if (npc.movementType == NPCStateMachine.MovementType.patrolMove)
         {
-			EditorGUI.indentLevel++;
-			npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
-			EditorGUILayout.LabelField("Patrol Move", EditorStyles.boldLabel);
-			npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
-			if (npc.movementType == NPCStateMachine.MovementType.patrolMove)
-			{
-				npc.PatrolPathManager = (PatrolPathManager)EditorGUILayout.ObjectField(
-					"Patrol Points", npc.PatrolPathManager, typeof(PatrolPathManager), true);
-			}
-			else if (npc.movementType == NPCStateMachine.MovementType.randomAreaMove)
-			{
-				npc.RandomAreaMoveManager = (RandomAreaMoveManager)EditorGUILayout.ObjectField(
-					"Random Area Move Manager", npc.RandomAreaMoveManager, typeof(RandomAreaMoveManager), true);
-			}
-			EditorGUI.indentLevel--;
+            npc.PatrolPathManager = (PatrolPathManager)EditorGUILayout.ObjectField(
+                "Patrol Points", npc.PatrolPathManager, typeof(PatrolPathManager), true);
         }
-		#endregion
+        else if (npc.movementType == NPCStateMachine.MovementType.randomAreaMove)
+        {
+            npc.RandomAreaMoveManager = (RandomAreaMoveManager)EditorGUILayout.ObjectField(
+                "Random Area Move Manager", npc.RandomAreaMoveManager, typeof(RandomAreaMoveManager), true);
+        }
+        EditorGUI.indentLevel--;
+        #endregion
 
-		if (GUI.changed)
+        EditorGUILayout.Space(10);
+
+        #region Npc Range Consideration Toggles
+        EditorGUILayout.LabelField("Npc Range Toggles", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        npc.showUnholsteredWeaponRange = EditorGUILayout.Toggle("Show Unholstered Weapon Range", npc.showUnholsteredWeaponRange);
+		npc.showFleeRange = EditorGUILayout.Toggle("Show Flee Range", npc.showFleeRange);
+        EditorGUI.indentLevel--;
+        #endregion
+
+        EditorGUILayout.Space(10);
+
+        #region Npc Interactables Context
+        if (npc.DoorInPath != null)
+        {
+            SerializedProperty doorProp = serializedObject.FindProperty("DoorInPath");
+            EditorGUILayout.PropertyField(doorProp, true);
+        }
+        #endregion
+
+        if (GUI.changed)
         {
             EditorUtility.SetDirty(npc);
         }

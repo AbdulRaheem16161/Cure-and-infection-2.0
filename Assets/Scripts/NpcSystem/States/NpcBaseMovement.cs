@@ -1,15 +1,11 @@
 using Game.MyNPC;
-using System.IO;
-using UnityEditor.ShaderGraph.Internal;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class NpcBaseMovementState : NPCBaseState
 {
-	private Door doorInMovePath;
-
-	private LayerMask interactablesLineOfSightMask = LayerMask.GetMask("Environment", "EnvironmentCover", "Interactable");
-
     protected bool lookingAtTarget;
 	public enum MoveType { walk, sprint }
 	private readonly float[] navMeshSamplingRadius = { 1f, 5f, 10f};
@@ -103,6 +99,7 @@ public class NpcBaseMovementState : NPCBaseState
 
 		UpdateMoveSpeed(moveIntent);
 		stateMachine.Agent.SetPath(path);
+		stateMachine.NpcPerception.CheckPathForDoors(path);
 	}
 	private bool GetValidMovePath(Vector3 sampledPosition, out NavMeshPath path)
 	{
@@ -143,10 +140,10 @@ public class NpcBaseMovementState : NPCBaseState
 		stateMachine.moveIntent = moveIntent;
 		stateMachine.IsSprinting = canSprint;
 	}
-	#endregion
+    #endregion
 
-	#region Valid Patrol and Area Move Point Checks
-	private bool HasValidPatrolPoints()
+    #region Valid Patrol and Area Move Point Checks
+    private bool HasValidPatrolPoints()
 	{
 		if (stateMachine.movementType == NPCStateMachine.MovementType.patrolMove && stateMachine.PatrolPathManager != null)
 			return true;
@@ -227,34 +224,5 @@ public class NpcBaseMovementState : NPCBaseState
 				return navHit.position;  // Valid position found, return it
 		}
 	}
-    #endregion
-
-    #region Door In Move Path Check
-    public void DoorInMovePathCheck()
-	{
-		if (!IsTurning()) return;
-
-        Vector3 direction = stateMachine.Agent.desiredVelocity.normalized;
-		Debug.DrawRay(stateMachine.transform.position, direction * 2f, Color.green);
-
-        if (Physics.Raycast(stateMachine.transform.position, direction, out RaycastHit hit, 1000, interactablesLineOfSightMask))
-        {
-			if (hit.transform.TryGetComponent(out Door door))
-			{
-                doorInMovePath = door;
-                Debug.Log($"Hit: {hit.collider.name}");
-            }
-        }
-	}
-    private bool IsTurning(float angleThreshold = 1f)
-    {
-        Vector3 desiredDir = stateMachine.Agent.desiredVelocity;
-
-        if (desiredDir.sqrMagnitude < 0.01f)
-            return false;
-
-        float angle = Vector3.Angle(stateMachine.transform.forward, desiredDir.normalized);
-        return angle > angleThreshold;
-    }
     #endregion
 }
