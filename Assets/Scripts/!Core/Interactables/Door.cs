@@ -1,34 +1,23 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Hinge))]
 public class Door : MonoBehaviour, IInteractable
 {
     public bool Open { get; private set; }
 
-    [SerializeField] private Transform doorHinge;
-
-    [Header("Rotation")]
-    [SerializeField] private float openAngle = 90f;
-    [SerializeField] private float speed = 5f;
-
-    private Quaternion closedRotation;
-    private Quaternion openRotation;
+    private Hinge hinge;
 
     private void Awake()
     {
-        closedRotation = doorHinge.localRotation;
-        openRotation = closedRotation * Quaternion.Euler(0f, openAngle, 0f);
-    }
-
-    private void Update()
-    {
-        Quaternion target = Open ? openRotation : closedRotation;
-        doorHinge.localRotation = Quaternion.Slerp(doorHinge.localRotation, target, Time.deltaTime * speed);
+        hinge = GetComponent<Hinge>();
+        Open = false;
+        hinge.CloseHinge();
     }
 
     public void InteractPress(Interactor interactor)
     {
         Open = !Open;
+        hinge.Toggle();
     }
     public void InteractHoldComplete(Interactor interactor)
     {

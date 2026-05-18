@@ -1,25 +1,34 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Hinge))]
 public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
 {
     [SerializeField] private ItemContainer itemContainer;
     public ItemContainer ItemContainer => itemContainer;
 
-    public string ContainerName => "Lootable Container";
+    public string LootableName;
+    public string ContainerName => LootableName;
 
     public bool CanLoot => true;
+    public bool Open { get; private set; }
+
+    private Hinge hinge;
+
+    private void Awake()
+    {
+        hinge = GetComponent<Hinge>();
+        Open = false;
+        hinge.CloseHinge();
+    }
 
     public void InteractPress(Interactor interactor)
     {
-        //open both this inventory + interactor.Inventory in ui
-        Debug.LogError("Needs implementation");
-
-        return;
+        Open = !Open;
+        hinge.Toggle();
     }
-
     public void InteractHoldComplete(Interactor interactor)
     {
-        return;
+        return; //not used
     }
 
     private void SpawLootableItems()
