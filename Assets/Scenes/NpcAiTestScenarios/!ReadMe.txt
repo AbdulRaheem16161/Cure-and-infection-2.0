@@ -19,6 +19,14 @@ NPC TEST TO ADD:
 4TeamEngagmentTest:
 all teams should move towards the center, spotting and engaging the closest enemy in a 4 way shoot out till 1 team is left.
 
+AnimalFleeTest:
+same as FleeAndChaseTest, just wanted to ensure it worked for animals.
+
+CoverFarAwayTest:
+2 npcs spawn away from each other, 1 pair with cover infront of them that will move to and shoot at other pair, 
+the other pair has cover behind them, the pair will move to cover behind them, and semi randomly shoot back while moving to cover. 
+(wanted to simulate more human behaviour when cover is far away)
+
 EatCorpseTest:
 1 survivor npc should spawn in dead along with 2 zombie npcs, zombie npcs will walk to dead npc corpse (no eat anim atm).
 then both will tick zombification progress up on dead corpse, (with 2 zombies takes 10s), once complete corpse dissapears
@@ -42,10 +50,9 @@ Contains 2 tests, one for showing how npcs wont use cover if not needed (engagin
 and another for showing how npcs will utilize cover (engaging other survivors for example)
 In the cover test npcs will spawn see one another, seek to find cover first before shooting. (of course ones facing zombies will shoot straight away)
 
-CoverFarAwayTest:
-2 npcs spawn away from each other, 1 pair with cover infront of them that will move to and shoot at other pair, 
-the other pair has cover behind them, the pair will move to cover behind them, and semi randomly shoot back while moving to cover. 
-(wanted to simulate more human behaviour when cover is far away)
+NpcDoorInteractTest:
+1 npc will spawn and path through patrol waypoints, encountering 2 doors that when close enough npc will open.
+clicking on the door in hierarchy will allow u to manually debug press interact to close/open the door.
 
 ReactingToSoundAndHurtTest:
 2 npcs spawn, one infront of the other, the one behind will shoot the one in front, on hit they will go to investigate the direction they were shot from

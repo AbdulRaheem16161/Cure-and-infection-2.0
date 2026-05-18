@@ -2,6 +2,7 @@
 using Game.MyNPC;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -30,13 +31,7 @@ public class NpcPerception : MonoBehaviour
 	public bool showVision = false;
 	#endregion
 
-	public enum TargetTrackResult
-	{
-		valid, invalid, lost
-	}
-
 	#region layer Masks (internal config)
-	[Header("Layer Masks")]
 	private LayerMask targetMask;
 	private LayerMask lineOfSightMask;
 	private LayerMask coverMask;
@@ -48,10 +43,15 @@ public class NpcPerception : MonoBehaviour
 	public TargetData Target {get; private set;}
 	public TargetData EatableTarget {get; private set;}
 	public TargetData ClosestFleeTarget { get; private set;}
-	#endregion
 
-	#region Found Interactables
-	[Header("Found Interactables")]
+    public enum TargetTrackResult
+    {
+        valid, invalid, lost
+    }
+    #endregion
+
+    #region Found Interactables
+    [Header("Found Interactables")]
 	public List<InteractContext> interactables = new();
     public List<InteractContext> doorsInPath = new();
     #endregion
@@ -551,22 +551,28 @@ public class NpcPerception : MonoBehaviour
     }
     #endregion
 
+    #region Gizmos
     private void OnDrawGizmos()
-	{
-		//draw vision cone for debugging
-		if (!showVision) return;
+    {
+        ShowVisionConeGizmo();
+    }
 
-		Color finalColor = Beliefs.Target != null ? detectedColor : normalColor;
-		finalColor.a = colorAlpha;
-		Handles.color = finalColor;
+    private void ShowVisionConeGizmo()
+    {
+        if (!showVision) return;
 
-		Handles.DrawSolidArc(
-			transform.position,
-			Vector3.up,
-			Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward,
-			viewAngle,
-			viewDistance
-		);
-	}
+        Color finalColor = Beliefs.Target != null ? detectedColor : normalColor;
+        finalColor.a = colorAlpha;
+        Handles.color = finalColor;
+
+        Handles.DrawSolidArc(
+            transform.position,
+            Vector3.up,
+            Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward,
+            viewAngle,
+            viewDistance
+        );
+    }
+    #endregion
 }
 #endif

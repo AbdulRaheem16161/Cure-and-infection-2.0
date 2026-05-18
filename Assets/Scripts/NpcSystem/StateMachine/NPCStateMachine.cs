@@ -1,5 +1,4 @@
 using Game.Core;
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +8,8 @@ using static NpcBaseMovementState;
 
 namespace Game.MyNPC
 {
-	[RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(NpcController))]
+    [RequireComponent(typeof(Animator))]
 	[RequireComponent(typeof(NavMeshAgent))]
 	[RequireComponent(typeof(NpcBeliefs))]
 	[RequireComponent(typeof(NpcPerception))]
@@ -35,6 +35,8 @@ namespace Game.MyNPC
 		#region Runtime Info
 		[Header("Runtime Info")]
 		public string CurrentStateName;
+		public bool showFullMovePath;
+		[HideInInspector] public NavMeshAgent path;
 		[HideInInspector] public MoveType moveIntent;
 		[HideInInspector] public bool IsSprinting;
 		public float CurrentSpeed;
@@ -190,7 +192,7 @@ namespace Game.MyNPC
 			/// </summary>
 
 			DoorInPath = UpdateNextDoorInPath();
-			OpenDoorInPath();
+            OpenClosedDoorsInPath();
 
 			currentState?.Tick(Time.deltaTime);
 			HandlePriorityStateSwitches();
@@ -266,43 +268,60 @@ namespace Game.MyNPC
 			else
 				return NpcPerception.doorsInPath[0];
         }
-        private bool OpenDoorInPath()
+        private void OpenClosedDoorsInPath()
         {
-			if (DoorInPath == null || DoorInPath.interactable is not Door door || door.Open) return false;
+			if (DoorInPath == null || DoorInPath.interactable is not Door door) return;
 
             DoorInPath.UpdateDistance(transform.position);
+			if (DoorInPath.squaredDistance > 5f) return;
 
-            if (DoorInPath.squaredDistance < 7.5f)
-            {
+			if (!door.Open)
                 DoorInPath.interactable.InteractPress(Interactor);
-				NpcPerception.doorsInPath.RemoveAt(0);
-                return true;
-            }
-            else
-                return false;
+
+			NpcPerception.doorsInPath.RemoveAt(0);
+			//could add extra behaviour here to auto close door after 1-2s, or based on specific conditions EG: fleeing
         }
         #endregion
 
         #region Gizmos
         private void OnDrawGizmos()
 		{
-			if (showUnholsteredWeaponRange)
-			{
-				Gizmos.color = Color.green;
-
-				if (EquipmentHandler == null || EquipmentHandler.itemInHands == null) return;
-
-				if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition weaponRanged)
-					Gizmos.DrawWireSphere(transform.position, weaponRanged.EffectiveRange);
-			}
-
-			if (showFleeRange)
-			{
-				Gizmos.color = Color.red;
-				if (Definition == null) return;
-				Gizmos.DrawWireSphere(transform.position, Definition.FleeDistance);
-			}
+            ShowFullAgentPath();
+            ShowUnholsteredWeaponRangeGizmo();
+			ShowFleeRangeGizmo();
 		}
+		private void ShowFullAgentPath()
+		{
+			if (!showFullMovePath || Agent.path == null) return;
+
+            for (int i = 0; i < Agent.path.corners.Length - 1; i++)
+            {
+                if (i + 1 > Agent.path.corners.Length - 1) break; //no more corners to check between
+                Vector3 cornerOne = new(Agent.path.corners[i].x, Agent.path.corners[i].y + 1, Agent.path.corners[i].z);
+                Vector3 cornerTwo = new(Agent.path.corners[i + 1].x, Agent.path.corners[i + 1].y + 1, Agent.path.corners[i + 1].z);
+
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(cornerOne, cornerTwo);
+            }
+        }
+        private void ShowUnholsteredWeaponRangeGizmo()
+        {
+            if (!showUnholsteredWeaponRange) return;
+            Gizmos.color = Color.green;
+
+            if (EquipmentHandler == null || EquipmentHandler.itemInHands == null) return;
+
+            if (EquipmentHandler.itemInHands.ItemDefinition is WeaponRangedDefinition weaponRanged)
+                Gizmos.DrawWireSphere(transform.position, weaponRanged.EffectiveRange);
+        }
+        private void ShowFleeRangeGizmo()
+		{
+			if (!showFleeRange) return;
+            Gizmos.color = Color.red;
+
+            if (Definition == null) return;
+            Gizmos.DrawWireSphere(transform.position, Definition.FleeDistance);
+        }
 		#endregion
 	}
 }

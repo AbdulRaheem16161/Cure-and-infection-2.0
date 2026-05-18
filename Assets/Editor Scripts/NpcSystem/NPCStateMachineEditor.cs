@@ -33,6 +33,7 @@ public class NPCStateMachineEditor : Editor
         EditorGUILayout.PropertyField(capabilityProp);
 
         EditorGUILayout.LabelField("Movement Toggles", EditorStyles.boldLabel);
+        npc.showFullMovePath = EditorGUILayout.Toggle("Show Full Move Path", npc.showFullMovePath);
         npc.movementType = (NPCStateMachine.MovementType)EditorGUILayout.EnumPopup("Movement Type", npc.movementType);
         if (npc.movementType == NPCStateMachine.MovementType.patrolMove)
         {
