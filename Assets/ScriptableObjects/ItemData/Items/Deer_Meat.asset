@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Dear Meat
   itemDescription: Meat from a dear
   itemPrice: 110
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 1
   allowedEquipmentSlots: 0

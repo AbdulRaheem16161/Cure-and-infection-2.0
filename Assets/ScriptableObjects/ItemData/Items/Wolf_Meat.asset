@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Wolf Meat
   itemDescription: Meat from a wolf
   itemPrice: 80
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 1
   allowedEquipmentSlots: 0

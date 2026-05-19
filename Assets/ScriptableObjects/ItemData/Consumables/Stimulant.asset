@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Stimulant
   itemDescription: Restores some food and health
   itemPrice: 65
+  baseSpawnWeight: 0.25
   tradable: 0
   allowedSlots: 17
   allowedEquipmentSlots: 448
@@ -23,7 +24,9 @@ MonoBehaviour:
   itemWeight: 0.2
   modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
-  restorationType: 3
-  healthRestored: 35
-  foodRestored: 25
-  waterRestored: 60
+  restorationType: 8
+  healthRestored: 0
+  foodRestored: 0
+  waterRestored: 0
+  staminaRestored: 40
+  consumableFlags: 4

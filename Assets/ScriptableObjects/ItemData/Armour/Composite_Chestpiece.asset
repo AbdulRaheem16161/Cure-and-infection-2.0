@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Composite Chespiece
   itemDescription: 
   itemPrice: 830
+  baseSpawnWeight: 0.2
   tradable: 0
   allowedSlots: 9
   allowedEquipmentSlots: 16
@@ -26,3 +27,4 @@ MonoBehaviour:
   armourType: 2
   protectionProvided: 0.35
   inventorySlotsProvided: 0
+  armourFlags: 12

@@ -317,9 +317,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba7c9aa30ef1dae4fb3b15cf1753306a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LootableName: Chest
+  InitialContainerSize: 20
   itemContainer:
     items: []
-  LootableName: Chest
+  itemSpawnConfig:
+    minItemsToSpawn: 5
+    maxItemsToSpawn: 10
+    allowedRangedWeaponsFlags: -1
+    allowedMeleeWeaponFlags: -1
+    allowedArmourFlags: -1
+    allowedConsumableFlags: -1
+    rangedWeaponWeights: []
+    meleeWeaponWeights: []
+    armourWeights: []
+    consumableWeights: []
+  spawnTable: []
 --- !u!114 &5974733139445683001
 MonoBehaviour:
   m_ObjectHideFlags: 0

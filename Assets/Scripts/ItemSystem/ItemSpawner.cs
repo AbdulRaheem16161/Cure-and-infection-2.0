@@ -1,8 +1,5 @@
-using Mono.Cecil;
-using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class ItemSpawner : MonoBehaviour
 {

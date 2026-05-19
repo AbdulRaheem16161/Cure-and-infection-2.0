@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Bear Meat
   itemDescription: Meat from a bear
   itemPrice: 165
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 1
   allowedEquipmentSlots: 0

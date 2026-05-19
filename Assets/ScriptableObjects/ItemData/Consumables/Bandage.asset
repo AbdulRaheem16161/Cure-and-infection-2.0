@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Bandage
   itemDescription: Restores some health
   itemPrice: 25
+  baseSpawnWeight: 0.25
   tradable: 0
   allowedSlots: 17
   allowedEquipmentSlots: 448
@@ -25,5 +26,7 @@ MonoBehaviour:
   itemUiIcon: {fileID: 0}
   restorationType: 1
   healthRestored: 15
-  foodRestored: 6
-  waterRestored: 10
+  foodRestored: 0
+  waterRestored: 0
+  staminaRestored: 0
+  consumableFlags: 258

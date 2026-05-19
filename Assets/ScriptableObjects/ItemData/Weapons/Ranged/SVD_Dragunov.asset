@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: SVD Dragunov
   itemDescription: 
   itemPrice: 300
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
@@ -31,6 +32,7 @@ MonoBehaviour:
   fireRateRPM: 90
   reloadTime: 3
   effectiveRange: 80
+  weaponFlags: 0
   adsTime: 2.2
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4

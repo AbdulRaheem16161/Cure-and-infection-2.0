@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Combat Knife
   itemDescription: 
   itemPrice: 150
+  baseSpawnWeight: 0.2
   tradable: 1
   allowedSlots: 4
   allowedEquipmentSlots: 4
@@ -23,10 +24,10 @@ MonoBehaviour:
   itemWeight: 0
   modelPrefab: {fileID: 1274142545500504308, guid: 3cfc4713418924499bc31f35f36c1c3d, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 1
   damage: 25
   impactType: 2
   lightSwingSpeed: 1
   lightSwingCooldown: 1
   heavySwingSpeed: 1.5
   heavySwingCooldown: 1.5
+  weaponFlags: 0

@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: "5.56\xD745mm NATO"
   itemDescription: 
   itemPrice: 4
+  baseSpawnWeight: 0.1
   tradable: 0
   allowedSlots: 1
   allowedEquipmentSlots: 0

@@ -8,16 +8,34 @@ public class LootableContainerEditor : Editor
     {
         DrawDefaultInspector();
 
-        LootableContainer door = (LootableContainer)target;
+        LootableContainer lootableContainer = (LootableContainer)target;
 
         GUILayout.Space(10);
-        GUILayout.Label("DEBUG Interacts", EditorStyles.boldLabel);
+        GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Spawn Lootable Items"))
+        {
+            if (!ApplicationPlaying()) return;
+
+            lootableContainer.SpawnLootableItemsInContainer();
+        }
+
+        GUILayout.Space(5);
+
+        if (GUILayout.Button("Reset Loot Container"))
+        {
+            if (!ApplicationPlaying()) return;
+
+            lootableContainer.ItemContainer.ResetContainer();
+        }
+
+        GUILayout.Space(5);
 
         if (GUILayout.Button("Press Interact"))
         {
             if (!ApplicationPlaying()) return;
 
-            door.InteractPress(null);
+            lootableContainer.InteractPress(null);
         }
     }
 

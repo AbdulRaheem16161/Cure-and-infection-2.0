@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Backpack Medium
   itemDescription: 
   itemPrice: 280
+  baseSpawnWeight: 0.2
   tradable: 0
   allowedSlots: 9
   allowedEquipmentSlots: 32
@@ -26,3 +27,4 @@ MonoBehaviour:
   armourType: 3
   protectionProvided: 0
   inventorySlotsProvided: 8
+  armourFlags: -1

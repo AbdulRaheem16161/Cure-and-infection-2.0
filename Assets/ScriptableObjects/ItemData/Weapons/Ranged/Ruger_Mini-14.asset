@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Ruger Mini-14
   itemDescription: 
   itemPrice: 300
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
@@ -31,6 +32,7 @@ MonoBehaviour:
   fireRateRPM: 120
   reloadTime: 2.2
   effectiveRange: 65
+  weaponFlags: 0
   adsTime: 2.2
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4

@@ -11,7 +11,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private WeaponType weaponType;
 	public enum WeaponType
 	{
-		unset, melee, handgun, shotgun, smg, assaultRifle, marksmanRifle, boltActionRifle
+		unset, handgun, shotgun, smg, assaultRifle, marksmanRifle, boltActionRifle
 	}
 
 	[SerializeField] private HitImpact impactType;
@@ -31,6 +31,18 @@ public class WeaponRangedDefinition : ItemDefinition
 	[SerializeField] private int fireRateRPM;
 	[SerializeField] private float reloadTime;
 	[SerializeField] private int effectiveRange;
+
+	[SerializeField] private WeaponFlag weaponFlags;
+    [Flags]
+    public enum WeaponFlag
+    {
+        none = 0,
+        improvised = 1 << 0,
+        civilian = 1 << 1,
+        police = 1 << 2,
+        military = 1 << 3,
+        hunting = 1 << 4,
+    }
 	#endregion
 
 	#region weapon handling
@@ -89,6 +101,8 @@ public class WeaponRangedDefinition : ItemDefinition
 	public float ReloadTime => reloadTime;
 	public int EffectiveRange => effectiveRange;
 	public int EffectiveSqrRange => effectiveRange * effectiveRange;
+
+	public WeaponFlag WeaponFlags => weaponFlags;
 
 	//handling
 	public float AdsTime => adsTime;

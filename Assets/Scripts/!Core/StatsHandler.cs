@@ -319,7 +319,10 @@ public class StatsHandler : MonoBehaviour, IDamageable
 
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
 				Mathf.Clamp(food += consumableDefinition.FoodRestored, 0, 100);
-		}
+
+            if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.stamina))
+                Mathf.Clamp(stamina += consumableDefinition.StaminaRestored, 0, 100);
+        }
 	}
 	#endregion
 

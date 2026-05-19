@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Steel helmet
   itemDescription: 
   itemPrice: 170
+  baseSpawnWeight: 0.2
   tradable: 0
   allowedSlots: 9
   allowedEquipmentSlots: 8
@@ -26,3 +27,4 @@ MonoBehaviour:
   armourType: 1
   protectionProvided: 0.05
   inventorySlotsProvided: 0
+  armourFlags: 6

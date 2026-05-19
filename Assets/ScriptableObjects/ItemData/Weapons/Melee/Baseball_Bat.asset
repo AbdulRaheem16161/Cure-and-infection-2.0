@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Baseball Bat
   itemDescription: 
   itemPrice: 150
+  baseSpawnWeight: 0.2
   tradable: 1
   allowedSlots: 4
   allowedEquipmentSlots: 4
@@ -23,10 +24,10 @@ MonoBehaviour:
   itemWeight: 0
   modelPrefab: {fileID: 4981836282949982424, guid: 536fb2e4ed1584d2bb6d71edfe7dc9e5, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 1
   damage: 25
   impactType: 2
   lightSwingSpeed: 1
   lightSwingCooldown: 1
   heavySwingSpeed: 1.5
   heavySwingCooldown: 1.5
+  weaponFlags: 35

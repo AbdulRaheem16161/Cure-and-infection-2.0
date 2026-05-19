@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Sterling L2A3
   itemDescription: 
   itemPrice: 300
+  baseSpawnWeight: 0.1
   tradable: 1
   allowedSlots: 3
   allowedEquipmentSlots: 3
@@ -31,6 +32,7 @@ MonoBehaviour:
   fireRateRPM: 650
   reloadTime: 2
   effectiveRange: 30
+  weaponFlags: 0
   adsTime: 2.2
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4

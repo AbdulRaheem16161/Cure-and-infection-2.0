@@ -5,16 +5,22 @@ using static EquipmentHandler;
 [Serializable]
 public class ItemDefinition : ScriptableObject
 {
-	#region core item info
-	[Header("Item Info")]
+    #region Core Item Info
+    [Header("Item Info")]
 	[SerializeField] private string itemId;
 	[SerializeField] private string itemName;
 	[SerializeField] private string itemDescription;
 	[SerializeField] private int itemPrice;
 	#endregion
 
-	#region inventory properties
-	[SerializeField] private bool tradable;
+	#region Item Spawn Chance
+	[Header("Item Spawn Chance")]
+	[Range(0, 1f)]
+	[SerializeField] private float baseSpawnWeight;
+    #endregion
+
+    #region Inventory Properties
+    [SerializeField] private bool tradable;
 	[Header("Inventory Properties")]
 	[SerializeField] private InventorySlotType allowedSlots;
 	[Flags]
@@ -45,6 +51,8 @@ public class ItemDefinition : ScriptableObject
 	public string ItemName => itemName;
 	public string ItemDescription => itemDescription;
 	public int ItemPrice => itemPrice;
+
+	public float BaseSpawnWeight => baseSpawnWeight;
 
 	public bool Tradable => tradable;
 	public InventorySlotType AllowedSlots => allowedSlots;

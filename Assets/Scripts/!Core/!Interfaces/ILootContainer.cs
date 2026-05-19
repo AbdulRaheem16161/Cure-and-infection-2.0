@@ -2,9 +2,8 @@ using UnityEngine;
 
 public interface ILootContainer
 {
-    ItemContainer ItemContainer { get; }
-
     string ContainerName { get; }
+    bool CanLoot { get; }
 
-    bool CanLoot {  get; }
+    ItemContainer ItemContainer { get; }
 }

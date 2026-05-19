@@ -9,7 +9,6 @@ public class InventoryHandlerEditor : Editor
 
 	public override void OnInspectorGUI()
 	{
-		// Draw default inspector first
 		DrawDefaultInspector();
 
 		InventoryHandler inventory = (InventoryHandler)target;

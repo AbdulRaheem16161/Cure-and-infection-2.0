@@ -12,11 +12,11 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	[SerializeField] private int money;
 	[SerializeField] private int initialInventorySize;
 
-	[SerializeField] private ItemContainer itemContainer;
-    public ItemContainer ItemContainer => itemContainer;
-
     public string ContainerName => $"{StatsHandler.Definition.Name} Inventory";
     public bool CanLoot => StatsHandler.LifeState == EntityDefinition.LifeState.dead;
+
+    [SerializeField] private ItemContainer itemContainer;
+    public ItemContainer ItemContainer => itemContainer;
     #endregion
 
     #region inventory readonly settings

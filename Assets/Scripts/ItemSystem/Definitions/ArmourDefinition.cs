@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Armour", menuName = "ScriptableObjects/Item/Armour")]
@@ -15,15 +16,30 @@ public class ArmourDefinition : ItemDefinition
 	[Range(0f, 1f)]
 	[SerializeField] private float protectionProvided;
 	[SerializeField] private int inventorySlotsProvided;
-	#endregion
 
-	//add fields for ui icons, 3d prefab models etc, sfx/vfx specific for armour etc...
-	#region model, vfx, sfx
-	#endregion
+    [SerializeField] private ArmourFlag armourFlags;
+    [Flags]
+    public enum ArmourFlag
+    {
+        None = 0,
+        Improvised = 1 << 0,
+        Civilian = 1 << 1,
+        Police = 1 << 2,
+        Military = 1 << 3,
+        Industrial = 1 << 4,
+        Sporting = 1 << 5
+    }
+    #endregion
 
-	#region readoly properties
-	public ArmourSlotType ArmourSlot => armourType;
+    //add fields for ui icons, 3d prefab models etc, sfx/vfx specific for armour etc...
+    #region model, vfx, sfx
+    #endregion
+
+    #region readoly properties
+    public ArmourSlotType ArmourSlot => armourType;
 	public float ProtectionProvided => protectionProvided;
 	public int InventorySlotsProvided => inventorySlotsProvided;
-	#endregion
+
+    public ArmourFlag ArmourFlags => armourFlags;
+    #endregion
 }

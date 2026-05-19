@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using static DamageContext;
 
@@ -6,11 +7,6 @@ public class WeaponMeleeDefinition : ItemDefinition
 {
 	#region weapon characteristics
 	[Header("Weapon Characteristics")]
-	[SerializeField] private WeaponType weaponType;
-	public enum WeaponType
-	{
-		unset, melee, handgun, smg, assaultRifle, marksmanRifle, boltActionRifle
-	}
 	[SerializeField] private int damage;
 	[SerializeField] private HitImpact impactType;
 
@@ -24,11 +20,23 @@ public class WeaponMeleeDefinition : ItemDefinition
 	[SerializeField] private float heavySwingSpeed;
 	[Tooltip("How long till you can swing again after swingSpeed")]
 	[SerializeField] private float heavySwingCooldown;
-	#endregion
 
-	#region readonly properties
-	public WeaponType Weapon => weaponType;
-	public HitImpact ImpactType => impactType;
+    [SerializeField] private WeaponFlag weaponFlags;
+    [Flags]
+    public enum WeaponFlag
+    {
+        None = 0,
+        Improvised = 1 << 0,
+        Civilian = 1 << 1,
+        Police = 1 << 2,
+        Military = 1 << 3,
+        Industrial = 1 << 4,
+        Sporting = 1 << 5
+    }
+    #endregion
+
+    #region readonly properties
+    public HitImpact ImpactType => impactType;
 	public int Damage => damage;
 
 	//swing behaviour
@@ -37,5 +45,7 @@ public class WeaponMeleeDefinition : ItemDefinition
 
 	public float HeavySwingSpeed => heavySwingSpeed;
 	public float HeavySwingCooldown => heavySwingCooldown;
-	#endregion
+
+    public WeaponFlag WeaponFlags => weaponFlags;
+    #endregion
 }

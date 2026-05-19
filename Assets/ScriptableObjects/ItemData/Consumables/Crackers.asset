@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Crackers
   itemDescription: Restores a little food
   itemPrice: 10
+  baseSpawnWeight: 0.25
   tradable: 0
   allowedSlots: 17
   allowedEquipmentSlots: 448
@@ -23,7 +24,9 @@ MonoBehaviour:
   itemWeight: 0.01
   modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
-  restorationType: 2
-  healthRestored: 60
+  restorationType: 6
+  healthRestored: 0
   foodRestored: 15
   waterRestored: -5
+  staminaRestored: 0
+  consumableFlags: 2

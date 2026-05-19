@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Energy Bar
   itemDescription: Restores some food
   itemPrice: 30
+  baseSpawnWeight: 0.25
   tradable: 0
   allowedSlots: 17
   allowedEquipmentSlots: 448
@@ -23,7 +24,9 @@ MonoBehaviour:
   itemWeight: 0.05
   modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
-  restorationType: 2
-  healthRestored: 60
-  foodRestored: 30
-  waterRestored: -5
+  restorationType: 10
+  healthRestored: 0
+  foodRestored: 20
+  waterRestored: 0
+  staminaRestored: 5
+  consumableFlags: 66

@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Composite helmet
   itemDescription: 
   itemPrice: 365
+  baseSpawnWeight: 0.2
   tradable: 0
   allowedSlots: 9
   allowedEquipmentSlots: 8
@@ -26,3 +27,4 @@ MonoBehaviour:
   armourType: 1
   protectionProvided: 0.25
   inventorySlotsProvided: 0
+  armourFlags: 12

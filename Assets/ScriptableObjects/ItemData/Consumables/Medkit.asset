@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Medkit
   itemDescription: Restores a lot of health
   itemPrice: 75
+  baseSpawnWeight: 0.25
   tradable: 0
   allowedSlots: 17
   allowedEquipmentSlots: 448
@@ -24,6 +25,8 @@ MonoBehaviour:
   modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
   restorationType: 1
-  healthRestored: 60
-  foodRestored: 6
-  waterRestored: 10
+  healthRestored: 50
+  foodRestored: 0
+  waterRestored: 0
+  staminaRestored: 0
+  consumableFlags: 260

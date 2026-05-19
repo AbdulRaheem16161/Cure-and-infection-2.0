@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: "7.62\xD754mmR"
   itemDescription: 
   itemPrice: 8
+  baseSpawnWeight: 0.1
   tradable: 0
   allowedSlots: 1
   allowedEquipmentSlots: 0
