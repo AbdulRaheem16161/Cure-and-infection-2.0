@@ -1,6 +1,7 @@
 using Game.Core;
 using Game.MyNPC;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using static EquipmentHandler;
@@ -69,11 +70,20 @@ public class NpcBeliefs : MonoBehaviour
 	public bool CanHeal => Hurt && HealableItem != null;
 	public bool CanDrink => Thirsty && DrinkableItem != null;
 	public bool CanEat => Hungry && EatableItem != null;
-	#endregion
+    #endregion
 
-	//internal belifs that should probably stay hidden
-	#region tracked Equipment slots updated on events
-	private EquipmentSlot ConsumableOne;
+    #region Loot Beliefs
+    private Coroutine lootEvaluationRoutine;
+    private const float lootableThreshold = 0.4f;
+    private const float maxLootSqrDistance = 400f;
+
+    public InteractContext LootableContainer { get; private set; }
+    public bool HasLootableContainer => LootableContainer != null;
+    #endregion
+
+    //internal belifs that should probably stay hidden
+    #region tracked Equipment slots updated on events
+    private EquipmentSlot ConsumableOne;
 	private EquipmentSlot ConsumableTwo;
 	private EquipmentSlot ConsumableThree;
 	#endregion
@@ -100,13 +110,16 @@ public class NpcBeliefs : MonoBehaviour
 		Definition = definition;
 		InvestigateLocation = null;
 		LookDirection = null;
-	}
+        lootEvaluationRoutine = StartCoroutine(EvaluateLootablesRoutine());
+    }
 
 	private void OnDestroy()
 	{
 		EquipmentHandler.OnEquippedItemChanges -= OnEquippedItemChanges;
 		StatsHandler.OnHit -= HandleOnHit;
-	}
+        if (lootEvaluationRoutine != null)
+            StopCoroutine(lootEvaluationRoutine);
+    }
 
 	#region alert belief check
 	public bool Alerted()
@@ -148,15 +161,15 @@ public class NpcBeliefs : MonoBehaviour
 			if (FleeTarget.SquaredDistance < Definition.FleeSqrDistance)
 			{
 				if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < FleeTarget.SquaredDistance) //switch to flee from closer threat
-					FleeTarget = ClosestFleeTarget;
+                    UpdateFleeTarget(ClosestFleeTarget);
 
-				return true;
+                return true;
 			}
 		}
 
 		if (ClosestFleeTarget != null && ClosestFleeTarget.SquaredDistance < Definition.FleeSqrDistance) //start fleeing if not already
 		{
-			FleeTarget = ClosestFleeTarget;
+			UpdateFleeTarget(ClosestFleeTarget);
 			return true;
 		}
 
@@ -233,10 +246,45 @@ public class NpcBeliefs : MonoBehaviour
 
 		return cachedConsumableSlot;
 	}
-	#endregion
+    #endregion
 
-	#region On Hit Stunned Event Listener
-	private void HandleOnHit(DamageContext damageContext)
+    #region Update And Evaluate Lootable Interactables
+    private IEnumerator EvaluateLootablesRoutine()
+    {
+        WaitForSeconds wait = new(5f);
+
+        while (true)
+        {
+            EvaluateLootables();
+            yield return wait;
+        }
+    }
+    private void EvaluateLootables()
+    {
+        InteractContext bestLootable = null;
+        float bestScore = 0f;
+
+        foreach (var interactable in NpcPerception.interactables)
+        {
+            if (!interactable.CheckIfLootable())
+                continue;
+
+			interactable.UpdateDistance(transform.position);
+            float score = Mathf.Clamp01(1f - interactable.squaredDistance / maxLootSqrDistance);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestLootable = interactable;
+            }
+        }
+
+        LootableContainer = bestScore >= lootableThreshold ? bestLootable : null;
+    }
+    #endregion
+
+    #region On Hit Stunned Event Listener
+    private void HandleOnHit(DamageContext damageContext)
 	{
 		if (damageContext.ImpactType == DamageContext.HitImpact.knockback)
 			Stunned = true;

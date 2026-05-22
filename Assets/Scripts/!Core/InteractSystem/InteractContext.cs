@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -24,9 +25,9 @@ public class InteractContext
         UpdateDistance(npcPosition);
     }
 
-    public void CheckIfLootable()
+    public bool CheckIfLootable()
     {
-        if (lootState == LootState.notLootable || lootState == LootState.alreadyLooted) return;
+        if (lootState == LootState.notLootable || lootState == LootState.alreadyLooted) return false;
 
         if (interactable is ILootContainer loot)
         {
@@ -37,6 +38,8 @@ public class InteractContext
         }
         else
             lootState = LootState.notLootable;
+
+        return lootState == LootState.Lootable;
     }
 
     public void MarkAsAlreadyLooted()

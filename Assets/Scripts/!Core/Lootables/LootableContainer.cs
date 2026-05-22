@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEditor.Progress;
 
 [RequireComponent(typeof(Hinge))]
 public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
@@ -71,11 +72,12 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     {
         int tries = 0;
         int maxTries = 10000;
+        int itemsFoundToSpawn = 0;
         int itemsToSpawnCount = systemRandom.Next(itemSpawnConfig.minItemsToSpawn, itemSpawnConfig.maxItemsToSpawn + 1);
 
-        List<ItemDefinition> itemsToSpawn = new();
+        Dictionary<ItemDefinition, int> itemsToSpawn = new();
 
-        while (itemsToSpawn.Count < itemsToSpawnCount && tries < maxTries)
+        while (itemsFoundToSpawn < itemsToSpawnCount && tries < maxTries)
         {
             float roll = (float)systemRandom.NextDouble() * totalSpawnWeight;
             float current = 0f;
@@ -84,17 +86,31 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
             {
                 current += entry.weight;
 
-                if (roll <= current)
+                if (roll > current)
+                    continue;
+
+                if (itemsToSpawn.TryGetValue(entry.item, out int count)) //limit duplicates to 2
                 {
-                    itemsToSpawn.Add(entry.item);
-                    break;
+                    if (count >= 2)
+                        break;
+
+                    itemsToSpawn[entry.item]++;
                 }
+                else
+                    itemsToSpawn[entry.item] = 1;
+
+                itemsFoundToSpawn++;
+                break;
             }
             tries++;
         }
 
-        foreach (ItemDefinition item in itemsToSpawn)
-            itemContainer.AddNewItem(new InventoryItem(item, systemRandom.Next(1, item.StackLimit + 1)));
+        foreach (var kvp in itemsToSpawn)
+        {
+            int itemCount = kvp.Value;
+            for (int i = 0; i < itemCount; i++)
+                itemContainer.AddNewItem(new InventoryItem(kvp.Key, systemRandom.Next(1, kvp.Key.StackLimit + 1)));
+        }
     }
     #endregion
 
@@ -106,19 +122,12 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
         int weightedMask = 0;
 
         foreach (var w in weights)
-        {
             weightedMask |= Convert.ToInt32(w.flag);
-        }
 
-        // ONLY real error: weighted but not allowed
         int invalid = weightedMask & ~allowed;
 
         if (invalid != 0)
-        {
-            Debug.LogWarning(
-                $"[{context}] Flags have spawn weights but are NOT allowed: {Convert.ToString(invalid, 2)}"
-            );
-        }
+            Debug.LogWarning($"[{context}] Flags have spawn weights but are NOT allowed: {Convert.ToString(invalid, 2)}");
     }
     #endregion
 
@@ -207,7 +216,7 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     }
     #endregion
 
-    [System.Serializable]
+    [Serializable]
     public class SpawnEntry
     {
         public ItemDefinition item;
