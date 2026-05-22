@@ -23,7 +23,7 @@ public static class InventoryService
         fullInventory, itemNull, success
     }
 
-    #region adjust container size
+    #region Modify Container Size
     public static void ModifyContainerSize(ItemContainer container, int sizeAdjustment, Vector3 dropPosition)
     {
         int newSize = container.Items.Length + sizeAdjustment;
@@ -36,7 +36,7 @@ public static class InventoryService
 
         for (int i = newSize; i < container.Items.Length; i++) //drop items on floor if they dont fit
         {
-            if (container.ItemExists(container.Items[i]))
+            if (container.InventoryItemExists(container.Items[i]))
             {
                 Debug.LogWarning($"Item {container.Items[i].ItemDefinition.ItemName} was dropped on the ground");
                 DropItem(dropPosition, container, i, true);
@@ -47,7 +47,7 @@ public static class InventoryService
     }
     #endregion
 
-    #region buying/selling items
+    #region Buy/Sell Items
     public static void BuyItemInSlot(InventoryHandler seller, InventoryHandler buyer, int slot, bool transferStack)
     {
         ShopTransferResult result = ShopTransferValid(seller, buyer, slot, transferStack, out ShopTransferContext transferContext);
@@ -105,7 +105,7 @@ public static class InventoryService
 
         InventoryItem item = seller.ItemContainer.Items[slot];
 
-        if (!seller.ItemContainer.ItemExists(item)) { return ShopTransferResult.itemNull; }
+        if (!seller.ItemContainer.InventoryItemExists(item)) { return ShopTransferResult.itemNull; }
 
         int stackCount = transferStack ? item.CurrentStack : 1;
         int price = item.ItemDefinition.ItemPrice * stackCount;
@@ -127,7 +127,7 @@ public static class InventoryService
     }
     #endregion
 
-    #region MoveItems
+    #region Move Item
     public static void TryMoveItem(ItemContainer destination, ItemContainer source, int slot, bool logOutcome = false)
     {
         MoveItemResult result = MoveItemValid(source, slot);
@@ -153,14 +153,15 @@ public static class InventoryService
     public static MoveItemResult MoveItemValid(ItemContainer container, int slot)
     {
         if (container.ContainerFull()) return MoveItemResult.fullInventory;
-        if (container.ItemExists(container.Items[slot])) return MoveItemResult.itemNull;
+        if (container.InventoryItemExists(container.Items[slot])) return MoveItemResult.itemNull;
         return MoveItemResult.success;
     }
     #endregion
 
+    #region Drop Item
     public static void DropItem(Vector3 dropPosition, ItemContainer container, int slot, bool dropStack)
     {
-        if (!container.SlotExists(slot) || !container.ItemExists(container.Items[slot]))
+        if (!container.SlotExists(slot) || !container.InventoryItemExists(container.Items[slot]))
         {
             Debug.LogError($"no item exists in slot {slot}");
             return;
@@ -172,4 +173,5 @@ public static class InventoryService
 
         ItemSpawner.GetItem(itemToDrop.ItemDefinition, itemToDrop.CurrentStack, null, dropPosition, Quaternion.identity);
     }
+    #endregion
 }

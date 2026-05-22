@@ -52,7 +52,7 @@ public class InventoryHandlerEditor : Editor
 		#region adding items to inventory buttons
 		GUILayout.Label("Item Adding", EditorStyles.boldLabel);
 		inventory.itemToSpawn = (ItemDefinition)EditorGUILayout.ObjectField("Item To Spawn", inventory.itemToSpawn, typeof(ItemDefinition), false);
-		inventory.itemToSpawnCount = EditorGUILayout.IntField("Item To Spawn Count", inventory.itemToSpawnCount);
+		inventory.itemCount = EditorGUILayout.IntField("Item Count", inventory.itemCount);
 
 		if (GUILayout.Button("Pick Up Specific Item"))
 		{
@@ -64,12 +64,12 @@ public class InventoryHandlerEditor : Editor
 				return;
 			}
 
-			if (inventory.itemToSpawnCount > inventory.itemToSpawn.StackLimit)
-				inventory.itemToSpawnCount = inventory.itemToSpawn.StackLimit;
-			else if (inventory.itemToSpawnCount <= 0)
-				inventory.itemToSpawnCount = 1;
+			if (inventory.itemCount > inventory.itemToSpawn.StackLimit)
+				inventory.itemCount = inventory.itemToSpawn.StackLimit;
+			else if (inventory.itemCount <= 0)
+				inventory.itemCount = 1;
 
-			inventory.ItemContainer.AddNewItem(new(inventory.itemToSpawn, ItemSpawner.GetItemStackCount(inventory.itemToSpawn)));
+			inventory.ItemContainer.AddNewItem(new(inventory.itemToSpawn, inventory.itemCount));
 		}
 
 		if (GUILayout.Button("Pick Up Random Item"))
@@ -86,10 +86,29 @@ public class InventoryHandlerEditor : Editor
 		GUILayout.Label("Debug Specific Slot", EditorStyles.boldLabel);
 		inventory.actionEffectsStack = EditorGUILayout.Toggle("Action Effects Stack", inventory.actionEffectsStack);
 		inventory.slotIndex = EditorGUILayout.IntField("Slot Index (0 = base)", inventory.slotIndex);
-		#endregion
+		inventory.newSlotIndex = EditorGUILayout.IntField("New Slot Index (0 = base)", inventory.newSlotIndex);
+        #endregion
 
-		#region destroy item button (TODO update to a proper way to destroy item)
-		if (GUILayout.Button("Destory Item/stack"))
+        #region Move item button
+        if (GUILayout.Button("Move Item To Slot"))
+        {
+            if (!ApplicationPlaying()) return;
+
+			inventory.ItemContainer.MoveItemToSlot(inventory.slotIndex, inventory.newSlotIndex);
+        }
+        #endregion
+
+        #region Split item button
+        if (GUILayout.Button("Split Item"))
+        {
+            if (!ApplicationPlaying()) return;
+
+			inventory.ItemContainer.SplitItem(inventory.slotIndex);
+        }
+        #endregion
+
+        #region destroy item button (TODO update to a proper way to destroy item)
+        if (GUILayout.Button("Destory Item/stack"))
 		{
 			if (!ApplicationPlaying()) return;
 

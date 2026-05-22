@@ -15,9 +15,10 @@ MonoBehaviour:
   entityName: Zombie Basic
   isPlayer: 0
   startingLifeState: 2
-  capabilities: -1
+  capabilities: 3071
   entityFlags: 0
   gameObjectPrefab: {fileID: 4125029387023148961, guid: e4195ad6d3e19ff4695153d850c778cc, type: 3}
+  itemsDroppedOnDeath: []
   maxHealth: 100
   maxWater: 100
   maxFood: 100
@@ -34,6 +35,8 @@ MonoBehaviour:
   walkSpeed: 0.5
   sprintSpeed: 5.5
   rotationSpeed: 300
+  acceleration: 10
+  stoppingDistance: 1
   fleeDistance: 0
   minIdleTime: 1
   maxIdleTime: 3

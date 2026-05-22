@@ -15,7 +15,7 @@ MonoBehaviour:
   entityName: Bear
   isPlayer: 0
   startingLifeState: 0
-  capabilities: 1077
+  capabilities: 53
   entityFlags: 0
   gameObjectPrefab: {fileID: 6402345513559696848, guid: d0f6d6f1e6cddf943b572ec3f6123858, type: 3}
   itemsDroppedOnDeath:

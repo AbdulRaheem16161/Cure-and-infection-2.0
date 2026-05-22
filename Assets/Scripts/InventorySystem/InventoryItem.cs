@@ -19,16 +19,29 @@ public class InventoryItem
         this.currentStack = Mathf.Max(0, currentStack);
     }
 
-	public void SetItemStack(int newStack)
+    public void SetItemStack(int newStack)
 	{
         currentStack = Mathf.Max(0, newStack);
     }
 	public void AddItemStack(int stackToAdd)
 	{
-		currentStack += stackToAdd;
-	}
+        currentStack += Mathf.Max(0, stackToAdd);
+    }
 	public void RemoveItemStack(int stackToRemove)
 	{
 		currentStack -= stackToRemove;
 	}
+
+	public bool CanStackWith(InventoryItem otherItem)
+    {
+        if (otherItem == null || otherItem.ItemDefinitionNull) return false;
+        return ItemDefinitionMatches(otherItem);
+    }
+    public bool ItemDefinitionMatches(InventoryItem otherItem)
+    {
+        if (ItemDefinition == otherItem.ItemDefinition)
+            return true;
+        else
+            return false;
+    }
 }

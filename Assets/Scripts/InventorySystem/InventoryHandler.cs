@@ -29,8 +29,9 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	[HideInInspector] public int modifyInventorySizeByThis;
 	[HideInInspector] public bool actionEffectsStack = false;
 	[HideInInspector] public int slotIndex = 0;
+	[HideInInspector] public int newSlotIndex = 0;
 	[HideInInspector] public ItemDefinition itemToSpawn;
-	[HideInInspector] public int itemToSpawnCount;
+	[HideInInspector] public int itemCount;
 	#endregion
 
 	#region awake + initialize inventory handler method
