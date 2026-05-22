@@ -16,13 +16,13 @@ public class InventoryItem
 	public InventoryItem(ItemDefinition itemDefinition, int currentStack)
 	{
 		this.itemDefinition = itemDefinition;
-		this.currentStack = currentStack;
-	}
+        this.currentStack = Mathf.Max(0, currentStack);
+    }
 
 	public void SetItemStack(int newStack)
 	{
-		currentStack = newStack;
-	}
+        currentStack = Mathf.Max(0, newStack);
+    }
 	public void AddItemStack(int stackToAdd)
 	{
 		currentStack += stackToAdd;

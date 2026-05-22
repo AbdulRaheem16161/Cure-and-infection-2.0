@@ -30,7 +30,8 @@ public class EntityDefinition : ScriptableObject
 		investigate = 1 << 7,
 		drink = 1 << 8,
 		eat = 1 << 9,
-		move = 1 << 10
+		loot = 1 << 10,
+		move = 1 << 11
 	};
 
 	[SerializeField] private EntityFlags entityFlags;

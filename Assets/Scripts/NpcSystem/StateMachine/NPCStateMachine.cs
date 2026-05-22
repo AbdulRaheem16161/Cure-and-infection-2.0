@@ -63,6 +63,7 @@ namespace Game.MyNPC
 		private NPCInvestigateState investigateState;
 		private NpcDrinkState drinkState;
 		private NpcEatState eatState;
+		private NpcLootState lootState;
 		private NpcIdleMovementState moveState;
         #endregion
 
@@ -125,7 +126,8 @@ namespace Game.MyNPC
 			investigateState = new NPCInvestigateState(this, 50);
 			drinkState = new NpcDrinkState(this, 35);
 			eatState = new NpcEatState(this, 30);
-			moveState = new NpcIdleMovementState(this, 10);
+			lootState = new NpcLootState(this, 20);
+            moveState = new NpcIdleMovementState(this, 10);
 
 			states.Add(stunnedState);
 			states.Add(fleeState);
@@ -138,7 +140,8 @@ namespace Game.MyNPC
 			states.Add(investigateState);
 			states.Add(drinkState);
 			states.Add(eatState);
-			states.Add(moveState);
+			states.Add(lootState);
+            states.Add(moveState);
 
 			capabilityOverrides = Definition.Capabilities;
 			Agent.speed = Definition.WalkSpeed;

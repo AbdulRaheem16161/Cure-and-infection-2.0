@@ -2,11 +2,6 @@ using UnityEngine;
 
 public static class InventoryService
 {
-    public enum ShopTransferResult
-    {
-        fullInventory, itemNull, noMoney, success
-    }
-
     public class ShopTransferContext
     {
         public InventoryHandler seller;
@@ -16,6 +11,16 @@ public static class InventoryService
         public int stackCount;
         public int price;
         public bool transferStack;
+    }
+
+    public enum ShopTransferResult
+    {
+        fullInventory, itemNull, noMoney, success
+    }
+
+    public enum MoveItemResult
+    {
+        fullInventory, itemNull, success
     }
 
     #region adjust container size
@@ -122,19 +127,36 @@ public static class InventoryService
     }
     #endregion
 
-    public static void TransferItem(ItemContainer containerOne, ItemContainer containerTwo)
+    #region MoveItems
+    public static void TryMoveItem(ItemContainer destination, ItemContainer source, int slot, bool logOutcome = false)
     {
-        Debug.LogError("Method 'TransferItem' Not Implemented");
-        return;
+        MoveItemResult result = MoveItemValid(source, slot);
 
-        //no op
+        switch (result)
+        {
+            case MoveItemResult.success:
+                InventoryItem itemToMove = source.Items[slot];
+                destination.AddNewItem(itemToMove, true);
+                source.RemoveItemsFromSlot(slot, itemToMove.CurrentStack, true);
+                break;
+
+            case MoveItemResult.fullInventory:
+                if (logOutcome) Debug.LogWarning("Cannot move Item, destination inventory full.");
+                break;
+
+            case MoveItemResult.itemNull:
+                if (logOutcome) Debug.LogWarning("Cannot move Item, item in slot null");
+                break;
+        }
     }
-    public static bool ItemTransferValid(ItemContainer container, bool itemExpected, int slot)
+
+    public static MoveItemResult MoveItemValid(ItemContainer container, int slot)
     {
-        if (container.ContainerFull()) return false;
-
-        return itemExpected && container.ItemExists(container.Items[slot]);
+        if (container.ContainerFull()) return MoveItemResult.fullInventory;
+        if (container.ItemExists(container.Items[slot])) return MoveItemResult.itemNull;
+        return MoveItemResult.success;
     }
+    #endregion
 
     public static void DropItem(Vector3 dropPosition, ItemContainer container, int slot, bool dropStack)
     {
