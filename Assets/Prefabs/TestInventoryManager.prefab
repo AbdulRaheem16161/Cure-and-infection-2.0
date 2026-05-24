@@ -1,0 +1,410 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2009543864170859156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2619364378787798012}
+  - component: {fileID: 5133178818773280873}
+  - component: {fileID: 3992722771664672670}
+  - component: {fileID: 8720711801949505348}
+  - component: {fileID: 636715261610849483}
+  - component: {fileID: 7432530735474910996}
+  m_Layer: 0
+  m_Name: InventoryTestObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2619364378787798012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5795400162001119139}
+  m_Father: {fileID: 9219814924291558595}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5133178818773280873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641b5c2508dfd943b19490359f09f3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Definition: {fileID: 11400000, guid: 92156a5fc4607a945ab173b751c506da, type: 2}
+  team: 1
+--- !u!114 &3992722771664672670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: 0
+  lifeState: 0
+  health: 50
+  water: 50
+  food: 50
+  stamina: 50
+  headProtection: 0
+  chestProtection: 0
+  zombificationPercentage: 0
+  invincible: 0
+  forceRespawn: 0
+--- !u!114 &8720711801949505348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edda677364658b744ba34b0e7a8ea499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
+  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
+  ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
+  equippedHelmetParent: {fileID: 2756390615225222790}
+  equippedChestpieceParent: {fileID: 2756390615225222790}
+  equippedBackpackParent: {fileID: 2756390615225222790}
+  equippedWeaponsParent: {fileID: 2756390615225222790}
+  ItemsInHandsParent: {fileID: 2756390615225222790}
+  equippedItems: []
+  itemInHands: {fileID: 0}
+  itemToEquip: {fileID: 11400000, guid: d8800095176a06b41a826c07338bbcea, type: 2}
+  itemToEquipCount: 1
+  slotToEquipItemTo: 1
+  equipmentSlotToUnequip: 4
+  consumableSlotToUse: 64
+  equipItemFromInventorySlot: 0
+  unHolsterItem: 0
+--- !u!114 &636715261610849483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  money: 500
+  initialInventorySize: 12
+  itemContainer:
+    items: []
+  addMoney: 500
+  modifyInventorySizeByThis: 0
+  actionEffectsStack: 0
+  slotIndex: 0
+  newSlotIndex: 0
+  itemToSpawn: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
+  itemCount: 0
+--- !u!136 &7432530735474910996
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009543864170859156}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &2756390615225222790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5795400162001119139}
+  m_Layer: 0
+  m_Name: EquippedItemsParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5795400162001119139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2756390615225222790}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2619364378787798012}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2938361739308859283
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9219814924291558595}
+  - component: {fileID: 2318121098762488746}
+  m_Layer: 0
+  m_Name: TestInventoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9219814924291558595
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2938361739308859283}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2619364378787798012}
+  - {fileID: 3731410724818036717}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2318121098762488746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2938361739308859283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1469cd43a9c716d4fb36a60206c0f077, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerObj: {fileID: 2009543864170859156}
+  npcObj: {fileID: 5793756134769913470}
+--- !u!1 &5793756134769913470
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3731410724818036717}
+  - component: {fileID: 2820154462498253198}
+  - component: {fileID: 4817945304870544323}
+  - component: {fileID: 5949310806521748973}
+  - component: {fileID: 4997561149558230000}
+  - component: {fileID: 8457893125741470664}
+  m_Layer: 0
+  m_Name: InventoryTestObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3731410724818036717
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2185441010918656164}
+  m_Father: {fileID: 9219814924291558595}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2820154462498253198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7641b5c2508dfd943b19490359f09f3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Definition: {fileID: 11400000, guid: 92156a5fc4607a945ab173b751c506da, type: 2}
+  team: 1
+--- !u!114 &4817945304870544323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d737436b1f8bd194082e83016222285e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: 0
+  lifeState: 0
+  health: 50
+  water: 50
+  food: 50
+  stamina: 50
+  headProtection: 0
+  chestProtection: 0
+  zombificationPercentage: 0
+  invincible: 0
+  forceRespawn: 0
+--- !u!114 &5949310806521748973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edda677364658b744ba34b0e7a8ea499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WeaponRangedPrefab: {fileID: 7577775180019769632, guid: 7411cbeff99c24741b01e7de3fd29aab, type: 3}
+  WeaponMeleePrefab: {fileID: 7762940628498603428, guid: f9f84e82a0630e84f8029a89deb7e6bc, type: 3}
+  ArmourPrefab: {fileID: 8985737731187995693, guid: 21d57c382bd34774b81a8313826fef4a, type: 3}
+  equippedHelmetParent: {fileID: 9113720859960614241}
+  equippedChestpieceParent: {fileID: 9113720859960614241}
+  equippedBackpackParent: {fileID: 9113720859960614241}
+  equippedWeaponsParent: {fileID: 9113720859960614241}
+  ItemsInHandsParent: {fileID: 9113720859960614241}
+  equippedItems: []
+  itemInHands: {fileID: 0}
+  itemToEquip: {fileID: 11400000, guid: d8800095176a06b41a826c07338bbcea, type: 2}
+  itemToEquipCount: 1
+  slotToEquipItemTo: 1
+  equipmentSlotToUnequip: 4
+  consumableSlotToUse: 64
+  equipItemFromInventorySlot: 0
+  unHolsterItem: 0
+--- !u!114 &4997561149558230000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  money: 500
+  initialInventorySize: 12
+  itemContainer:
+    items: []
+  addMoney: 500
+  modifyInventorySizeByThis: 0
+  actionEffectsStack: 0
+  slotIndex: 0
+  newSlotIndex: 0
+  itemToSpawn: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
+  itemCount: 0
+--- !u!136 &8457893125741470664
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5793756134769913470}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &9113720859960614241
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2185441010918656164}
+  m_Layer: 0
+  m_Name: EquippedItemsParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2185441010918656164
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9113720859960614241}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3731410724818036717}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

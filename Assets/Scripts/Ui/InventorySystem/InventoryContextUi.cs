@@ -225,28 +225,28 @@ public class InventoryContextUi : MonoBehaviour
 	#region button actions
 	private void EquipItem(InventorySlotUi slot, EquipmentType equipmentType)
 	{
-		slot.InventoryRef.EquipmentHandler.EquipItemFromInventory(slot.SlotIndex, equipmentType);
+		slot.Equipment.EquipItemFromInventory(slot.SlotIndex, equipmentType);
 		HideContextPanel();
 	}
 	private void UnEquipItem(InventorySlotUi slot)
 	{
-		slot.EquipmentRef.UnequipItem(slot.SlotEquipmentType);
+		slot.Equipment.UnequipItem(slot.EquipmentTypes);
 		HideContextPanel();
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
-		slot.InventoryRef.ItemContainer.SplitItem(slot.SlotIndex);
+		slot.ItemContainer.SplitItem(slot.SlotIndex);
 		HideContextPanel();
 	}
 	private void DropItem(InventorySlotUi slot, bool dropStack)
 	{
-		if (slot.EquipmentRef != null)
+		if (slot.Equipment != null)
 		{
-			slot.EquipmentRef.DropItem(slot.SlotEquipmentType, dropStack);
+			slot.Equipment.DropItem(slot.EquipmentTypes, dropStack);
 		}
-		else if (slot.InventoryRef != null)
+		else if (slot.ItemContainer != null)
 		{
-			InventoryService.DropItem(slot.InventoryRef.transform.position, slot.InventoryRef.ItemContainer, slot.SlotIndex, dropStack);
+			InventoryService.DropItem(slot.ObjectRef.transform.position, slot.ItemContainer, slot.SlotIndex, dropStack);
 		}
 		HideContextPanel();
 	}

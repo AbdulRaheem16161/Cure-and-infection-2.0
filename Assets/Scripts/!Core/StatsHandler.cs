@@ -8,7 +8,9 @@ using Game.MyNPC;
 [RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
-	public EntityDefinition Definition { get; private set; }
+	private TestInventoryController TestInventoryController; //temp for testing, remove when not needed
+
+    public EntityDefinition Definition { get; private set; }
 	public NPCStateMachine NpcStateMachine { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
@@ -69,7 +71,8 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region awake + Initialize stats handler method
 	private void Awake()
 	{
-		NpcStateMachine = GetComponent<NPCStateMachine>();
+        TestInventoryController = GetComponent<TestInventoryController>(); //temp for testing, remove when not needed
+        NpcStateMachine = GetComponent<NPCStateMachine>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		if (!_Initialized)
@@ -112,7 +115,9 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		HandleWaterDrain();
 		HandleFoodDrain();
 
-		if (NpcStateMachine != null) //npc handle move intent
+		if (TestInventoryController != null) return; //temp for testing so dont need movement, remove when not needed
+
+        if (NpcStateMachine != null) //npc handle move intent
 		{
 			if (NpcStateMachine.IsSprinting)
 				HandleStaminaDrain();

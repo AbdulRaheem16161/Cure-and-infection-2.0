@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class InventoryUi : MonoBehaviour
 {
-	#region inventory ui
-	[Header("Inventory Ui")]
+    public bool isPlayerInventory; //if true, will only listen to player inventory events
+
+    #region inventory ui
+    [Header("Inventory Ui")]
 	public GameObject inventoryUiPanel;
 	public InventorySlotUi[] inventorySlotUis;
 	#endregion
@@ -14,48 +16,92 @@ public class InventoryUi : MonoBehaviour
 	/// </summary>
 	#region inventory ref
 	[Header("Runtime Ref")]
-	[SerializeField] private InventoryHandler inventory;
+    [SerializeField] private GameObject objectRef;
+    [SerializeField] private ItemContainer itemContainer;
 	#endregion
 
 	private void Start()
-	{
-		inventory = TestInventoryManager.Instance.playerObj.GetComponent<InventoryHandler>(); //grab via test manager for now
-		inventory.ItemContainer.OnContainerSizeChanged += HandleInventorySizeChanges;
-		HandleInventorySizeChanges(inventory.ItemContainer.ContainerSize);
+    {
+        if (isPlayerInventory)
+            UpdateObjectReferences(TestInventoryManager.Instance.playerObj); //grab via test manager for now)
+
+        SubToEvents();
 	}
 	private void OnDestroy()
 	{
-		inventory.ItemContainer.OnContainerSizeChanged -= HandleInventorySizeChanges;
+        UnSubToEvents();
 	}
 
-	#region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
-	public void ShowInventory()
+    public void UpdateObjectReferences(GameObject newRef)
+    {
+        itemContainer.OnContainerSizeChanged -= OnInventorySizeChange;
+
+        objectRef = newRef;
+        itemContainer = objectRef.GetComponent<InventoryHandler>().ItemContainer;
+        itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
+
+        OnInventorySizeChange(itemContainer.ContainerSize);
+    }
+
+    #region Event Subscriptions
+    private void SubToEvents()
+    {
+        itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
+        TestInventoryManager.PlayerInventoryVisibleEvent += OnPlayerInventoryVisible;
+        TestInventoryManager.LootableInventoryVisibleEvent += OnLootableInventoryVisible;
+    }
+    private void UnSubToEvents()
+    {
+        TestInventoryManager.PlayerInventoryVisibleEvent -= OnPlayerInventoryVisible;
+        TestInventoryManager.LootableInventoryVisibleEvent -= OnLootableInventoryVisible;
+    }
+    private void OnInventorySizeChange(int newSize)
+    {
+        if (newSize > inventorySlotUis.Length)
+        {
+            Debug.LogError("New inventroy size bigger then what ui currently supports, resize and add new ui slots " +
+                "or edit inventory size + inventory sizes provided by backpacks");
+            return;
+        }
+
+        for (int i = 0; i < inventorySlotUis.Length; i++)
+        {
+            if (i < newSize)
+                inventorySlotUis[i].EnableSlot(objectRef, itemContainer);
+            else
+                inventorySlotUis[i].DisableSlot();
+        }
+    }
+    private void OnPlayerInventoryVisible(bool isVisible)
+    {
+        if (objectRef != TestInventoryManager.Instance.playerObj)
+            return;
+
+        if (isVisible) ShowInventory();
+        else HideInventory();
+    }
+    private void OnLootableInventoryVisible(GameObject lootable, bool isVisible)
+    {
+        if (objectRef == TestInventoryManager.Instance.playerObj)
+            return;
+
+        UpdateObjectReferences(lootable);
+
+        if (isVisible) ShowInventory();
+        else  HideInventory();
+    }
+    #endregion
+
+    #region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
+    public void ShowInventory()
 	{
-		inventoryUiPanel.SetActive(true);
+        Debug.LogError("Show Inventory: true");
+        inventoryUiPanel.SetActive(true);
 	}
 	public void HideInventory()
 	{
-		inventoryUiPanel.SetActive(false);
-	}
-	#endregion
-
-	#region inventory size changes
-	private void HandleInventorySizeChanges(int newSize)
-	{
-		if (newSize > inventorySlotUis.Length)
-		{
-			Debug.LogError("New inventroy size bigger then what ui currently supports, resize and add new ui slots " +
-				"or edit inventory size + inventory sizes provided by backpacks");
-			return;
-		}
-
-		for (int i = 0; i < inventorySlotUis.Length; i++)
-		{
-			if (i < newSize)
-				inventorySlotUis[i].EnableSlot(inventory);
-			else
-				inventorySlotUis[i].DisableSlot();
-		}
+        Debug.LogError("Show Inventory: false");
+        inventoryUiPanel.SetActive(false);
 	}
 	#endregion
 }

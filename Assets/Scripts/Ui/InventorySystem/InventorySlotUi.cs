@@ -29,18 +29,20 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	[SerializeField] private bool isBeingDragged;
 	[SerializeField] private int slotIndex;
 
-	[SerializeField] private EquipmentHandler equipmentRef;
-	[SerializeField] private InventoryHandler inventoryRef;
+	[SerializeField] private GameObject objectRef;
+	[SerializeField] private EquipmentHandler equipment;
+	[SerializeField] private ItemContainer itemContainer;
 	[SerializeField] private InventoryItem slotItem;
-	[SerializeField] private EquipmentType slotEquipmentType;
+	[SerializeField] private EquipmentType equipmentType;
 	#endregion
 
 	#region read only runtime info
 	public int SlotIndex => slotIndex;
-	public EquipmentHandler EquipmentRef => equipmentRef;
-	public InventoryHandler InventoryRef => inventoryRef;
+	public GameObject ObjectRef => objectRef;
+    public EquipmentHandler Equipment => equipment;
+	public ItemContainer ItemContainer => itemContainer;
 	public InventoryItem SlotItem => slotItem;
-	public EquipmentType SlotEquipmentType => slotEquipmentType;
+	public EquipmentType EquipmentTypes => equipmentType;
 	#endregion
 
 	public static event Action<InventorySlotUi, Vector2> OnToggleInventoryContextMenu;
@@ -56,38 +58,38 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	private void OnDestroy()
 	{
-		if (inventoryRef != null)
-			inventoryRef.ItemContainer.OnContainerItemChanged -= HandleItemChanges;
+		if (ItemContainer != null)
+            ItemContainer.OnContainerItemChanged -= HandleItemChanges;
 
-		if (equipmentRef != null)
-		{
-			equipmentRef.OnEquippedItemChanges -= OnEquippedItemChanges;
-		}
+		if (equipment != null)
+			equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
 	}
 
 	#region enable/disable equipment slot
-	public void EnableEquipmentSlot(EquipmentHandler equipmentRef, EquipmentType equipmentType)
+	public void EnableEquipmentSlot(GameObject gamebject, EquipmentHandler equipment, EquipmentType equipmentType)
 	{
 		inventorySlotUi.SetActive(true);
 
-		if (equipmentRef != null) //sub to events
+		if (equipment != null) //sub to events
 		{
-			this.equipmentRef = equipmentRef;
-			this.slotEquipmentType = equipmentType;
-			equipmentRef.OnEquippedItemChanges += OnEquippedItemChanges;
-			equipmentRef.OnConsumableUsed += OnConsumableUsed;
+            objectRef = gamebject;
+            this.equipment = equipment;
+			this.equipmentType = equipmentType;
+			equipment.OnEquippedItemChanges += OnEquippedItemChanges;
+			equipment.OnConsumableUsed += OnConsumableUsed;
 		}
 
-		inventorySlotUi.SetActive(true);
+        UpdateSlotUi(equipment.GetEquipmentSlot(equipmentType).Item);
+        inventorySlotUi.SetActive(true);
 	}
 	public void DisableEquipmentSlot()
 	{
 		inventorySlotUi.SetActive(false);
 
-		if (equipmentRef != null) //unsub to events
+		if (equipment != null) //unsub to events
 		{
-			equipmentRef.OnEquippedItemChanges -= OnEquippedItemChanges;
-			equipmentRef.OnConsumableUsed -= OnConsumableUsed;
+			equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
+			equipment.OnConsumableUsed -= OnConsumableUsed;
 		}
 
 		UpdateSlotUi(null);
@@ -95,22 +97,24 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	#region enable/disable inventory slot
-	public void EnableSlot(InventoryHandler inventoryRef)
+	public void EnableSlot(GameObject gamebject, ItemContainer container)
 	{
-		if (inventoryRef != null) //sub to events
+		if (itemContainer != null) //sub to events
 		{
-			this.inventoryRef = inventoryRef;
-			inventoryRef.ItemContainer.OnContainerItemChanged += HandleItemChanges;
+            objectRef = gamebject;
+            itemContainer = container;
+            itemContainer.OnContainerItemChanged += HandleItemChanges;
 		}
 
-		inventorySlotUi.SetActive(true);
+        UpdateSlotUi(itemContainer.Items[slotIndex]);
+        inventorySlotUi.SetActive(true);
 	}
 	public void DisableSlot()
 	{
 		inventorySlotUi.SetActive(false);
 
-		if (inventoryRef != null) //unsub to events
-			inventoryRef.ItemContainer.OnContainerItemChanged -= HandleItemChanges;
+		if (itemContainer != null) //unsub to events
+            itemContainer.OnContainerItemChanged -= HandleItemChanges;
 
 		UpdateSlotUi(null);
 	}
@@ -172,16 +176,16 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		if (draggedSlotUi == this) return;
 
 		if (draggedSlotUi.IsInventorySlot() && IsInventorySlot())
-			inventoryRef.ItemContainer.MoveItemToSlot(draggedSlotUi.slotIndex, slotIndex);
+			itemContainer.MoveItemToSlot(draggedSlotUi.slotIndex, slotIndex);
 
 		else if (draggedSlotUi.IsEquipmentSlot() && IsEquipmentSlot())
-			equipmentRef.EquipItemFromEquipment(draggedSlotUi.slotEquipmentType, slotEquipmentType);
+			equipment.EquipItemFromEquipment(draggedSlotUi.equipmentType, equipmentType);
 
 		else if (draggedSlotUi.IsInventorySlot() && IsEquipmentSlot())
-			equipmentRef.EquipItemFromInventory(draggedSlotUi.slotIndex, slotEquipmentType);
+			equipment.EquipItemFromInventory(draggedSlotUi.slotIndex, equipmentType);
 
 		else if (draggedSlotUi.IsEquipmentSlot() && IsInventorySlot())
-			draggedSlotUi.equipmentRef.EquipItemFromInventory(slotIndex, draggedSlotUi.slotEquipmentType);
+			draggedSlotUi.equipment.EquipItemFromInventory(slotIndex, draggedSlotUi.equipmentType);
 
 		else
 			Debug.LogError("drag and drop action not supported");
@@ -199,13 +203,9 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region equipment slot listeners
 	private void OnEquippedItemChanges(EquipmentSlot slot, bool wasEquipped)
 	{
-		if (equipmentRef == null) return;
-		if (slotEquipmentType != slot.EquipmentType) return; //not correct equipment slot type
-
-		if (wasEquipped)
-			UpdateSlotUi(slot.Item);
-		else
-			UpdateSlotUi(null);
+		if (equipment == null) return;
+		if (equipmentType != slot.EquipmentType) return; //not correct equipment slot type
+		UpdateSlotUi(slot.Item);
 	}
 	private void OnConsumableUsed(EquipmentSlot slot)
 	{
@@ -216,7 +216,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region inventory listener
 	private void HandleItemChanges(int slot, InventoryItem item)
 	{
-		if (inventoryRef == null) return; //doesnt have inventory to represent
+		if (itemContainer == null) return; //doesnt have inventory to represent
 		if (slotIndex != slot) return; //not correct slot
 
 		UpdateSlotUi(item);
@@ -226,7 +226,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region updating ui elements
 	private void UpdateSlotUi(InventoryItem item)
 	{
-		if (item != null)
+		if (item != null && !item.ItemDefinitionNull)
 		{
 			//while no ui icons for items just change colour to green, when they do uncomment warning log
 			//itemInventoryIcon = item.ItemDefinition.ItemUiIcon;
@@ -274,7 +274,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	#region slot checks
-	public bool IsInventorySlot() => inventoryRef != null;
-	public bool IsEquipmentSlot() => equipmentRef != null;
+	public bool IsInventorySlot() => itemContainer != null;
+	public bool IsEquipmentSlot() => equipment != null;
 	#endregion
 }

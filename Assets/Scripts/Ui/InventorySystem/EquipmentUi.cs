@@ -4,15 +4,16 @@ using static EquipmentHandler;
 
 public class EquipmentUi : MonoBehaviour
 {
-	#region equipment ui
-	[Header("Equipment Ui")]
+	public bool isPlayerEquipment; //if true, will only listen to player inventory events
+
+    #region equipment ui
+    [Header("Equipment Ui")]
 	public GameObject equipmentUiPanel;
 	public GameObject quickSlotsUiPanel; //could hide them and only show them when using consumable for 5 seconds + when also showing equipment
 	#endregion
 
 	public float quickSlotHideDelay = 5f;
 	private Coroutine currentCoroutine;
-
 
 	#region equipment ui slots
 	[Header("Equipment Slots")]
@@ -34,23 +35,84 @@ public class EquipmentUi : MonoBehaviour
 	/// </summary>
 	#region equipment ref
 	[Header("Runtime Ref")]
-	[SerializeField] private EquipmentHandler equipment;
+    [SerializeField] private GameObject objectRef;
+    [SerializeField] private EquipmentHandler equipment;
 	#endregion
 
 	private void Start()
 	{
-		equipment = TestInventoryManager.Instance.playerObj.GetComponent<EquipmentHandler>(); //grab via test manager for now
-		SetUpEquipmentSlots();
-	}
+		if (isPlayerEquipment)
+			UpdateObjectReferences(TestInventoryManager.Instance.playerObj); //grab via test manager for now)
 
-	#region show/hide equipment (should listen out for player input events + when opening other ui elements except pause screen)
-	public void ShowEquipment()
+        SubToEvents();
+    }
+    private void OnDestroy()
+    {
+		UnSubToEvents();
+    }
+
+	public void UpdateObjectReferences(GameObject newRef)
+    {
+        objectRef = newRef;
+        equipment = objectRef.GetComponent<EquipmentHandler>();
+		SetUpEquipmentUiSlots();
+    }
+
+    private void SetUpEquipmentUiSlots()
+    {
+        weaponOneSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponOne);
+        weaponTwoSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponTwo);
+        meleeWeaponSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponMelee);
+        helmetSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.helmet);
+        chestSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.chest);
+        backpackSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.backpack);
+
+        quickSlotOne.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableOne);
+        quickSlotTwo.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableTwo);
+        quickSlotThree.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableThree);
+    }
+
+    #region Event Subscriptions
+    private void SubToEvents()
+	{
+        TestInventoryManager.PlayerInventoryVisibleEvent += OnPlayerInventoryVisible;
+		TestInventoryManager.LootableInventoryVisibleEvent += OnLootableInventoryVisible;
+    }
+	private void UnSubToEvents()
+	{
+        TestInventoryManager.PlayerInventoryVisibleEvent -= OnPlayerInventoryVisible;
+        TestInventoryManager.LootableInventoryVisibleEvent -= OnLootableInventoryVisible;
+    }
+    private void OnPlayerInventoryVisible(bool isVisible)
+    {
+        if (objectRef != TestInventoryManager.Instance.playerObj)
+            return;
+
+        if (isVisible) ShowEquipment();
+        else HideEquipment();
+    }
+    private void OnLootableInventoryVisible(GameObject lootable, bool isVisible)
+    {
+        if (objectRef == TestInventoryManager.Instance.playerObj)
+            return;
+
+        UpdateObjectReferences(lootable);
+
+        if (isVisible && equipment != null)
+            ShowEquipment();
+        else
+            HideEquipment();
+    }
+    #endregion
+
+    #region show/hide equipment (should listen out for player input events + when opening other ui elements except pause screen)
+    public void ShowEquipment()
 	{
 		equipmentUiPanel.SetActive(true);
 	}
 	public void HideEquipment()
 	{
-		equipmentUiPanel.SetActive(false);
+        equipmentUiPanel.SetActive(false);
 	}
 	#endregion
 
@@ -69,29 +131,14 @@ public class EquipmentUi : MonoBehaviour
 			currentCoroutine = StartCoroutine(DelayQuickSlotHide());
 		}
 	}
-	public void HideQuickSlots()
+    private IEnumerator DelayQuickSlotHide()
+    {
+        yield return new WaitForSeconds(quickSlotHideDelay);
+        HideQuickSlots();
+    }
+    public void HideQuickSlots()
 	{
 		quickSlotsUiPanel.SetActive(false);
 	}
 	#endregion
-
-	private IEnumerator DelayQuickSlotHide()
-	{
-		yield return new WaitForSeconds(quickSlotHideDelay);
-		HideQuickSlots();
-	}
-
-	private void SetUpEquipmentSlots()
-	{
-		weaponOneSlot.EnableEquipmentSlot(equipment, EquipmentType.weaponOne);
-		weaponTwoSlot.EnableEquipmentSlot(equipment, EquipmentType.weaponTwo);
-		meleeWeaponSlot.EnableEquipmentSlot(equipment, EquipmentType.weaponMelee);
-		helmetSlot.EnableEquipmentSlot(equipment, EquipmentType.helmet);
-		chestSlot.EnableEquipmentSlot(equipment, EquipmentType.chest);
-		backpackSlot.EnableEquipmentSlot(equipment, EquipmentType.backpack);
-
-		quickSlotOne.EnableEquipmentSlot(equipment, EquipmentType.consumableOne);
-		quickSlotTwo.EnableEquipmentSlot(equipment, EquipmentType.consumableTwo);
-		quickSlotThree.EnableEquipmentSlot(equipment, EquipmentType.consumableThree);
-	}
 }
