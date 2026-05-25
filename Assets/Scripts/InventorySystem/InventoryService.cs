@@ -1,4 +1,5 @@
 using UnityEngine;
+using static EquipmentHandler;
 
 public static class InventoryService
 {
@@ -18,9 +19,9 @@ public static class InventoryService
         fullInventory, itemNull, noMoney, success
     }
 
-    public enum MoveItemResult
+    public enum EquipItemResult
     {
-        fullInventory, itemNull, success
+        fullInventory, itemNull, invalidEquipmentType, success
     }
 
     #region Modify Container Size
@@ -127,34 +128,98 @@ public static class InventoryService
     }
     #endregion
 
-    #region Move Item
-    public static void TryMoveItem(ItemContainer destination, ItemContainer source, int slot, bool logOutcome = false)
+    #region Equipping/Unequipping Item
+    public static void TryEquipItem(EquipmentHandler equipmentHandler, ItemContainer inventory, int slot, EquipmentType equipmentType)
     {
-        MoveItemResult result = MoveItemValid(source, slot);
-
-        switch (result)
+        if (!inventory.SlotExists(slot) || !inventory.InventoryItemExists(inventory.Items[slot]))
         {
-            case MoveItemResult.success:
-                InventoryItem itemToMove = source.Items[slot];
-                destination.AddNewItem(itemToMove, true);
-                source.RemoveItemsFromSlot(slot, itemToMove.CurrentStack, true);
-                break;
-
-            case MoveItemResult.fullInventory:
-                if (logOutcome) Debug.LogWarning("Cannot move Item, destination inventory full.");
-                break;
-
-            case MoveItemResult.itemNull:
-                if (logOutcome) Debug.LogWarning("Cannot move Item, item in slot null");
-                break;
+            Debug.LogError($"no item exists in slot {slot}");
+            return;
         }
     }
-
-    public static MoveItemResult MoveItemValid(ItemContainer container, int slot)
+    public static EquipItemResult EquipItemValid(EquipmentHandler equipmentHandler, InventoryItem item, EquipmentType equipmentType)
     {
-        if (container.ContainerFull()) return MoveItemResult.fullInventory;
-        if (container.InventoryItemExists(container.Items[slot])) return MoveItemResult.itemNull;
-        return MoveItemResult.success;
+        if (!equipmentHandler.CanEquipItem(item, equipmentType)) return EquipItemResult.invalidEquipmentType;
+        return EquipItemResult.success;
+    }
+    #endregion
+
+    #region Try Resolve Slot Interactions
+    public static void TryResolveSlotInteraction(
+        ItemContainer source, int sourceSlot, ItemContainer destination, int destinationSlot = -1, bool logOutcome = false)
+    {
+        if (SlotIndexOutOfBounds(destination, destinationSlot) || SlotIndexOutOfBounds(source, sourceSlot))
+        {
+            if (logOutcome) Debug.LogError($"Cannot interact with slots, one or more slot indices out of bounds for their respective container.");
+            return;
+        }
+
+        if (destinationSlot >= 0)
+            ResolveSlotInteraction(source, sourceSlot, destination, destinationSlot, logOutcome);
+        else
+            ResolveAutoSlotInteraction(source, sourceSlot, destination, logOutcome);
+
+    }
+    #endregion
+
+    #region Resolve Slot To Slot Interaction
+    private static void ResolveSlotInteraction(ItemContainer source, int sourceSlot, ItemContainer destination, int destinationSlot = -1, bool logOutcome = false)
+    {
+        InventoryItem itemA = source.Items[sourceSlot];
+        InventoryItem itemB = destination.Items[destinationSlot];
+
+        if (CanMergeItems(itemA, itemB)) //merge stacks to destination, null source slot if all merged
+        {
+            itemB = destination.StackItem(destinationSlot, itemA);
+            source.SetItemInSlot(itemB.CurrentStack > 0 ? itemB : null, sourceSlot);
+        }
+        else if (!itemA.ItemDefinitionNull) //move itemA, if itemB exists move to source, if not null source (itemB didnt exist)
+        {
+            destination.SetItemInSlot(itemA, destinationSlot);
+
+            if (!itemB.ItemDefinitionNull)
+                source.SetItemInSlot(itemB, sourceSlot);
+            else
+                source.SetItemInSlot(null, sourceSlot);
+        }
+        else
+        {
+            if (logOutcome) Debug.LogError($"Failed");
+        }
+    }
+    #endregion
+
+    #region Resolve Auto Slot Interaction
+    private static void ResolveAutoSlotInteraction(ItemContainer source, int sourceSlot, ItemContainer destination, bool logOutcome = false)
+    {
+        InventoryItem item = source.Items[sourceSlot];
+
+        item = destination.TryStackItem(item);
+
+        if (item.CurrentStack > 0) //if we have any left that couldnt be stacked, try to add to an empty slot
+        {
+            if (destination.ContainerFull())
+            {
+                if (logOutcome) Debug.LogWarning($"Could not move item, destination container full.");
+                return;
+            }
+            destination.AddNewItem(item);
+        }
+    }
+    #endregion
+
+    #region Helper Checks
+    private static bool SlotIndexOutOfBounds(ItemContainer container, int slot)
+    {
+        return container.Items.Length <= slot || slot < 0;
+    }
+
+    private static bool CanMergeItems(InventoryItem itemA, InventoryItem itemB)
+    {
+        if (itemA == null || itemB == null) return false;
+        if (itemA.ItemDefinitionNull || itemB.ItemDefinitionNull) return false;
+        if (!itemA.CanStackWith(itemB)) return false;
+        return true;
     }
     #endregion
 

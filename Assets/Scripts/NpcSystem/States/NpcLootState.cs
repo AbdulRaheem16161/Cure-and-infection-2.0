@@ -39,7 +39,7 @@ public class NpcLootState : NpcBaseMovementState
         {
             for (int i = 0; i < lootable.ItemContainer.Items.Length; i++)
             {
-                InventoryService.TryMoveItem(stateMachine.InventoryHandler.ItemContainer, lootable.ItemContainer, i);
+                InventoryService.TryResolveSlotInteraction(lootable.ItemContainer, i, stateMachine.InventoryHandler.ItemContainer, -1, true);
             }
         }
 

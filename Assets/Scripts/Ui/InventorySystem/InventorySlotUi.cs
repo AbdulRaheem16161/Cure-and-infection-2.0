@@ -176,7 +176,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		if (draggedSlotUi == this) return;
 
 		if (draggedSlotUi.IsInventorySlot() && IsInventorySlot())
-			itemContainer.MoveItemToSlot(draggedSlotUi.slotIndex, slotIndex);
+			InventoryService.TryResolveSlotInteraction(itemContainer, draggedSlotUi.slotIndex, ItemContainer, slotIndex, true);
 
 		else if (draggedSlotUi.IsEquipmentSlot() && IsEquipmentSlot())
 			equipment.EquipItemFromEquipment(draggedSlotUi.equipmentType, equipmentType);

@@ -34,7 +34,7 @@ public class InventoryItem
 
 	public bool CanStackWith(InventoryItem otherItem)
     {
-        if (otherItem == null || otherItem.ItemDefinitionNull) return false;
+        if (ItemDefinitionNull || otherItem == null || otherItem.ItemDefinitionNull && otherItem.currentStack <= 0) return false;
         return ItemDefinitionMatches(otherItem);
     }
     public bool ItemDefinitionMatches(InventoryItem otherItem)

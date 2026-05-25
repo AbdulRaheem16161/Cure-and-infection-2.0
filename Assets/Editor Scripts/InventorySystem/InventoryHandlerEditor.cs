@@ -76,7 +76,7 @@ public class InventoryHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			inventory.ItemContainer.AddNewItem(ItemSpawner.GetRandomInventoryItem());
+            inventory.ItemContainer.AddNewItem(ItemSpawner.GetRandomInventoryItem());
 		}
 		#endregion
 
@@ -94,7 +94,7 @@ public class InventoryHandlerEditor : Editor
         {
             if (!ApplicationPlaying()) return;
 
-			inventory.ItemContainer.MoveItemToSlot(inventory.slotIndex, inventory.newSlotIndex);
+			InventoryService.TryResolveSlotInteraction(inventory.ItemContainer, inventory.slotIndex, inventory.ItemContainer, inventory.newSlotIndex, true);
         }
         #endregion
 
@@ -103,7 +103,7 @@ public class InventoryHandlerEditor : Editor
         {
             if (!ApplicationPlaying()) return;
 
-			inventory.ItemContainer.SplitItem(inventory.slotIndex);
+			inventory.ItemContainer.SplitItemInSlot(inventory.slotIndex);
         }
         #endregion
 

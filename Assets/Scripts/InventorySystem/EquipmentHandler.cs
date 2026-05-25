@@ -160,7 +160,7 @@ public class EquipmentHandler : MonoBehaviour
 
 	#region equipping item methods
 	/// <summary>
-	/// equip item, replacing any existing item, safe to use for npcs
+	/// equip item, replacing any existing item, safe to use for npcs only
 	/// </summary>
 	public void EquipItem(ItemDefinition item, int stackCount, EquipmentType equipmentType)
 	{
@@ -172,14 +172,23 @@ public class EquipmentHandler : MonoBehaviour
 		HandleItemEquipping(itemToEquip, equipmentSlot);
 	}
 
-	/// <summary>
-	/// equip item from inventory, returning existing item to inventory by default, always use for player 
-	/// </summary>
-	public void EquipItemFromInventory(int itemSlot, EquipmentType equipmentType, bool returnItem = true)
+    public bool CanEquipItem(InventoryItem itemToEquip, EquipmentType equipmentType)
+    {
+        EquipmentSlot slot = GetEquipmentSlot(equipmentType);
+
+		if (!itemToEquip.ItemDefinitionNull && EquipmentSlotsMatch(slot, itemToEquip))
+			return true;
+		else
+			return false;
+    }
+
+    /// <summary>
+    /// equip item from inventory, returning existing item to inventory by default, always use for player 
+    /// </summary>
+    public void EquipItemFromInventory(int itemSlot, EquipmentType equipmentType, bool returnItem = true)
 	{
 		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
 		InventoryItem itemToEquip = InventoryHandler.ItemContainer.Items[itemSlot];
-
 
 		if (itemToEquip.ItemDefinitionNull && !slot.ItemDefinitionNull && returnItem) //return early if no item to equip
 		{

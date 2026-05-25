@@ -100,48 +100,68 @@ public class ItemContainer : IAmmoGiver
 	}
     #endregion
 
+    #region Set Item In Slot
+    public void SetItemInSlot(InventoryItem item, int slot)
+    {
+        items[slot] = item;
+        if (item.ItemDefinitionNull)
+            item.SetItemStack(0);
+
+        OnContainerItemChanged?.Invoke(slot, item);
+    }
+    #endregion
+
     #region Add New Item
     /// <summary>
-    /// add new items to inventory, by default trying to stack them
+    /// add new items to first empty inventory slot, stacking if possible, but return unstacked items 
     /// </summary>
-    public void AddNewItem(InventoryItem newItem, bool tryStack = true)
+    public InventoryItem AddNewItem(InventoryItem newItem)
 	{
-		if (tryStack)
-			newItem = TryStackItem(newItem);
+        newItem = TryStackItem(newItem);
+		if (newItem.CurrentStack <= 0) return newItem;
 
-		if (ContainerFull() && newItem.CurrentStack > 0) //leave rest of stack (stack should update correctly internally)
+        //if we have any left that couldnt be stacked, try to add to first empty slot found
+        if (ContainerFull())
 		{
-			Debug.LogWarning("inventory full and cant stack anymore items");
-			return;
+			Debug.LogWarning("item container full and cant add item");
+			return newItem;
 		}
-		else if (newItem.CurrentStack > 0)
-		{
-			for (int i = 0; i < items.Length; i++)
-			{
-				if (!SlotExists(i) || InventoryItemExists(items[i])) continue;
 
-				Debug.Log($"added new item: {newItem.ItemDefinition.ItemName}");
-				AddInventoryItemToSlot(i, newItem); //add to first empty slot
-				return;
-			}
-		}
-	}
-	#endregion
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (!SlotExists(i) || InventoryItemExists(items[i])) continue;
 
-	#region move items to specific slot methods
-	public void MoveItemToSlot(int currentSlot, int newSlot)
-	{
-        if (!SlotExists(currentSlot) || !SlotExists(newSlot)) return;
-
-        (Items[currentSlot], Items[newSlot]) = (Items[newSlot], Items[currentSlot]);
-
-        OnContainerItemChanged?.Invoke(currentSlot, Items[currentSlot]);
-        OnContainerItemChanged?.Invoke(newSlot, Items[newSlot]);
+            Debug.Log($"added new item: {newItem.ItemDefinition.ItemName}");
+            SetItemInSlot(newItem, i);
+			break;
+        }
+        return newItem;
     }
-	#endregion
+    #endregion
 
-	#region splitting items
-	public void SplitItem(int slot)
+    #region Remove Item From Slot
+    public void RemoveItemsFromSlot(int slot, int stackToRemove, bool effectsStack)
+    {
+        if (!SlotExists(slot) || !InventoryItemExists(items[slot]))
+        {
+            Debug.LogError($"no item exists in slot {slot}");
+            return;
+        }
+        InventoryItem item = items[slot];
+
+        if (effectsStack)
+        {
+            SetItemInSlot(null, slot);
+            return;
+        }
+
+        item.RemoveItemStack(stackToRemove);
+        SetItemInSlot(item, slot);
+    }
+    #endregion
+
+    #region Split item In Slot
+    public void SplitItemInSlot(int slot)
 	{
 		if (ContainerFull()) { Debug.LogWarning("Inventory full cant split item stack"); return; }
 
@@ -154,74 +174,28 @@ public class ItemContainer : IAmmoGiver
         int keepStack = item.CurrentStack - newStack;
 
         item.SetItemStack(keepStack);
-        AddNewItem(new InventoryItem(item.ItemDefinition, newStack), false);
+        AddNewItem(new InventoryItem(item.ItemDefinition, newStack));
         OnContainerItemChanged?.Invoke(slot, item);
 	}
-	#endregion
+    #endregion
 
-	#region removing items
-	public void RemoveItemsFromSlot(int slot, int stackToRemove, bool effectsStack)
+    #region Try Stack & Stack Item
+    public InventoryItem TryStackItem(InventoryItem itemToStack)
 	{
-		if (!SlotExists(slot) || !InventoryItemExists(items[slot]))
-		{
-			Debug.LogError($"no item exists in slot {slot}");
-			return;
-		}
-		InventoryItem item = items[slot];
-
-		if (effectsStack)
-		{
-            RemoveInventoryItemFromSlot(slot);
-            return;
-		}
-
-		item.RemoveItemStack(stackToRemove);
-		OnContainerItemChanged?.Invoke(slot, item);
-
-		if (item.CurrentStack <= 0)
-			RemoveInventoryItemFromSlot(slot);
-	}
-	#endregion
-
-	#region adding/removing InventoryItem to/from inventory
-	private void AddInventoryItemToSlot(int slot, InventoryItem item)
-	{
-		if (!SlotExists(slot)) return;
-		Items[slot] = item;
-		OnContainerItemChanged?.Invoke(slot, item);
-	}
-	private void RemoveInventoryItemFromSlot(int slot)
-	{
-		if (!SlotExists(slot)) return;
-		Items[slot] = null;
-		OnContainerItemChanged?.Invoke(slot, null);
-	}
-	#endregion
-
-	#region item stacking helpers
-    private InventoryItem TryStackItem(InventoryItem itemToStack, bool logOutcome = false)
-    {
-		if (logOutcome) Debug.Log($"trying to stack new item: {itemToStack.ItemDefinition.ItemName} ({itemToStack.CurrentStack}x)");
-
-        for (int i = 0; i < Items.Length; i++)
+		for (int i = 0; i < Items.Length; i++)
         {
-            InventoryItem existingItem = Items[i];
-            if (!InventoryItemExists(existingItem) || !existingItem.CanStackWith(itemToStack)) continue; //filter
-
-            if (logOutcome) Debug.Log($"existing item: {existingItem.ItemDefinition.ItemName} with stack {existingItem.CurrentStack}");
-
-            if (existingItem.CurrentStack < existingItem.ItemDefinition.StackLimit) //check for valid stack space
-                itemToStack = StackItem(i, existingItem, itemToStack); //stack item
-
-            if (itemToStack.CurrentStack <= 0)
-                return itemToStack;
+            if (InventoryItemExists(Items[i]))
+			{
+				if (!Items[i].CanStackWith(itemToStack)) continue;
+                itemToStack = StackItem(i, itemToStack);
+            }
         }
-
 		return itemToStack;
     }
-    private InventoryItem StackItem(int slot, InventoryItem existingItem, InventoryItem itemToSack)
+    public InventoryItem StackItem(int slot, InventoryItem itemToSack)
 	{
-		int newStackCount = existingItem.CurrentStack + itemToSack.CurrentStack;
+		InventoryItem existingItem = Items[slot];
+        int newStackCount = existingItem.CurrentStack + itemToSack.CurrentStack;
 
 		if (newStackCount > existingItem.ItemDefinition.StackLimit) //handle stacking overflow
 		{
@@ -246,7 +220,7 @@ public class ItemContainer : IAmmoGiver
 	public void ResetContainer()
 	{
 		for (int i = 0; i < Items.Length; i++)
-			RemoveInventoryItemFromSlot(i);
+			SetItemInSlot(null, i);
 	}
 	#endregion
 

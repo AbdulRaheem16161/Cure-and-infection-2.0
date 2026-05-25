@@ -235,7 +235,7 @@ public class InventoryContextUi : MonoBehaviour
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
-		slot.ItemContainer.SplitItem(slot.SlotIndex);
+		slot.ItemContainer.SplitItemInSlot(slot.SlotIndex);
 		HideContextPanel();
 	}
 	private void DropItem(InventorySlotUi slot, bool dropStack)
