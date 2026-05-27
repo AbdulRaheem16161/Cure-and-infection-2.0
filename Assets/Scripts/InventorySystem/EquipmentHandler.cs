@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -130,152 +131,32 @@ public class EquipmentHandler : MonoBehaviour
 
 		if (humanoid.MeleeWeapon != null) //auto equip melee to hands
 		{
-			EquipItem(humanoid.MeleeWeapon, humanoid.MeleeWeapon.StackLimit, EquipmentType.weaponMelee);
+			HandleItemEquipping(GetEquipmentSlot(EquipmentType.weaponMelee), new(humanoid.MeleeWeapon, humanoid.MeleeWeapon.StackLimit));
 			UnholsterWeapon(EquipmentType.weaponMelee);
 		}
 
 		if (humanoid.WeaponOne != null) //overwrite melee weapon (allows for melee only npcs)
 		{
-			EquipItem(humanoid.WeaponOne, humanoid.WeaponOne.StackLimit, EquipmentType.weaponOne);
-			UnholsterWeapon(EquipmentType.weaponOne);
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.weaponOne), new(humanoid.WeaponOne, humanoid.WeaponOne.StackLimit));
+            UnholsterWeapon(EquipmentType.weaponOne);
 		}
 		if (humanoid.WeaponTwo != null)
-			EquipItem(humanoid.WeaponTwo, humanoid.WeaponTwo.StackLimit, EquipmentType.weaponTwo);
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.weaponTwo), new(humanoid.WeaponTwo, humanoid.WeaponTwo.StackLimit));
 
-		if (humanoid.Helmet != null)
-			EquipItem(humanoid.Helmet, humanoid.Helmet.StackLimit, EquipmentType.helmet);
-		if (humanoid.Chest != null)
-			EquipItem(humanoid.Chest, humanoid.Chest.StackLimit, EquipmentType.chest);
-		if (humanoid.Backpack != null)
-			EquipItem(humanoid.Backpack, humanoid.Backpack.StackLimit, EquipmentType.backpack);
+        if (humanoid.Helmet != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.helmet), new(humanoid.Helmet, humanoid.Helmet.StackLimit));
+        if (humanoid.Chest != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.chest), new(humanoid.Chest, humanoid.Chest.StackLimit));
+        if (humanoid.Backpack != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.backpack), new(humanoid.Backpack, humanoid.Backpack.StackLimit));
 
-		if (humanoid.ConsumableOne != null)
-			EquipItem(humanoid.ConsumableOne, humanoid.ConsumableOne.StackLimit, EquipmentType.consumableOne);
-		if (humanoid.ConsumableTwo != null)
-			EquipItem(humanoid.ConsumableTwo, humanoid.ConsumableTwo.StackLimit, EquipmentType.consumableTwo);
-		if (humanoid.ConsumableThree != null)
-			EquipItem(humanoid.ConsumableThree, humanoid.ConsumableThree.StackLimit, EquipmentType.consumableThree);
-	}
-	#endregion
-
-	#region equipping item methods
-	/// <summary>
-	/// equip item, replacing any existing item, safe to use for npcs only
-	/// </summary>
-	public void EquipItem(ItemDefinition item, int stackCount, EquipmentType equipmentType)
-	{
-		EquipmentSlot equipmentSlot = GetEquipmentSlot(equipmentType);
-		InventoryItem itemToEquip = new(item, stackCount);
-
-		if (!EquipmentSlotsMatch(equipmentSlot, itemToEquip)) return;
-
-		HandleItemEquipping(itemToEquip, equipmentSlot);
-	}
-
-    public bool CanEquipItem(InventoryItem itemToEquip, EquipmentType equipmentType)
-    {
-        EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-
-		if (!itemToEquip.ItemDefinitionNull && EquipmentSlotsMatch(slot, itemToEquip))
-			return true;
-		else
-			return false;
+        if (humanoid.ConsumableOne != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.consumableOne), new(humanoid.ConsumableOne, humanoid.ConsumableOne.StackLimit));
+        if (humanoid.ConsumableTwo != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.consumableTwo), new(humanoid.ConsumableTwo, humanoid.ConsumableTwo.StackLimit));
+        if (humanoid.ConsumableThree != null)
+            HandleItemEquipping(GetEquipmentSlot(EquipmentType.consumableThree), new(humanoid.ConsumableThree, humanoid.ConsumableThree.StackLimit));
     }
-
-    /// <summary>
-    /// equip item from inventory, returning existing item to inventory by default, always use for player 
-    /// </summary>
-    public void EquipItemFromInventory(int itemSlot, EquipmentType equipmentType, bool returnItem = true)
-	{
-		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-		InventoryItem itemToEquip = InventoryHandler.ItemContainer.Items[itemSlot];
-
-		if (itemToEquip.ItemDefinitionNull && !slot.ItemDefinitionNull && returnItem) //return early if no item to equip
-		{
-			HandleItemUnequipping(slot);
-			InventoryHandler.ItemContainer.AddNewItem(slot.Item);
-			return;
-		}
-
-		if (!EquipmentSlotsMatch(slot, itemToEquip)) return;
-
-		if (!slot.ItemDefinitionNull && returnItem) //return item
-		{
-			if (InventoryHandler.ItemContainer.ContainerFull())
-			{
-				Debug.LogWarning("inventory full, cannot equip new item and return old one");
-				return;
-			}
-
-			HandleItemUnequipping(slot);
-			InventoryHandler.ItemContainer.AddNewItem(slot.Item);
-		}
-
-		HandleItemEquipping(itemToEquip, slot);
-		InventoryHandler.ItemContainer.RemoveItemsFromSlot(itemSlot, itemToEquip.CurrentStack, false);
-	}
-	/// <summary>
-	/// equip item from equipment, swapping item places if slot matches
-	/// </summary>
-	public void EquipItemFromEquipment(EquipmentType currentSlotType, EquipmentType newSlotType)
-	{
-		EquipmentSlot currentSlot = GetEquipmentSlot(currentSlotType);
-		EquipmentSlot newSlot = GetEquipmentSlot(newSlotType);
-
-		if (!SlotTypesMatch(currentSlot, newSlot)) return; //cant swap equipped items
-		if (!EquipmentSlotsMatch(newSlot, currentSlot.Item)) return;
-
-		HandleItemEquipping(currentSlot.Item, newSlot);
-
-		if (currentSlot.Item == null)
-		{
-			HandleItemUnequipping(currentSlot);
-			Debug.LogWarning("inventory item null");
-			return;
-		}
-		if (newSlot.Item.ItemDefinition == null) //item def null nothing to swap
-		{
-			Debug.LogWarning("inventory item definition null");
-			return;
-		}
-
-		HandleItemEquipping(newSlot.Item, currentSlot);
-	}
-	#endregion
-
-	#region unequipping item method
-	/// <summary>
-	/// unequip item, returning existing item to inventory by default
-	/// </summary>
-	public void UnequipItem(EquipmentType equipmentType, bool returnItem = true)
-	{
-		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-
-		if (slot.ItemNull) return; //no equipped item to unequip
-		HandleItemUnequipping(slot);
-
-		if (returnItem)
-		{
-			if (!InventoryHandler.ItemContainer.ContainerFull()) //return equipped item
-				InventoryHandler.ItemContainer.AddNewItem(slot.Item);
-			else
-				Debug.LogWarning("inventory full, cannot unequip item");
-		}
-	}
-	#endregion
-
-	#region drop item method on ground (TODO add spawning of item on ground logic)
-	public void DropItem(EquipmentType equipmentType, bool dropStack)
-	{
-		//TODO: instantiate item in world at characters feet
-		EquipmentSlot slot = GetEquipmentSlot(equipmentType);
-
-		if (slot.ItemNull) return;
-
-		HandleItemUnequipping(slot);
-
-		//spawn world item
-	}
 	#endregion
 
 	/// <summary>
@@ -284,13 +165,9 @@ public class EquipmentHandler : MonoBehaviour
 	/// </summary>
 
 	#region handle item equipping/unequipping
-	private void HandleItemEquipping(InventoryItem item, EquipmentSlot slot)
+	public void HandleItemEquipping(EquipmentSlot slot, InventoryItem item)
 	{
-		if (item.ItemDefinitionNull)
-		{
-			Debug.LogError("items, itemDefinition is null when reference is expected");
-			return;
-		}
+		if (item.ItemDefinitionNull) return;
 
 		Debug.Log($"equipped {item.ItemDefinition.ItemName} to {slot.EquipmentType} slot");
 		slot.SetInventoryItem(new(item.ItemDefinition, item.CurrentStack));
@@ -303,7 +180,7 @@ public class EquipmentHandler : MonoBehaviour
 		}
 		OnEquippedItemChanges?.Invoke(slot, true);
 	}
-	private void HandleItemUnequipping(EquipmentSlot slot)
+	public void HandleItemUnequipping(EquipmentSlot slot)
 	{
 		if (slot.ItemDefinitionNull) return; //no item to unequip can be expected
 		Debug.Log($"unequipped {slot.Item.ItemDefinition.ItemName} from {slot.EquipmentType} slot");
@@ -343,10 +220,18 @@ public class EquipmentHandler : MonoBehaviour
 			return transform;
 		}
 	}
-	#endregion
+    #endregion
 
-	#region get equipped item instance
-	public Item GetOrCreateItemInstance(EquipmentSlot slot)
+    #region Invoke equip/unequip item changes event
+	public void InvokeEquippedItemChanges(EquipmentSlot slot, bool equipped)
+	{
+        OnEquippedItemChanges?.Invoke(slot, equipped);
+
+    }
+    #endregion
+
+    #region get equipped item instance
+    public Item GetOrCreateItemInstance(EquipmentSlot slot)
 	{
 		Item itemInstance;
 
@@ -415,10 +300,25 @@ public class EquipmentHandler : MonoBehaviour
 
 		return equippedItems[0];
 	}
-	#endregion
+    public bool GetMatchingEquipmentSlot(EquipmentType equipmentType, out EquipmentSlot slot)
+    {
+        foreach (EquipmentSlot equipmentSlot in equippedItems)
+        {
+            if (equipmentSlot.EquipmentType == equipmentType)
+			{
+				slot = equipmentSlot;
+                return true;
+            }
+        }
+        Debug.LogError($"Failed to find {typeof(EquipmentSlot)} that matched {equipmentType}, returning first as fallback");
 
-	#region slot and item type checks
-	private bool SlotTypesMatch(EquipmentSlot slotOne, EquipmentSlot slotTwo)
+		slot = null;
+        return false;
+    }
+    #endregion
+
+    #region slot and item type checks
+    private bool SlotTypesMatch(EquipmentSlot slotOne, EquipmentSlot slotTwo)
 	{
 		InventorySlotType slotTypeOne = slotToInventoryType[slotOne.EquipmentType];
 		InventorySlotType slotTypeTwo = slotToInventoryType[slotTwo.EquipmentType];
@@ -429,7 +329,7 @@ public class EquipmentHandler : MonoBehaviour
 		Debug.LogWarning($"Slot One ({slotTypeOne}) and Slot Two ({slotTypeTwo}) types do not match");
 		return false;
 	}
-	private bool EquipmentSlotsMatch(EquipmentSlot slot, InventoryItem item)
+	public bool EquipmentSlotMatchesAllowed(EquipmentSlot slot, InventoryItem item)
 	{
 		return (slot.EquipmentType & item.ItemDefinition.AllowedEquipmentSlots) != 0;
 	}
@@ -449,7 +349,6 @@ public class EquipmentSlot
 	public InventoryItem Item => item;
 	public Item WorldItem => worldItem;
 
-	public bool ItemNull => item == null;
 	public bool ItemDefinitionNull => item == null || item.ItemDefinition == null;
 	public bool WorldItemNull => worldItem == null;
 

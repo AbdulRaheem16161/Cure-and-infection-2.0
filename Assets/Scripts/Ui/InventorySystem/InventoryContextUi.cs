@@ -113,7 +113,7 @@ public class InventoryContextUi : MonoBehaviour
 	#region set up equip item context menu buttons
 	private void SetUpEquipContext(InventorySlotUi slot)
 	{
-		if (slot.IsEquipmentSlot()) return;
+		if (slot.EquipmentSlot) return;
 
 		ItemDefinition item = slot.SlotItem.ItemDefinition;
 		var validSlots = GetValidEquipmentSlotsForItem(item).ToList();
@@ -142,7 +142,7 @@ public class InventoryContextUi : MonoBehaviour
 	#region set up un equip item context menu buttons
 	private void SetUpUnEquipContext(InventorySlotUi slot)
 	{
-		if (slot.IsInventorySlot()) return;
+		if (!slot.EquipmentSlot) return;
 
 		unEquipItem.onClick.RemoveAllListeners();
 		unEquipItem.onClick.AddListener(() => UnEquipItem(slot));
@@ -225,13 +225,13 @@ public class InventoryContextUi : MonoBehaviour
 	#region button actions
 	private void EquipItem(InventorySlotUi slot, EquipmentType equipmentType)
 	{
-		slot.Equipment.EquipItemFromInventory(slot.SlotIndex, equipmentType);
+		InventoryService.TryResolveSlotEquipping(slot.Equipment, equipmentType, slot.ItemContainer, slot.SlotIndex, true);
 		HideContextPanel();
 	}
 	private void UnEquipItem(InventorySlotUi slot)
 	{
-		slot.Equipment.UnequipItem(slot.EquipmentTypes);
-		HideContextPanel();
+        InventoryService.TryResolveSlotEquipping(slot.Equipment, slot.EquipmentTypes, slot.ItemContainer, -1, true);
+        HideContextPanel();
 	}
 	private void SplitItem(InventorySlotUi slot)
 	{
@@ -241,13 +241,10 @@ public class InventoryContextUi : MonoBehaviour
 	private void DropItem(InventorySlotUi slot, bool dropStack)
 	{
 		if (slot.Equipment != null)
-		{
-			slot.Equipment.DropItem(slot.EquipmentTypes, dropStack);
-		}
+			InventoryService.DropItem(slot.ObjectRef.transform.position, slot.Equipment, slot.EquipmentTypes);
 		else if (slot.ItemContainer != null)
-		{
 			InventoryService.DropItem(slot.ObjectRef.transform.position, slot.ItemContainer, slot.SlotIndex, dropStack);
-		}
+
 		HideContextPanel();
 	}
 	#endregion

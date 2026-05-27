@@ -25,6 +25,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	#region runtime info
 	[Header("Runtime Info")]
+	public bool EquipmentSlot { get; private set; }
 	[SerializeField] private bool canBeDragged;
 	[SerializeField] private bool isBeingDragged;
 	[SerializeField] private int slotIndex;
@@ -69,12 +70,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	public void EnableEquipmentSlot(GameObject gamebject, EquipmentHandler equipment, EquipmentType equipmentType)
 	{
 		inventorySlotUi.SetActive(true);
+		EquipmentSlot = true;
 
 		if (equipment != null) //sub to events
 		{
             objectRef = gamebject;
             this.equipment = equipment;
 			this.equipmentType = equipmentType;
+			itemContainer = equipment.InventoryHandler.ItemContainer;
 			equipment.OnEquippedItemChanges += OnEquippedItemChanges;
 			equipment.OnConsumableUsed += OnConsumableUsed;
 		}
@@ -97,11 +100,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	#region enable/disable inventory slot
-	public void EnableSlot(GameObject gamebject, ItemContainer container)
+	public void EnableSlot(GameObject gamebject, ItemContainer container, EquipmentHandler equipment)
 	{
-		if (itemContainer != null) //sub to events
+        EquipmentSlot = false;
+
+        if (itemContainer != null) //sub to events
 		{
             objectRef = gamebject;
+            this.equipment = equipment;
             itemContainer = container;
             itemContainer.OnContainerItemChanged += HandleItemChanges;
 		}
@@ -175,19 +181,19 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	{
 		if (draggedSlotUi == this) return;
 
-		if (draggedSlotUi.IsInventorySlot() && IsInventorySlot())
+		if (!draggedSlotUi.EquipmentSlot && !EquipmentSlot)
 			InventoryService.TryResolveSlotInteraction(itemContainer, draggedSlotUi.slotIndex, ItemContainer, slotIndex, true);
 
-		else if (draggedSlotUi.IsEquipmentSlot() && IsEquipmentSlot())
-			equipment.EquipItemFromEquipment(draggedSlotUi.equipmentType, equipmentType);
+		else if (draggedSlotUi.EquipmentSlot && EquipmentSlot)
+			InventoryService.TryResolveSlotEquipping(draggedSlotUi.equipment, draggedSlotUi.EquipmentTypes, itemContainer, slotIndex, true);
 
-		else if (draggedSlotUi.IsInventorySlot() && IsEquipmentSlot())
-			equipment.EquipItemFromInventory(draggedSlotUi.slotIndex, equipmentType);
+		else if (!draggedSlotUi.EquipmentSlot && EquipmentSlot)
+            InventoryService.TryResolveSlotEquipping(equipment, EquipmentTypes, draggedSlotUi.itemContainer, draggedSlotUi.slotIndex, true);
 
-		else if (draggedSlotUi.IsEquipmentSlot() && IsInventorySlot())
-			draggedSlotUi.equipment.EquipItemFromInventory(slotIndex, draggedSlotUi.equipmentType);
+        else if (draggedSlotUi.EquipmentSlot && !EquipmentSlot)
+            InventoryService.TryResolveSlotEquipping(draggedSlotUi.equipment, draggedSlotUi.EquipmentTypes, itemContainer, slotIndex, true);
 
-		else
+        else
 			Debug.LogError("drag and drop action not supported");
 	}
 	#endregion
@@ -205,8 +211,12 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	{
 		if (equipment == null) return;
 		if (equipmentType != slot.EquipmentType) return; //not correct equipment slot type
-		UpdateSlotUi(slot.Item);
-	}
+
+		if (wasEquipped)
+			UpdateSlotUi(slot.Item);
+		else
+            UpdateSlotUi(null);
+    }
 	private void OnConsumableUsed(EquipmentSlot slot)
 	{
 		OnEquippedItemChanges(slot, true);
@@ -271,10 +281,5 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 		OnToggleInventoryContextMenu?.Invoke(null, new(0, 0)); //disable on inventory changes
 	}
-	#endregion
-
-	#region slot checks
-	public bool IsInventorySlot() => itemContainer != null;
-	public bool IsEquipmentSlot() => equipment != null;
 	#endregion
 }

@@ -301,11 +301,11 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		switch (slot.EquipmentType)
 		{
 			case EquipmentHandler.EquipmentType.helmet:
-			headProtection = GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
+			headProtection += GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
 			break;
 
 			case EquipmentHandler.EquipmentType.chest:
-			chestProtection = GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
+			chestProtection += GetProtectionModifier(armourDefinition.ProtectionProvided, wasEquipped);
 			break;
 		}
 	}

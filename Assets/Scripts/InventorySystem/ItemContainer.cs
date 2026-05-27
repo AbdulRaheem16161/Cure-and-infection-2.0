@@ -40,14 +40,14 @@ public class ItemContainer : IAmmoGiver
 	#region ammo counting + checking
 	private void RecalculateAmmoCounts(int _, InventoryItem item)
 	{
-		if (!InventoryItemExists(item)) return;
+		if (!InventoryService.ItemExists(item)) return;
 		if (item.ItemDefinition is not ProjectileDefinition _) return;
 
 		ammoCounts.Clear();
 
 		foreach (InventoryItem inventoryItem in items)
 		{
-			if (!InventoryItemExists(inventoryItem)) continue;
+			if (!InventoryService.ItemExists(inventoryItem)) continue;
 
 			if (inventoryItem.ItemDefinition is ProjectileDefinition projectileDef)
 			{
@@ -104,7 +104,7 @@ public class ItemContainer : IAmmoGiver
     public void SetItemInSlot(InventoryItem item, int slot)
     {
         items[slot] = item;
-        if (item.ItemDefinitionNull)
+        if (item != null && item.ItemDefinitionNull)
             item.SetItemStack(0);
 
         OnContainerItemChanged?.Invoke(slot, item);
@@ -117,7 +117,7 @@ public class ItemContainer : IAmmoGiver
     /// </summary>
     public InventoryItem AddNewItem(InventoryItem newItem)
 	{
-        newItem = TryStackItem(newItem);
+        newItem = InventoryService.TryStackItem(this, newItem);
 		if (newItem.CurrentStack <= 0) return newItem;
 
         //if we have any left that couldnt be stacked, try to add to first empty slot found
@@ -129,7 +129,7 @@ public class ItemContainer : IAmmoGiver
 
         for (int i = 0; i < items.Length; i++)
         {
-            if (!SlotExists(i) || InventoryItemExists(items[i])) continue;
+            if (!SlotExists(i) || InventoryService.ItemExists(items[i])) continue;
 
             Debug.Log($"added new item: {newItem.ItemDefinition.ItemName}");
             SetItemInSlot(newItem, i);
@@ -142,7 +142,7 @@ public class ItemContainer : IAmmoGiver
     #region Remove Item From Slot
     public void RemoveItemsFromSlot(int slot, int stackToRemove, bool effectsStack)
     {
-        if (!SlotExists(slot) || !InventoryItemExists(items[slot]))
+        if (!SlotExists(slot) || !InventoryService.ItemExists(items[slot]))
         {
             Debug.LogError($"no item exists in slot {slot}");
             return;
@@ -167,7 +167,7 @@ public class ItemContainer : IAmmoGiver
 
 		InventoryItem item = Items[slot];
 
-		if (!InventoryItemExists(item)) { Debug.LogWarning($"No item in slot {slot}"); return; }
+		if (!InventoryService.ItemExists(item)) { Debug.LogWarning($"No item in slot {slot}"); return; }
 		if (item.CurrentStack <= 1) { Debug.LogWarning($"Cant split single item"); return; }
 
         int newStack = item.CurrentStack / 2;
@@ -179,42 +179,12 @@ public class ItemContainer : IAmmoGiver
 	}
     #endregion
 
-    #region Try Stack & Stack Item
-    public InventoryItem TryStackItem(InventoryItem itemToStack)
+    #region ContainerItemChanged Invoke
+	public void InvokeContainerItemChanged(int slot, InventoryItem item)
 	{
-		for (int i = 0; i < Items.Length; i++)
-        {
-            if (InventoryItemExists(Items[i]))
-			{
-				if (!Items[i].CanStackWith(itemToStack)) continue;
-                itemToStack = StackItem(i, itemToStack);
-            }
-        }
-		return itemToStack;
+        OnContainerItemChanged?.Invoke(slot, item);
     }
-    public InventoryItem StackItem(int slot, InventoryItem itemToSack)
-	{
-		InventoryItem existingItem = Items[slot];
-        int newStackCount = existingItem.CurrentStack + itemToSack.CurrentStack;
-
-		if (newStackCount > existingItem.ItemDefinition.StackLimit) //handle stacking overflow
-		{
-			existingItem.SetItemStack(existingItem.ItemDefinition.StackLimit); //set max stack limit
-			newStackCount -= existingItem.ItemDefinition.StackLimit; //carry overflow
-			itemToSack.SetItemStack(newStackCount); //set to overflow
-		}
-		else
-		{
-			existingItem.AddItemStack(itemToSack.CurrentStack); //add to stack
-			itemToSack.SetItemStack(0); //nothing left to stack
-		}
-
-		OnContainerItemChanged?.Invoke(slot, existingItem);
-		Debug.Log($"stacked item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
-
-		return itemToSack;
-	}
-	#endregion
+    #endregion
 
 	#region reset container
 	public void ResetContainer()
@@ -230,7 +200,7 @@ public class ItemContainer : IAmmoGiver
         int fullSlots = 0;
         foreach (InventoryItem item in Items)
         {
-			if (InventoryItemExists(item))
+			if (InventoryService.ItemExists(item))
                 fullSlots++;
         }
 
@@ -243,20 +213,6 @@ public class ItemContainer : IAmmoGiver
 	{
 		if (slot < 0 || slot >= Items.Length) { Debug.LogError("slot index out of range"); return false; }
 		return true;
-	}
-	public bool InventoryItemExists(InventoryItem item)
-	{
-		if (item == null || item.ItemDefinitionNull) 
-			return false;
-		else 
-			return true;
-	}
-	public bool ItemDefinitionMatches(InventoryItem itemOne, InventoryItem itemTwo)
-	{
-		if (itemOne.ItemDefinition == itemTwo.ItemDefinition)
-			return true;
-		else 
-			return false;
 	}
 	#endregion
 }

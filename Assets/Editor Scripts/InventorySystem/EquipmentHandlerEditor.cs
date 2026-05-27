@@ -47,7 +47,7 @@ public class EquipmentHandlerEditor : Editor
 				equipment.itemToEquipCount = 1;
 			}
 
-			equipment.EquipItem(equipment.itemToEquip, equipment.itemToEquipCount, equipment.slotToEquipItemTo);
+			equipment.HandleItemEquipping(equipment.GetEquipmentSlot(equipment.slotToEquipItemTo), new(equipment.itemToEquip, equipment.itemToEquipCount));
 		}
 		#endregion
 
@@ -69,7 +69,8 @@ public class EquipmentHandlerEditor : Editor
 				return;
 			}
 
-			equipment.EquipItemFromInventory(equipment.equipItemFromInventorySlot, equipment.slotToEquipItemTo);
+			InventoryService.TryResolveSlotEquipping(
+				equipment, equipment.slotToEquipItemTo, equipment.InventoryHandler.ItemContainer, equipment.equipItemFromInventorySlot);
 		}
 		#endregion
 
@@ -84,13 +85,13 @@ public class EquipmentHandlerEditor : Editor
 		{
 			if (!ApplicationPlaying()) return;
 
-			equipment.UnequipItem(equipment.equipmentSlotToUnequip);
+			InventoryService.TryResolveSlotEquipping(equipment, equipment.equipmentSlotToUnequip, equipment.InventoryHandler.ItemContainer, -1, true);
 		}
 		if (GUILayout.Button("Unequip Item (destroys)"))
 		{
 			if (!ApplicationPlaying()) return;
 
-			equipment.UnequipItem(equipment.equipmentSlotToUnequip, false);
+			equipment.HandleItemUnequipping(equipment.GetEquipmentSlot(equipment.equipmentSlotToUnequip));
 		}
 		#endregion
 

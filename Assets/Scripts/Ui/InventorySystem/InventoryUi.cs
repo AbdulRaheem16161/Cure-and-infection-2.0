@@ -18,9 +18,10 @@ public class InventoryUi : MonoBehaviour
 	[Header("Runtime Ref")]
     [SerializeField] private GameObject objectRef;
     [SerializeField] private ItemContainer itemContainer;
-	#endregion
+    [SerializeField] private EquipmentHandler equipment;
+    #endregion
 
-	private void Start()
+    private void Start()
     {
         if (isPlayerInventory)
             UpdateObjectReferences(TestInventoryManager.Instance.playerObj); //grab via test manager for now)
@@ -39,6 +40,7 @@ public class InventoryUi : MonoBehaviour
         objectRef = newRef;
         itemContainer = objectRef.GetComponent<InventoryHandler>().ItemContainer;
         itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
+        equipment = objectRef.GetComponent<EquipmentHandler>();
 
         OnInventorySizeChange(itemContainer.ContainerSize);
     }
@@ -67,7 +69,7 @@ public class InventoryUi : MonoBehaviour
         for (int i = 0; i < inventorySlotUis.Length; i++)
         {
             if (i < newSize)
-                inventorySlotUis[i].EnableSlot(objectRef, itemContainer);
+                inventorySlotUis[i].EnableSlot(objectRef, itemContainer, equipment);
             else
                 inventorySlotUis[i].DisableSlot();
         }
