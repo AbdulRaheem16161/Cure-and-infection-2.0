@@ -21,7 +21,7 @@ public abstract class Item<T> : Item where T : ItemDefinition
 	{
 		TypedDefinition = definition;
 		gameObject.name = TypedDefinition.ItemName;
-		CurrentItemStack = itemStack;
+		currentItemStack = itemStack;
 
 		IsEquipped = false;
 		IsInHands = false;
@@ -70,9 +70,10 @@ public abstract class Item : MonoBehaviour, IInteractable
 	public bool IsInHands { get; protected set; }
 	public bool IsEquipped { get; protected set; }
 
-	public int CurrentItemStack { get; protected set; }
+    [SerializeField] protected int currentItemStack;
+    public int CurrentItemStack => currentItemStack;
 
-	public static event Action<Item> OnCleanUpItem;
+    public static event Action<Item> OnCleanUpItem;
 	public static event Action<ItemDefinition, GameObject> OnCleanUpItemModel;
 
     public abstract void InitializeItem(ItemDefinition definition, int itemStack);
@@ -133,7 +134,7 @@ public abstract class Item : MonoBehaviour, IInteractable
             return;
         }
 
-        InventoryItem newItem = new(ItemDefinition, CurrentItemStack);
+        InventoryItem newItem = new(ItemDefinition, currentItemStack);
         interactor.Inventory.ItemContainer.AddNewItem(newItem);
         CleanUpItem();
     }

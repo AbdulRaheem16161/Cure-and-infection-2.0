@@ -37,7 +37,7 @@ public class NpcLootState : NpcBaseMovementState
     {
         if (Beliefs.LootableContainer.interactable is ILootContainer lootable)
         {
-            for (int i = 0; i < lootable.ItemContainer.Items.Length; i++)
+            for (int i = 0; i < lootable.ItemContainer.Items.Count; i++)
             {
                 InventoryService.TryResolveSlotInteraction(lootable.ItemContainer, i, stateMachine.InventoryHandler.ItemContainer, -1, true);
             }

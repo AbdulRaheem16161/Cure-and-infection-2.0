@@ -107,15 +107,15 @@ public class InventoryHandlerEditor : Editor
         }
         #endregion
 
-        #region destroy item button (TODO update to a proper way to destroy item)
+        #region destroy item button
         if (GUILayout.Button("Destory Item/stack"))
 		{
 			if (!ApplicationPlaying()) return;
 
 			if (inventory.actionEffectsStack)
-				inventory.ItemContainer.RemoveItemsFromSlot(inventory.slotIndex, 1, true);
+				inventory.ItemContainer.SetSlotContents(null, inventory.slotIndex);
 			else
-                inventory.ItemContainer.RemoveItemsFromSlot(inventory.slotIndex, 1, false);
+                inventory.ItemContainer.RemoveItem(inventory.slotIndex, 1);
 		}
 		#endregion
 

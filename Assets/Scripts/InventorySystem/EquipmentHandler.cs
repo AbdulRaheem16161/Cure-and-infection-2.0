@@ -260,7 +260,7 @@ public class EquipmentHandler : MonoBehaviour
 		}
 
 		if (consumeItem)
-			slot.Item.RemoveItemStack(1);
+			slot.Item.SetItemStack(slot.Item.CurrentStack - 1);
 
 		OnConsumableUsed?.Invoke(slot);
 

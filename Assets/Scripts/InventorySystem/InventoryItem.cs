@@ -15,35 +15,23 @@ public class InventoryItem
 
 	public InventoryItem(ItemDefinition itemDefinition, int currentStack)
 	{
-		this.itemDefinition = itemDefinition;
-        this.currentStack = Mathf.Max(0, currentStack);
+        if (itemDefinition == null) { Clear(); return; }
+
+        this.itemDefinition = itemDefinition;
+        this.currentStack = Mathf.Clamp(currentStack, 0, itemDefinition.StackLimit);
     }
 
-    public void SetItemStack(int newStack)
-	{
-        currentStack = Mathf.Max(0, newStack);
-    }
-	public void AddItemStack(int stackToAdd)
-	{
-        currentStack += Mathf.Max(0, stackToAdd);
-    }
-	public void RemoveItemStack(int stackToRemove)
-	{
-		currentStack -= stackToRemove;
-	}
-
-	public bool CanStackWith(InventoryItem otherItem)
+    public void SetItemStack(int value)
     {
-        if (ItemDefinitionNull || currentStack > itemDefinition.StackLimit || 
-            otherItem == null || otherItem.ItemDefinitionNull && otherItem.currentStack <= 0) return false;
+        currentStack = Mathf.Clamp(value,0, itemDefinition != null ? itemDefinition.StackLimit : 0);
 
-        return ItemDefinitionMatches(otherItem);
+        if (currentStack == 0)
+            Clear();
     }
-    public bool ItemDefinitionMatches(InventoryItem otherItem)
+
+    private void Clear()
     {
-        if (ItemDefinition == otherItem.ItemDefinition)
-            return true;
-        else
-            return false;
+        itemDefinition = null;
+        currentStack = 0;
     }
 }

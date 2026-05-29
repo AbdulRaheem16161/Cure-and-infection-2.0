@@ -236,7 +236,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region updating ui elements
 	private void UpdateSlotUi(InventoryItem item)
 	{
-		if (item != null && !item.ItemDefinitionNull)
+		if (InventoryService.ItemExists(item) && item.CurrentStack != 0)
 		{
 			//while no ui icons for items just change colour to green, when they do uncomment warning log
 			//itemInventoryIcon = item.ItemDefinition.ItemUiIcon;

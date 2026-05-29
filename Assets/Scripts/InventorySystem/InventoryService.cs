@@ -22,7 +22,7 @@ public static class InventoryService
     #region Modify Container Size
     public static void ModifyContainerSize(ItemContainer container, int sizeAdjustment, Vector3 dropPosition)
     {
-        int newSize = container.Items.Length + sizeAdjustment;
+        int newSize = container.Items.Count + sizeAdjustment;
 
         if (newSize < 0)
         {
@@ -30,7 +30,7 @@ public static class InventoryService
             return;
         }
 
-        for (int i = newSize; i < container.Items.Length; i++) //drop items on floor if they dont fit
+        for (int i = newSize; i < container.Items.Count; i++) //drop items on floor if they dont fit
         {
             if (ItemExists(container.Items[i]))
             {
@@ -90,17 +90,16 @@ public static class InventoryService
         shopTransferData.seller.AddMoney(shopTransferData.price);
 
         shopTransferData.buyer.ItemContainer.AddNewItem(new(shopTransferData.item.ItemDefinition, shopTransferData.stackCount));
-        shopTransferData.seller.ItemContainer.RemoveItemsFromSlot(shopTransferData.slot, shopTransferData.stackCount, shopTransferData.transferStack);
+        shopTransferData.seller.ItemContainer.RemoveItem(shopTransferData.slot, shopTransferData.stackCount);
     }
     private static ShopTransferResult ShopTransferValid(
         InventoryHandler seller, InventoryHandler buyer, int slot, bool transferStack, out ShopTransferContext data)
     {
         data = null;
 
-        if (buyer.ItemContainer.ContainerFull()) { return ShopTransferResult.fullInventory; }
-
         InventoryItem item = seller.ItemContainer.Items[slot];
 
+        if (buyer.ItemContainer.ContainerCanAcceptItem(item)) { return ShopTransferResult.fullInventory; }
         if (!ItemExists(item)) { return ShopTransferResult.itemNull; }
 
         int stackCount = transferStack ? item.CurrentStack : 1;
@@ -172,7 +171,7 @@ public static class InventoryService
         if (CanMergeItems(itemToEquip, itemToUnequp)) //merge stacks to destination, null source slot if all merged
         {
             itemToUnequp = StackEquipmentItem(equipmentSlot, slot, itemToEquip);
-            inventory.SetItemInSlot(itemToUnequp.CurrentStack > 0 ? itemToUnequp : null, slot);
+            inventory.SetSlotContents(itemToUnequp.CurrentStack > 0 ? itemToUnequp : null, slot);
             equipmentHandler.InvokeEquippedItemChanges(equipmentSlot, true);
             return;
         }
@@ -180,22 +179,28 @@ public static class InventoryService
         if (itemToEquipExists && !itemToUnEquipExists)
         {
             equipmentHandler.HandleItemEquipping(equipmentSlot, itemToEquip);
-            inventory.SetItemInSlot(null, slot);
+            inventory.SetSlotContents(null, slot);
         }
         else if (!itemToEquipExists && itemToUnEquipExists)
         {
+            if (!inventory.ContainerCanAcceptItem(itemToUnequp))
+            {
+                if (logOutcome) Debug.LogError($"Cannot unequip item to inventory, container cannot accept item.");
+                return;
+            }
+
             equipmentHandler.HandleItemUnequipping(equipmentSlot);
 
             if (slot == -1)
                 inventory.AddNewItem(itemToUnequp);
             else
-                inventory.SetItemInSlot(itemToUnequp, slot);
+                inventory.SetSlotContents(itemToUnequp, slot);
         }
         else //both exist, swap them
         {
             equipmentHandler.HandleItemUnequipping(equipmentSlot);
             equipmentHandler.HandleItemEquipping(equipmentSlot, itemToEquip);
-            inventory.SetItemInSlot(itemToUnequp, slot);
+            inventory.SetSlotContents(itemToUnequp, slot);
         }
     }
     #endregion
@@ -230,16 +235,16 @@ public static class InventoryService
         if (CanMergeItems(itemA, itemB)) //merge stacks to destination, null source slot if all merged
         {
             itemB = StackContainerItem(destination, destinationSlot, itemA);
-            source.SetItemInSlot(itemB.CurrentStack > 0 ? itemB : null, sourceSlot);
+            source.SetSlotContents(itemB.CurrentStack > 0 ? itemB : null, sourceSlot);
         }
         else if (ItemExists(itemA)) //move itemA, if itemB exists move to source, if not null source (itemB didnt exist)
         {
-            destination.SetItemInSlot(itemA, destinationSlot);
+            destination.SetSlotContents(itemA, destinationSlot);
 
             if (ItemExists(itemB))
-                source.SetItemInSlot(itemB, sourceSlot);
+                source.SetSlotContents(itemB, sourceSlot);
             else
-                source.SetItemInSlot(null, sourceSlot);
+                source.SetSlotContents(null, sourceSlot);
         }
         else
         {
@@ -252,29 +257,18 @@ public static class InventoryService
     private static void ResolveAutoSlotInteraction(ItemContainer source, int sourceSlot, ItemContainer destination, bool logOutcome = false)
     {
         InventoryItem item = source.Items[sourceSlot];
-
-        item = TryStackItem(destination, item);
-
-        if (item.CurrentStack > 0) //if we have any left that couldnt be stacked, try to add to an empty slot
-        {
-            if (destination.ContainerFull())
-            {
-                if (logOutcome) Debug.LogWarning($"Could not move item, destination container full.");
-                return;
-            }
-            destination.AddNewItem(item);
-        }
+        item = destination.AddNewItem(item);
     }
     #endregion
 
     #region Item Stacking Helpers
     public static InventoryItem TryStackItem(ItemContainer container, InventoryItem itemToStack)
     {
-        for (int i = 0; i < container.Items.Length; i++)
+        for (int i = 0; i < container.Items.Count; i++)
         {
             if (ItemExists(container.Items[i]))
             {
-                if (!container.Items[i].CanStackWith(itemToStack)) continue;
+                if (!CanMergeItems(container.Items[i], itemToStack)) continue;
                 itemToStack = StackContainerItem(container, i, itemToStack);
             }
         }
@@ -283,21 +277,18 @@ public static class InventoryService
     public static InventoryItem StackContainerItem(ItemContainer container, int slot, InventoryItem itemToSack)
     {
         InventoryItem existingItem = container.Items[slot];
+        if (existingItem.CurrentStack == existingItem.ItemDefinition.StackLimit) return itemToSack;
+
         StackItem(existingItem, itemToSack);
-
         container.InvokeContainerItemChanged(slot, existingItem);
-        Debug.Log($"stacked item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
-
         return itemToSack;
     }
     public static InventoryItem StackEquipmentItem(EquipmentSlot equipmentSlot, int slot, InventoryItem itemToSack)
     {
         InventoryItem existingItem = equipmentSlot.Item;
+        if (existingItem.CurrentStack == existingItem.ItemDefinition.StackLimit) return itemToSack;
+
         StackItem(existingItem, itemToSack);
-
-        //container.InvokeContainerItemChanged(slot, existingItem);
-        Debug.Log($"stacked item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
-
         return itemToSack;
     }
     private static InventoryItem StackItem(InventoryItem existingItem, InventoryItem itemToSack)
@@ -312,12 +303,11 @@ public static class InventoryService
         }
         else
         {
-            existingItem.AddItemStack(itemToSack.CurrentStack); //add to stack
+            existingItem.SetItemStack(existingItem.CurrentStack + itemToSack.CurrentStack); //add to stack
             itemToSack.SetItemStack(0); //nothing left to stack
         }
 
         Debug.Log($"stacked item: {existingItem.ItemDefinition.ItemName} to {existingItem.CurrentStack}");
-
         return itemToSack;
     }
     #endregion
@@ -325,12 +315,12 @@ public static class InventoryService
     #region Helper Checks
     public static bool SlotIndexOutOfBounds(ItemContainer container, int slot)
     {
-        return container.Items.Length <= slot || slot < 0;
+        return container.Items.Count <= slot || slot < 0;
     }
 
     public static bool CanMergeItems(InventoryItem itemA, InventoryItem itemB)
     {
-        return ItemExists(itemA) && ItemExists(itemB) && itemA.CanStackWith(itemB);
+        return ItemExists(itemA) && ItemExists(itemB) && itemA.ItemDefinition == itemB.ItemDefinition;
     }
     public static bool ItemExists(InventoryItem item)
     {
@@ -348,9 +338,9 @@ public static class InventoryService
         }
 
         InventoryItem itemToDrop = container.Items[slot];
-        container.RemoveItemsFromSlot(slot, itemToDrop.CurrentStack, dropStack);
-
         int dropAmount = dropStack ? itemToDrop.CurrentStack : 1;
+
+        container.RemoveItem(slot, dropAmount);
         ItemSpawner.GetItem(itemToDrop.ItemDefinition, dropAmount, null, dropPosition, Quaternion.identity);
     }
     public static void DropItem(Vector3 dropPosition, EquipmentHandler equipment, EquipmentType equipmentType)

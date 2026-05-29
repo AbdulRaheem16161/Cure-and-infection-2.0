@@ -154,7 +154,9 @@ public class InventoryContextUi : MonoBehaviour
 	#region set up split item context menu buttons
 	private void SetupSplitContext(InventorySlotUi slot)
 	{
-		splitItem.onClick.RemoveAllListeners();
+        if (slot.EquipmentSlot) return;
+
+        splitItem.onClick.RemoveAllListeners();
 		bool stackMoreThenOne = slot.SlotItem.CurrentStack > 1;
 
 		if (!stackMoreThenOne)
@@ -240,9 +242,9 @@ public class InventoryContextUi : MonoBehaviour
 	}
 	private void DropItem(InventorySlotUi slot, bool dropStack)
 	{
-		if (slot.Equipment != null)
+		if (slot.EquipmentSlot)
 			InventoryService.DropItem(slot.ObjectRef.transform.position, slot.Equipment, slot.EquipmentTypes);
-		else if (slot.ItemContainer != null)
+		else
 			InventoryService.DropItem(slot.ObjectRef.transform.position, slot.ItemContainer, slot.SlotIndex, dropStack);
 
 		HideContextPanel();
