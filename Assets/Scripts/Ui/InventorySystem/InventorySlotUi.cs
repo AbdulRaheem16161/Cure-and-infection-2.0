@@ -7,8 +7,10 @@ using static EquipmentHandler;
 
 public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler
 {
-	#region inventory slot ui
-	[Header("Inventory Slot Ui")]
+    public bool IsPlayerOwnedSlot { get; private set; } //set from inventory/equipment ui when initializing slot
+
+    #region inventory slot ui
+    [Header("Inventory Slot Ui")]
 	public GameObject inventorySlotUi;
 	public Image itemInventoryIcon;
 	public TMP_Text itemNameText;
@@ -50,12 +52,13 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	[SerializeField] private GameObject canvasParent; //used for draggable ui
 
-	private void Awake()
+	public void InitializeSlotUi(GameObject canvasParent, bool isPlayerOwnedSlot)
 	{
-		canvasParent = gameObject.transform.parent.transform.parent.transform.parent.transform.parent.gameObject; //grab parent canvas in hierarchy
-		slotIndex = transform.GetSiblingIndex();
-		UpdateSlotUi(null);
-	}
+		IsPlayerOwnedSlot = isPlayerOwnedSlot;
+        this.canvasParent = canvasParent; //grab parent canvas in hierarchy
+        slotIndex = transform.GetSiblingIndex();
+        UpdateSlotUi(null);
+    }
 
 	private void OnDestroy()
 	{
@@ -72,15 +75,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		inventorySlotUi.SetActive(true);
 		EquipmentSlot = true;
 
-		if (equipment != null) //sub to events
-		{
-            objectRef = gamebject;
-            this.equipment = equipment;
-			this.equipmentType = equipmentType;
-			itemContainer = equipment.InventoryHandler.ItemContainer;
-			equipment.OnEquippedItemChanges += OnEquippedItemChanges;
-			equipment.OnConsumableUsed += OnConsumableUsed;
-		}
+		if (equipment == null) return;
+
+        objectRef = gamebject;
+        this.equipment = equipment;
+		this.equipmentType = equipmentType;
+		itemContainer = equipment.InventoryHandler.ItemContainer;
+		equipment.OnEquippedItemChanges += OnEquippedItemChanges;
+		equipment.OnConsumableUsed += OnConsumableUsed;
 
         UpdateSlotUi(equipment.GetEquipmentSlot(equipmentType).Item);
         inventorySlotUi.SetActive(true);
@@ -88,15 +90,14 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	public void DisableEquipmentSlot()
 	{
 		inventorySlotUi.SetActive(false);
+        UpdateSlotUi(null);
 
-		if (equipment != null) //unsub to events
-		{
-			equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
-			equipment.OnConsumableUsed -= OnConsumableUsed;
-		}
+		if (equipment == null) return; //unsub to events
 
-		UpdateSlotUi(null);
-	}
+        equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
+        equipment.OnConsumableUsed -= OnConsumableUsed;
+        equipment = null;
+    }
 	#endregion
 
 	#region enable/disable inventory slot
@@ -182,7 +183,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		if (draggedSlotUi == this) return;
 
 		if (!draggedSlotUi.EquipmentSlot && !EquipmentSlot)
-			InventoryService.TryResolveSlotInteraction(itemContainer, draggedSlotUi.slotIndex, ItemContainer, slotIndex, true);
+			InventoryService.TryResolveSlotInteraction(draggedSlotUi.itemContainer, draggedSlotUi.slotIndex, ItemContainer, slotIndex, true);
 
 		else if (draggedSlotUi.EquipmentSlot && EquipmentSlot)
 			InventoryService.TryResolveSlotEquipping(draggedSlotUi.equipment, draggedSlotUi.EquipmentTypes, itemContainer, slotIndex, true);

@@ -108,12 +108,19 @@ public class InventoryContextUi : MonoBehaviour
 
 		return new Vector2(width, height);
 	}
-	#endregion
+    #endregion
 
-	#region set up equip item context menu buttons
-	private void SetUpEquipContext(InventorySlotUi slot)
+    #region set up equip item context menu buttons (TODO: see summery in method )
+    private void SetUpEquipContext(InventorySlotUi slot)
 	{
-		if (slot.EquipmentSlot) return;
+        ///<summery>
+        ///if (!slot.IsPlayerOwnedSlot) return; stops context ui from showing equip options on items not in player inventory (eg items in chest or corpse)
+		///want to update this so they do show and work but would require some changes i may end up changing again when i start adding full ui elements
+		///so leave disabled for now
+        ///<summery>
+
+        if (!slot.IsPlayerOwnedSlot) return;
+        if (slot.EquipmentSlot) return;
 
 		ItemDefinition item = slot.SlotItem.ItemDefinition;
 		var validSlots = GetValidEquipmentSlotsForItem(item).ToList();
@@ -137,11 +144,18 @@ public class InventoryContextUi : MonoBehaviour
 		if (!validSlots.Any())
 			Debug.LogWarning($"No valid equipment slots found for {item.ItemName}");
 	}
-	#endregion
+    #endregion
 
-	#region set up un equip item context menu buttons
-	private void SetUpUnEquipContext(InventorySlotUi slot)
+    #region set up un equip item context menu buttons (TODO: see summery in method )
+    private void SetUpUnEquipContext(InventorySlotUi slot)
 	{
+        ///<summery>
+        ///if (!slot.IsPlayerOwnedSlot) return; stops context ui from showing equip options on items not in player inventory (eg items in chest or corpse)
+        ///want to update this so they do show and work but would require some changes i may end up changing again when i start adding full ui elements
+        ///so leave disabled for now
+        ///<summery>
+
+        if (!slot.IsPlayerOwnedSlot) return;
 		if (!slot.EquipmentSlot) return;
 
 		unEquipItem.onClick.RemoveAllListeners();

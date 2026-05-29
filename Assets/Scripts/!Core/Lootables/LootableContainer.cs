@@ -1,22 +1,10 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
-using UnityEngine.Rendering;
-using static UnityEditor.Progress;
 
 [RequireComponent(typeof(Hinge))]
 public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
 {
-    ///<Summery>
-    /// use ItemSpawnConfig to tweak what sort of things are allowed + adding spawn chance multipliers to items
-    /// when deciding what to spawn, in awake, create spawn table of things allowed to spawn here + there modified spawn chances
-    /// 
-    /// to calc modifed spawn chances and to limit same item spam, when item has 2+ modifiers create diminishing returns (for both increase/decrease)
-    /// example: baseball bat has flags, improvised, sporting, consumer, for total of 2x x3(6x), instead diminish 2x, 1x, 0.2x (3.2x)
-    /// will also when rolling for loot limit duplicates to 2
-    ///<Summery>
-
     [Header("Loot Container Settings")]
     public string LootableName;
     public string ContainerName => LootableName;
@@ -60,6 +48,7 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     {
         Open = !Open;
         hinge.Toggle();
+        TestInventoryManager.LootContainer(gameObject, Open);
     }
     public void InteractHoldComplete(Interactor interactor)
     {

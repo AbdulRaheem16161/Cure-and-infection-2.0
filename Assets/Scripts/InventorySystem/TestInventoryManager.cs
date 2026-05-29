@@ -19,7 +19,7 @@ public class TestInventoryManager : MonoBehaviour
     public static bool PlayerInventoryVisible { get; private set; }
     public static bool LootableInventoryVisible { get; private set; }
 
-    public static event Action<bool> PlayerInventoryVisibleEvent;
+    public static event Action<bool, bool> PlayerInventoryVisibleEvent;
     public static event Action<GameObject, bool> LootableInventoryVisibleEvent;
 
     private void Awake()
@@ -38,22 +38,30 @@ public class TestInventoryManager : MonoBehaviour
     public static void TogglePlayerEquipmentAndInventory()
     {
         PlayerInventoryVisible = !PlayerInventoryVisible;
-        PlayerInventoryVisibleEvent?.Invoke(PlayerInventoryVisible);
+        PlayerInventoryVisibleEvent?.Invoke(PlayerInventoryVisible, true);
     }
 
     public static void LootCorpse(GameObject lootable, bool open)
     {
         PlayerInventoryVisible = open;
-        PlayerInventoryVisibleEvent?.Invoke(open);
+        PlayerInventoryVisibleEvent?.Invoke(open, false);
 
         LootableInventoryVisible = open;
         LootableInventoryVisibleEvent?.Invoke(lootable, open);
     }
 
+    /// <summary>
+    /// move to a UiManager of some sort that instead subs to a event in LootableContainer script: 
+    /// public static event Action<gameobject, bool> OnLootableContainerInteract;
+    /// UiManager then tells what sub ui elements to and has a ref to them like: public InventoryUi playerInventoryUi;
+    /// that gets called like PlayerInventoryUi.ShowInventory(lootable) 
+    /// merge methods public void UpdateObjectReferences(GameObject newRef) and public void ShowInventory()) to make ui elements simpler
+    /// </summary>
+
     public static void LootContainer(GameObject lootable, bool open)
     {
         PlayerInventoryVisible = open;
-        PlayerInventoryVisibleEvent?.Invoke(open);
+        PlayerInventoryVisibleEvent?.Invoke(open, false);
 
         LootableInventoryVisible = open;
         LootableInventoryVisibleEvent?.Invoke(lootable, open);
