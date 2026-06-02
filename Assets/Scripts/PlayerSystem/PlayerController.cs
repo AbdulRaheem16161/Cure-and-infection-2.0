@@ -1,92 +1,98 @@
 using UnityEngine;
+using static NPCSpawner;
 
-/// <summary>
-/// example script, comment out if needed
-/// </summary>
-
+[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(StatsHandler))]
+[RequireComponent(typeof(EquipmentHandler))]
+[RequireComponent(typeof(InventoryHandler))]
 public class PlayerController : MonoBehaviour
 {
-	private EquipmentHandler EquipmentHandler;
+    private bool _initialized = false;
+
+    public EntityDefinition Definition;
+
+    #region 1st Person Camera + Settings
+    private Camera PlayerCamera;
+    private readonly float lookSensitivity = 0.05f;
+    private readonly float minCameraPitch = -70f;
+    private readonly float maxCameraPitch = 60f;
+    private float pitch;
+    #endregion
+
+    private CharacterController CharacterController;
+    private StatsHandler StatsHandler;
+    private EquipmentHandler EquipmentHandler;
 	private InventoryHandler InventoryHandler;
 
-	private string[] HitableTags;
+    public bool IsSprinting => InputManager.Instance.Sprinting;
 
 	private void Awake()
 	{
+        PlayerCamera = GetComponentInChildren<Camera>();
+        CharacterController = GetComponent<CharacterController>();
+		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 		InventoryHandler = GetComponent<InventoryHandler>();
 	}
 
-	public void PlayerMouseLeftClick()
-	{
-		if (EquipmentHandler.itemInHands is RangedWeaponItem weaponRanged)
-		{
-			weaponRanged.Shoot();
-		}
-		else if (EquipmentHandler.itemInHands is MeleeWeaponItem weaponMelee)
-		{
-			weaponMelee.LightAttack();
-		}
-	}
+    private void Start()
+    {
+        if (!_initialized)
+        {
+            if (Definition != null)
+                InitializePlayer(Definition, StatsHandler.Team); //keep current team
+            else
+                Debug.LogError($"{typeof(EntityDefinition)} null, assign reference in inspector when not using a NpcSpawner");
+        }
+    }
 
-	/// <summary>
-	/// inputKey would be passed in via PlayerInputs for example F to interact is base, but looking at a ranged weapon with multiple destinations
-	/// will also give the option of pressing f/e
-	/// TEST EXAMPLE OUTDATED DUE TO ITEM PICK UP CHANGE + INTERACT SYSTEM IMPLEMENTATION
-	/// </summary>
-	/*
-	public void ItemPickUpInteract<T>(Item<T> item, int inputKey) where T : ItemDefinition
-	{
-		if (item is RangedWeaponItem ranged)
-		{
-			if (inputKey == 0) // 0 = input key f for example
-				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponOne); //equip directly
-			else if (inputKey == 1) // 1 = input key e for example
-				EquipmentHandler.EquipItem(ranged.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponTwo); //equip directly
-		}
-		else if (item is MeleeWeaponItem melee)
-		{
-			EquipmentHandler.EquipItem(melee.TypedDefinition, 1, EquipmentHandler.EquipmentType.weaponMelee); //equip directly
-		}
-		else
-			item.PickUp(InventoryHandler);
-	}
-	*/
+    public void InitializePlayer(EntityDefinition definition, Teams team)
+    {
+        if (definition == null)
+        {
+            Debug.LogError($"{typeof(EntityDefinition)} null, NpcSpawner failed to assign definition");
+            return;
+        }
 
-	//holsters weapon on key press if same weapon already equipped. if not unholsters that weapon (internal logic should handle things)
+        Definition = definition;
+        gameObject.name = Definition.Name;
 
-	public void PlayerHotkeyPressOne()
-	{
-		if (EquipmentHandler.HasItemInHands)
-			EquipmentHandler.HolsterWeapon();
-		else
-			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponOne);
-	}
+        StatsHandler.InitializeStats(team, Definition);
+        InventoryHandler.InitializeInventoryHandler();
+        EquipmentHandler.InitializeEquipmentHandler(Definition);
+        _initialized = true;
+    }
 
-	public void PlayerHotkeyPressTwo()
-	{
-		if (EquipmentHandler.HasItemInHands)
-			EquipmentHandler.HolsterWeapon();
-		else
-			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponTwo);
-	}
+    private void Update()
+    {
+        HandleMovement();
+        HandleLooking();
+    }
 
-	public void PlayerHotkeyPressThree()
-	{
-		if (EquipmentHandler.HasItemInHands)
-			EquipmentHandler.HolsterWeapon();
-		else
-			EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponMelee);
-	}
+    private void HandleMovement(bool debugLog = false)
+    {
+        Vector2 moveInput = InputManager.Instance.Move;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
 
-	//use consumables on hotkey presses
+        if (IsSprinting)
+            CharacterController.Move(Definition.SprintSpeed * Time.deltaTime * move);
+        else
+            CharacterController.Move(Definition.WalkSpeed * Time.deltaTime * move);
 
-	public void PlayerHotkeyPressQ()
-	{
-		EquipmentHandler.UseConsumable(EquipmentHandler.EquipmentType.consumableOne);
-	}
-	public void PlayerHotkeyPressE()
-	{
-		EquipmentHandler.UseConsumable(EquipmentHandler.EquipmentType.consumableTwo);
-	}
+        if (debugLog) Debug.Log($"Move: {moveInput}");
+    }
+    private void HandleLooking(bool debugLog = false)
+    {
+        Vector2 lookInput = InputManager.Instance.Look;
+        float mouseX = lookInput.x * lookSensitivity;
+        float mouseY = lookInput.y * lookSensitivity;
+
+        transform.Rotate(Vector3.up * mouseX);
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, minCameraPitch, maxCameraPitch);
+
+        PlayerCamera.gameObject.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+
+        if (debugLog) Debug.Log($"Look: {lookInput}");
+    }
 }

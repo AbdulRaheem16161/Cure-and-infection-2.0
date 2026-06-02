@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e1ca600b11cbd408a3c75d84f8642b, type: 3}
+  m_Name: Player
+  m_EditorClassIdentifier: 
+  entityName: Player
+  isPlayer: 1
+  startingLifeState: 0
+  capabilities: -1
+  entityFlags: -1
+  gameObjectPrefab: {fileID: 5955127515211841332, guid: bbe3de7e73d86ee41bd23a3af302bbf0, type: 3}
+  itemsDroppedOnDeath: []
+  maxHealth: 100
+  maxWater: 100
+  maxFood: 100
+  maxStamina: 100
+  waterDrainSeconds: 15
+  waterDrainAmount: 1
+  foodDrainSeconds: 25
+  foodDrainAmount: 1
+  staminaDrainSeconds: 0.4
+  staminaDrainAmount: 1
+  staminaRegenSeconds: 1
+  staminaRegenAmount: 1
+  exhaustToSprintThreshold: 0.15
+  walkSpeed: 2.5
+  sprintSpeed: 5.5
+  rotationSpeed: 240
+  acceleration: 10
+  stoppingDistance: 1
+  fleeDistance: 20
+  minIdleTime: 1
+  maxIdleTime: 3
+  viewAngle: 120
+  viewDistance: 30
+  highAlertDuration: 10
+  viewAngleMultiplier: 1.5
+  viewDistanceMultiplier: 1.5
+  soundSensitivity: 0
+  weaponOne: {fileID: 11400000, guid: 891c4fb4191ce7c479c3aa2c2a088c45, type: 2}
+  weaponTwo: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: a9fff7e107251f24aa8e897c12f7d775, type: 2}
+  helmet: {fileID: 0}
+  chest: {fileID: 0}
+  backpack: {fileID: 11400000, guid: 55d7cf881b8899c49b9c3a5ab2aae00a, type: 2}
+  consumableOne: {fileID: 11400000, guid: fe64440df4181d04f9752fb76b8ca258, type: 2}
+  consumableTwo: {fileID: 11400000, guid: d97c730fb2888ec45833a0062a53ae63, type: 2}
+  consumableThree: {fileID: 11400000, guid: 2439ce63286a12c44a2070d131b20313, type: 2}

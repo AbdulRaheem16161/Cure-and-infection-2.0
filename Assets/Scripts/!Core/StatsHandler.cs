@@ -11,6 +11,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	private TestInventoryController TestInventoryController; //temp for testing, remove when not needed
 
     public EntityDefinition Definition { get; private set; }
+	public PlayerController PlayerController { get; private set; }
 	public NPCStateMachine NpcStateMachine { get; private set; }
 	public EquipmentHandler EquipmentHandler { get; private set; }
 	private bool _Initialized = false;
@@ -72,6 +73,7 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	private void Awake()
 	{
         TestInventoryController = GetComponent<TestInventoryController>(); //temp for testing, remove when not needed
+		PlayerController = GetComponent<PlayerController>();
         NpcStateMachine = GetComponent<NPCStateMachine>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 
@@ -124,14 +126,16 @@ public class StatsHandler : MonoBehaviour, IDamageable
 			else
 				HandleStaminaRegen();
 		}
-		else if (NpcStateMachine == null)
+		else if (PlayerController != null)
 		{
-			//would be player so handle reading player movement intent here, for now log state machine not existing
-			Debug.LogError($"Missing Entity movement of {typeof(NPCStateMachine)} or 'not implemented yet' one is expected");
-		}
+			if (PlayerController.IsSprinting)
+				HandleStaminaDrain();
+			else
+				HandleStaminaRegen();
+        }
 		else //log error as 1 should exist outside of testing.
 		{
-			Debug.LogError($"Missing Entity movement of {typeof(NPCStateMachine)} or 'not implemented yet' one is expected");
+			Debug.LogError($"Missing Entity movement of {typeof(NPCStateMachine)} or {typeof(PlayerController)}, one is expected");
 		}
 	}
 
