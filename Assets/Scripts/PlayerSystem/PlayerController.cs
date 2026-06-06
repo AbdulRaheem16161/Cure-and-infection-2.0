@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.Windows;
 using static NPCSpawner;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(StatsHandler))]
 [RequireComponent(typeof(EquipmentHandler))]
 [RequireComponent(typeof(InventoryHandler))]
+[RequireComponent(typeof(Interactor))]
 public class PlayerController : MonoBehaviour
 {
     private bool _initialized = false;
@@ -23,16 +25,19 @@ public class PlayerController : MonoBehaviour
     private StatsHandler StatsHandler;
     private EquipmentHandler EquipmentHandler;
 	private InventoryHandler InventoryHandler;
+    private Interactor Interactor;
 
-    public bool IsSprinting => InputManager.Instance.Sprinting;
+    public bool IsSprinting => InputManager.Instance.Sprinting; //constant sprinting check
 
-	private void Awake()
+    #region Player Initialization
+    private void Awake()
 	{
         PlayerCamera = GetComponentInChildren<Camera>();
         CharacterController = GetComponent<CharacterController>();
 		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 		InventoryHandler = GetComponent<InventoryHandler>();
+        Interactor = GetComponent<Interactor>();
 	}
 
     private void Start()
@@ -62,13 +67,23 @@ public class PlayerController : MonoBehaviour
         EquipmentHandler.InitializeEquipmentHandler(Definition);
         _initialized = true;
     }
+    #endregion
 
     private void Update()
     {
+        Interactor.TickSearchForInteractables(Time.deltaTime);
         HandleMovement();
         HandleLooking();
+
+        HandlePrimaryAction();
+        HandleSecondaryAction();
+        HandleReloadAction();
+        HandleInteractAction();
+
+        HandleHotbarActions();
     }
 
+    #region Handle Player Movement and Looking
     private void HandleMovement(bool debugLog = false)
     {
         Vector2 moveInput = InputManager.Instance.Move;
@@ -95,4 +110,93 @@ public class PlayerController : MonoBehaviour
 
         if (debugLog) Debug.Log($"Look: {lookInput}");
     }
+    #endregion
+
+    #region Handle Player Actions
+    private void HandlePrimaryAction()
+    {
+        if (InputManager.Instance.PrimaryAction)
+        {
+            if (!EquipmentHandler.HasItemInHands) return;
+
+            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
+                rangedWeapon.Shoot();
+            else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon)
+                meleeWeapon.LightAttack();
+            else
+                Debug.LogWarning("Primary action with non-weapon item in hands occured");
+        }
+    }
+
+    private void HandleSecondaryAction()
+    {
+        if (InputManager.Instance.SecondaryAction)
+        {
+            if (!EquipmentHandler.HasItemInHands) return;
+
+            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
+            {
+                if (rangedWeapon.Aim == RangedWeaponItem.AimState.hipfire)
+                    rangedWeapon.EnterAimDownSights();
+            }
+            else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon)
+                meleeWeapon.HeavyAttack();
+            else
+                Debug.LogWarning("Secondary action with non-weapon item in hands occured");
+        }
+        else
+        {
+            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
+            {
+                if (rangedWeapon.Aim == RangedWeaponItem.AimState.ads)
+                    rangedWeapon.ExitAimDownSights();
+            }
+        }
+    }
+
+    private void HandleReloadAction()
+    {
+        if (InputManager.Instance.ReloadAction)
+        {
+            if (!EquipmentHandler.HasItemInHands) return;
+            if (EquipmentHandler.itemInHands is not RangedWeaponItem rangedWeapon) return;
+
+            rangedWeapon.Reload(InventoryHandler.ItemContainer, true);
+        }
+    }
+
+    private void HandleInteractAction()
+    {
+        if (InputManager.Instance.InteractPressAction)
+            Interactor.InteractPress();
+
+        if (InputManager.Instance.InteractHoldAction)
+            Interactor.InteractHold(true);
+        else
+            Interactor.InteractHold(false);
+    }
+    #endregion
+
+    #region Handle Hotbar Actions
+    private void HandleHotbarActions()
+    {
+        if (InputManager.Instance.HotbarPressed(0))
+            EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponOne);
+
+        if (InputManager.Instance.HotbarPressed(1))
+            EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponTwo);
+
+        if (InputManager.Instance.HotbarPressed(2))
+            EquipmentHandler.UnholsterWeapon(EquipmentHandler.EquipmentType.weaponMelee);
+
+        if (InputManager.Instance.HotbarPressed(3))
+            EquipmentHandler.UseConsumable(EquipmentHandler.EquipmentType.consumableOne);
+
+        if (InputManager.Instance.HotbarPressed(4))
+            EquipmentHandler.UseConsumable(EquipmentHandler.EquipmentType.consumableTwo);
+
+        if (InputManager.Instance.HotbarPressed(5))
+            EquipmentHandler.UseConsumable(EquipmentHandler.EquipmentType.consumableThree);
+    }
+    #endregion
 }

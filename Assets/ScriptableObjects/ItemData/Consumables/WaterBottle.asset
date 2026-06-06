@@ -25,8 +25,8 @@ MonoBehaviour:
   modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
   itemUiIcon: {fileID: 0}
   restorationType: 4
-  healthRestored: 65
+  healthRestored: 0
   foodRestored: 0
-  waterRestored: 0
+  waterRestored: 60
   staminaRestored: 0
   consumableFlags: 2

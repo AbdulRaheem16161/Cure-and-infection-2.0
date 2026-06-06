@@ -321,16 +321,16 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		if (slot.Item.ItemDefinition is ConsumableDefinition consumableDefinition)
 		{
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.health))
-				Mathf.Clamp(health += consumableDefinition.HealthRestored, 0, 100);
+				health = Mathf.Clamp(health += consumableDefinition.HealthRestored, 0, 100);
 
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.water))
-				Mathf.Clamp(water += consumableDefinition.WaterRestored, 0, 100);
+				water = Mathf.Clamp(water += consumableDefinition.WaterRestored, 0, 100);
 
 			if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.food))
-				Mathf.Clamp(food += consumableDefinition.FoodRestored, 0, 100);
+				food = Mathf.Clamp(food += consumableDefinition.FoodRestored, 0, 100);
 
             if (consumableDefinition.RestorationTypes.HasFlag(ConsumableDefinition.RestorationType.stamina))
-                Mathf.Clamp(stamina += consumableDefinition.StaminaRestored, 0, 100);
+                stamina = Mathf.Clamp(stamina += consumableDefinition.StaminaRestored, 0, 100);
         }
 	}
 	#endregion

@@ -6,66 +6,58 @@ public class Interactor : MonoBehaviour
 {
     public InventoryHandler Inventory { get; private set; }
 
-    [SerializeField] private float holdTime = 1f;
     [SerializeField] private LayerMask interactLayerMask;
 
-    private bool CanInteract => current != null;
     private IInteractable current;
+    [SerializeField] private float holdTime = 2f;
     private float holdTimer;
+
+    private float interactablesSearchTime = 0.1f;
+    private float interactablesSearchTimer;
 
     public event Action<float> OnHoldProgress;
     public event Action OnInteractChanged;
 
-    protected virtual void Awake()
+    private void Awake()
     {
+        interactLayerMask = LayerMask.GetMask("Interactable");
         Inventory = GetComponent<InventoryHandler>();
     }
 
-    protected virtual void Update()
+    public void TickSearchForInteractables(float deltaTime)
     {
+        interactablesSearchTimer -= deltaTime;
+        if (interactablesSearchTimer > 0) return;
+
+        interactablesSearchTimer = interactablesSearchTime;
         SetCurrentInteractable(FindInteractable());
-        HandleInput();
     }
 
-    #region Handle Interact Inputs (press and hold)
-    private void HandleInput()
+    public void InteractPress()
     {
-        if (!CanInteract) return;
+        if (current == null) return;
 
-        PressInteract();
-
-        StartHoldInteract();
-
-        EndHoldInteract();
+        current.InteractPress(this);
     }
 
-    private void PressInteract()
+    public void InteractHold(bool holding)
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (current == null) return;
+
+        if (!holding)
         {
-            current.InteractPress(this);
+            ResetHold();
+            return;
         }
-    }
-    private void StartHoldInteract()
-    {
-        if (Input.GetKey(KeyCode.E))
-        {
-            holdTimer += Time.deltaTime;
 
-            float progress = holdTimer / holdTime;
-            OnHoldProgress?.Invoke(progress);
+        holdTimer += Time.deltaTime;
 
-            if (holdTimer >= holdTime)
-            {
-                current.InteractHoldComplete(this);
-                ResetHold();
-            }
-        }
-    }
-    private void EndHoldInteract()
-    {
-        if (Input.GetKeyUp(KeyCode.E))
+        float progress = holdTimer / holdTime;
+        OnHoldProgress?.Invoke(progress);
+
+        if (holdTimer >= holdTime)
         {
+            current.InteractHoldComplete(this);
             ResetHold();
         }
     }
@@ -75,22 +67,25 @@ public class Interactor : MonoBehaviour
         holdTimer = 0f;
         OnHoldProgress?.Invoke(0f);
     }
-    #endregion
 
-    private void SetCurrentInteractable(IInteractable newInteractable) 
+    private void SetCurrentInteractable(IInteractable newInteractable)
     {
         if (current == newInteractable) return;
+
         current = newInteractable;
         ResetHold();
         OnInteractChanged?.Invoke();
     }
+
     private IInteractable FindInteractable()
     {
         Ray ray = new(transform.position, transform.forward);
+
         if (Physics.Raycast(ray, out RaycastHit hit, 3f, interactLayerMask))
         {
             return hit.collider.GetComponentInParent<IInteractable>();
         }
+
         return null;
     }
 }

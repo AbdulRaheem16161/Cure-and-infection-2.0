@@ -538,7 +538,7 @@ public class NpcPerception : MonoBehaviour
             Vector3 cornerOne = new(path.corners[i].x, path.corners[i].y + 1, path.corners[i].z);
             Vector3 cornerTwo = new(path.corners[i + 1].x, path.corners[i + 1].y + 1, path.corners[i + 1].z);
 
-            int count = Physics.RaycastNonAlloc(cornerOne, cornerTwo, RaycastHits, 100f, interactablesMask, QueryTriggerInteraction.Ignore);
+            int count = Physics.RaycastNonAlloc(cornerOne, cornerTwo, RaycastHits, 1000f, interactablesMask);
 
             for (int j = 0; j < count; j++)
             {
