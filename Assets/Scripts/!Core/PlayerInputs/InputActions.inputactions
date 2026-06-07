@@ -1,8 +1,8 @@
 {
-    "name": "PlayerInputs",
+    "name": "InputActions",
     "maps": [
         {
-            "name": "Player",
+            "name": "Gameplay",
             "id": "31515e20-9c4f-4b99-b3b8-a4ba502f1311",
             "actions": [
                 {
@@ -308,6 +308,54 @@
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Menu",
+            "id": "7e1fc5c3-2381-4ce1-ac9d-0cade36668b6",
+            "actions": [
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "71bb2bbf-b53a-4afb-8342-268c2826ab16",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PlayerInventory",
+                    "type": "Button",
+                    "id": "6c2e48ea-8fa6-4091-ba86-76a21e43fee6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a09d3675-7cb5-4cc3-a2e8-1d9a2588d82e",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1cbcc6b7-afc1-4036-b6aa-3b9806fec301",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlayerInventory",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

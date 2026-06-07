@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -20,6 +21,8 @@ public class GameManager : MonoBehaviour
         Paused,
         GameOver
     }
+
+    public static event Action<GameStates> OnGameStateChange;
 
     #region Game Initialization
     private void Awake()
@@ -111,6 +114,7 @@ public class GameManager : MonoBehaviour
     public void SetGameState(GameStates newState)
     {
         gameState = newState;
+        OnGameStateChange?.Invoke(gameState);
 
         switch (newState)
         {
