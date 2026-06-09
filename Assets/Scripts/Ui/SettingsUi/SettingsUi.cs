@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class SettingsUi : MonoBehaviour
+public class SettingsUi : MonoBehaviour, IUiPanel
 {
     public GameObject settingsUi;
 
-    public void ShowUi()
+    public void ShowUi(UiContext uiContext)
     {
         settingsUi.SetActive(true);
     }

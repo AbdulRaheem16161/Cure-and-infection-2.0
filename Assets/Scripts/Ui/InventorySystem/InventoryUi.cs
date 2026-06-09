@@ -2,9 +2,9 @@ using UnityEngine;
 
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(Canvas))]
-public class InventoryUi : MonoBehaviour
+public class InventoryUi : MonoBehaviour, IUiPanel
 {
-    public bool isPlayerInventory; //if true, will only listen to player inventory events
+    private bool isPlayerOwned; //if true, will only listen to player inventory events
 
     #region inventory ui
     [Header("Inventory Ui")]
@@ -21,58 +21,50 @@ public class InventoryUi : MonoBehaviour
     #region inventory ref
     [Header("Runtime Ref")]
     [SerializeField] private GameObject objectRef;
+    [SerializeField] private EquipmentHandler equipmentHandler;
     [SerializeField] private ItemContainer itemContainer;
-    [SerializeField] private EquipmentHandler equipment;
     #endregion
 
     private void Start()
     {
         canvas = GetComponent<Canvas>();
         inventoryUiRectTransform = inventoryUiPanel.GetComponent<RectTransform>();
-
-        for (int i = 0; i < inventorySlotUis.Length; i++)
-            inventorySlotUis[i].InitializeSlotUi(canvas.gameObject, isPlayerInventory);
-
-        if (isPlayerInventory)
-            UpdateObjectReferences(TestInventoryManager.Instance.playerObj); //grab via test manager for now)
-
-        SubToEvents();
     }
-	private void OnDestroy()
-	{
-        UnSubToEvents();
-	}
 
-    public void UpdateObjectReferences(GameObject newRef)
+    #region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
+    public void ShowUi(UiContext uiContext)
+	{
+        inventoryUiPanel.SetActive(true);
+	}
+	public void HideUi()
+	{
+        inventoryUiPanel.SetActive(false);
+	}
+    public void SetUiAnchorPosition(bool equipmentExists)
+    {
+        inventoryUiRectTransform.anchoredPosition = equipmentExists ? new(300, 0) : new(720, 0);
+    }
+    #endregion
+
+    #region Update references + Slots from UiContext
+    public void UpdateObjectReferences(bool playerOwned, GameObject obj, EquipmentHandler equipment, ItemContainer container)
     {
         itemContainer.OnContainerSizeChanged -= OnInventorySizeChange;
 
-        objectRef = newRef;
+        isPlayerOwned = playerOwned;
+        objectRef = obj;
+        equipmentHandler = equipment;
+        itemContainer = container;
 
-        if (objectRef.TryGetComponent(out ILootContainer lootContainer))
-            itemContainer = lootContainer.ItemContainer;
-        else
-            { Debug.LogError($"Passed {objectRef} doesnt have {typeof(ILootContainer)} interface"); return; }
-
-        if (objectRef.TryGetComponent(out EquipmentHandler equipmentHandler))
-            equipment = equipmentHandler;
+        for (int i = 0; i < inventorySlotUis.Length; i++)
+            inventorySlotUis[i].InitializeSlotUi(canvas, isPlayerOwned);
 
         itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
         OnInventorySizeChange(itemContainer.ContainerSize);
     }
+    #endregion
 
     #region Event Subscriptions
-    private void SubToEvents()
-    {
-        itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
-        TestInventoryManager.PlayerInventoryVisibleEvent += OnPlayerInventoryVisible;
-        TestInventoryManager.LootableInventoryVisibleEvent += OnLootableInventoryVisible;
-    }
-    private void UnSubToEvents()
-    {
-        TestInventoryManager.PlayerInventoryVisibleEvent -= OnPlayerInventoryVisible;
-        TestInventoryManager.LootableInventoryVisibleEvent -= OnLootableInventoryVisible;
-    }
     private void OnInventorySizeChange(int newSize)
     {
         if (newSize > inventorySlotUis.Length)
@@ -85,53 +77,9 @@ public class InventoryUi : MonoBehaviour
         for (int i = 0; i < inventorySlotUis.Length; i++)
         {
             if (i < newSize)
-                inventorySlotUis[i].EnableSlot(objectRef, itemContainer, equipment);
+                inventorySlotUis[i].EnableSlot(objectRef, equipmentHandler, itemContainer);
             else
                 inventorySlotUis[i].DisableSlot();
-        }
-    }
-    private void OnPlayerInventoryVisible(bool isVisible, bool centerUi)
-    {
-        if (objectRef != TestInventoryManager.Instance.playerObj)
-            return;
-
-        SetUiAnchorPosition(centerUi, true, equipment != null);
-
-        if (isVisible) ShowInventory();
-        else HideInventory();
-    }
-    private void OnLootableInventoryVisible(GameObject lootable, bool isVisible)
-    {
-        if (objectRef == TestInventoryManager.Instance.playerObj)
-            return;
-
-        SetUiAnchorPosition(false, false, equipment != null);
-        UpdateObjectReferences(lootable);
-
-        if (isVisible) ShowInventory();
-        else  HideInventory();
-    }
-    #endregion
-
-    #region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
-    public void ShowInventory()
-	{
-        inventoryUiPanel.SetActive(true);
-	}
-	public void HideInventory()
-	{
-        inventoryUiPanel.SetActive(false);
-	}
-    private void SetUiAnchorPosition(bool centerUi, bool pushLeft, bool equipmentExists)
-    {
-        Debug.LogError($"Inventory is Player: {isPlayerInventory} | centerUI: {centerUi} | pushLeft: {pushLeft}");
-
-        if (centerUi)
-            inventoryUiRectTransform.anchoredPosition = new Vector2(250, 0);
-        else
-        {
-            float offset = equipmentExists ? 300 : 720;
-            inventoryUiRectTransform.anchoredPosition = pushLeft ? new(-offset, 0) : new(offset, 0);
         }
     }
     #endregion

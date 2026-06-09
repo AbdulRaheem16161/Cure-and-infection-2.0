@@ -6,8 +6,7 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
 
-    [SerializeField] private InputActionAsset menuInputActions;
-    [SerializeField] private InputActionAsset gameplayInputActions;
+    [SerializeField] private InputActionAsset inputActions;
 
     #region Player Input Action Map + Input Actions
     private InputActionMap gameplayActionMap;
@@ -61,7 +60,7 @@ public class InputManager : MonoBehaviour
 
     private void SetupPlayerInputActionsAndMap()
     {
-        gameplayActionMap = gameplayInputActions.FindActionMap("Gameplay", true);
+        gameplayActionMap = inputActions.FindActionMap("Gameplay", true);
 
         moveAction = gameplayActionMap.FindAction("Move", true);
         lookAction = gameplayActionMap.FindAction("Look", true);
@@ -85,7 +84,7 @@ public class InputManager : MonoBehaviour
 
     private void SetupUiInputActionsAndMap()
     {
-        menuActionMap = menuInputActions.FindActionMap("Menu", true);
+        menuActionMap = inputActions.FindActionMap("Menu", true);
 
         gameMenuAction = menuActionMap.FindAction("Back", true);
         playerInventoryAction = menuActionMap.FindAction("PlayerInventory", true);

@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 8917418661095594959}
   - component: {fileID: 466015788720324116}
   - component: {fileID: 3759128838947042541}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: ValidSpawnZoneCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,7 +224,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -254,7 +254,7 @@ GameObject:
   - component: {fileID: 385350808108783537}
   - component: {fileID: 7537475981375976150}
   - component: {fileID: 663187922983572782}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: BlockSpawnZoneCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -291,7 +291,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3

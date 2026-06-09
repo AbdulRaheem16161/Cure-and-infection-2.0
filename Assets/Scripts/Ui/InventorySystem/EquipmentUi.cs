@@ -4,9 +4,9 @@ using static EquipmentHandler;
 
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(Canvas))]
-public class EquipmentUi : MonoBehaviour
+public class EquipmentUi : MonoBehaviour, IUiPanel
 {
-	public bool isPlayerEquipment; //if true, will only listen to player inventory events
+	private bool isPlayerOwned; //if true, will only listen to player inventory events
 
     #region equipment ui
     [Header("Equipment Ui")]
@@ -40,119 +40,65 @@ public class EquipmentUi : MonoBehaviour
     #region equipment ref
     [Header("Runtime Ref")]
     [SerializeField] private GameObject objectRef;
-    [SerializeField] private EquipmentHandler equipment;
+    [SerializeField] private EquipmentHandler equipmentHandler;
+    [SerializeField] private ItemContainer itemContainer;
     #endregion
 
     private void Start()
 	{
         canvas = GetComponent<Canvas>();
         equipmentUiRectTransform = equipmentUiPanel.GetComponent<RectTransform>();
-
-        weaponOneSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        weaponTwoSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        meleeWeaponSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-
-        helmetSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        chestSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        backpackSlot.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-
-        quickSlotOne.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        quickSlotTwo.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-        quickSlotThree.InitializeSlotUi(canvas.gameObject, isPlayerEquipment);
-
-        if (isPlayerEquipment)
-			UpdateObjectReferences(TestInventoryManager.Instance.playerObj); //grab via test manager for now)
-
-        SubToEvents();
     }
-    private void OnDestroy()
-    {
-		UnSubToEvents();
-    }
-
-	public void UpdateObjectReferences(GameObject newRef)
-    {
-        objectRef = newRef;
-        if (objectRef.TryGetComponent(out EquipmentHandler equipmentHandler))
-            equipment = equipmentHandler;
-        else return;
-
-		SetUpEquipmentUiSlots();
-    }
-
-    private void SetUpEquipmentUiSlots()
-    {
-        weaponOneSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponOne);
-        weaponTwoSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponTwo);
-        meleeWeaponSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.weaponMelee);
-
-        helmetSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.helmet);
-        chestSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.chest);
-        backpackSlot.EnableEquipmentSlot(objectRef, equipment, EquipmentType.backpack);
-
-        quickSlotOne.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableOne);
-        quickSlotTwo.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableTwo);
-        quickSlotThree.EnableEquipmentSlot(objectRef, equipment, EquipmentType.consumableThree);
-    }
-
-    #region Event Subscriptions
-    private void SubToEvents()
-	{
-        TestInventoryManager.PlayerInventoryVisibleEvent += OnPlayerInventoryVisible;
-		TestInventoryManager.LootableInventoryVisibleEvent += OnLootableInventoryVisible;
-    }
-	private void UnSubToEvents()
-	{
-        TestInventoryManager.PlayerInventoryVisibleEvent -= OnPlayerInventoryVisible;
-        TestInventoryManager.LootableInventoryVisibleEvent -= OnLootableInventoryVisible;
-    }
-    private void OnPlayerInventoryVisible(bool isVisible, bool centerUi)
-    {
-        if (objectRef != TestInventoryManager.Instance.playerObj)
-            return;
-
-        SetUiAnchorPosition(centerUi, true);
-
-        if (isVisible) ShowEquipment();
-        else HideEquipment();
-    }
-    private void OnLootableInventoryVisible(GameObject lootable, bool isVisible)
-    {
-        if (objectRef == TestInventoryManager.Instance.playerObj)
-            return;
-
-        SetUiAnchorPosition(false, false);
-        UpdateObjectReferences(lootable);
-
-        if (isVisible && equipment != null)
-            ShowEquipment();
-        else
-            HideEquipment();
-    }
-    #endregion
 
     #region show/hide equipment (should listen out for player input events + when opening other ui elements except pause screen)
-    public void ShowEquipment()
+    public void ShowUi(UiContext uiContext)
 	{
 		equipmentUiPanel.SetActive(true);
+        ShowQuickSlots(false);
 	}
-	public void HideEquipment()
+	public void HideUi()
 	{
         equipmentUiPanel.SetActive(false);
+        HideQuickSlots();
 	}
-    private void SetUiAnchorPosition(bool centerUi, bool pushLeft)
-    {
-        Debug.LogError($"Equipment is Player: {isPlayerEquipment} | centerUI: {centerUi} | pushLeft: {pushLeft}");
+    #endregion
 
-        if (centerUi)
-            equipmentUiRectTransform.anchoredPosition = new(-250, 0);
-        else
-            equipmentUiRectTransform.anchoredPosition = pushLeft ? new(-740, 0) : new(740, 0);
+    #region Update references + Slots from UiContext
+    public void UpdateObjectReferences(bool playerOwned, GameObject obj, EquipmentHandler equipment, ItemContainer container)
+    {
+        isPlayerOwned = playerOwned;
+        objectRef = obj;
+        equipmentHandler = equipment;
+        itemContainer = container;
+
+        weaponOneSlot.InitializeSlotUi(canvas, isPlayerOwned);
+        weaponTwoSlot.InitializeSlotUi(canvas, isPlayerOwned);
+        meleeWeaponSlot.InitializeSlotUi(canvas, isPlayerOwned);
+
+        helmetSlot.InitializeSlotUi(canvas, isPlayerOwned);
+        chestSlot.InitializeSlotUi(canvas, isPlayerOwned);
+        backpackSlot.InitializeSlotUi(canvas, isPlayerOwned);
+
+        quickSlotOne.InitializeSlotUi(canvas, isPlayerOwned);
+        quickSlotTwo.InitializeSlotUi(canvas, isPlayerOwned);
+        quickSlotThree.InitializeSlotUi(canvas, isPlayerOwned);
+
+        weaponOneSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.weaponOne);
+        weaponTwoSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.weaponTwo);
+        meleeWeaponSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.weaponMelee);
+
+        helmetSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.helmet);
+        chestSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.chest);
+        backpackSlot.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.backpack);
+
+        quickSlotOne.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.consumableOne);
+        quickSlotTwo.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.consumableTwo);
+        quickSlotThree.EnableEquipmentSlot(objectRef, equipmentHandler, itemContainer, EquipmentType.consumableThree);
     }
     #endregion
 
     #region show/hide quickSlots + toggle to auto hide (using consumable shows bar for 5 seconds)
-    public void ShowQuickSLots(bool autoHide)
+    private void ShowQuickSlots(bool autoHide)
 	{
 		quickSlotsUiPanel.SetActive(true);
 
@@ -171,7 +117,7 @@ public class EquipmentUi : MonoBehaviour
         yield return new WaitForSeconds(quickSlotHideDelay);
         HideQuickSlots();
     }
-    public void HideQuickSlots()
+    private void HideQuickSlots()
 	{
 		quickSlotsUiPanel.SetActive(false);
 	}

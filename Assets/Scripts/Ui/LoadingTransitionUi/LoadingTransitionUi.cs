@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LoadingTransitionUi : MonoBehaviour
+public class LoadingTransitionUi : MonoBehaviour, IUiPanel
 {
     public GameObject loadingSceneTransitionUi;
     public LoadingBarUi loadingBarUi;
@@ -20,7 +20,7 @@ public class LoadingTransitionUi : MonoBehaviour
         loadingBarUi.UpdateBarProgress(LoadingBarUi.ScaleAxis.x, progress);
     }
 
-    public void ShowUi()
+    public void ShowUi(UiContext uiContext)
     {
         loadingSceneTransitionUi.SetActive(true);
     }

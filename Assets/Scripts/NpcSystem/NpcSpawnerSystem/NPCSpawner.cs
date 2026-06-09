@@ -287,7 +287,7 @@ public class NPCSpawner : MonoBehaviour
 	}
 	#endregion
 
-	#region
+	#region Should Spawn Npcs check
 	private bool ShouldSpawnNpcs()
 	{
 		if (forceSpawnNpcs)

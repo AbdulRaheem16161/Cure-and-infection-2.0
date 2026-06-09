@@ -41,7 +41,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	#region read only runtime info
 	public int SlotIndex => slotIndex;
-	public GameObject ObjectRef => objectRef;
+    public GameObject ObjectRef => objectRef;
     public EquipmentHandler Equipment => equipment;
 	public ItemContainer ItemContainer => itemContainer;
 	public InventoryItem SlotItem => slotItem;
@@ -50,12 +50,12 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	public static event Action<InventorySlotUi, Vector2> OnToggleInventoryContextMenu;
 
-	[SerializeField] private GameObject canvasParent; //used for draggable ui
+	[SerializeField] private GameObject draggableUiParent;
 
-	public void InitializeSlotUi(GameObject canvasParent, bool isPlayerOwnedSlot)
+	public void InitializeSlotUi(Canvas canvas, bool isPlayerOwnedSlot)
 	{
 		IsPlayerOwnedSlot = isPlayerOwnedSlot;
-        this.canvasParent = canvasParent; //grab parent canvas in hierarchy
+        draggableUiParent = canvas.transform.parent.gameObject; //grab parent of canvas
         slotIndex = transform.GetSiblingIndex();
         UpdateSlotUi(null);
     }
@@ -70,18 +70,18 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	}
 
 	#region enable/disable equipment slot
-	public void EnableEquipmentSlot(GameObject gamebject, EquipmentHandler equipment, EquipmentType equipmentType)
+	public void EnableEquipmentSlot(GameObject objectRef, EquipmentHandler equipment, ItemContainer itemContainer, EquipmentType equipmentType)
 	{
-		inventorySlotUi.SetActive(true);
 		EquipmentSlot = true;
 
 		if (equipment == null) return;
 
-        objectRef = gamebject;
+		this.objectRef = objectRef;
         this.equipment = equipment;
-		this.equipmentType = equipmentType;
-		itemContainer = equipment.InventoryHandler.ItemContainer;
-		equipment.OnEquippedItemChanges += OnEquippedItemChanges;
+		this.itemContainer = itemContainer;
+        this.equipmentType = equipmentType;
+
+        equipment.OnEquippedItemChanges += OnEquippedItemChanges;
 		equipment.OnConsumableUsed += OnConsumableUsed;
 
         UpdateSlotUi(equipment.GetEquipmentSlot(equipmentType).Item);
@@ -90,28 +90,29 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	public void DisableEquipmentSlot()
 	{
 		inventorySlotUi.SetActive(false);
-        UpdateSlotUi(null);
 
 		if (equipment == null) return; //unsub to events
 
         equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
         equipment.OnConsumableUsed -= OnConsumableUsed;
+
+        UpdateSlotUi(null);
         equipment = null;
+		itemContainer = null;
     }
 	#endregion
 
 	#region enable/disable inventory slot
-	public void EnableSlot(GameObject gamebject, ItemContainer container, EquipmentHandler equipment)
+	public void EnableSlot(GameObject objectRef, EquipmentHandler equipment, ItemContainer itemContainer)
 	{
         EquipmentSlot = false;
 
-        if (itemContainer != null) //sub to events
-		{
-            objectRef = gamebject;
-            this.equipment = equipment;
-            itemContainer = container;
-            itemContainer.OnContainerItemChanged += HandleItemChanges;
-		}
+        this.objectRef = objectRef;
+        this.equipment = equipment;
+        this.itemContainer = itemContainer;
+        equipmentType = EquipmentType.none;
+
+        itemContainer.OnContainerItemChanged += HandleItemChanges;
 
         UpdateSlotUi(itemContainer.Items[slotIndex]);
         inventorySlotUi.SetActive(true);
@@ -124,6 +125,8 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             itemContainer.OnContainerItemChanged -= HandleItemChanges;
 
 		UpdateSlotUi(null);
+		equipment = null;
+		itemContainer = null;
 	}
 	#endregion
 
@@ -132,7 +135,7 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	{
 		if (!canBeDragged) return;
 		Debug.LogWarning("begin drag");
-		draggableUi.transform.SetParent(canvasParent.transform);
+		draggableUi.transform.SetParent(draggableUiParent.transform);
 		draggableUi.SetActive(true);
 		isBeingDragged = true;
 	}

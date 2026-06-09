@@ -3,18 +3,18 @@ using UnityEngine;
 
 public class UiManager : MonoBehaviour
 {
-    /// <summary>
-    /// UI RULES:
-    /// only one ui panel open at a time, opening a new panel closes the previous one (loading transitions and player hud are always shown)
-    /// if request to open a ui panel thats already open, close it (toggle)
-    /// if request to open a ui panel that is not currently open, open it and close the previous one
-    /// </summary>
-    /// 
     public static UiManager Instance { get; private set; }
 
-    public LoadingTransitionUi LoadingTransitionUi;
+    public MainMenuUi MainMenuPanel;
+    public SettingsUi SettingsPanel;
+    public LoadingTransitionUi LoadingTransitionPanel;
+
+    public PlayerInventoryUi PlayerInventoryPanel;
+    public LootablesInventoryUi LootablesInventoryPanel;
 
     public Stack<UiScreens> currentUiStack = new();
+
+    private Dictionary<UiScreens, IUiPanel> uiPanels;
 
     public enum UiScreens
     {
@@ -26,25 +26,65 @@ public class UiManager : MonoBehaviour
         keybindsSettings,
         graphicsSettings,
 
-
-        inventory,
+        playerHud,
+        playerInventory,
+        LootableInventory,
     }
 
     private void Awake()
     {
         Instance = this;
+        CreateUiPanelDictionary();
     }
 
-    public static void ShowScreen(UiScreens screen)
+    private void Update()
     {
-        if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek() == screen)
+        HandleBackAction();
+        HandlePlayerInventoryAction();
+    }
+
+    private void CreateUiPanelDictionary()
+    {
+        uiPanels = new Dictionary<UiScreens, IUiPanel>
         {
+            { UiScreens.menu, MainMenuPanel },
+            { UiScreens.settings, SettingsPanel },
+
+            { UiScreens.playerInventory, PlayerInventoryPanel },
+            { UiScreens.LootableInventory, LootablesInventoryPanel },
+        };
+    }
+
+    #region Reset Ui Screens Api
+    public static void ResetUiScreens()
+    {
+        foreach (var kvp in Instance.uiPanels)
+            kvp.Value.HideUi();
+    }
+    #endregion
+
+    #region Show Ui Screens Api
+    public static void ShowScreen(UiContext uiContext)
+    {
+        if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek() == uiContext.uiScreen)
             Instance.PopAndHideUi();
-        }
         else
-        {
-            Instance.PushAndShowUi(screen);
-        }
+            Instance.PushAndShowUi(uiContext);
+    }
+    #endregion
+
+    #region Ui Panel Stacking Logic
+    private void PushAndShowUi(UiContext uiContext)
+    {
+        HideTopUi();
+        currentUiStack.Push(uiContext.uiScreen);
+        ShowUi(uiContext);
+    }
+
+    private void HideTopUi()
+    {
+        if (currentUiStack.Count <= 0) return;
+        HideUi(currentUiStack.Peek());
     }
 
     private void PopAndHideUi()
@@ -59,95 +99,50 @@ public class UiManager : MonoBehaviour
         currentUiStack.Pop();
     }
 
-    private void PushAndShowUi(UiScreens screen)
-    {
-        HideTopUi();
-        currentUiStack.Push(screen);
-        ShowUi(screen);
-    }
-
-    private void HideTopUi()
-    {
-        if (currentUiStack.Count <= 0) return;
-        HideUi(currentUiStack.Peek());
-    }
-
     private bool CanClose(UiScreens screen)
     {
+        if (screen == UiScreens.playerHud) return false;
         if (screen != UiScreens.menu) return true;
         return GameManager.Instance.GameState != GameManager.GameStates.MainMenu;
     }
 
-    private void ShowUi(UiScreens screen)
+    #endregion
+
+    #region Show/Hide Different Ui Panels
+    private void ShowUi(UiContext uiContext)
     {
-        switch (screen)
+        if (uiPanels.TryGetValue(uiContext.uiScreen, out var panel))
         {
-            case UiScreens.menu:
-                //show main menu ui
-                break;
-            case UiScreens.saveGame:
-                //show save game ui
-                break;
-            case UiScreens.loadGame:
-                //show load game ui
-                break;
-            case UiScreens.settings:
-                //show settings ui
-                break;
-            case UiScreens.audioSettings:
-                //show audio settings ui
-                break;
-            case UiScreens.keybindsSettings:
-                //show keybinds settings ui
-                break;
-            case UiScreens.graphicsSettings:
-                //show graphics settings ui
-                break;
-            case UiScreens.inventory:
-                //show inventory ui
-                break;
+            panel.ShowUi(uiContext);
+            return;
         }
+
+        Debug.LogError($"No UI registered for {uiContext.uiScreen}");
     }
     private void HideUi(UiScreens screen)
     {
-        switch (screen)
+        if (uiPanels.TryGetValue(screen, out var panel))
         {
-            case UiScreens.menu:
-                //Hide main menu ui
-                break;
-            case UiScreens.saveGame:
-                //Hide save game ui
-                break;
-            case UiScreens.loadGame:
-                //Hide load game ui
-                break;
-            case UiScreens.settings:
-                //Hide settings ui
-                break;
-            case UiScreens.audioSettings:
-                //Hide audio settings ui
-                break;
-            case UiScreens.keybindsSettings:
-                //Hide keybinds settings ui
-                break;
-            case UiScreens.graphicsSettings:
-                //Hide graphics settings ui
-                break;
-            case UiScreens.inventory:
-                //Hide inventory ui
-                break;
+            panel.HideUi();
+            return;
         }
-    }
 
+        Debug.LogError($"No UI registered for {screen}");
+    }
+    #endregion
+
+    #region Show Loading Transition
     public static void ShowSceneTransitionUi(bool open)
     {
         if (open)
-            Instance.LoadingTransitionUi.ShowUi();
+            Instance.LoadingTransitionPanel.ShowUi(new(UiScreens.menu)); //uses interface but its overlay so context should never matter
         else
-            Instance.LoadingTransitionUi.HideUi();
+            Instance.LoadingTransitionPanel.HideUi();
     }
+    #endregion
 
-    private void HandleBackInput()
+    #region Handle Player Ui Actions
+    private void HandleBackAction()
     {
         if (!InputManager.Instance.GameMenuAction) return;
 
@@ -155,7 +150,7 @@ public class UiManager : MonoBehaviour
         {
             case GameManager.GameStates.Playing:
                 GameManager.Instance.SetGameState(GameManager.GameStates.Paused);
-                ShowScreen(UiScreens.menu);
+                ShowScreen(new(UiScreens.menu));
                 break;
 
             case GameManager.GameStates.Paused:
@@ -171,4 +166,12 @@ public class UiManager : MonoBehaviour
                 break;
         }
     }
+
+    private void HandlePlayerInventoryAction()
+    {
+        if (!InputManager.Instance.PlayerInventoryAction) return;
+        if (GameManager.Instance.GameState == GameManager.GameStates.Playing)
+            ShowScreen(new(UiScreens.playerInventory, GameManager.Instance.PlayerReference));
+    }
+    #endregion
 }

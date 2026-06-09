@@ -38,19 +38,5 @@ public static class BootstrapPlayMode
                 return;
             }
         }
-
-        if (state == PlayModeStateChange.EnteredPlayMode)
-            EditorApplication.delayCall += LoadOriginalScene;
-    }
-
-    private static void LoadOriginalScene()
-    {
-        var sceneToRestore = SessionState.GetString(key, "");
-
-        if (string.IsNullOrEmpty(sceneToRestore))
-            return;
-
-        EditorSceneManager.LoadSceneAsyncInPlayMode(sceneToRestore, new LoadSceneParameters(LoadSceneMode.Additive));
-        Debug.LogWarning($"restored scene: {sceneToRestore}");
     }
 }

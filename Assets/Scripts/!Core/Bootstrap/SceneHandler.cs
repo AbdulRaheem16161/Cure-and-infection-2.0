@@ -87,17 +87,9 @@ public class SceneHandler : MonoBehaviour
         return SceneManager.GetActiveScene();
     }
 
-    public void SetActiveScene(string sceneName)
+    public void SetActiveScene(Scene scene)
     {
-        Scene scene = SceneManager.GetSceneByName(sceneName);
-
-        if (!scene.isLoaded)
-        {
-            Debug.LogWarning(
-                $"Cannot set active scene. '{sceneName}' is not loaded.");
-            return;
-        }
-
+        if (scene.name == BootstrapScene || scene.name == UiScene) return;
         SceneManager.SetActiveScene(scene);
     }
 }

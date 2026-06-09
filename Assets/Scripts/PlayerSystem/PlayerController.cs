@@ -1,4 +1,6 @@
+using Game.MyNPC;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.Windows;
 using static NPCSpawner;
 
@@ -13,6 +15,13 @@ public class PlayerController : MonoBehaviour
 
     public EntityDefinition Definition;
 
+    private CharacterController CharacterController;
+    private Interactor Interactor;
+
+    public StatsHandler StatsHandler { get; private set; }
+    public InventoryHandler InventoryHandler { get; private set; }
+    public EquipmentHandler EquipmentHandler { get; private set; }
+
     #region 1st Person Camera + Settings
     private Camera PlayerCamera;
     private readonly float lookSensitivity = 0.05f;
@@ -21,11 +30,15 @@ public class PlayerController : MonoBehaviour
     private float pitch;
     #endregion
 
-    private CharacterController CharacterController;
-    private StatsHandler StatsHandler;
-    private EquipmentHandler EquipmentHandler;
-	private InventoryHandler InventoryHandler;
-    private Interactor Interactor;
+    #region Ground Check + Settings
+    public bool Grounded => Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
+    [SerializeField] Transform groundCheck;
+    [SerializeField] float groundCheckRadius = 0.2f;
+    [SerializeField] LayerMask groundMask;
+
+    private readonly float gravity = -9.81f;
+    private float verticalVelocity;
+    #endregion
 
     public bool IsSprinting => InputManager.Instance.Sprinting; //constant sprinting check
 
@@ -88,11 +101,16 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = InputManager.Instance.Move;
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        float speed = IsSprinting ? Definition.SprintSpeed : Definition.WalkSpeed;
 
-        if (IsSprinting)
-            CharacterController.Move(Definition.SprintSpeed * Time.deltaTime * move);
-        else
-            CharacterController.Move(Definition.WalkSpeed * Time.deltaTime * move);
+        if (Grounded && verticalVelocity < 0)
+            verticalVelocity = -5f;
+
+        verticalVelocity += gravity * Time.deltaTime;
+        Vector3 finalMove = move * speed;
+        finalMove.y = verticalVelocity;
+
+        CharacterController.Move(finalMove * Time.deltaTime);
 
         if (debugLog) Debug.Log($"Move: {moveInput}");
     }

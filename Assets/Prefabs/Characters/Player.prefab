@@ -89,7 +89,7 @@ Transform:
   m_GameObject: {fileID: 3240204967410131106}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.124, z: 0}
+  m_LocalPosition: {x: 0, y: -0.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -114,7 +114,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.8, y: 1.5, z: 0.8}
+  m_Size: {x: 0.9, y: 1.3, z: 0.9}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1195184174084847469
 MonoBehaviour:
@@ -187,7 +187,7 @@ Transform:
   m_GameObject: {fileID: 4867181523426747620}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.871, z: 0}
+  m_LocalPosition: {x: 0, y: 0.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -212,7 +212,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6, y: 0.6, z: 0.6}
+  m_Size: {x: 0.7, y: 0.5, z: 0.7}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7820089026522189805
 MonoBehaviour:
@@ -227,6 +227,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bodyPart: 0
+--- !u!1 &5514891493246027140
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3915797810319644876}
+  m_Layer: 6
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3915797810319644876
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5514891493246027140}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1322841580992527135}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5737434237515596955
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,6 +307,7 @@ GameObject:
   - component: {fileID: 152031258435349359}
   - component: {fileID: 5616676633694475938}
   - component: {fileID: 3682409478861364982}
+  - component: {fileID: 1760153400126682167}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -293,9 +325,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 16.96, y: 0.98, z: -15.05}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.9, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3915797810319644876}
   - {fileID: 4839534808899254565}
   - {fileID: 8754416958599475570}
   - {fileID: 408458361334758234}
@@ -420,6 +453,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Definition: {fileID: 11400000, guid: 575bf30a83512c847b6c57ff79b71263, type: 2}
+  groundCheck: {fileID: 3915797810319644876}
+  groundCheckRadius: 0.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &8182942949964980391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,7 +485,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: Gameplay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!114 &152031258435349359
@@ -514,8 +552,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c947f0f2ca97b64e9ac11bc01555edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  money: 0
-  initialInventorySize: 0
+  money: 500
+  initialInventorySize: 12
   itemContainer:
     items: []
   addMoney: 0
@@ -525,6 +563,22 @@ MonoBehaviour:
   newSlotIndex: 0
   itemToSpawn: {fileID: 0}
   itemCount: 0
+--- !u!114 &1760153400126682167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5955127515211841332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebaab38a47678b745b7c908cd4cf4876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  holdTime: 2
 --- !u!1 &8624689187692067020
 GameObject:
   m_ObjectHideFlags: 0

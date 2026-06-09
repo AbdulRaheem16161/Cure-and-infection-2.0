@@ -1,8 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UiManager;
 
 [RequireComponent(typeof(SceneHandler))]
 public class GameManager : MonoBehaviour
@@ -21,6 +23,8 @@ public class GameManager : MonoBehaviour
         Paused,
         GameOver
     }
+
+    public PlayerController PlayerReference;
 
     public static event Action<GameStates> OnGameStateChange;
 
@@ -57,14 +61,23 @@ public class GameManager : MonoBehaviour
         if (string.IsNullOrEmpty(sceneToRestore))
         {
             // Normal build startup
-            UiManager.ShowSceneTransitionUi(true);
-            await SceneHandler.LoadMainMenu();
-            SetGameState(GameStates.MainMenu);
+            ShowSceneTransitionUi(true);
+            await LoadMainMenu();
         }
         else
         {
             // Editor play-mode restoration
+            ShowSceneTransitionUi(true);
+
+            await SceneHandler.LoadSceneAsync(sceneToRestore, LoadSceneMode.Additive);
             SetGameState(sceneToRestore == SceneHandler.MainMenuScene ? GameStates.MainMenu : GameStates.Playing);
+
+            if (GameState == GameStates.Playing && PlayerReference == null)
+                PlayerReference = PlayerSpawner.SpawnPlayer(null);
+
+            ResetUiScreens();
+            ShowScreen(new(UiScreens.playerHud, PlayerReference));
+            ShowSceneTransitionUi(false);
         }
     }
     #endregion
@@ -74,8 +87,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"Scene {scene.name} loaded successfully");
 
-        if (scene.name != SceneHandler.BootstrapScene && scene.name != SceneHandler.UiScene)
-            SceneHandler.SetActiveScene(scene.name);
+        SceneHandler.SetActiveScene(scene);
     }
     private void OnSceneUnloaded(Scene scene)
     {
@@ -86,7 +98,7 @@ public class GameManager : MonoBehaviour
     #region Game State And Scene Loading Management
     public async Task StartGame()
     {
-        UiManager.ShowSceneTransitionUi(true);
+        ShowSceneTransitionUi(true);
 
         await SceneHandler.LoadGame();
         await Task.Yield();
@@ -95,11 +107,19 @@ public class GameManager : MonoBehaviour
             await SceneHandler.UnloadSceneAsync(SceneHandler.MainMenuScene);
 
         SetGameState(GameStates.Playing);
-        UiManager.ShowSceneTransitionUi(false);
+
+        if (PlayerReference == null)
+            PlayerReference = PlayerSpawner.SpawnPlayer(null);
+
+        ResetUiScreens();
+        ShowScreen(new(UiScreens.playerHud, PlayerReference));
+        ShowSceneTransitionUi(false);
+
+        Debug.Log($"Start Game Finished");
     }
-    public async Task QuitToMainMenu()
+    public async Task LoadMainMenu()
     {
-        UiManager.ShowSceneTransitionUi(true);
+        ShowSceneTransitionUi(true);
 
         await SceneHandler.LoadMainMenu();
         await Task.Yield();
@@ -108,7 +128,10 @@ public class GameManager : MonoBehaviour
             await SceneHandler.UnloadSceneAsync(SceneHandler.GameScene);
 
         SetGameState(GameStates.MainMenu);
-        UiManager.ShowSceneTransitionUi(false);
+
+        ResetUiScreens();
+        ShowScreen(new(UiScreens.menu));
+        ShowSceneTransitionUi(false);
     }
 
     public void SetGameState(GameStates newState)
