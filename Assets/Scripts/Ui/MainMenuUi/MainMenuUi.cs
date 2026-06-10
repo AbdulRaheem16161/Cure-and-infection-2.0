@@ -49,7 +49,9 @@ public class MainMenuUi : MonoBehaviour, IUiPanel
     #region Show/Hide Ui Api
     public void ShowUi(UiContext uiContext)
     {
-        if (GameManager.Instance.GameState == GameStates.MainMenu)
+        GameStates gameState = GameManager.Instance.GameState;
+
+        if (gameState == GameStates.MainMenu)
         {
             SetButtonVisibilityStates(
                 quitGame: true,
@@ -60,7 +62,7 @@ public class MainMenuUi : MonoBehaviour, IUiPanel
                 settings: true,
                 quitToMenu: false);
         }
-        else if (GameManager.Instance.GameState == GameStates.Playing)
+        else if (gameState == GameStates.Playing || gameState == GameStates.Paused)
         {
             SetButtonVisibilityStates(
                 quitGame: false,

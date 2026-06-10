@@ -5,14 +5,19 @@ public class UiManager : MonoBehaviour
 {
     public static UiManager Instance { get; private set; }
 
+    public LoadingTransitionUi LoadingTransitionPanel;
+
     public MainMenuUi MainMenuPanel;
     public SettingsUi SettingsPanel;
-    public LoadingTransitionUi LoadingTransitionPanel;
+    public GameplaySettingsUi GameplaySettingsPanel;
+    public ControlSettingsUi ControlSettingsPanel;
+    public GraphicsSettingsUi GraphicsSettingsPanel;
+    public AudioSettingsUi AudioSettingsPanel;
 
     public PlayerInventoryUi PlayerInventoryPanel;
     public LootablesInventoryUi LootablesInventoryPanel;
 
-    public Stack<UiScreens> currentUiStack = new();
+    public Stack<UiContext> currentUiStack = new();
 
     private Dictionary<UiScreens, IUiPanel> uiPanels;
 
@@ -22,9 +27,10 @@ public class UiManager : MonoBehaviour
         saveGame,
         loadGame,
         settings,
-        audioSettings,
-        keybindsSettings,
+        gameplaySettings,
+        controlSettings,
         graphicsSettings,
+        audioSettings,
 
         playerHud,
         playerInventory,
@@ -49,6 +55,10 @@ public class UiManager : MonoBehaviour
         {
             { UiScreens.menu, MainMenuPanel },
             { UiScreens.settings, SettingsPanel },
+            { UiScreens.gameplaySettings, GameplaySettingsPanel },
+            { UiScreens.controlSettings, ControlSettingsPanel },
+            { UiScreens.graphicsSettings, GraphicsSettingsPanel },
+            { UiScreens.audioSettings, AudioSettingsPanel },
 
             { UiScreens.playerInventory, PlayerInventoryPanel },
             { UiScreens.LootableInventory, LootablesInventoryPanel },
@@ -66,37 +76,31 @@ public class UiManager : MonoBehaviour
     #region Show Ui Screens Api
     public static void ShowScreen(UiContext uiContext)
     {
-        if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek() == uiContext.uiScreen)
-            Instance.PopAndHideUi();
+        if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek().uiScreen == uiContext.uiScreen)
+            Instance.ShowPreviousUi(true);
         else
             Instance.PushAndShowUi(uiContext);
     }
     #endregion
 
     #region Ui Panel Stacking Logic
+    private void ShowPreviousUi(bool popTopUi)
+    {
+        if (currentUiStack.Count <= 0) return;
+
+        var currentUi = currentUiStack.Peek();
+
+        if (!CanClose(currentUi.uiScreen)) return;
+
+        HideUi(currentUi);
+        if (popTopUi) currentUiStack.Pop();
+        ShowUi(currentUiStack.Peek());
+    }
+
     private void PushAndShowUi(UiContext uiContext)
     {
-        HideTopUi();
-        currentUiStack.Push(uiContext.uiScreen);
+        currentUiStack.Push(uiContext);
         ShowUi(uiContext);
-    }
-
-    private void HideTopUi()
-    {
-        if (currentUiStack.Count <= 0) return;
-        HideUi(currentUiStack.Peek());
-    }
-
-    private void PopAndHideUi()
-    {
-        if (currentUiStack.Count <= 0) return;
-
-        var screen = currentUiStack.Peek();
-
-        if (!CanClose(screen)) return;
-
-        HideUi(screen);
-        currentUiStack.Pop();
     }
 
     private bool CanClose(UiScreens screen)
@@ -119,15 +123,15 @@ public class UiManager : MonoBehaviour
 
         Debug.LogError($"No UI registered for {uiContext.uiScreen}");
     }
-    private void HideUi(UiScreens screen)
+    private void HideUi(UiContext uiContext)
     {
-        if (uiPanels.TryGetValue(screen, out var panel))
+        if (uiPanels.TryGetValue(uiContext.uiScreen, out var panel))
         {
             panel.HideUi();
             return;
         }
 
-        Debug.LogError($"No UI registered for {screen}");
+        Debug.LogError($"No UI registered for {uiContext.uiScreen}");
     }
     #endregion
 
@@ -154,15 +158,15 @@ public class UiManager : MonoBehaviour
                 break;
 
             case GameManager.GameStates.Paused:
-                if (currentUiStack.Count > 0 && currentUiStack.Peek() == UiScreens.menu)
+                if (currentUiStack.Count > 0 && currentUiStack.Peek().uiScreen == UiScreens.menu)
                     GameManager.Instance.SetGameState(GameManager.GameStates.Playing);
 
-                PopAndHideUi();
+                ShowScreen(currentUiStack.Peek());
                 break;
 
             case GameManager.GameStates.MainMenu:
-                if (currentUiStack.Count > 0 && currentUiStack.Peek() != UiScreens.menu)
-                    PopAndHideUi();
+                if (currentUiStack.Count > 0 && currentUiStack.Peek().uiScreen != UiScreens.menu)
+                    ShowScreen(currentUiStack.Peek());
                 break;
         }
     }
