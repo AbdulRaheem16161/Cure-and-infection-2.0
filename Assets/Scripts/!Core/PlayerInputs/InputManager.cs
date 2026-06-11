@@ -30,6 +30,15 @@ public class InputManager : MonoBehaviour
     private InputAction playerInventoryAction;
     #endregion
 
+    #region Test Input Action Map + Input Actions
+    private InputActionMap testActionMap;
+
+    private InputAction testMoveAction;
+    private InputAction testOneAction;
+    private InputAction testTwoAction;
+    private InputAction testThreeAction;
+    #endregion
+
     #region Player Input Action Api
     //Movement
     public Vector2 Move => moveAction.ReadValue<Vector2>();
@@ -51,13 +60,53 @@ public class InputManager : MonoBehaviour
     public bool PlayerInventoryAction => playerInventoryAction.WasPressedThisFrame();
     #endregion
 
+    #region Test Input Action Api
+    public Vector2 TestMoveAction => testMoveAction.ReadValue<Vector2>();
+    public bool TestOneAction => testOneAction.WasPressedThisFrame();
+    public bool TestTwoAction => testTwoAction.WasPressedThisFrame();
+    public bool TestThreeAction => testThreeAction.WasPressedThisFrame();
+    #endregion
+
     private void Awake()
     {
         Instance = this;
         SetupPlayerInputActionsAndMap();
         SetupUiInputActionsAndMap();
+        SetupTestInputActionsAndMap();
+        LoadInputControls();
     }
 
+    private void Update()
+    {
+        LogTestInputs(true);
+    }
+
+    private void LogTestInputs(bool log)
+    {
+        if (!log) return;
+        Debug.Log($"Key: TestMoveAction Input: {TestMoveAction}");
+        if (TestOneAction) Debug.Log("Key: TestOneAction was pressed");
+        if (TestTwoAction) Debug.Log("Key: TestTwoAction was pressed");
+        if (TestThreeAction) Debug.Log("Key: TestThreeAction was pressed");
+    }
+
+    #region Save/Load Inputs
+    public static void SaveInputControls()
+    {
+        string json = Instance.inputActions.SaveBindingOverridesAsJson();
+
+        PlayerPrefs.SetString("Bindings", json);
+    }
+    public static void LoadInputControls()
+    {
+        string json = PlayerPrefs.GetString("Bindings", "");
+
+        if (string.IsNullOrEmpty(json)) return;
+        Instance.inputActions.LoadBindingOverridesFromJson(json);
+    }
+    #endregion
+
+    #region Setup Input Actions + Map
     private void SetupPlayerInputActionsAndMap()
     {
         gameplayActionMap = inputActions.FindActionMap("Gameplay", true);
@@ -90,11 +139,23 @@ public class InputManager : MonoBehaviour
         playerInventoryAction = menuActionMap.FindAction("PlayerInventory", true);
     }
 
+    private void SetupTestInputActionsAndMap()
+    {
+        testActionMap = inputActions.FindActionMap("Test", true);
+
+        testMoveAction = testActionMap.FindAction("TestMove", true);
+        testOneAction = testActionMap.FindAction("TestOne", true);
+        testTwoAction = testActionMap.FindAction("TestTwo", true);
+        testThreeAction = testActionMap.FindAction("TestThree", true);
+    }
+    #endregion
+
     private void OnEnable()
     {
         GameManager.OnGameStateChange += OnGameStateChange;
         menuActionMap.Enable();
         gameplayActionMap.Enable();
+        testActionMap.Enable();
     }
 
     private void OnDisable()
@@ -102,8 +163,15 @@ public class InputManager : MonoBehaviour
         GameManager.OnGameStateChange -= OnGameStateChange;
         menuActionMap.Disable();
         gameplayActionMap.Disable();
+        testActionMap.Disable();
     }
 
+    public static string GetGameMenuAction()
+    {
+        return Instance.gameMenuAction.ToString();
+    }
+
+    #region OnGameStateChange Event Enable/Disable gameplayActionMap
     public void OnGameStateChange(GameStates newState)
     {
         if (newState == GameStates.MainMenu)
@@ -111,7 +179,9 @@ public class InputManager : MonoBehaviour
         else
             gameplayActionMap.Enable();
     }
+    #endregion
 
+    #region HotbarPressed Action Inputs
     public bool HotbarPressed(int index)
     {
         if (index < 0 || index >= hotbarActions.Length)
@@ -119,4 +189,5 @@ public class InputManager : MonoBehaviour
 
         return hotbarActions[index].WasPressedThisFrame();
     }
+    #endregion
 }

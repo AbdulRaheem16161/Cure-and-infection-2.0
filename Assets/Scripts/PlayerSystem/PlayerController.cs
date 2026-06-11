@@ -1,7 +1,4 @@
-using Game.MyNPC;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Windows;
 using static NPCSpawner;
 
 [RequireComponent(typeof(CharacterController))]

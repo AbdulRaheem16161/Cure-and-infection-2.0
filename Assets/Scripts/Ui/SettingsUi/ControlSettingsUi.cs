@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static UiManager;
@@ -8,6 +10,7 @@ public class ControlSettingsUi : MonoBehaviour, IUiPanel
 
     public Button backButton;
 
+    public List<RebindButtonUi> rebindButtonUis = new();
 
     #region Initialize Ui + Button Listeners
     private void Start()
@@ -29,11 +32,17 @@ public class ControlSettingsUi : MonoBehaviour, IUiPanel
     #region Show/Hide Ui Api
     public void ShowUi(UiContext uiContext)
     {
+        foreach (RebindButtonUi rebindButtonUi in rebindButtonUis)
+            rebindButtonUi.ShowUi(uiContext);
+
         settingsUi.SetActive(true);
     }
     public void HideUi()
     {
         settingsUi.SetActive(false);
+
+        foreach (RebindButtonUi rebindButtonUi in rebindButtonUis)
+            rebindButtonUi.ShowUi(new(UiScreens.controlSettings));
     }
     #endregion
 }
