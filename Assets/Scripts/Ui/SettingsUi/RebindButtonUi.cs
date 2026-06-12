@@ -1,52 +1,89 @@
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class RebindButtonUi : MonoBehaviour, IUiPanel
+public class RebindButtonUi : MonoBehaviour
 {
     [Header("UI")]
     public GameObject rebindUi;
-    public TMP_Text bindingText;
+    public TMP_Text InputActionNameText;
+    public TMP_Text InputActionText;
     private Button rebindButton;
 
-    [Header("Input")]
-    [SerializeField] private InputActionReference actionReference;
-    [SerializeField] private int bindingIndex;
-
+    private InputActionReference actionReference;
+    private int bindingIndex;
     private InputActionRebindingExtensions.RebindingOperation rebindOperation;
 
-    private void Awake()
+    #region Initialize Rebind Ui
+    public void InitializeUi(InputActionReference actionReference, int bindingIndex)
     {
         if (actionReference == null)
             Debug.LogError($"RebindUi's actionReference null, Assign one in inspector");
         if (actionReference.action == null)
             Debug.LogError($"RebindUi's actionReference.action null");
-        if (bindingText == null)
-            Debug.LogError($"RebindUi's bindingText null, Assign one in inspector");
+        if (InputActionNameText == null)
+            Debug.LogError($"RebindUi's InputActionNameText null, Assign one in inspector");
+        if (InputActionText == null)
+            Debug.LogError($"RebindUi's InputActionText null, Assign one in inspector");
+
+        this.actionReference = actionReference;
+        this.bindingIndex = bindingIndex;
 
         rebindButton = GetComponentInChildren<Button>();
         rebindButton.onClick.AddListener(StartRebind);
-    }
 
-    public void ShowUi(UiContext uiContext)
-    {
+        InputActionNameText.text = SetInputActionName();
         UpdateBindingDisplay();
-        rebindUi.SetActive(true);
     }
-
-    public void HideUi()
+    private string SetInputActionName()
     {
-        rebindUi.SetActive(false);
-    }
+        string actionName = Regex.Replace(
+            actionReference.action.name,
+            @"(?<!^)([A-Z])",
+            " $1");
 
+        var binding = actionReference.action.bindings[bindingIndex];
+
+        if (binding.isPartOfComposite)
+        {
+            string partName = Regex.Replace(
+                binding.name,
+                @"(?<!^)([A-Z])",
+                " $1");
+
+            return $"{actionName} {partName}";
+        }
+
+        return actionName;
+    }
+    #endregion
+
+    #region Update Ui Input Display
+    public void UpdateBindingDisplay()
+    {
+        if (actionReference == null || actionReference.action == null || InputActionNameText == null || InputActionText == null) return;
+        InputActionText.text = actionReference.action.GetBindingDisplayString(bindingIndex);
+    }
+    #endregion
+
+    #region Reset Binding (called via ControlSettingsUi)
+    public void ResetBinding()
+    {
+        actionReference.action.RemoveAllBindingOverrides();
+        UpdateBindingDisplay();
+    }
+    #endregion
+
+    #region Start Rebind + Outcomes
     private void StartRebind()
     {
         if (rebindOperation != null) return;
 
         InputAction action = actionReference.action;
         action.Disable();
-        bindingText.text = "Press New Input...";
+        InputActionText.text = "Press New Input...";
 
         rebindOperation = action
             .PerformInteractiveRebinding(bindingIndex)
@@ -83,13 +120,9 @@ public class RebindButtonUi : MonoBehaviour, IUiPanel
         rebindOperation = null;
         Debug.Log("New binding: " + action.bindings[bindingIndex].effectivePath);
     }
+    #endregion
 
-    private void UpdateBindingDisplay()
-    {
-        if (actionReference == null || actionReference.action == null || bindingText == null) return;
-        bindingText.text = actionReference.action.GetBindingDisplayString(bindingIndex);
-    }
-
+    #region Find Conflicting Bindings to exclude
     private InputBinding FindConflictingBinding(
     InputAction currentAction,
     int currentBindingIndex,
@@ -113,4 +146,5 @@ public class RebindButtonUi : MonoBehaviour, IUiPanel
 
         return default;
     }
+    #endregion
 }

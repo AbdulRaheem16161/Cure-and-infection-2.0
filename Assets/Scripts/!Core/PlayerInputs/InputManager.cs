@@ -166,9 +166,9 @@ public class InputManager : MonoBehaviour
         testActionMap.Disable();
     }
 
-    public static string GetGameMenuAction()
+    public static InputActionAsset GetInputActionAsset()
     {
-        return Instance.gameMenuAction.ToString();
+        return Instance.inputActions;
     }
 
     #region OnGameStateChange Event Enable/Disable gameplayActionMap
