@@ -4,10 +4,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static UiManager;
 
-/// <summary>
-/// would be nice if 
-/// </summary>
-
 public class ControlSettingsUi : MonoBehaviour, IUiPanel
 {
     public GameObject settingsUi;
@@ -41,6 +37,9 @@ public class ControlSettingsUi : MonoBehaviour, IUiPanel
     }
     #endregion
 
+    /// <summary>
+    /// would be nice to add inputs missing an entry from any list to also be logged but not really important atm
+    /// </summary>
     #region Check For Missmatched Input References
     private void CheckForMissmatchedInputReferences(List<InputActionReference> source, List<InputActionReference> other, bool sourceIsUnbindable)
     {

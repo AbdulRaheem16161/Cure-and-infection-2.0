@@ -47,14 +47,14 @@ public class InventoryUi : MonoBehaviour, IUiPanel
     #endregion
 
     #region Update references + Slots from UiContext
-    public void UpdateObjectReferences(bool playerOwned, GameObject obj, EquipmentHandler equipment, ItemContainer container)
+    public void UpdateObjectReferences(bool playerOwned, UiContext uiContext)
     {
         itemContainer.OnContainerSizeChanged -= OnInventorySizeChange;
 
         isPlayerOwned = playerOwned;
-        objectRef = obj;
-        equipmentHandler = equipment;
-        itemContainer = container;
+        objectRef = uiContext.playerRef;
+        equipmentHandler = uiContext.playerEquipment;
+        itemContainer = uiContext.playerContainer;
 
         for (int i = 0; i < inventorySlotUis.Length; i++)
             inventorySlotUis[i].InitializeSlotUi(canvas, isPlayerOwned);

@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class LoadingBarUi : MonoBehaviour
+public class ProgressBarUi : MonoBehaviour
 {
     public GameObject loadingBar;
     public RectTransform loadingBarProgressRectTransform;
@@ -9,14 +9,21 @@ public class LoadingBarUi : MonoBehaviour
 
     public enum ScaleAxis {x, y, z}
 
-    public void UpdateSceneTransitionLoadingText(bool loading, string sceneName, float progress)
+    public void UpdateSceneTransitionLoadingText(bool loading, string sceneName, ScaleAxis scaleAxis, float progress)
     {
         string text = loading ? "Loading " : "Unloading ";
         text += $"{sceneName} {progress * 100}%";
         loadingBarText.text = text;
+        UpdateBarProgress(scaleAxis, progress);
     }
 
-    public void UpdateBarProgress(ScaleAxis scaleAxis, float percentage)
+    public void UpdateBarPercentage(ScaleAxis scaleAxis, string text, float percentage)
+    {
+        loadingBarText.text = text;
+        UpdateBarProgress(scaleAxis, percentage);
+    }
+
+    private void UpdateBarProgress(ScaleAxis scaleAxis, float percentage)
     {
         switch (scaleAxis)
         {

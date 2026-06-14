@@ -7,8 +7,8 @@ public class PlayerInventoryUi : MonoBehaviour, IUiPanel
 
     public void ShowUi(UiContext uiContext)
     {
-        equipmentPanel.UpdateObjectReferences(true, uiContext.playerRef, uiContext.playerEquipment, uiContext.playerContainer);
-        inventoryPanel.UpdateObjectReferences(true, uiContext.playerRef, uiContext.playerEquipment, uiContext.playerContainer);
+        equipmentPanel.UpdateObjectReferences(true, uiContext);
+        inventoryPanel.UpdateObjectReferences(true, uiContext);
 
         equipmentPanel.ShowUi(uiContext);
         inventoryPanel.ShowUi(uiContext);

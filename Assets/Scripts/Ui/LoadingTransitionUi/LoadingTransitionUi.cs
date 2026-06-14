@@ -3,7 +3,7 @@ using UnityEngine;
 public class LoadingTransitionUi : MonoBehaviour, IUiPanel
 {
     public GameObject loadingSceneTransitionUi;
-    public LoadingBarUi loadingBarUi;
+    public ProgressBarUi loadingBarUi;
 
     private void OnEnable()
     {
@@ -16,8 +16,7 @@ public class LoadingTransitionUi : MonoBehaviour, IUiPanel
 
     private void OnSceneTransitionProgress(bool loading, string sceneName, float progress)
     {
-        loadingBarUi.UpdateSceneTransitionLoadingText(loading, sceneName, progress);
-        loadingBarUi.UpdateBarProgress(LoadingBarUi.ScaleAxis.x, progress);
+        loadingBarUi.UpdateSceneTransitionLoadingText(loading, sceneName, ProgressBarUi.ScaleAxis.x, progress);
     }
 
     public void ShowUi(UiContext uiContext)

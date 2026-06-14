@@ -10,8 +10,8 @@ public class LootablesInventoryUi : MonoBehaviour, IUiPanel
 
     public void ShowUi(UiContext uiContext)
     {
-        playerEquipmentPanel.UpdateObjectReferences(true, uiContext.playerRef, uiContext.playerEquipment, uiContext.playerContainer);
-        playerInventoryPanel.UpdateObjectReferences(true, uiContext.playerRef, uiContext.playerEquipment, uiContext.playerContainer);
+        playerEquipmentPanel.UpdateObjectReferences(true, uiContext);
+        playerInventoryPanel.UpdateObjectReferences(true, uiContext);
 
         playerEquipmentPanel.ShowUi(uiContext);
         playerInventoryPanel.ShowUi(uiContext);
@@ -21,14 +21,14 @@ public class LootablesInventoryUi : MonoBehaviour, IUiPanel
 
         if (uiContext.otherRef == null) { Debug.LogError("UiContext.otherRef null, Failed to show Lootable Ui"); return; }
 
-        otherInventoryPanel.UpdateObjectReferences(false, uiContext.otherRef, uiContext.otherEquipment, uiContext.otherContainer);
+        otherInventoryPanel.UpdateObjectReferences(false, uiContext);
         otherInventoryPanel.ShowUi(uiContext);
         otherInventoryPanel.SetUiAnchorPosition(uiContext.otherEquipment != null); //based on equipment existing push right more
         otherInventoryPanel.gameObject.SetActive(true);
 
         if (uiContext.otherEquipment == null) { gameObject.SetActive(true); return; }
 
-        otherEquipmentPanel.UpdateObjectReferences(false, uiContext.otherRef, uiContext.otherEquipment, uiContext.otherContainer);
+        otherEquipmentPanel.UpdateObjectReferences(false, uiContext);
         otherEquipmentPanel.ShowUi(uiContext);
         otherEquipmentPanel.gameObject.SetActive(true);
 

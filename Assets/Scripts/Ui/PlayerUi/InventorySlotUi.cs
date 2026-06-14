@@ -27,16 +27,19 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	#region runtime info
 	[Header("Runtime Info")]
-	public bool EquipmentSlot { get; private set; }
-	[SerializeField] private bool canBeDragged;
-	[SerializeField] private bool isBeingDragged;
-	[SerializeField] private int slotIndex;
+    [SerializeField] private GameObject draggableUiParent;
+    private int slotIndex;
 
-	[SerializeField] private GameObject objectRef;
+	public bool Interactable { get; private set; }
+    public bool EquipmentSlot { get; private set; }
+    private bool canBeDragged;
+    private bool isBeingDragged;
+
+    [SerializeField] private GameObject objectRef;
 	[SerializeField] private EquipmentHandler equipment;
 	[SerializeField] private ItemContainer itemContainer;
 	[SerializeField] private InventoryItem slotItem;
-	[SerializeField] private EquipmentType equipmentType;
+	private EquipmentType equipmentType;
 	#endregion
 
 	#region read only runtime info
@@ -49,8 +52,6 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#endregion
 
 	public static event Action<InventorySlotUi, Vector2> OnToggleInventoryContextMenu;
-
-	[SerializeField] private GameObject draggableUiParent;
 
 	public void InitializeSlotUi(Canvas canvas, bool isPlayerOwnedSlot)
 	{
@@ -128,12 +129,19 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		equipment = null;
 		itemContainer = null;
 	}
-	#endregion
+    #endregion
 
-	#region i drag event listeners
-	public void OnBeginDrag(PointerEventData eventData)
+    #region enable/disable slot interactivity
+	public void UpdateSlotInteractivity(bool interactable)
 	{
-		if (!canBeDragged) return;
+		Interactable = interactable;
+	}
+    #endregion
+
+    #region i drag event listeners
+    public void OnBeginDrag(PointerEventData eventData)
+	{
+		if (!Interactable || !canBeDragged) return;
 		Debug.LogWarning("begin drag");
 		draggableUi.transform.SetParent(draggableUiParent.transform);
 		draggableUi.SetActive(true);
@@ -142,13 +150,13 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	public void OnDrag(PointerEventData eventData)
 	{
-		if (!isBeingDragged) return;
-		draggableUi.transform.position = eventData.position;
+        if (!Interactable || !canBeDragged) return;
+        draggableUi.transform.position = eventData.position;
 	}
 
 	public void OnEndDrag(PointerEventData eventData)
 	{
-		if (!isBeingDragged) return;
+		if (!Interactable || !isBeingDragged) return;
 		Debug.LogWarning("end drag");
 		draggableUi.SetActive(false);
 		draggableUi.transform.SetParent(gameObject.transform);
@@ -165,6 +173,8 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	#region i drop event listener
 	public void OnDrop(PointerEventData eventData)
 	{
+		if (!Interactable) return;
+
 		Debug.LogWarning("dropped");
 		GameObject draggedObject = eventData.pointerDrag;
 		if (draggedObject == null)
@@ -204,8 +214,10 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	#region i pointer click event listener
 	public void OnPointerClick(PointerEventData eventData)
-	{
-		if (eventData.button == PointerEventData.InputButton.Right && slotItem != null)
+    {
+        if (!Interactable) return;
+
+        if (eventData.button == PointerEventData.InputButton.Right && slotItem != null)
 			OnToggleInventoryContextMenu?.Invoke(this, eventData.position);
 	}
 	#endregion
