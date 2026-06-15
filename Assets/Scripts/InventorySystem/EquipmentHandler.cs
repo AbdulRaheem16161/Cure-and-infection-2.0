@@ -39,6 +39,7 @@ public class EquipmentHandler : MonoBehaviour
 	[Header("Weapon Item In Hands")]
 	public Item itemInHands;
 	public bool HasItemInHands => itemInHands != null;
+	public event Action<Item> OnItemInHandsChange;
 	#endregion
 
 	#region debug settings
@@ -277,7 +278,8 @@ public class EquipmentHandler : MonoBehaviour
 		itemInHands.transform.SetParent(equippedWeaponsParent.transform);
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		itemInHands = null;
-	}
+        OnItemInHandsChange?.Invoke(itemInHands);
+    }
 	public void UnholsterWeapon(EquipmentType equipmentType)
 	{
 		Item itemToUnholster = GetEquipmentSlot(equipmentType).WorldItem;
@@ -290,6 +292,7 @@ public class EquipmentHandler : MonoBehaviour
 		itemInHands.UnHolsterItem(this);
 		itemInHands.transform.SetParent(ItemsInHandsParent.transform);
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		OnItemInHandsChange?.Invoke(itemInHands);
 	}
 	#endregion
 

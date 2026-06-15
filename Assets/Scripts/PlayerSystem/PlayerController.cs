@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
     public EntityDefinition Definition;
 
     private CharacterController CharacterController;
-    private Interactor Interactor;
+    public Interactor Interactor { get; private set; }
 
     public StatsHandler StatsHandler { get; private set; }
     public InventoryHandler InventoryHandler { get; private set; }

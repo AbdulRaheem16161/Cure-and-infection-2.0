@@ -3,6 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(Hinge))]
 public class Door : MonoBehaviour, IInteractable
 {
+    public string InteractableName
+    {
+        get
+        {
+            if (Open) return $"Close Door";
+            return $"Open Door";
+        }
+    }
     public bool Open { get; private set; }
 
     private Hinge hinge;

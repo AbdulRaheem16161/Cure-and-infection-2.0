@@ -73,10 +73,12 @@ public class GameManager : MonoBehaviour
             SetGameState(sceneToRestore == SceneHandler.MainMenuScene ? GameStates.MainMenu : GameStates.Playing);
 
             if (GameState == GameStates.Playing && PlayerReference == null)
+            {
                 PlayerReference = PlayerSpawner.SpawnPlayer(null);
+                TogglePlayerHudVisibility(true, new(UiScreens.playerHud, PlayerReference));
+            }
 
             ResetUiScreens();
-            ShowScreen(new(UiScreens.playerHud, PlayerReference));
             ShowSceneTransitionUi(false);
         }
     }
@@ -112,7 +114,7 @@ public class GameManager : MonoBehaviour
             PlayerReference = PlayerSpawner.SpawnPlayer(null);
 
         ResetUiScreens();
-        ShowScreen(new(UiScreens.playerHud, PlayerReference));
+        TogglePlayerHudVisibility(true, new(UiScreens.playerHud, PlayerReference));
         ShowSceneTransitionUi(false);
 
         Debug.Log($"Start Game Finished");
@@ -130,6 +132,7 @@ public class GameManager : MonoBehaviour
         SetGameState(GameStates.MainMenu);
 
         ResetUiScreens();
+        TogglePlayerHudVisibility(false, null);
         ShowScreen(new(UiScreens.menu));
         ShowSceneTransitionUi(false);
     }

@@ -14,6 +14,7 @@ public class UiManager : MonoBehaviour
     public GraphicsSettingsUi GraphicsSettingsPanel;
     public AudioSettingsUi AudioSettingsPanel;
 
+    public PlayerHudUi PlayerHudPanel;
     public PlayerInventoryUi PlayerInventoryPanel;
     public LootablesInventoryUi LootablesInventoryPanel;
 
@@ -132,6 +133,16 @@ public class UiManager : MonoBehaviour
         }
 
         Debug.LogError($"No UI registered for {uiContext.uiScreen}");
+    }
+    #endregion
+
+    #region Toggle Player Hud Visibility
+    public static void TogglePlayerHudVisibility(bool showHud, UiContext uiContext)
+    {
+        if (showHud) 
+            Instance.PlayerHudPanel.ShowUi(uiContext);
+        else
+            Instance.PlayerHudPanel.HideUi();
     }
     #endregion
 

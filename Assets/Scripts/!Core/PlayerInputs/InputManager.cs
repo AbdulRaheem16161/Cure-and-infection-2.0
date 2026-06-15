@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static GameManager;
@@ -18,7 +19,7 @@ public class InputManager : MonoBehaviour
     private InputAction secondaryAction;
     private InputAction reloadAction;
     private InputAction sprintAction;
-    private InputAction interactAction;
+    public InputAction interactAction { get; private set; }
 
     private InputAction[] hotbarActions;
     #endregion
@@ -45,8 +46,8 @@ public class InputManager : MonoBehaviour
     public Vector2 Look => lookAction.ReadValue<Vector2>();
 
     //held inputs
-    public bool PrimaryAction => primaryAction.IsPressed();
-    public bool SecondaryAction => secondaryAction.IsPressed();
+    public bool PrimaryAction => primaryAction.WasPressedThisFrame();
+    public bool SecondaryAction => secondaryAction.WasPressedThisFrame();
     public bool Sprinting => sprintAction.IsPressed();
     public bool InteractPressAction => interactAction.WasPressedThisFrame();
     public bool InteractHoldAction => interactAction.IsPressed();
@@ -182,6 +183,17 @@ public class InputManager : MonoBehaviour
     #endregion
 
     #region HotbarPressed Action Inputs
+    public bool AnyHotbarPressed()
+    {
+        if (HotbarPressed(0)) return true;
+        if (HotbarPressed(1)) return true;
+        if (HotbarPressed(2)) return true;
+        if (HotbarPressed(3)) return true;
+        if (HotbarPressed(4)) return true;
+        if (HotbarPressed(5)) return true;
+
+        return false;
+    }
     public bool HotbarPressed(int index)
     {
         if (index < 0 || index >= hotbarActions.Length)

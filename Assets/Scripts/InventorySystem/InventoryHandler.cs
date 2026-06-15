@@ -13,6 +13,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	[SerializeField] private int initialInventorySize;
 
     public string ContainerName => $"{StatsHandler.Definition.Name} Inventory";
+    public string InteractableName => $"Loot {ContainerName}";
     public bool CanLoot => StatsHandler.LifeState == EntityDefinition.LifeState.dead;
 
     [SerializeField] private ItemContainer itemContainer;

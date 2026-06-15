@@ -52,10 +52,15 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public Vector3 targetRecoil;
 	public Vector3 currentRecoil;
 	private int recoilIndex = 0;
-	#endregion
+    #endregion
 
-	#region Initialize Item Override
-	public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
+    #region events
+	public event Action<int> OnMagazineCountChange;
+	public event Action<FireModeType> OnFireModeChange;
+    #endregion
+
+    #region Initialize Item Override
+    public override void InitializeItem(WeaponRangedDefinition definition, int itemStack)
 	{
 		base.InitializeItem(definition, itemStack);
 
@@ -178,6 +183,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 		IsShooting = true;
 		currentMagazineAmmo--;
+		OnMagazineCountChange?.Invoke(currentMagazineAmmo);
 		fireRateCooldownTimer = FireRateCooldown;
 		SimulateBulletSpread(); //uses raycast hitscan + visual bullet representation
 
@@ -214,12 +220,9 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		IsReloading = true;
 		yield return new WaitForSeconds(TypedDefinition.ReloadTime);
 
-		if (hasUnlimitedAmmo)
-			currentMagazineAmmo = ammoGiver.GetAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize);
-		else
-			currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize);
-
-		IsReloading = false;
+		currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize, hasUnlimitedAmmo);
+        OnMagazineCountChange?.Invoke(currentMagazineAmmo);
+        IsReloading = false;
 	}
 	#endregion
 
@@ -230,6 +233,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		{
 			Debug.LogError("Weapon fire modes configured incorrectly. none should not be selected, defaulting to semiAuto");
 			CurrentFireMode = FireModeType.semiAuto;
+            OnFireModeChange?.Invoke(CurrentFireMode);
 			return;
 		}
 
@@ -258,7 +262,8 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 			if (TypedDefinition.AllowedFireModes.HasFlag(next))
 			{
 				CurrentFireMode = next;
-				return;
+                OnFireModeChange?.Invoke(CurrentFireMode);
+                return;
 			}
 		}
 	}

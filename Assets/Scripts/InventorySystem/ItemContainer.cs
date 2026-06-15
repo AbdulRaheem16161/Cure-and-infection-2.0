@@ -12,6 +12,7 @@ public class ItemContainer : IAmmoGiver
 
     public event Action<int> OnContainerSizeChanged;
 	public event Action<int, InventoryItem> OnContainerItemChanged;
+	public event Action OnAmmoCountsChange;
 
 	private Dictionary<ProjectileDefinition, int> ammoCounts = new();
 	public Dictionary<ProjectileDefinition, int> AmmoCounts => ammoCounts;
@@ -57,16 +58,21 @@ public class ItemContainer : IAmmoGiver
 					ammoCounts[projectileDef] = inventoryItem.CurrentStack;
 			}
 		}
-	}
-	#endregion
 
-	#region ammo interface methods
-	public int GetAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
-	{
-		return amountNeeded;
+		OnAmmoCountsChange?.Invoke();
 	}
-	public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+    #endregion
+
+    #region ammo interface methods
+    public bool AmmoAvailable(ProjectileDefinition projectileDefinition)
+    {
+        return AmmoCounts.TryGetValue(projectileDefinition, out int count) && count > 0;
+    }
+    public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded, bool takeForFree = false)
 	{
+		if (takeForFree)
+			return amountNeeded;
+
 		int ammoFound = 0;
 
 		foreach (var item in Items) //collect ammo needed
@@ -92,11 +98,8 @@ public class ItemContainer : IAmmoGiver
 				break;
 		}
 
-		return ammoFound;
-	}
-	public bool AmmoAvailable(ProjectileDefinition projectileDefinition)
-	{
-		return AmmoCounts.TryGetValue(projectileDefinition, out int count) && count > 0;
+        OnAmmoCountsChange?.Invoke();
+        return ammoFound;
 	}
     #endregion
 
@@ -111,6 +114,11 @@ public class ItemContainer : IAmmoGiver
 
         items[slot] = item;
         OnContainerItemChanged?.Invoke(slot, item);
+
+		if (item.ItemDefinition is ProjectileDefinition)
+		{
+
+		}
     }
     #endregion
 

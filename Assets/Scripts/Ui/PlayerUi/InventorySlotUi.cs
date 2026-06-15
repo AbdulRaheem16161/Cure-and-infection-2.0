@@ -53,10 +53,12 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 	public static event Action<InventorySlotUi, Vector2> OnToggleInventoryContextMenu;
 
-	public void InitializeSlotUi(Canvas canvas, bool isPlayerOwnedSlot)
+	#region Initialize Slot (called from parent)
+	public void InitializeSlotUi(bool interactable, bool isPlayerOwnedSlot)
 	{
+		Interactable = interactable;
 		IsPlayerOwnedSlot = isPlayerOwnedSlot;
-        draggableUiParent = canvas.transform.parent.gameObject; //grab parent of canvas
+        draggableUiParent = UiManager.Instance.gameObject;
         slotIndex = transform.GetSiblingIndex();
         UpdateSlotUi(null);
     }
@@ -69,9 +71,10 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		if (equipment != null)
 			equipment.OnEquippedItemChanges -= OnEquippedItemChanges;
 	}
+    #endregion
 
-	#region enable/disable equipment slot
-	public void EnableEquipmentSlot(GameObject objectRef, EquipmentHandler equipment, ItemContainer itemContainer, EquipmentType equipmentType)
+    #region enable/disable equipment slot
+    public void EnableEquipmentSlot(GameObject objectRef, EquipmentHandler equipment, ItemContainer itemContainer, EquipmentType equipmentType)
 	{
 		EquipmentSlot = true;
 
@@ -131,13 +134,6 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	}
     #endregion
 
-    #region enable/disable slot interactivity
-	public void UpdateSlotInteractivity(bool interactable)
-	{
-		Interactable = interactable;
-	}
-    #endregion
-
     #region i drag event listeners
     public void OnBeginDrag(PointerEventData eventData)
 	{
@@ -163,12 +159,6 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		isBeingDragged = false;
 	}
 	#endregion
-
-	/// <summary>
-	/// consider if its worth switching to events so ui isnt directly calling game logic
-	/// fine for now but when swapping inventory items to equipment slots (+ equipment slots to inventory items) i use add new item which finds the
-	/// first empty slot. instead of adding it to the slot player dragged item into or from. 
-	/// </summary>
 
 	#region i drop event listener
 	public void OnDrop(PointerEventData eventData)

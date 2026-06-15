@@ -65,11 +65,7 @@ public class WeaponRangedEditor : Editor, IAmmoGiver
 	{
 		return true;
 	}
-	public int GetAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
-	{
-		return amountNeeded;
-	}
-	public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded)
+	public int TakeAmmo(ProjectileDefinition projectileDefinition, int amountNeeded, bool takeForFree = true)
 	{
 		return amountNeeded;
 	}

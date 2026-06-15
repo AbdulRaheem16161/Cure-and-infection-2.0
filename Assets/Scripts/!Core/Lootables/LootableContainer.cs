@@ -8,6 +8,11 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     [Header("Loot Container Settings")]
     public string LootableName;
     public string ContainerName => LootableName;
+    public string InteractableName
+    {
+        get { if (Open) return $"Close {LootableName}";
+            return $"Open {LootableName}";}
+    }
     public bool CanLoot => true;
 
     [SerializeField] private int InitialContainerSize;

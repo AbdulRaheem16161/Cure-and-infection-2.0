@@ -1,24 +1,18 @@
 using UnityEngine;
 
 [RequireComponent(typeof(RectTransform))]
-[RequireComponent(typeof(Canvas))]
 public class InventoryUi : MonoBehaviour, IUiPanel
 {
     private bool isPlayerOwned; //if true, will only listen to player inventory events
 
     #region inventory ui
     [Header("Inventory Ui")]
-    private Canvas canvas;
     public GameObject inventoryUiPanel;
 	private RectTransform inventoryUiRectTransform;
 	public InventorySlotUi[] inventorySlotUis;
     #endregion
 
-    /// <summary>
-    /// for player inventory could simply be grabbed from a GameManager or similar
-    /// for npc shop inventory, on interact pass interacted obj (npc in this case) and grab InventoryHandler script through some new method
-    /// </summary>
-    #region inventory ref
+    #region runtime ref
     [Header("Runtime Ref")]
     [SerializeField] private GameObject objectRef;
     [SerializeField] private EquipmentHandler equipmentHandler;
@@ -27,11 +21,10 @@ public class InventoryUi : MonoBehaviour, IUiPanel
 
     private void Start()
     {
-        canvas = GetComponent<Canvas>();
         inventoryUiRectTransform = inventoryUiPanel.GetComponent<RectTransform>();
     }
 
-    #region show/hide inventory (TODO link to and listen out for player input events + when opening other ui elements except pause screen)
+    #region show/hide inventory
     public void ShowUi(UiContext uiContext)
 	{
         inventoryUiPanel.SetActive(true);
@@ -52,12 +45,22 @@ public class InventoryUi : MonoBehaviour, IUiPanel
         itemContainer.OnContainerSizeChanged -= OnInventorySizeChange;
 
         isPlayerOwned = playerOwned;
-        objectRef = uiContext.playerRef;
-        equipmentHandler = uiContext.playerEquipment;
-        itemContainer = uiContext.playerContainer;
+
+        if (isPlayerOwned)
+        {
+            objectRef = uiContext.playerRef;
+            equipmentHandler = uiContext.playerEquipment;
+            itemContainer = uiContext.playerContainer;
+        }
+        else
+        {
+            objectRef = uiContext.otherRef;
+            equipmentHandler = uiContext.otherEquipment;
+            itemContainer = uiContext.otherContainer;
+        }
 
         for (int i = 0; i < inventorySlotUis.Length; i++)
-            inventorySlotUis[i].InitializeSlotUi(canvas, isPlayerOwned);
+            inventorySlotUis[i].InitializeSlotUi(true, isPlayerOwned);
 
         itemContainer.OnContainerSizeChanged += OnInventorySizeChange;
         OnInventorySizeChange(itemContainer.ContainerSize);

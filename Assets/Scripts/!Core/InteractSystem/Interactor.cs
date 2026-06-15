@@ -16,7 +16,8 @@ public class Interactor : MonoBehaviour
     private float interactablesSearchTimer;
 
     public event Action<float> OnHoldProgress;
-    public event Action OnInteractChanged;
+    public event Action<IInteractable> OnInteractChanged;
+    public event Action<IInteractable> OnInteractCompleted;
 
     private void Awake()
     {
@@ -38,6 +39,7 @@ public class Interactor : MonoBehaviour
         if (current == null) return;
 
         current.InteractPress(this);
+        OnInteractCompleted?.Invoke(current);
     }
 
     public void InteractHold(bool holding)
@@ -58,6 +60,7 @@ public class Interactor : MonoBehaviour
         if (holdTimer >= holdTime)
         {
             current.InteractHoldComplete(this);
+            OnInteractCompleted?.Invoke(current);
             ResetHold();
         }
     }
@@ -74,7 +77,7 @@ public class Interactor : MonoBehaviour
 
         current = newInteractable;
         ResetHold();
-        OnInteractChanged?.Invoke();
+        OnInteractChanged?.Invoke(newInteractable);
     }
 
     private IInteractable FindInteractable()

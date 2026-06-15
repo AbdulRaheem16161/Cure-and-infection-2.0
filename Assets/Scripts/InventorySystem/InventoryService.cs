@@ -122,11 +122,6 @@ public static class InventoryService
     }
     #endregion
 
-    /// <summary>
-    /// currently dragging equipped item to inventory slot doesnt handle item stacking correctly as u logic is set up to always stack into an equipment slot
-    /// its fine like this for now but does need to have a bool or something that flips the stacking target to inventory when dragging equipment to inventory
-    /// </summary>
-
     #region Try Resolve Equipping/Unequipping Item
     public static void TryResolveSlotEquipping(
         EquipmentHandler equipmentHandler, EquipmentType equipmentType, ItemContainer inventory, int slot = -1, bool logOutcome = false)
