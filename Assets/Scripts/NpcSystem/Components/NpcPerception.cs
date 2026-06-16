@@ -17,9 +17,9 @@ public class NpcPerception : MonoBehaviour
 	public NpcBeliefs Beliefs { get; private set; }
 	public NPCStateMachine StateMachine { get; private set; }
 	public StatsHandler StatsHandler { get; private set; }
-	public EquipmentHandler EquipmentHandler{ get; private set; }
+	public EquipmentHandler EquipmentHandler { get; private set; }
 
-    public GameObject rayViewPoint;
+    public GameObject eyePoint;
 
 	#region Runtime Vision Values
 	[Header("Runtime Vision Values")]
@@ -116,7 +116,7 @@ public class NpcPerception : MonoBehaviour
 	}
 	public void Initialize(EntityDefinition definition)
 	{
-		if (rayViewPoint == null)
+		if (eyePoint == null)
 			Debug.LogError("rayViewPoint null, assign empty object where vision raycasts should start from");
 
 		Definition = definition;
@@ -147,14 +147,37 @@ public class NpcPerception : MonoBehaviour
 		SearchForInteractables();
 	}
 
-	/// <summary>
-	/// things that should trigger investigations
-	/// getting attacked by something or moosing target to attack
-	/// hearing a sound (could specify sounds, or filter sounds made by player (if not zombie) or npcs on same team)
-	/// </summary>
+    private void LateUpdate()
+    {
+        if (StatsHandler.LifeState == LifeState.dead) return;
 
-	#region Npc Investigation Triggers
-	private void InvestigateWhereHitFrom(DamageContext damageContext)
+        EquipmentHandler.PivotItemInHandsToAimPoint(GetAimPoint());
+    }
+
+    #region Get AimPoint For Npcs
+    public Vector3 GetAimPoint()
+    {
+        if (Beliefs.Target == null)
+            return eyePoint.transform.position + eyePoint.transform.forward * 10000;
+
+        Vector3 dir = (Beliefs.Target.AimPoint - eyePoint.transform.position).normalized;
+        Ray ray = new(eyePoint.transform.position, dir);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 10000, lineOfSightMask))
+            return hit.point;
+
+        return ray.origin + ray.direction * 10000;
+    }
+    #endregion
+
+    /// <summary>
+    /// things that should trigger investigations
+    /// getting attacked by something or moosing target to attack
+    /// hearing a sound (could specify sounds, or filter sounds made by player (if not zombie) or npcs on same team)
+    /// </summary>
+
+    #region Npc Investigation Triggers
+    private void InvestigateWhereHitFrom(DamageContext damageContext)
 	{
 		if (damageContext.Attacker == gameObject) return; //ignore damage from self
 		if (!Beliefs.Alert)
@@ -218,7 +241,7 @@ public class NpcPerception : MonoBehaviour
         //skip looking if target already found
         if (Target != null)
         {
-            Vector3 lastRecordedPosition = Beliefs.Target.Transform.position;
+            Vector3 lastRecordedPosition = Beliefs.Target.Position;
             TargetTrackResult trackResult;
             (Target, trackResult) = TrackTarget(Target, LifeState.alive, LifeState.zombified);
 
@@ -301,19 +324,18 @@ public class NpcPerception : MonoBehaviour
 				continue;
 			}
 
-			if (!FilterSearch(stats, lifeState)) continue;
+            Vector3 dirToTarget = (collider.bounds.center - eyePoint.transform.position).normalized;
 
-			Vector3 dirToTarget = (collider.bounds.center - rayViewPoint.transform.position).normalized;
+            if (!FilterSearch(stats, lifeState)) continue;
 			if (!TargetInVisionConeAngle(dirToTarget)) continue;
+            if (!TargetInLineOfSight(go.transform)) continue;
 
-			if (!TargetInLineOfSight(dirToTarget, lineOfSightMask, collider)) continue;
-
-			float sqrDistance = (stats.transform.position - transform.position).sqrMagnitude;
+            float sqrDistance = (stats.transform.position - transform.position).sqrMagnitude;
 
 			if (sqrDistance < closestSqrDistance)
 			{
 				closestSqrDistance = sqrDistance;
-				closestTarget = new TargetData(stats, collider, stats.transform);
+				closestTarget = new TargetData(stats, collider);
 				closestTarget.UpdateTargetDistance(transform.position);
 			}
 		}
@@ -355,9 +377,9 @@ public class NpcPerception : MonoBehaviour
 		else
 			return true;
 	}
-	private bool TargetInLineOfSight(Vector3 dirToTarget, LayerMask mask, Collider collider)
+	private bool TargetInLineOfSight(Vector3 dirToTarget, LayerMask mask, Collider collider) //old LoS check
 	{
-		int count = Physics.RaycastNonAlloc(rayViewPoint.transform.position, dirToTarget, RaycastHits, viewDistance, mask, QueryTriggerInteraction.Ignore);
+		int count = Physics.RaycastNonAlloc(eyePoint.transform.position, dirToTarget, RaycastHits, viewDistance, mask);
 		float closestTargetDistance = viewDistance;
 		float closestBlockingDistance = viewDistance;
 
@@ -381,17 +403,27 @@ public class NpcPerception : MonoBehaviour
 
 		return closestTargetDistance < closestBlockingDistance;
 	}
-	#endregion
+    private bool TargetInLineOfSight(Transform target)
+    {
+        Vector3 origin = eyePoint.transform.position;
+        Vector3 dir = (target.position - origin).normalized;
 
-	#region Handle tracking found targets and loosing them
-	private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, params LifeState[] validStates)
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, viewDistance, lineOfSightMask))
+            return hit.transform == target || hit.transform.IsChildOf(target);
+
+        return false;
+    }
+    #endregion
+
+    #region Handle tracking found targets and loosing them
+    private (TargetData, TargetTrackResult) TrackTarget(TargetData trackedTarget, params LifeState[] validStates)
 	{
 		if (!validStates.Contains(trackedTarget.StatsHandler.LifeState))
 			return (null, TargetTrackResult.invalid);
 
 		trackedTarget.UpdateTargetDistance(transform.position);
-		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - rayViewPoint.transform.position).normalized;
-		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(dirToTarget, lineOfSightMask, trackedTarget.Collider)) 
+		Vector3 dirToTarget = (trackedTarget.Collider.bounds.center - eyePoint.transform.position).normalized;
+		if (TargetInVisionConeAngle(dirToTarget) && TargetInLineOfSight(trackedTarget.StatsHandler.transform)) 
 			return (trackedTarget, TargetTrackResult.valid);
 
 		return (null, TargetTrackResult.lost); //no longer in vision cone or line of sight
@@ -415,7 +447,7 @@ public class NpcPerception : MonoBehaviour
 
 		foreach (CoverObject cover in validCovers)
 		{
-			if (cover.GetClosestPointBehindCover(transform.position, Beliefs.Target.Transform.position, out Vector3? coverPosition))
+			if (cover.GetClosestPointBehindCover(transform.position, Beliefs.Target.Position, out Vector3? coverPosition))
 			{
 				coverMovePosition = coverPosition;
 				return true;
@@ -429,7 +461,7 @@ public class NpcPerception : MonoBehaviour
 		for (int i = foundCovers.Count - 1; i >= 0; i--)
 		{
 			float coverSqrDistanceToSelf = (foundCovers[i].transform.position - transform.position).sqrMagnitude;
-			float coverSqrDistanceToThreat = (foundCovers[i].transform.position - threat.Transform.position).sqrMagnitude;
+			float coverSqrDistanceToThreat = (foundCovers[i].transform.position - threat.Position).sqrMagnitude;
 
 			if (CoverWithinSquaredDistance(Definition.FleeSqrDistance, coverSqrDistanceToThreat) ||
 				CoverOutsideEquippedWeaponRange(coverSqrDistanceToSelf))

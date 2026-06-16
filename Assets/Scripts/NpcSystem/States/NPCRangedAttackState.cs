@@ -51,7 +51,7 @@ namespace Game.MyNPC
 
 			if (Beliefs.Target == null) return;
 
-			LookAtDirection(Beliefs.Target.Transform.position);
+			LookAtDirection(Beliefs.Target.Position);
 			HandleShootingBehaviour();
 		}
 

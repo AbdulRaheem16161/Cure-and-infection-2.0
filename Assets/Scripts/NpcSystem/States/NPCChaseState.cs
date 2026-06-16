@@ -23,7 +23,7 @@ namespace Game.MyNPC
             if (stateMachine.StatsHandler.LifeState == EntityDefinition.LifeState.dead) return;
 
             if (stateMachine.Beliefs.Target != null)
-				MoveToDestination(stateMachine.Beliefs.Target.Transform.position, MoveType.sprint);
+				MoveToDestination(stateMachine.Beliefs.Target.Position, MoveType.sprint);
         }
 
         public override void Exit()

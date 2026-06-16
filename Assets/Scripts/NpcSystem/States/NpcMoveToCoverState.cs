@@ -42,7 +42,7 @@ public class NpcMoveToCoverState : NpcBaseMovementState
 		{
 			Vector3 coverMovePosition = Beliefs.CoverPosition.Value;
 			MoveToDestination(coverMovePosition, MoveType.sprint);
-			Beliefs.SetNewLookDirection(Beliefs.Target.Transform.position);
+			Beliefs.SetNewLookDirection(Beliefs.Target.Position);
 		}
 	}
 	#endregion

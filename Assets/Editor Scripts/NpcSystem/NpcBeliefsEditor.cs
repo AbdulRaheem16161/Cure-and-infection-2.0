@@ -136,10 +136,10 @@ public class NpcBeliefsEditor : Editor
 
 		EditorGUI.indentLevel++;
 
-		EditorGUILayout.ObjectField("Transform", target.Transform, typeof(Transform), true);
-		EditorGUILayout.ObjectField("Collider", target.Collider, typeof(Collider), true);
-		EditorGUILayout.ObjectField("Stats Handler", target.StatsHandler, typeof(StatsHandler), true);
-		EditorGUILayout.FloatField("Distance", target.SquaredDistance);
+        EditorGUILayout.ObjectField("Stats Handler", target.StatsHandler, typeof(StatsHandler), true);
+        EditorGUILayout.ObjectField("Collider", target.Collider, typeof(Collider), true);
+        EditorGUILayout.Vector3Field("Position", target.Position);
+        EditorGUILayout.FloatField("Distance", target.SquaredDistance);
 
 		EditorGUI.indentLevel--;
 	}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using static NPCSpawner;
 
 [RequireComponent(typeof(CharacterController))]
@@ -20,7 +21,9 @@ public class PlayerController : MonoBehaviour
     public EquipmentHandler EquipmentHandler { get; private set; }
 
     #region 1st Person Camera + Settings
-    private Camera PlayerCamera;
+    [SerializeField] private GameObject cameraPivot;
+    [SerializeField] private Camera PlayerCamera;
+    private LayerMask hitMask;
     private readonly float lookSensitivity = 0.05f;
     private readonly float minCameraPitch = -70f;
     private readonly float maxCameraPitch = 60f;
@@ -29,9 +32,9 @@ public class PlayerController : MonoBehaviour
 
     #region Ground Check + Settings
     public bool Grounded => Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
-    [SerializeField] Transform groundCheck;
-    [SerializeField] float groundCheckRadius = 0.2f;
-    [SerializeField] LayerMask groundMask;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundMask;
 
     private readonly float gravity = -9.81f;
     private float verticalVelocity;
@@ -42,13 +45,15 @@ public class PlayerController : MonoBehaviour
     #region Player Initialization
     private void Awake()
 	{
-        PlayerCamera = GetComponentInChildren<Camera>();
+        PlayerCamera = cameraPivot.GetComponentInChildren<Camera>();
         CharacterController = GetComponent<CharacterController>();
 		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 		InventoryHandler = GetComponent<InventoryHandler>();
         Interactor = GetComponent<Interactor>();
-	}
+
+        hitMask = LayerMask.GetMask("Environment", "EnvironmentCover", "CharacterDetection");
+    }
 
     private void Start()
     {
@@ -93,6 +98,23 @@ public class PlayerController : MonoBehaviour
         HandleHotbarActions();
     }
 
+    private void LateUpdate()
+    {
+        EquipmentHandler.PivotItemInHandsToAimPoint(GetAimPoint());
+    }
+
+    #region Get AimPoint For Player
+    private Vector3 GetAimPoint()
+    {
+        Ray ray = PlayerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 10000, hitMask))
+            return hit.point;
+
+        return ray.origin + ray.direction * 10000;
+    }
+    #endregion
+
     #region Handle Player Movement and Looking
     private void HandleMovement(bool debugLog = false)
     {
@@ -121,7 +143,7 @@ public class PlayerController : MonoBehaviour
         pitch -= mouseY;
         pitch = Mathf.Clamp(pitch, minCameraPitch, maxCameraPitch);
 
-        PlayerCamera.gameObject.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        cameraPivot.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
 
         if (debugLog) Debug.Log($"Look: {lookInput}");
     }

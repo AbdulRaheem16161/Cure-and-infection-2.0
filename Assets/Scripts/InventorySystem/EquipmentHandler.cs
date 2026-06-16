@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -158,15 +157,30 @@ public class EquipmentHandler : MonoBehaviour
         if (humanoid.ConsumableThree != null)
             HandleItemEquipping(GetEquipmentSlot(EquipmentType.consumableThree), new(humanoid.ConsumableThree, humanoid.ConsumableThree.StackLimit));
     }
-	#endregion
+    #endregion
 
-	/// <summary>
-	/// will need updating to play any equip/unequip sfxs, linking with any animations and vfxs when equipping weapons, armour and using consumables
-	/// + proper pos/rot setting to visually be on characters back etc..
-	/// </summary>
+    #region Handle Pivoting ItemInHands to AimPoint
+	public void PivotItemInHandsToAimPoint(Vector3 aimPoint)
+	{
+		if (itemInHands is not RangedWeaponItem) return;
 
-	#region handle item equipping/unequipping
-	public void HandleItemEquipping(EquipmentSlot slot, InventoryItem item)
+        Vector3 direction = aimPoint - ItemsInHandsParent.transform.position;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        ItemsInHandsParent.transform.rotation = targetRotation * Quaternion.Euler(0f, 180f, 0f);
+    }
+    #endregion
+
+    /// <summary>
+    /// will need updating to play any equip/unequip sfxs, linking with any animations and vfxs when equipping weapons, armour and using consumables
+    /// + proper pos/rot setting to visually be on characters back etc..
+    /// </summary>
+
+    #region handle item equipping/unequipping
+    public void HandleItemEquipping(EquipmentSlot slot, InventoryItem item)
 	{
 		if (item.ItemDefinitionNull) return;
 
@@ -344,7 +358,7 @@ public class EquipmentHandler : MonoBehaviour
 	#endregion
 }
 
-[System.Serializable]
+[Serializable]
 public class EquipmentSlot
 {
 	[SerializeField] private InventorySlotType slotType;

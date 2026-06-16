@@ -207,8 +207,8 @@ namespace Game.MyNPC
 			UpdateAnimationMoveSpeed();
         }
 
-		#region Handle Priority State Switches
-		private void HandlePriorityStateSwitches()
+        #region Handle Priority State Switches
+        private void HandlePriorityStateSwitches()
 		{
 			NPCBaseState bestState = null;
 			int bestPriority = int.MinValue;

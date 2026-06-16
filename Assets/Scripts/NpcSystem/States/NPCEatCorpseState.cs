@@ -25,7 +25,7 @@ public class NPCEatCorpseState : NpcBaseMovementState
 	{
 		eatingCorpse = false;
 		zombificationTickTimer = zombificationTickCooldown;
-		MoveToDestination(stateMachine.Beliefs.EatableTarget.Transform.position, MoveType.walk);
+		MoveToDestination(stateMachine.Beliefs.EatableTarget.Position, MoveType.walk);
 	}
 
 	public override void Exit()

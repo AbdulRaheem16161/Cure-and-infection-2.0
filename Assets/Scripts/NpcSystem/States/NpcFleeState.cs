@@ -56,7 +56,7 @@ public class NpcFleeState : NpcBaseMovementState
 	private void UpdateFleeingDirection()
 	{
 		fleeTimer = fleeCooldown;
-		Beliefs.SetNewLookDirection(Beliefs.FleeTarget.Transform.position);
-		FleeFromPosition(Beliefs.FleeTarget.Transform.position);
+		Beliefs.SetNewLookDirection(Beliefs.FleeTarget.Position);
+		FleeFromPosition(Beliefs.FleeTarget.Position);
 	}
 }

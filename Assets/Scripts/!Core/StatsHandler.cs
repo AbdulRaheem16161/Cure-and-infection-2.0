@@ -24,8 +24,11 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	[SerializeField, ReadOnly] private LifeState lifeState;
 	public LifeState LifeState => lifeState;
 
-	#region stats
-	[Header("Stats")] //for now leave them public so inspector can easily change them ( make them [SerializeField, ReadOnly] private fields)
+	[Header("Aim Points")]
+	public Transform AimPoint;
+
+    #region stats
+    [Header("Stats")] //for now leave them public so inspector can easily change them ( make them [SerializeField, ReadOnly] private fields)
 	public int health;
 	public int water;
 	public int food;
