@@ -9,7 +9,6 @@ public class EquipmentUi : MonoBehaviour, IUiPanel
     #region equipment ui
     [Header("Equipment Ui")]
 	public GameObject equipmentUiPanel;
-
     public List<InventorySlotUi> equipmentSlotsUi = new();
     #endregion
 
@@ -20,7 +19,7 @@ public class EquipmentUi : MonoBehaviour, IUiPanel
     [SerializeField] private ItemContainer itemContainer;
     #endregion
 
-    #region show/hide equipment (should listen out for player input events + when opening other ui elements except pause screen)
+    #region show/hide equipment
     public void ShowUi(UiContext uiContext)
 	{
 		equipmentUiPanel.SetActive(true);

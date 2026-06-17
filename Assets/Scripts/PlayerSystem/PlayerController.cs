@@ -93,6 +93,7 @@ public class PlayerController : MonoBehaviour
         HandlePrimaryAction();
         HandleSecondaryAction();
         HandleReloadAction();
+        HandleToggleFireModeAction();
         HandleInteractAction();
 
         HandleHotbarActions();
@@ -152,43 +153,36 @@ public class PlayerController : MonoBehaviour
     #region Handle Player Actions
     private void HandlePrimaryAction()
     {
-        if (InputManager.Instance.PrimaryAction)
-        {
-            if (!EquipmentHandler.HasItemInHands) return;
+        if (!EquipmentHandler.HasItemInHands) return;
 
-            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
+        if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
+        {
+            if (rangedWeapon.CanHoldFire && InputManager.Instance.PrimaryActionHeld)
                 rangedWeapon.Shoot();
-            else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon)
-                meleeWeapon.LightAttack();
-            else
-                Debug.LogWarning("Primary action with non-weapon item in hands occured");
+            else if (!rangedWeapon.CanHoldFire && InputManager.Instance.PrimaryActionPressed)
+                rangedWeapon.Shoot();
         }
+        else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon && InputManager.Instance.PrimaryActionPressed)
+            meleeWeapon.LightAttack();
+        else
+            Debug.LogWarning("Primary action with non-weapon item in hands occured");
     }
 
     private void HandleSecondaryAction()
     {
-        if (InputManager.Instance.SecondaryAction)
-        {
-            if (!EquipmentHandler.HasItemInHands) return;
+        if (!EquipmentHandler.HasItemInHands) return;
 
-            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
-            {
-                if (rangedWeapon.Aim == RangedWeaponItem.AimState.hipfire)
-                    rangedWeapon.EnterAimDownSights();
-            }
-            else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon)
-                meleeWeapon.HeavyAttack();
-            else
-                Debug.LogWarning("Secondary action with non-weapon item in hands occured");
-        }
-        else
+        if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
         {
-            if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
-            {
-                if (rangedWeapon.Aim == RangedWeaponItem.AimState.ads)
-                    rangedWeapon.ExitAimDownSights();
-            }
+            if (rangedWeapon.Aim == RangedWeaponItem.AimState.hipfire && InputManager.Instance.SecondaryActionHeld)
+                rangedWeapon.EnterAimDownSights();
+            else if (rangedWeapon.Aim != RangedWeaponItem.AimState.hipfire && !InputManager.Instance.SecondaryActionHeld)
+                rangedWeapon.ExitAimDownSights();
         }
+        else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon && InputManager.Instance.SecondaryActionPressed)
+            meleeWeapon.HeavyAttack();
+        else
+            Debug.LogWarning("Secondary action with non-weapon item in hands occured");
     }
 
     private void HandleReloadAction()
@@ -200,6 +194,14 @@ public class PlayerController : MonoBehaviour
 
             rangedWeapon.Reload(InventoryHandler.ItemContainer, true);
         }
+    }
+
+    private void HandleToggleFireModeAction()
+    {
+        if (!EquipmentHandler.HasItemInHands) return;
+
+        if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon && InputManager.Instance.ToggleFireModeAction)
+            rangedWeapon.CycleFireMode();
     }
 
     private void HandleInteractAction()

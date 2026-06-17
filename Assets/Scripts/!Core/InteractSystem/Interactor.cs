@@ -21,7 +21,7 @@ public class Interactor : MonoBehaviour
 
     private void Awake()
     {
-        interactLayerMask = LayerMask.GetMask("Interactable");
+        interactLayerMask = LayerMask.GetMask("Interactable", "CharacterDetection");
         Inventory = GetComponent<InventoryHandler>();
     }
 
@@ -77,7 +77,11 @@ public class Interactor : MonoBehaviour
 
         current = newInteractable;
         ResetHold();
-        OnInteractChanged?.Invoke(newInteractable);
+
+        if (newInteractable != null && !newInteractable.CanInteract) //if cant interact dont show pop up
+            OnInteractChanged?.Invoke(null);
+        else
+            OnInteractChanged?.Invoke(newInteractable);
     }
 
     private IInteractable FindInteractable()

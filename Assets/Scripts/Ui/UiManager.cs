@@ -74,7 +74,7 @@ public class UiManager : MonoBehaviour
     }
     #endregion
 
-    #region Show Ui Screens Api
+    #region Show/Hide Ui Screens Api
     public static void ShowScreen(UiContext uiContext)
     {
         if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek().uiScreen == uiContext.uiScreen)
@@ -82,10 +82,14 @@ public class UiManager : MonoBehaviour
         else
             Instance.PushAndShowUi(uiContext);
     }
+    public static void HideTopScreen()
+    {
+        Instance.ShowPreviousUi(true);
+    }
     #endregion
 
     #region Ui Panel Stacking Logic
-    private void ShowPreviousUi(bool popTopUi)
+    public void ShowPreviousUi(bool popTopUi)
     {
         if (currentUiStack.Count <= 0) return;
 
@@ -95,7 +99,7 @@ public class UiManager : MonoBehaviour
 
         HideUi(currentUi);
         if (popTopUi) currentUiStack.Pop();
-        ShowUi(currentUiStack.Peek());
+        if (currentUiStack.Count > 0) ShowUi(currentUiStack.Peek());
     }
 
     private void PushAndShowUi(UiContext uiContext)

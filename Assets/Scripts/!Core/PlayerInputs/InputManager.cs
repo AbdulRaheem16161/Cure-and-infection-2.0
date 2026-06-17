@@ -18,6 +18,7 @@ public class InputManager : MonoBehaviour
     private InputAction primaryAction;
     private InputAction secondaryAction;
     private InputAction reloadAction;
+    private InputAction toggleFireModeAction;
     private InputAction sprintAction;
     public InputAction interactAction { get; private set; }
 
@@ -46,14 +47,19 @@ public class InputManager : MonoBehaviour
     public Vector2 Look => lookAction.ReadValue<Vector2>();
 
     //held inputs
-    public bool PrimaryAction => primaryAction.WasPressedThisFrame();
-    public bool SecondaryAction => secondaryAction.WasPressedThisFrame();
+    public bool PrimaryActionHeld => primaryAction.IsPressed();
+    public bool SecondaryActionHeld => secondaryAction.IsPressed();
     public bool Sprinting => sprintAction.IsPressed();
-    public bool InteractPressAction => interactAction.WasPressedThisFrame();
-    public bool InteractHoldAction => interactAction.IsPressed();
 
     //one shot inputs
+    public bool PrimaryActionPressed => primaryAction.WasPressedThisFrame();
+    public bool SecondaryActionPressed => secondaryAction.WasPressedThisFrame();
     public bool ReloadAction => reloadAction.WasPressedThisFrame();
+    public bool ToggleFireModeAction => toggleFireModeAction.WasPressedThisFrame();
+
+    //interact inputs
+    public bool InteractPressAction => interactAction.WasPressedThisFrame();
+    public bool InteractHoldAction => interactAction.IsPressed();
     #endregion
 
     #region Ui Input Action Api
@@ -118,6 +124,7 @@ public class InputManager : MonoBehaviour
         primaryAction = gameplayActionMap.FindAction("PrimaryAction", true);
         secondaryAction = gameplayActionMap.FindAction("SecondaryAction", true);
         reloadAction = gameplayActionMap.FindAction("Reload", true);
+        toggleFireModeAction = gameplayActionMap.FindAction("ToggleFireMode", true);
         sprintAction = gameplayActionMap.FindAction("Sprint", true);
         interactAction = gameplayActionMap.FindAction("Interact", true);
 

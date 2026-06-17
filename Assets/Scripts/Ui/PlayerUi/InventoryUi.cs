@@ -8,7 +8,7 @@ public class InventoryUi : MonoBehaviour, IUiPanel
     #region inventory ui
     [Header("Inventory Ui")]
     public GameObject inventoryUiPanel;
-	private RectTransform inventoryUiRectTransform;
+	public RectTransform inventoryUiRectTransform;
 	public InventorySlotUi[] inventorySlotUis;
     #endregion
 
@@ -18,11 +18,6 @@ public class InventoryUi : MonoBehaviour, IUiPanel
     [SerializeField] private EquipmentHandler equipmentHandler;
     [SerializeField] private ItemContainer itemContainer;
     #endregion
-
-    private void Start()
-    {
-        inventoryUiRectTransform = inventoryUiPanel.GetComponent<RectTransform>();
-    }
 
     #region show/hide inventory
     public void ShowUi(UiContext uiContext)

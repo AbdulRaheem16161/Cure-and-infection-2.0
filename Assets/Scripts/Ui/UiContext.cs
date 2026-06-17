@@ -26,13 +26,13 @@ public class UiContext
         playerContainer = player.InventoryHandler.ItemContainer;
     }
 
-    public UiContext(UiScreens uiScreen, PlayerController player, GameObject obj, EquipmentHandler equipmentHandler, ILootContainer lootContainer)
+    public UiContext(UiScreens uiScreen, PlayerController player, GameObject other, EquipmentHandler equipmentHandler, ILootContainer lootContainer)
     {
         this.uiScreen = uiScreen;
         playerRef = player.gameObject;
         playerEquipment = player.EquipmentHandler;
         playerContainer = player.InventoryHandler.ItemContainer;
-        otherRef = obj;
+        otherRef = other;
         otherEquipment = equipmentHandler;
         otherContainer = lootContainer.ItemContainer;
     }

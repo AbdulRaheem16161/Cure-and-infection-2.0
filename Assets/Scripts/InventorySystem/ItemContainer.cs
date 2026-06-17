@@ -114,11 +114,6 @@ public class ItemContainer : IAmmoGiver
 
         items[slot] = item;
         OnContainerItemChanged?.Invoke(slot, item);
-
-		if (item.ItemDefinition is ProjectileDefinition)
-		{
-
-		}
     }
     #endregion
 

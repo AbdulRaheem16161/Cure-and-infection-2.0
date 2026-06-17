@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Hinge))]
 public class Door : MonoBehaviour, IInteractable
 {
+    public bool CanInteract => true;
     public string InteractableName
     {
         get

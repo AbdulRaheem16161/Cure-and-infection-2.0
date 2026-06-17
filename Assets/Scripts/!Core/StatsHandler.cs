@@ -1,15 +1,12 @@
 using UnityEngine;
 using System;
 using static EntityDefinition;
-using UnityEngine.AI;
 using Game.MyNPC;
 
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class StatsHandler : MonoBehaviour, IDamageable
 {
-	private TestInventoryController TestInventoryController; //temp for testing, remove when not needed
-
     public EntityDefinition Definition { get; private set; }
 	public PlayerController PlayerController { get; private set; }
 	public NPCStateMachine NpcStateMachine { get; private set; }
@@ -75,7 +72,6 @@ public class StatsHandler : MonoBehaviour, IDamageable
 	#region awake + Initialize stats handler method
 	private void Awake()
 	{
-        TestInventoryController = GetComponent<TestInventoryController>(); //temp for testing, remove when not needed
 		PlayerController = GetComponent<PlayerController>();
         NpcStateMachine = GetComponent<NPCStateMachine>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
@@ -119,8 +115,6 @@ public class StatsHandler : MonoBehaviour, IDamageable
 		HandleHealthDrain();
 		HandleWaterDrain();
 		HandleFoodDrain();
-
-		if (TestInventoryController != null) return; //temp for testing so dont need movement, remove when not needed
 
         if (NpcStateMachine != null) //npc handle move intent
 		{

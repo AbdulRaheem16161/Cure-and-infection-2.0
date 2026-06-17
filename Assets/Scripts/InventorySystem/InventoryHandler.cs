@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(StatsHandler))]
 [RequireComponent(typeof(EquipmentHandler))]
 public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 {
@@ -13,6 +14,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	[SerializeField] private int initialInventorySize;
 
     public string ContainerName => $"{StatsHandler.Definition.Name} Inventory";
+    public bool CanInteract => CanLoot;
     public string InteractableName => $"Loot {ContainerName}";
     public bool CanLoot => StatsHandler.LifeState == EntityDefinition.LifeState.dead;
 
@@ -38,6 +40,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	#region awake + initialize inventory handler method
 	private void Awake()
 	{
+		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
 
 		if (!_Initialized)
@@ -108,7 +111,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 		if (!CanLoot) return;
 
 		//open both this inventory + interactor.Inventory in ui
-		Debug.LogError("Needs implementation");
+		UiManager.ShowScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, EquipmentHandler, this));
 		return;
     }
 

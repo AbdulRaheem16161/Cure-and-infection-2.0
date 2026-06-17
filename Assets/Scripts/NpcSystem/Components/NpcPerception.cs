@@ -103,7 +103,7 @@ public class NpcPerception : MonoBehaviour
 		targetMask = LayerMask.GetMask("CharacterDetection");
 		lineOfSightMask = LayerMask.GetMask("Environment", "EnvironmentCover", "CharacterDetection");
 		coverMask = LayerMask.GetMask("EnvironmentCover");
-		interactablesMask = LayerMask.GetMask("Interactable");
+		interactablesMask = LayerMask.GetMask("CharacterDetection", "Interactable");
 
 		//randomize initial timer to mitigate lag spikes
         detectTargetTimer = Random.Range(0f, detectTargetCooldown);

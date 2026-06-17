@@ -27,6 +27,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	#endregion
 
 	#region fire mode fields
+	public bool CanHoldFire { get; private set; }
 	public FireModeType CurrentFireMode {  get; private set; }
 	private static readonly FireModeType[] fireModeOrder =
 	{
@@ -57,6 +58,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
     #region events
 	public event Action<int> OnMagazineCountChange;
 	public event Action<FireModeType> OnFireModeChange;
+	public event Action<float> OnAccuracyModifierChange;
     #endregion
 
     #region Initialize Item Override
@@ -148,7 +150,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	}
 	public void ExitAimDownSights()
 	{
-		if (Aim != AimState.ads) return;
+        if (Aim != AimState.ads) return;
 
 		exitAdsTimer = TypedDefinition.AdsTime * 0.5f; //quicker
 		Aim = AimState.ExitAds;
@@ -234,6 +236,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 			Debug.LogError("Weapon fire modes configured incorrectly. none should not be selected, defaulting to semiAuto");
 			CurrentFireMode = FireModeType.semiAuto;
             OnFireModeChange?.Invoke(CurrentFireMode);
+			UpdateCanHoldFire();
 			return;
 		}
 
@@ -242,7 +245,8 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 			if ((TypedDefinition.AllowedFireModes & fireModeOrder[i]) == 0) continue;
 
 			CurrentFireMode = fireModeOrder[i];
-			return;
+            UpdateCanHoldFire();
+            return;
 		}
 	}
 	public void CycleFireMode()
@@ -262,15 +266,33 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 			if (TypedDefinition.AllowedFireModes.HasFlag(next))
 			{
 				CurrentFireMode = next;
+                UpdateCanHoldFire();
                 OnFireModeChange?.Invoke(CurrentFireMode);
                 return;
 			}
 		}
 	}
-	#endregion
+    #endregion
 
-	#region Handle Fire Rate
-	private void HandleFireRate()
+    #region Handle Setting CanHoldFire bool
+	private void UpdateCanHoldFire()
+	{
+		switch (CurrentFireMode)
+		{
+			case FireModeType.pumpAction:
+				CanHoldFire = false; break;
+			case FireModeType.semiAuto:
+				CanHoldFire = false; break;
+			case FireModeType.fullAuto: 
+				CanHoldFire = true; break;
+			case FireModeType.boltAction:
+				CanHoldFire = false; break;
+		}
+	}
+    #endregion
+
+    #region Handle Fire Rate
+    private void HandleFireRate()
 	{
 		if (fireRateCooldownTimer > 0f)
 			fireRateCooldownTimer -= Time.deltaTime;
@@ -281,18 +303,12 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	private float CurrentBulletSpreadMultipler()
 	{
 		float multiplier = 1f;
-
-		multiplier *= Aim == AimState.ads ? TypedDefinition.AdsBulletSpreadMultiplier : TypedDefinition.HipfireBulletSpreadMultiplier;
-
-		return multiplier;
+        return multiplier *= Aim == AimState.ads ? TypedDefinition.AdsBulletSpreadMultiplier : TypedDefinition.HipfireBulletSpreadMultiplier;
 	}
 	private float CurrentRecoilMultipler()
 	{
 		float multiplier = 1f;
-
-		multiplier *= Aim == AimState.ads ? TypedDefinition.AdsRecoilMultiplier : TypedDefinition.HipfireRecoilMultiplier;
-
-		return multiplier;
+        return multiplier *= Aim == AimState.ads ? TypedDefinition.AdsRecoilMultiplier : TypedDefinition.HipfireRecoilMultiplier;
 	}
 	#endregion
 
@@ -305,15 +321,13 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	{
 		accuracyModifier -= Time.deltaTime;
 		accuracyModifier = Mathf.Clamp(accuracyModifier, TypedDefinition.BaseSpread, TypedDefinition.MaxSpread);
+
+        float normalizedSpread = Mathf.InverseLerp(TypedDefinition.BaseSpread, TypedDefinition.MaxSpread, accuracyModifier);
+        OnAccuracyModifierChange?.Invoke(normalizedSpread);
 	}
 	#endregion
 
 	#region Handle Physical gun recoil
-	/// <summary>
-	/// will need updating to handle player input and allow them to counteract recoil, something like this
-	/// currentPitch += mouseY;			currentYaw += mouseX;
-	/// modelReference.localRotation = Quaternion.Euler(currentPitch, currentYaw, 0f) * Quaternion.Euler(currentRecoil);
-	/// </summary>
 	public void AdjustRecoilOnShoot()
 	{
 		if (TypedDefinition.RecoilPattern.Count == 0) return;

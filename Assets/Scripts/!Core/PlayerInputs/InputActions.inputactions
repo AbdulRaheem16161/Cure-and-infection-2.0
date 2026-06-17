@@ -51,6 +51,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "ToggleFireMode",
+                    "type": "Button",
+                    "id": "74c0b73c-aa87-4817-b2c3-66a183c0ed3e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Sprint",
                     "type": "Button",
                     "id": "94cdba21-f422-4cf4-a586-7292afb59702",
@@ -231,6 +240,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Reload",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b7044bcf-72e3-4030-9f43-715e625d55c8",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleFireMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

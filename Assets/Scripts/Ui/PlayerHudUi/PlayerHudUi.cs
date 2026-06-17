@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Mono.Cecil;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -43,6 +44,13 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
     public TMP_Text weaponReserveCounterText;
 
     public RangedWeaponItem equippedWeapon;
+
+    [Header("Weapon Reticle Ui")]
+    public GameObject weaponReticleUi;
+    public RectTransform downReticleBar;
+    public RectTransform rightReticleBar;
+    public RectTransform upReticleBar;
+    public RectTransform leftReticleBar;
 
     [Header("Hotbar Slots Ui")]
     public GameObject hotbarSlotsUi;
@@ -142,6 +150,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
         playerInventory.OnAmmoCountsChange += UpdateReserveAmmoCounter;
         equippedWeapon.OnMagazineCountChange += UpdateMagCounter;
         equippedWeapon.OnFireModeChange += UpdateFireMode;
+        equippedWeapon.OnAccuracyModifierChange += UpdateReticleUi;
     }
     private void UnsubToWeaponEvents()
     {
@@ -150,6 +159,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
         playerInventory.OnAmmoCountsChange -= UpdateReserveAmmoCounter;
         equippedWeapon.OnMagazineCountChange -= UpdateMagCounter;
         equippedWeapon.OnFireModeChange -= UpdateFireMode;
+        equippedWeapon.OnAccuracyModifierChange -= UpdateReticleUi;
     }
     #endregion
 
@@ -186,6 +196,16 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
             return;
         }
         weaponReserveCounterText.text = $"0";
+    }
+    #endregion
+
+    #region Update Weapon Reticle
+    private void UpdateReticleUi(float accuracyModfier)
+    {
+        downReticleBar.anchoredPosition = new Vector2(0, -accuracyModfier * 1000);
+        rightReticleBar.anchoredPosition = new Vector2(accuracyModfier * 1000, 0);
+        upReticleBar.anchoredPosition = new Vector2(0, accuracyModfier * 1000);
+        leftReticleBar.anchoredPosition = new Vector2(-accuracyModfier * 1000, 0);
     }
     #endregion
 
@@ -236,6 +256,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
     }
     private void HideInteractPopup()
     {
+        HideTopScreen();
         interactPopupUi.SetActive(false);
     }
     #endregion

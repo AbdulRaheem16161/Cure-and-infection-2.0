@@ -4063,6 +4063,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryUiPanel: {fileID: 1590900594570044185}
+  inventoryUiRectTransform: {fileID: 2749503737840066507}
   inventorySlotUis:
   - {fileID: 8755319337318813017}
   - {fileID: 2258977982154758226}

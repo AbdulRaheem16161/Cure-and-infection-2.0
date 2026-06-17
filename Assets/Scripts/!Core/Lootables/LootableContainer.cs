@@ -8,6 +8,7 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     [Header("Loot Container Settings")]
     public string LootableName;
     public string ContainerName => LootableName;
+    public bool CanInteract => true;
     public string InteractableName
     {
         get { if (Open) return $"Close {LootableName}";

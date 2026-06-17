@@ -73,6 +73,7 @@ public abstract class Item : MonoBehaviour, IInteractable
     [SerializeField] protected int currentItemStack;
     public int CurrentItemStack => currentItemStack;
 
+	public bool CanInteract => true;
     public string InteractableName => ItemDefinition.ItemName;
 
     public static event Action<Item> OnCleanUpItem;
