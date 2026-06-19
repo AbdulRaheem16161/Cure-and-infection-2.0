@@ -24,8 +24,6 @@ public class WeaponRangedEditor : Editor, IAmmoGiver
 
 		if (GUILayout.Button("Initialize Weapon"))
 		{
-			if (!ApplicationPlaying()) return;
-
 			weapon.InitializeItem(Definition, 1);
 		}
 		if (GUILayout.Button("Fire Weapon"))

@@ -10,13 +10,9 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public bool IsShooting { get; private set; }
 
 	#region aiming down sights
-	public AimState Aim;
-	public enum AimState
-	{
-		hipfire, ads, EnterAds, ExitAds
-	}
-	public float enterAdsTimer;
-	public float exitAdsTimer;
+	public bool IsAds => AdsTarget >= 0.95f;
+	public float AdsAlpha;
+	public float AdsTarget;
 	#endregion
 
 	#region reloading and magazine count fields
@@ -40,7 +36,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 
 	#region fire rate fields
 	public bool canShoot;
-	private bool CanShoot => fireRateCooldownTimer <= 0 && (Aim == AimState.hipfire || Aim == AimState.ads);
+	private bool CanShoot => fireRateCooldownTimer <= 0 && AdsAlpha >= 0.95f || fireRateCooldownTimer <= 0 && AdsAlpha < 0.05f;
 	public float FireRateCooldown;
 	public float fireRateCooldownTimer;
 	#endregion
@@ -59,6 +55,9 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	public event Action<int> OnMagazineCountChange;
 	public event Action<FireModeType> OnFireModeChange;
 	public event Action<float> OnAccuracyModifierChange;
+    public event Action OnReloadStart;
+    public event Action OnReloadEnd;
+    public event Action<float> OnReloadTimeRemaining;
     #endregion
 
     #region Initialize Item Override
@@ -133,47 +132,21 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 		if (!IsInHands) return;
 
 		canShoot = CanShoot;
+		UpdateAdsTransition();
 		HandleFireRate();
 		HandleBulletSpreadRecovery();
 		NormalizeRecoil();
-		EnterAimDownSightsTimer();
-		ExitAimDownSightsTimer();
 	}
 
-	#region Handle Begin/End Adsing + transition states
-	public void EnterAimDownSights()
+    #region Handle Begin/End Adsing + transition states
+    public void SetAimDownSights(bool enabled)
+    {
+        AdsTarget = enabled ? 1f : 0f;
+    }
+    private void UpdateAdsTransition()
 	{
-		if (Aim != AimState.hipfire) return;
-
-		enterAdsTimer = TypedDefinition.AdsTime;
-		Aim = AimState.EnterAds;
-	}
-	public void ExitAimDownSights()
-	{
-        if (Aim != AimState.ads) return;
-
-		exitAdsTimer = TypedDefinition.AdsTime * 0.5f; //quicker
-		Aim = AimState.ExitAds;
-	}
-	private void EnterAimDownSightsTimer()
-	{
-		if (Aim != AimState.EnterAds) return;
-
-		enterAdsTimer -= Time.deltaTime;
-
-		if (enterAdsTimer <= 0f)
-			Aim = AimState.ads;
-	}
-
-	private void ExitAimDownSightsTimer()
-	{
-		if (Aim != AimState.ExitAds) return;
-
-		exitAdsTimer -= Time.deltaTime;
-
-		if (exitAdsTimer <= 0f)
-			Aim = AimState.hipfire;
-	}
+        AdsAlpha = Mathf.Lerp(AdsAlpha, AdsTarget, Time.deltaTime * TypedDefinition.AdsSpeed);
+    }
 	#endregion
 
 	#region Handle Shooting and Stop Shooting Weapon Behaviour
@@ -204,7 +177,7 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	}
 	#endregion
 
-	#region reloading (TODO add sfx, vfx and animations)
+	#region reloading 
 	public void Reload(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
 	{
 		if (MagazineFull) return;
@@ -218,11 +191,29 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	private IEnumerator ReloadAmmo(IAmmoGiver ammoGiver, bool hasUnlimitedAmmo)
 	{
 		WeaponView.ChangeAnimation("Reload", 0, true);
-
 		IsReloading = true;
-		yield return new WaitForSeconds(TypedDefinition.ReloadTime);
 
-		currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize, hasUnlimitedAmmo);
+        float duration = TypedDefinition.ReloadTime;
+        float elapsed = 0f;
+        float lastSentValue = -1f;
+        OnReloadTimeRemaining?.Invoke(lastSentValue);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float remaining = Mathf.Max(0f, duration - elapsed);
+            float snapped = Mathf.Round(remaining * 10f) / 10f; //snap to 0.1s steps
+
+            if (snapped != lastSentValue)
+            {
+                lastSentValue = snapped;
+                OnReloadTimeRemaining?.Invoke(snapped);
+            }
+            yield return null;
+        }
+
+        currentMagazineAmmo = ammoGiver.TakeAmmo(TypedDefinition.AmmoType, TypedDefinition.MagazineSize, hasUnlimitedAmmo);
+        OnReloadTimeRemaining?.Invoke(0);
         OnMagazineCountChange?.Invoke(currentMagazineAmmo);
         IsReloading = false;
 	}
@@ -303,12 +294,12 @@ public class RangedWeaponItem : Item<WeaponRangedDefinition>
 	private float CurrentBulletSpreadMultipler()
 	{
 		float multiplier = 1f;
-        return multiplier *= Aim == AimState.ads ? TypedDefinition.AdsBulletSpreadMultiplier : TypedDefinition.HipfireBulletSpreadMultiplier;
+        return multiplier *= IsAds ? TypedDefinition.AdsBulletSpreadMultiplier : TypedDefinition.HipfireBulletSpreadMultiplier;
 	}
 	private float CurrentRecoilMultipler()
 	{
 		float multiplier = 1f;
-        return multiplier *= Aim == AimState.ads ? TypedDefinition.AdsRecoilMultiplier : TypedDefinition.HipfireRecoilMultiplier;
+        return multiplier *= IsAds ? TypedDefinition.AdsRecoilMultiplier : TypedDefinition.HipfireRecoilMultiplier;
 	}
 	#endregion
 

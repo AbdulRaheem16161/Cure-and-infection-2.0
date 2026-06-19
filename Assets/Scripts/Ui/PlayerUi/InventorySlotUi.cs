@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,12 +8,21 @@ using static EquipmentHandler;
 
 public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler
 {
+    private static WaitForSeconds _waitForSeconds0_25 = new(0.25f);
+    private static WaitForSeconds _waitForSeconds0_75 = new(0.75f);
+
     public bool IsPlayerOwnedSlot { get; private set; } //set from inventory/equipment ui when initializing slot
 
     #region inventory slot ui
     [Header("Inventory Slot Ui")]
 	public GameObject inventorySlotUi;
-	public Image itemInventoryIcon;
+
+    public Image flashInventoryIcon;
+    private Coroutine flashCouroutine;
+	private Color black = new(0.1960784f, 0.1960784f, 0.1960784f);
+	private Color white = new(0.7843137f, 0.7843137f, 0.7843137f);
+
+    public Image itemInventoryIcon;
 	public TMP_Text itemNameText;
 	public TMP_Text itemCountText;
 	#endregion
@@ -132,6 +142,38 @@ public class InventorySlotUi : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		equipment = null;
 		itemContainer = null;
 	}
+    #endregion
+
+    #region flash slot ui (atm just used when selecting hotbar item)
+	public void StartFlashingSlot()
+	{
+		StopFlashingSlot();
+		flashCouroutine = StartCoroutine(FlashUiIcon());
+	}
+    public void StopFlashingSlot()
+    {
+        if (flashCouroutine != null)
+            StopCoroutine(flashCouroutine);
+    }
+    private IEnumerator FlashUiIcon()
+	{
+		flashInventoryIcon.color = black;
+		yield return _waitForSeconds0_25;
+
+		flashInventoryIcon.color = white;
+		yield return _waitForSeconds0_75;
+
+        flashInventoryIcon.color = black;
+        yield return _waitForSeconds0_25;
+
+        flashInventoryIcon.color = white;
+        yield return _waitForSeconds0_75;
+
+        flashInventoryIcon.color = black;
+        yield return _waitForSeconds0_25;
+
+        flashInventoryIcon.color = white;
+    }
     #endregion
 
     #region i drag event listeners

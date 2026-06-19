@@ -10,6 +10,8 @@ using UnityEngine;
 public class RangedWeaponView : MonoBehaviour
 {
 	public Transform MuzzlePoint;
+	public Transform adsPosition;
+	public Transform hipfirePosition;
 	public Animator Animator { get; private set; }
 	private string currentAnimation = "";
 

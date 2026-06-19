@@ -47,7 +47,7 @@ public class WeaponRangedDefinition : ItemDefinition
 
 	#region weapon handling
 	[Header("Weapon Handling")]
-	[SerializeField] private float adsTime = 2.2f;
+	[SerializeField] private float adsSpeed = 1f;
 	[SerializeField] private float hipfireBulletSpreadMultiplier = 1;
 	[SerializeField] private float adsBulletSpreadMultiplier = 0.4f;
 	[SerializeField] private float hipfireRecoilMultiplier = 1;
@@ -105,7 +105,7 @@ public class WeaponRangedDefinition : ItemDefinition
 	public WeaponFlag WeaponFlags => weaponFlags;
 
 	//handling
-	public float AdsTime => adsTime;
+	public float AdsSpeed => adsSpeed;
 	public float HipfireBulletSpreadMultiplier => hipfireBulletSpreadMultiplier;
 	public float AdsBulletSpreadMultiplier => adsBulletSpreadMultiplier;
 	public float HipfireRecoilMultiplier => hipfireRecoilMultiplier;

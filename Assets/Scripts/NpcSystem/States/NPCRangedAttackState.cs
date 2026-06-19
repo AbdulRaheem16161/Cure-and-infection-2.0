@@ -64,24 +64,21 @@ namespace Game.MyNPC
 		#region Ads check timer
 		private void ShouldAdsCheckTimer(float deltaTime)
 		{
-			if (shouldAdsTimer <= 0)
-			{
-				bool shouldBeAds = ShouldAds();
+            shouldAdsTimer -= deltaTime;
 
-				if (shouldBeAds != (EquippedWeapon.Aim == RangedWeaponItem.AimState.ads))
-				{
-					if (shouldBeAds)
-						EquippedWeapon.EnterAimDownSights();
-					else
-						EquippedWeapon.ExitAimDownSights();
-				}
+            if (shouldAdsTimer > 0)
+                return;
 
-				shouldAdsTimer = shouldAdsCooldown;
-			}
+            bool shouldBeAds = ShouldAds();
 
-			if (shouldAdsTimer > 0)
-				shouldAdsTimer -= deltaTime;
-		}
+            if (shouldBeAds && !EquippedWeapon.IsAds)
+                stateMachine.EquipmentHandler.SetAimDownSights(true);
+
+            else if (!shouldBeAds && EquippedWeapon.IsAds)
+                stateMachine.EquipmentHandler.SetAimDownSights(false);
+
+            shouldAdsTimer = shouldAdsCooldown;
+        }
 		#endregion
 
 		#region Ads checks
@@ -92,9 +89,7 @@ namespace Game.MyNPC
 			adsScore = Beliefs.InCover ? 0.15f : 0f; //more likely to ads in cover
 			adsScore += GetAdsScoreBasedOnDistance();
 
-			bool currentlyAds = EquippedWeapon.Aim == RangedWeaponItem.AimState.ads;
-			float threshold = currentlyAds ? 0.6f : 0.7f; //ads above 0.7f, stay ads'd till lower then 0.6f
-
+			float threshold = EquippedWeapon.IsAds ? 0.6f : 0.7f; //ads above 0.7f, stay ads'd till lower then 0.6f
 			return adsScore >= threshold;
 		}
 		/// <summary>

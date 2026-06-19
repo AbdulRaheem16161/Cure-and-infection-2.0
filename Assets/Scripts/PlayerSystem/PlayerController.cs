@@ -1,5 +1,5 @@
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using static NPCSpawner;
 
 [RequireComponent(typeof(CharacterController))]
@@ -21,13 +21,21 @@ public class PlayerController : MonoBehaviour
     public EquipmentHandler EquipmentHandler { get; private set; }
 
     #region 1st Person Camera + Settings
+    [Header("Player Camera Settings")]
     [SerializeField] private GameObject cameraPivot;
     [SerializeField] private Camera PlayerCamera;
     private LayerMask hitMask;
-    private readonly float lookSensitivity = 0.05f;
-    private readonly float minCameraPitch = -70f;
-    private readonly float maxCameraPitch = 60f;
+    [SerializeField] private float lookSensitivity = 0.05f;
+    [SerializeField] private float minCameraPitch = -70f;
+    [SerializeField] private float maxCameraPitch = 60f;
     private float pitch;
+    #endregion
+
+    #region Camera Flinch On Hit Settings
+    [Header("Camera Flinch On Hit Settings")]
+    [SerializeField] private float flinchAngle = 5f;
+    [SerializeField] private float flinchDuration = 0.15f;
+    private Coroutine cameraFlinchRoutine;
     #endregion
 
     #region Ground Check + Settings
@@ -64,6 +72,12 @@ public class PlayerController : MonoBehaviour
             else
                 Debug.LogError($"{typeof(EntityDefinition)} null, assign reference in inspector when not using a NpcSpawner");
         }
+
+        StatsHandler.OnHit += OnHit;
+    }
+    private void OnDestroy()
+    {
+        StatsHandler.OnHit -= OnHit;
     }
 
     public void InitializePlayer(EntityDefinition definition, Teams team)
@@ -113,6 +127,64 @@ public class PlayerController : MonoBehaviour
             return hit.point;
 
         return ray.origin + ray.direction * 10000;
+    }
+    #endregion
+
+    #region Player Camera Flinch On Hit
+    private void OnHit(DamageContext damageContext)
+    {
+        ApplyCameraFlinch(damageContext);
+    }
+
+    private void ApplyCameraFlinch(DamageContext damageContext)
+    {
+        if (damageContext.ImpactType == DamageContext.HitImpact.none) return;
+
+        float flinchAngle = this.flinchAngle;
+
+        if (damageContext.ImpactType == DamageContext.HitImpact.knockback)
+            flinchAngle *= 3f;
+
+        if (cameraFlinchRoutine != null)
+            StopCoroutine(cameraFlinchRoutine);
+
+        cameraFlinchRoutine = StartCoroutine(CameraFlinch(flinchAngle));
+    }
+
+    private IEnumerator CameraFlinch(float flinchAngle)
+    {
+        float randomPitch = Random.Range(-flinchAngle, flinchAngle);
+        float randomYaw = Random.Range(-flinchAngle, flinchAngle);
+
+        Quaternion targetRotation = Quaternion.identity * Quaternion.Euler(randomPitch, randomYaw, 0f);
+        float elapsed = 0f;
+
+        // Flinch in
+        while (elapsed < flinchDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / flinchDuration;
+
+            PlayerCamera.transform.localRotation = Quaternion.Slerp(Quaternion.identity, targetRotation, t);
+
+            yield return null;
+        }
+
+        elapsed = 0f;
+
+        // Return to neutral (0,0,0)
+        while (elapsed < flinchDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / flinchDuration;
+
+            PlayerCamera.transform.localRotation =
+                Quaternion.Slerp(targetRotation, Quaternion.identity, t);
+
+            yield return null;
+        }
+
+        PlayerCamera.transform.localRotation = Quaternion.identity;
     }
     #endregion
 
@@ -172,13 +244,8 @@ public class PlayerController : MonoBehaviour
     {
         if (!EquipmentHandler.HasItemInHands) return;
 
-        if (EquipmentHandler.itemInHands is RangedWeaponItem rangedWeapon)
-        {
-            if (rangedWeapon.Aim == RangedWeaponItem.AimState.hipfire && InputManager.Instance.SecondaryActionHeld)
-                rangedWeapon.EnterAimDownSights();
-            else if (rangedWeapon.Aim != RangedWeaponItem.AimState.hipfire && !InputManager.Instance.SecondaryActionHeld)
-                rangedWeapon.ExitAimDownSights();
-        }
+        if (EquipmentHandler.itemInHands is RangedWeaponItem)
+            EquipmentHandler.SetAimDownSights(InputManager.Instance.SecondaryActionHeld);
         else if (EquipmentHandler.itemInHands is MeleeWeaponItem meleeWeapon && InputManager.Instance.SecondaryActionPressed)
             meleeWeapon.HeavyAttack();
         else

@@ -1,4 +1,6 @@
+using Mono.Cecil;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static ArmourDefinition;
@@ -87,10 +89,12 @@ public class EquipmentHandler : MonoBehaviour
 		{ EquipmentType.consumableTwo, InventorySlotType.consumable },
 		{ EquipmentType.consumableThree, InventorySlotType.consumable }
 	};
-	#endregion
+    #endregion
 
-	#region awake + initialize equipment handler method
-	private void Awake()
+    private Coroutine adsRoutine;
+
+    #region awake + initialize equipment handler method
+    private void Awake()
 	{
 		StatsHandler = GetComponent<StatsHandler>();
 		InventoryHandler = GetComponent<InventoryHandler>();
@@ -308,10 +312,57 @@ public class EquipmentHandler : MonoBehaviour
 		itemInHands.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		OnItemInHandsChange?.Invoke(itemInHands);
 	}
-	#endregion
+    #endregion
 
-	#region equipment slot and inventory item checks
-	public EquipmentSlot GetEquipmentSlot(EquipmentType equipmentType)
+    #region Handle Begin/End Adsing + transition item in hands to correct positions
+    public void SetAimDownSights(bool enabled)
+    {
+		if (itemInHands is RangedWeaponItem rangedWeaponItem)
+		{
+            rangedWeaponItem.SetAimDownSights(enabled);
+
+            if (adsRoutine != null)
+                StopCoroutine(adsRoutine);
+
+            adsRoutine = StartCoroutine(AdsLerpRoutine(rangedWeaponItem));
+        }
+    }
+    private IEnumerator AdsLerpRoutine(RangedWeaponItem rangedWeapon)
+    {
+        float startAlpha = rangedWeapon.AdsAlpha;
+		float currentAdsAlpha = 0f;
+        float time = 0f;
+        float duration = 0.15f; // tweak per weapon later
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            float t = time / duration;
+
+            currentAdsAlpha = Mathf.Lerp(startAlpha, rangedWeapon.AdsTarget, t);
+
+            ApplyWeaponPose(rangedWeapon.WeaponView, currentAdsAlpha);
+
+            yield return null;
+        }
+
+        currentAdsAlpha = rangedWeapon.AdsTarget;
+        ApplyWeaponPose(rangedWeapon.WeaponView, currentAdsAlpha);
+    }
+    private void ApplyWeaponPose(RangedWeaponView weaponView, float alpha)
+    {
+        if (ItemsInHandsParent == null)
+            return;
+
+        ItemsInHandsParent.transform.SetLocalPositionAndRotation(
+			Vector3.Lerp(weaponView.hipfirePosition.localPosition, weaponView.adsPosition.localPosition, alpha), 
+			Quaternion.Slerp(weaponView.hipfirePosition.localRotation, weaponView.adsPosition.localRotation, alpha)
+			);
+    }
+    #endregion
+
+    #region equipment slot and inventory item checks
+    public EquipmentSlot GetEquipmentSlot(EquipmentType equipmentType)
 	{
 		foreach (EquipmentSlot equipmentSlot in equippedItems)
 		{

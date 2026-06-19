@@ -190,15 +190,16 @@ public class InputManager : MonoBehaviour
     #endregion
 
     #region HotbarPressed Action Inputs
-    public bool AnyHotbarPressed()
+    public bool AnyHotbarPressed(out int hotbarPressed)
     {
-        if (HotbarPressed(0)) return true;
-        if (HotbarPressed(1)) return true;
-        if (HotbarPressed(2)) return true;
-        if (HotbarPressed(3)) return true;
-        if (HotbarPressed(4)) return true;
-        if (HotbarPressed(5)) return true;
+        if (HotbarPressed(0)) { hotbarPressed = 0; return true; }
+        if (HotbarPressed(1)) { hotbarPressed = 1; return true; }
+        if (HotbarPressed(2)) { hotbarPressed = 2; return true; }
+        if (HotbarPressed(3)) { hotbarPressed = 3; return true; }
+        if (HotbarPressed(4)) { hotbarPressed = 4; return true; }
+        if (HotbarPressed(5)) { hotbarPressed = 5; return true; }
 
+        hotbarPressed = -1;
         return false;
     }
     public bool HotbarPressed(int index)

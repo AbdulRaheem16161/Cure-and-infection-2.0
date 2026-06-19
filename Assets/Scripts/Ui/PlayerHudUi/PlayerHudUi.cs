@@ -58,6 +58,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
     private readonly float hotbarHideDelay = 3f;
     private Coroutine hotbarHideCoroutine;
     public List<InventorySlotUi> hotbarSlotUis = new();
+    public int previousHotbarPressed;
 
     [Header("Interact Popup Ui")]
     public GameObject interactPopupUi;
@@ -113,8 +114,13 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
         if (player != null)
             UpdateStats();
 
-        if (InputManager.Instance.AnyHotbarPressed())
+        if (InputManager.Instance.AnyHotbarPressed(out int hotbarPressed))
+        {
             ShowHotbarSlots();
+            hotbarSlotUis[previousHotbarPressed].StopFlashingSlot();
+            hotbarSlotUis[hotbarPressed].StartFlashingSlot();
+            previousHotbarPressed = hotbarPressed;
+        }
     }
 
     #region Update Stats
@@ -151,6 +157,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
         equippedWeapon.OnMagazineCountChange += UpdateMagCounter;
         equippedWeapon.OnFireModeChange += UpdateFireMode;
         equippedWeapon.OnAccuracyModifierChange += UpdateReticleUi;
+        equippedWeapon.OnReloadTimeRemaining += OnReloadWeaponEvents;
     }
     private void UnsubToWeaponEvents()
     {
@@ -160,6 +167,7 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
         equippedWeapon.OnMagazineCountChange -= UpdateMagCounter;
         equippedWeapon.OnFireModeChange -= UpdateFireMode;
         equippedWeapon.OnAccuracyModifierChange -= UpdateReticleUi;
+        equippedWeapon.OnReloadTimeRemaining -= OnReloadWeaponEvents;
     }
     #endregion
 
@@ -182,6 +190,23 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
                 break;
         }
     }
+
+    private void OnReloadWeaponEvents(float timeRemaning)
+    {
+        if (timeRemaning == -1) //reload start
+        {
+            weaponfiremodeText.text = "Reloading";
+            weaponMagCounterText.text = $"{timeRemaning}s";
+        }
+        else if (timeRemaning == 0) //reload end
+        {
+            UpdateFireMode(equippedWeapon.CurrentFireMode);
+            weaponMagCounterText.text = $"{timeRemaning}s";
+        }
+        else
+            weaponMagCounterText.text = $"{timeRemaning}s";
+    }
+
     private void UpdateMagCounter(int magazineCount)
     {
         weaponMagCounterText.text = $"{magazineCount} /";
