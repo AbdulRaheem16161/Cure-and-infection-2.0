@@ -5,6 +5,13 @@ public class LoadingTransitionUi : MonoBehaviour, IUiPanel
     public GameObject loadingSceneTransitionUi;
     public ProgressBarUi loadingBarUi;
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat | InputManager.InputBlock.UI;
+    }
+    #endregion
+
     private void OnEnable()
     {
         SceneHandler.OnSceneTransitionProgress += OnSceneTransitionProgress;

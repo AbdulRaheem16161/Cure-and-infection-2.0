@@ -133,7 +133,7 @@ public class GameManager : MonoBehaviour
 
         ResetUiScreens();
         TogglePlayerHudVisibility(false, null);
-        ShowScreen(new(UiScreens.menu));
+        ToggleScreen(new(UiScreens.menu));
         ShowSceneTransitionUi(false);
     }
 

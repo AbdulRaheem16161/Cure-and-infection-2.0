@@ -8,6 +8,12 @@ public class GraphicsSettingsUi : MonoBehaviour, IUiPanel
 
     public Button backButton;
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat;
+    }
+    #endregion
 
     #region Initialize Ui + Button Listeners
     private void Start()
@@ -17,7 +23,7 @@ public class GraphicsSettingsUi : MonoBehaviour, IUiPanel
 
     private void InitializeUi()
     {
-        backButton.onClick.AddListener(() => ShowScreen(new(UiScreens.graphicsSettings)));
+        backButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.graphicsSettings)));
     }
 
     private void OnDestroy()

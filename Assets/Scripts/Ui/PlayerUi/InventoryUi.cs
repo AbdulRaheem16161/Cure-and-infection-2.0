@@ -19,6 +19,13 @@ public class InventoryUi : MonoBehaviour, IUiPanel
     [SerializeField] private ItemContainer itemContainer;
     #endregion
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Combat;
+    }
+    #endregion
+
     #region show/hide inventory
     public void ShowUi(UiContext uiContext)
 	{
@@ -30,7 +37,7 @@ public class InventoryUi : MonoBehaviour, IUiPanel
 	}
     public void SetUiAnchorPosition(bool equipmentExists)
     {
-        inventoryUiRectTransform.anchoredPosition = equipmentExists ? new(300, 0) : new(720, 0);
+        inventoryUiRectTransform.anchoredPosition = equipmentExists ? new(-425, 0) : new(0, 0);
     }
     #endregion
 

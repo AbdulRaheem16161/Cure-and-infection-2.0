@@ -24,7 +24,7 @@ MonoBehaviour:
   itemWeight: 0
   modelPrefab: {fileID: 1095254202041702, guid: 6273e2936e9d6a24e9f64c7c70d6bd19, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 4
+  weaponType: 3
   impactType: 1
   damage: 20
   magazineSize: 34
@@ -33,7 +33,7 @@ MonoBehaviour:
   reloadTime: 2
   effectiveRange: 30
   weaponFlags: 0
-  adsTime: 2.2
+  adsSpeed: 1
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4
   hipfireRecoilMultiplier: 1

@@ -8,6 +8,13 @@ public class LootablesInventoryUi : MonoBehaviour, IUiPanel
     public EquipmentUi otherEquipmentPanel;
     public InventoryUi otherInventoryPanel;
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Combat;
+    }
+    #endregion
+
     public void ShowUi(UiContext uiContext)
     {
         playerEquipmentPanel.UpdateObjectReferences(true, uiContext);
