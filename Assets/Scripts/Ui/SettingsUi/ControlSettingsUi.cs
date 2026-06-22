@@ -19,13 +19,6 @@ public class ControlSettingsUi : MonoBehaviour, IUiPanel
     public List<InputActionReference> uiActionReferences = new();
     public List<InputActionReference> unbindableActionReferences = new();
 
-    #region Blocked Inputs for Ui Screen api
-    public InputManager.InputBlock GetInputBlock()
-    {
-        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat;
-    }
-    #endregion
-
     #region Initialize Ui + Button Listeners
     private void Start()
     {
@@ -37,7 +30,7 @@ public class ControlSettingsUi : MonoBehaviour, IUiPanel
 
     private void InitializeUi()
     {
-        backButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.controlSettings)));
+        backButton.onClick.AddListener(() => ShowScreen(new(UiScreens.controlSettings)));
         resetBindingsButton.onClick.AddListener(ResetAllBindings);
         AutoSetupRebindButtonUiElements(gameplayActionReferences);
         AutoSetupRebindButtonUiElements(uiActionReferences);

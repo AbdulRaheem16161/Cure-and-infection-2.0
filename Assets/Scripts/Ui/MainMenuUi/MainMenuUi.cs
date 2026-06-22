@@ -17,13 +17,6 @@ public class MainMenuUi : MonoBehaviour, IUiPanel
     public Button settingsButton;
     public Button quitToMainMenuButton;
 
-    #region Blocked Inputs for Ui Screen api
-    public InputManager.InputBlock GetInputBlock()
-    {
-        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat;
-    }
-    #endregion
-
     #region Initialize Ui + Button Listeners
     private void Start()
     {
@@ -33,11 +26,11 @@ public class MainMenuUi : MonoBehaviour, IUiPanel
     private void InitializeUi()
     {
         quitGameButton.onClick.AddListener(QuitGame);
-        closeMenuButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.menu)));
+        closeMenuButton.onClick.AddListener(() => ShowScreen(new(UiScreens.menu)));
         newGameButton.onClick.AddListener(async () => await GameManager.Instance.StartGame());
-        saveGameButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.saveGame)));
-        loadGameButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.loadGame)));
-        settingsButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.settings)));
+        saveGameButton.onClick.AddListener(() => ShowScreen(new(UiScreens.saveGame)));
+        loadGameButton.onClick.AddListener(() => ShowScreen(new(UiScreens.loadGame)));
+        settingsButton.onClick.AddListener(() => ShowScreen(new(UiScreens.settings)));
         quitToMainMenuButton.onClick.AddListener(async () => await GameManager.Instance.LoadMainMenu());
     }
 

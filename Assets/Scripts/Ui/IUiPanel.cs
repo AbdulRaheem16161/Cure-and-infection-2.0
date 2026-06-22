@@ -1,9 +1,7 @@
-using static InputManager;
+using UnityEngine;
 
 public interface IUiPanel
 {
     public void ShowUi(UiContext uiContext);
     public void HideUi();
-
-    InputBlock GetInputBlock();
 }

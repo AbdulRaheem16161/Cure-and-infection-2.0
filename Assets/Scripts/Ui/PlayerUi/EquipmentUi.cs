@@ -19,13 +19,6 @@ public class EquipmentUi : MonoBehaviour, IUiPanel
     [SerializeField] private ItemContainer itemContainer;
     #endregion
 
-    #region Blocked Inputs for Ui Screen api
-    public InputManager.InputBlock GetInputBlock()
-    {
-        return InputManager.InputBlock.Look | InputManager.InputBlock.Combat;
-    }
-    #endregion
-
     #region show/hide equipment
     public void ShowUi(UiContext uiContext)
 	{

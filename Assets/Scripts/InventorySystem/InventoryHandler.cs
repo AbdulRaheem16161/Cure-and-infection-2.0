@@ -111,7 +111,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 		if (!CanLoot) return;
 
 		//open both this inventory + interactor.Inventory in ui
-		UiManager.ToggleScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, EquipmentHandler, this));
+		UiManager.ShowScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, EquipmentHandler, this));
 		return;
     }
 

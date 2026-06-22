@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static InputManager;
 
 public class UiManager : MonoBehaviour
 {
     public static UiManager Instance { get; private set; }
-    public static bool CursorLocked { get; private set; }
 
     public LoadingTransitionUi LoadingTransitionPanel;
 
@@ -24,8 +21,6 @@ public class UiManager : MonoBehaviour
     public Stack<UiContext> currentUiStack = new();
 
     private Dictionary<UiScreens, IUiPanel> uiPanels;
-
-    public static event Action<InputBlock> OnUiScreenChange;
 
     public enum UiScreens
     {
@@ -45,7 +40,6 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
-        CursorLocked = true;
         Instance = this;
         CreateUiPanelDictionary();
     }
@@ -54,20 +48,6 @@ public class UiManager : MonoBehaviour
     {
         HandleBackAction();
         HandlePlayerInventoryAction();
-
-        LogCurrentUiStack(false);
-    }
-    
-    private void LogCurrentUiStack(bool log)
-    {
-        if (!log || currentUiStack.Count <= 0) return;
-
-        string message = "CurrentUi Stack: ";
-
-        foreach (var ui in currentUiStack)
-            message += $"{ui.uiScreen} | ";
-
-        Debug.LogError(message);
     }
 
     private void CreateUiPanelDictionary()
@@ -89,33 +69,22 @@ public class UiManager : MonoBehaviour
     #region Reset Ui Screens Api
     public static void ResetUiScreens()
     {
-        Instance.currentUiStack.Clear();
-
         foreach (var kvp in Instance.uiPanels)
             kvp.Value.HideUi();
-
-        Instance.RefreshUiState();
     }
     #endregion
 
     #region Show/Hide Ui Screens Api
-    public static void ToggleScreen(UiContext uiContext)
+    public static void ShowScreen(UiContext uiContext)
     {
-        if (UiScreenAlreadyVisible(uiContext))
+        if (Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek().uiScreen == uiContext.uiScreen)
             Instance.ShowPreviousUi(true);
         else
             Instance.PushAndShowUi(uiContext);
-
-        Instance.RefreshUiState();
     }
     public static void HideTopScreen()
     {
         Instance.ShowPreviousUi(true);
-        Instance.RefreshUiState();
-    }
-    private static bool UiScreenAlreadyVisible(UiContext uiContext)
-    {
-        return Instance.currentUiStack.Count > 0 && Instance.currentUiStack.Peek().uiScreen == uiContext.uiScreen;
     }
     #endregion
 
@@ -135,9 +104,6 @@ public class UiManager : MonoBehaviour
 
     private void PushAndShowUi(UiContext uiContext)
     {
-        if (currentUiStack.Count > 0)
-            HideUi(currentUiStack.Peek());
-
         currentUiStack.Push(uiContext);
         ShowUi(uiContext);
     }
@@ -148,6 +114,7 @@ public class UiManager : MonoBehaviour
         if (screen != UiScreens.menu) return true;
         return GameManager.Instance.GameState != GameManager.GameStates.MainMenu;
     }
+
     #endregion
 
     #region Show/Hide Different Ui Panels
@@ -170,27 +137,6 @@ public class UiManager : MonoBehaviour
         }
 
         Debug.LogError($"No UI registered for {uiContext.uiScreen}");
-    }
-    #endregion
-
-    #region Refresh Ui Input + Cursor States
-    private void RefreshUiState()
-    {
-        InputBlock block = InputBlock.None;
-
-        if (currentUiStack.Count > 0)
-        {
-            block = uiPanels[currentUiStack.Peek().uiScreen].GetInputBlock();
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
-        OnUiScreenChange?.Invoke(block);
     }
     #endregion
 
@@ -223,19 +169,19 @@ public class UiManager : MonoBehaviour
         {
             case GameManager.GameStates.Playing:
                 GameManager.Instance.SetGameState(GameManager.GameStates.Paused);
-                ToggleScreen(new(UiScreens.menu));
+                ShowScreen(new(UiScreens.menu));
                 break;
 
             case GameManager.GameStates.Paused:
                 if (currentUiStack.Count > 0 && currentUiStack.Peek().uiScreen == UiScreens.menu)
                     GameManager.Instance.SetGameState(GameManager.GameStates.Playing);
 
-                ToggleScreen(currentUiStack.Peek());
+                ShowScreen(currentUiStack.Peek());
                 break;
 
             case GameManager.GameStates.MainMenu:
                 if (currentUiStack.Count > 0 && currentUiStack.Peek().uiScreen != UiScreens.menu)
-                    ToggleScreen(currentUiStack.Peek());
+                    ShowScreen(currentUiStack.Peek());
                 break;
         }
     }
@@ -244,7 +190,7 @@ public class UiManager : MonoBehaviour
     {
         if (!InputManager.Instance.PlayerInventoryAction) return;
         if (GameManager.Instance.GameState == GameManager.GameStates.Playing)
-            ToggleScreen(new(UiScreens.playerInventory, GameManager.Instance.PlayerReference));
+            ShowScreen(new(UiScreens.playerInventory, GameManager.Instance.PlayerReference));
     }
     #endregion
 }

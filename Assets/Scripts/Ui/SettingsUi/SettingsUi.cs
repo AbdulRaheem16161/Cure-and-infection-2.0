@@ -12,12 +12,6 @@ public class SettingsUi : MonoBehaviour, IUiPanel
     public Button audioSettingsButton;
     public Button backButton;
 
-    #region Blocked Inputs for Ui Screen api
-    public InputManager.InputBlock GetInputBlock()
-    {
-        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat;
-    }
-    #endregion
 
     #region Initialize Ui + Button Listeners
     private void Start()
@@ -27,11 +21,11 @@ public class SettingsUi : MonoBehaviour, IUiPanel
 
     private void InitializeUi()
     {
-        gameplaySettingsButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.gameplaySettings)));
-        controlSettingsButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.controlSettings)));
-        GraphicsSettingsButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.graphicsSettings)));
-        audioSettingsButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.audioSettings)));
-        backButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.settings)));
+        gameplaySettingsButton.onClick.AddListener(() => ShowScreen(new(UiScreens.gameplaySettings)));
+        controlSettingsButton.onClick.AddListener(() => ShowScreen(new(UiScreens.controlSettings)));
+        GraphicsSettingsButton.onClick.AddListener(() => ShowScreen(new(UiScreens.graphicsSettings)));
+        audioSettingsButton.onClick.AddListener(() => ShowScreen(new(UiScreens.audioSettings)));
+        backButton.onClick.AddListener(() => ShowScreen(new(UiScreens.settings)));
     }
 
     private void OnDestroy()
