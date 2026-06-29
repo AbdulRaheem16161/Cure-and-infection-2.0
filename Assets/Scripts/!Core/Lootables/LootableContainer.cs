@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static ILootContainer;
 
 [RequireComponent(typeof(Hinge))]
 public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
@@ -15,6 +16,7 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
             return $"Open {LootableName}";}
     }
     public bool CanLoot => true;
+    public LootSpawningState lootSpawningState { get; set; }
 
     [SerializeField] private int InitialContainerSize;
     [SerializeField] private ItemContainer itemContainer;
@@ -34,14 +36,16 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     private void Awake()
     {
         hinge = GetComponent<Hinge>();
-        Open = false;
         hinge.CloseHinge();
+
+        Open = false;
+        lootSpawningState = LootSpawningState.empty;
         itemContainer.SetContainerSize(InitialContainerSize);
 
         CheckForItemSpawnConfigConflicts(itemSpawnConfig.allowedRangedWeaponsFlags, itemSpawnConfig.rangedWeaponWeights, "Ranged Weapon");
         CheckForItemSpawnConfigConflicts(itemSpawnConfig.allowedMeleeWeaponFlags, itemSpawnConfig.meleeWeaponWeights, "Melee Weapon");
         CheckForItemSpawnConfigConflicts(itemSpawnConfig.allowedArmourFlags, itemSpawnConfig.armourWeights, "Armour");
-        CheckForItemSpawnConfigConflicts(itemSpawnConfig.allowedConsumableFlags, itemSpawnConfig.consumableWeights, "Consumbale");
+        CheckForItemSpawnConfigConflicts(itemSpawnConfig.allowedConsumableFlags, itemSpawnConfig.consumableWeights, "Consumable");
     }
 
     private void Start()
@@ -52,9 +56,14 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     #region IInteractable Interface Methods
     public void InteractPress(Interactor interactor)
     {
+        if (!Open && lootSpawningState == LootSpawningState.empty)
+            SpawnLootableItemsInContainer();
+
         Open = !Open;
         hinge.Toggle();
-        TestInventoryManager.LootContainer(gameObject, Open);
+
+        if (interactor.IsPlayerInteractor)
+            UiManager.ShowScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, null, this));
     }
     public void InteractHoldComplete(Interactor interactor)
     {
@@ -65,6 +74,8 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
     #region Spawn Lootable Items In Container
     public void SpawnLootableItemsInContainer()
     {
+        lootSpawningState = LootSpawningState.spawningLoot;
+
         int tries = 0;
         int maxTries = 10000;
         int itemsFoundToSpawn = 0;
@@ -106,6 +117,8 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
             for (int i = 0; i < itemCount; i++)
                 itemContainer.AddNewItem(new InventoryItem(kvp.Key, systemRandom.Next(1, kvp.Key.StackLimit + 1)));
         }
+
+        lootSpawningState = LootSpawningState.lootSpawned;
     }
     #endregion
 

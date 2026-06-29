@@ -1,4 +1,5 @@
 using Game.MyNPC;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -114,10 +115,21 @@ public class NpcBeliefsEditor : Editor
 		EditorGUILayout.Toggle("Can Drink", beliefs.CanDrink);
 		EditorGUILayout.Toggle("Can Eat", beliefs.CanEat);
 		EditorGUI.indentLevel--;
-		#endregion
-	}
+        #endregion
 
-	private bool ApplicationPlaying()
+        EditorGUILayout.Space(10);
+
+        #region Loot Beliefs
+        EditorGUILayout.LabelField("Loot Beliefs", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        DrawInteractableContextData("Best Lootable", beliefs.LootableContainer);
+        EditorGUILayout.Toggle("Can Loot Container", beliefs.CanLootContainer);
+		DrawInteractableContextData("Looted Containers", beliefs.lootedContainers);
+        EditorGUI.indentLevel--;
+        #endregion
+    }
+
+    private bool ApplicationPlaying()
 	{
 		if (!Application.isPlaying)
 			return false;
@@ -143,4 +155,39 @@ public class NpcBeliefsEditor : Editor
 
 		EditorGUI.indentLevel--;
 	}
+
+    private void DrawInteractableContextData(string label, List<InteractContext> targets)
+    {
+        EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+
+        if (targets == null || targets.Count == 0)
+        {
+            EditorGUILayout.LabelField("None");
+            return;
+        }
+
+        foreach (var target in targets)
+        {
+            DrawInteractableContextData(string.Empty, target);
+            EditorGUILayout.Space();
+        }
+    }
+    private void DrawInteractableContextData(string label, InteractContext target)
+    {
+        EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+
+        if (target == null)
+        {
+            EditorGUILayout.LabelField("None");
+            return;
+        }
+
+        EditorGUI.indentLevel++;
+
+        EditorGUILayout.TextField(target.name);
+        EditorGUILayout.EnumFlagsField("Loot state", target.lootState);
+        EditorGUILayout.FloatField("Distance", target.squaredDistance);
+
+        EditorGUI.indentLevel--;
+    }
 }

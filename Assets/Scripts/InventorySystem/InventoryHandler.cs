@@ -1,4 +1,5 @@
 using UnityEngine;
+using static ILootContainer;
 
 [RequireComponent(typeof(StatsHandler))]
 [RequireComponent(typeof(EquipmentHandler))]
@@ -13,10 +14,12 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	[SerializeField] private int money;
 	[SerializeField] private int initialInventorySize;
 
-    public string ContainerName => $"{StatsHandler.Definition.Name} Inventory";
     public bool CanInteract => CanLoot;
     public string InteractableName => $"Loot {ContainerName}";
+
+    public string ContainerName => $"{StatsHandler.Definition.Name} Inventory";
     public bool CanLoot => StatsHandler.LifeState == EntityDefinition.LifeState.dead;
+    public LootSpawningState lootSpawningState { get; set; }
 
     [SerializeField] private ItemContainer itemContainer;
     public ItemContainer ItemContainer => itemContainer;
@@ -42,6 +45,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	{
 		StatsHandler = GetComponent<StatsHandler>();
 		EquipmentHandler = GetComponent<EquipmentHandler>();
+		lootSpawningState = LootSpawningState.lootSpawned;
 
 		if (!_Initialized)
 			InitializeInventoryHandler();
@@ -105,7 +109,7 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 	}
 	#endregion
 
-	#region inventory interact interface methods (TODO: make them actually open inventories)
+	#region inventory interact interface methods
 	public void InteractPress(Interactor interactor)
     {
 		if (!CanLoot) return;

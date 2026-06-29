@@ -5,6 +5,7 @@ using UnityEngine;
 public class Interactor : MonoBehaviour
 {
     public InventoryHandler Inventory { get; private set; }
+    public bool IsPlayerInteractor { get; private set; }
 
     [SerializeField] private LayerMask interactLayerMask;
 
@@ -23,6 +24,7 @@ public class Interactor : MonoBehaviour
     {
         interactLayerMask = LayerMask.GetMask("Interactable", "CharacterDetection");
         Inventory = GetComponent<InventoryHandler>();
+        IsPlayerInteractor = TryGetComponent(out PlayerController playerController);
     }
 
     public void TickSearchForInteractables(float deltaTime)

@@ -1,7 +1,9 @@
 using Game.Core;
 using Game.MyNPC;
+using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static EquipmentHandler;
@@ -78,7 +80,8 @@ public class NpcBeliefs : MonoBehaviour
     private const float maxLootSqrDistance = 400f;
 
     public InteractContext LootableContainer { get; private set; }
-    public bool HasLootableContainer => LootableContainer != null;
+    public bool CanLootContainer => LootableContainer != null && !Alert;
+	public List<InteractContext> lootedContainers = new();
     #endregion
 
     //internal belifs that should probably stay hidden
@@ -246,6 +249,16 @@ public class NpcBeliefs : MonoBehaviour
 
 		return cachedConsumableSlot;
 	}
+	#endregion
+
+	#region Add Looted Interactables To Long Term Memory
+	public void AddLootableToLongTermMemory(InteractContext interactedLootable)
+	{
+		if (lootedContainers.Contains(interactedLootable))
+			Debug.LogWarning($"{gameObject.name} looted a container it already looted");
+
+		lootedContainers.Add(interactedLootable);
+	}
     #endregion
 
     #region Update And Evaluate Lootable Interactables
@@ -266,7 +279,7 @@ public class NpcBeliefs : MonoBehaviour
 
         foreach (var interactable in NpcPerception.interactables)
         {
-            if (!interactable.CheckIfLootable())
+            if (LootableAlreadyLooted(interactable) || !interactable.CanBeLooted())
                 continue;
 
 			interactable.UpdateDistance(transform.position);
@@ -281,6 +294,10 @@ public class NpcBeliefs : MonoBehaviour
 
         LootableContainer = bestScore >= lootableThreshold ? bestLootable : null;
     }
+	private bool LootableAlreadyLooted(InteractContext container)
+	{
+		return lootedContainers.Contains(container);
+	}
     #endregion
 
     #region On Hit Stunned Event Listener

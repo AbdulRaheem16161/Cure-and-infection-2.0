@@ -521,6 +521,7 @@ public class NpcPerception : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Collider collider = ColliderHits[i];
+			if (collider.gameObject == gameObject) continue;
 
 			if (collider.TryGetComponent(out IInteractable interactable))
             {

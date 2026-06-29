@@ -21,11 +21,16 @@ public class InteractContext
         this.interactable = interactable;
         this.collider = collider;
         lootState = LootState.unSet;
-        CheckIfLootable();
+        CanBeLooted();
         UpdateDistance(npcPosition);
     }
 
-    public bool CheckIfLootable()
+    public bool CheckIfAlreadyLooted(InteractContext interact)
+    {
+        return this == interact;
+    }
+
+    public bool CanBeLooted()
     {
         if (lootState == LootState.notLootable || lootState == LootState.alreadyLooted) return false;
 
