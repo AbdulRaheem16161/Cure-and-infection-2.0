@@ -253,6 +253,7 @@ public static class InventoryService
     {
         InventoryItem item = source.Items[sourceSlot];
         item = destination.AddNewItem(item);
+        source.SetSlotContents(item, sourceSlot);
     }
     #endregion
 

@@ -518,7 +518,7 @@ CapsuleCollider:
   m_Radius: 0.4
   m_Height: 2.25
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!95 &8096372186562772462
 Animator:
   serializedVersion: 7
@@ -588,6 +588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556762a593628674da71c4a27adcac09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lootedContainers: []
 --- !u!114 &1864734135541436750
 MonoBehaviour:
   m_ObjectHideFlags: 0

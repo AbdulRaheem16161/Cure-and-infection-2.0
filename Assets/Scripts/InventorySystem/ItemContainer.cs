@@ -143,7 +143,8 @@ public class ItemContainer : IAmmoGiver
             SetSlotContents(newItem, i);
 			break;
         }
-        return newItem;
+
+        return new(null, 0);
     }
     #endregion
 

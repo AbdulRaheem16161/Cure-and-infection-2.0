@@ -30,7 +30,7 @@ public class InventoryUi : MonoBehaviour, IUiPanel
 	}
     public void SetUiAnchorPosition(bool equipmentExists)
     {
-        inventoryUiRectTransform.anchoredPosition = equipmentExists ? new(300, 0) : new(720, 0);
+        inventoryUiRectTransform.anchoredPosition = equipmentExists ? new(-425, 0) : new(0, 0);
     }
     #endregion
 

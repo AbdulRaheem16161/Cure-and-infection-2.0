@@ -81,7 +81,7 @@ public class NpcBeliefs : MonoBehaviour
 
     public InteractContext LootableContainer { get; private set; }
     public bool CanLootContainer => LootableContainer != null && !Alert;
-	public List<InteractContext> lootedContainers = new();
+	[HideInInspector] public List<InteractContext> lootedContainers = new();
     #endregion
 
     //internal belifs that should probably stay hidden
@@ -254,11 +254,16 @@ public class NpcBeliefs : MonoBehaviour
 	#region Add Looted Interactables To Long Term Memory
 	public void AddLootableToLongTermMemory(InteractContext interactedLootable)
 	{
-		if (lootedContainers.Contains(interactedLootable))
-			Debug.LogWarning($"{gameObject.name} looted a container it already looted");
+		foreach (var lootedContainer in lootedContainers)
+		{
+			if (lootedContainer.collider != interactedLootable.collider) continue;
 
-		lootedContainers.Add(interactedLootable);
-	}
+			Debug.LogWarning($"{gameObject.name} looted a container it already looted"); 
+			return;
+        }
+
+        lootedContainers.Add(interactedLootable);
+    }
     #endregion
 
     #region Update And Evaluate Lootable Interactables

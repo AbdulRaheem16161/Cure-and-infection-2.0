@@ -1,11 +1,20 @@
+using UnityEngine;
 using Game.MyNPC;
 
 public class NpcLootState : NpcBaseMovementState
 {
-    private bool lootItems;
+    IInteractable interactableContainer;
+    ILootContainer lootableContainer;
 
-    readonly float lootTimeout = 5f;
-    readonly float lootDelay = 2f;
+    public LootStage lootStage;
+
+    public enum LootStage
+    {
+        movingToLootable, notLooting, looting, lootingComplete, LootingCanceled
+    }
+
+    float lootTimeout;
+    float timeToLootItems;
     float lootTimer;
 
     public NpcLootState(NPCStateMachine stateMachine, int priority) : base(stateMachine, priority) { }
@@ -18,9 +27,13 @@ public class NpcLootState : NpcBaseMovementState
 
     public override void Enter()
     {
-        lootItems = true;
+        lootStage = LootStage.movingToLootable;
         lootTimer = 0;
         MoveToDestination(Beliefs.LootableContainer.collider.transform.position, MoveType.walk);
+
+        interactableContainer = Beliefs.LootableContainer.interactable;
+        if (Beliefs.LootableContainer.interactable is ILootContainer lootable)
+            lootableContainer = lootable;
     }
 
     public override void Tick(float deltaTime)
@@ -29,34 +42,50 @@ public class NpcLootState : NpcBaseMovementState
         if (!Beliefs.CanLootContainer || Beliefs.LootableContainer == null) return;
 
         if (!HasReachedDestination()) return;
-        TryLootItemsInContainer(deltaTime);
+
+        TryLootItemsInContainer();
+        LootItemsWaitTimer(deltaTime);
     }
 
     public override void Exit()
     {
+        interactableContainer.InteractPress(stateMachine.Interactor);
         stateMachine.Agent.updateRotation = true;
         stateMachine.Agent.isStopped = false;
     }
 
-    private void TryLootItemsInContainer(float deltaTime)
+    private void TryLootItemsInContainer()
     {
-        if (Beliefs.LootableContainer.interactable is ILootContainer lootable)
+        if (lootStage == LootStage.movingToLootable)
         {
+            lootStage = LootStage.notLooting;
             Beliefs.LootableContainer.interactable.InteractPress(stateMachine.Interactor);
-            lootTimer += deltaTime;
+        }
 
-            if (lootItems && lootTimer > lootDelay)
-            {
-                lootItems = false;
-                for (int i = 0; i < lootable.ItemContainer.Items.Count; i++)
-                {
-                    if (lootable.ItemContainer.Items[i] == null || lootable.ItemContainer.Items[i].ItemDefinitionNull) continue;
-                    InventoryService.TryResolveSlotInteraction(lootable.ItemContainer, i, stateMachine.InventoryHandler.ItemContainer, -1, true);
-                }
-            }
+        if (lootStage == LootStage.notLooting && lootableContainer.lootSpawningState == ILootContainer.LootSpawningState.lootSpawned)
+            LootItems(lootableContainer);
 
-            if (lootTimer > lootTimeout)
-                CompleteItemLooting();
+        if (lootStage == LootStage.lootingComplete)
+            CompleteItemLooting();
+
+        if (lootStage == LootStage.LootingCanceled) //doesnt really need any special behaviour, just treat it as looted but forget about it.
+            CompleteItemLooting(true);
+    }
+    private void LootItems(ILootContainer lootable)
+    {
+        int itemsToLoot = 0;
+        lootStage = LootStage.looting;
+        timeToLootItems = 1f;
+        lootTimeout = 6f;
+
+        for (int i = 0; i < lootable.ItemContainer.Items.Count; i++)
+        {
+            if (lootable.ItemContainer.Items[i] == null || lootable.ItemContainer.Items[i].ItemDefinitionNull) continue;
+
+            itemsToLoot++;
+            timeToLootItems += 0.25f;
+            lootTimeout += 0.25f;
+            InventoryService.TryResolveSlotInteraction(lootable.ItemContainer, i, stateMachine.InventoryHandler.ItemContainer, -1, true);
         }
     }
     private void CompleteItemLooting(bool forgetLootable = false)
@@ -73,5 +102,18 @@ public class NpcLootState : NpcBaseMovementState
             Beliefs.AddLootableToLongTermMemory(interactContext);
             break;
         }
+    }
+
+    private void LootItemsWaitTimer(float deltaTime)
+    {
+        if (lootStage != LootStage.looting) return;
+
+        lootTimer += deltaTime;
+
+        if (lootTimer > timeToLootItems)
+            lootStage = LootStage.lootingComplete;
+
+        if (lootTimer > lootTimeout)
+            lootStage = LootStage.LootingCanceled;
     }
 }

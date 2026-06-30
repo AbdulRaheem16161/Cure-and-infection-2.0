@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(InventoryHandler))]
 public class Interactor : MonoBehaviour
 {
+    public StatsHandler StatsHandler { get; private set; }
     public InventoryHandler Inventory { get; private set; }
     public bool IsPlayerInteractor { get; private set; }
 
@@ -22,20 +23,31 @@ public class Interactor : MonoBehaviour
 
     private void Awake()
     {
-        interactLayerMask = LayerMask.GetMask("Interactable", "CharacterDetection");
+        StatsHandler = GetComponent<StatsHandler>();
         Inventory = GetComponent<InventoryHandler>();
         IsPlayerInteractor = TryGetComponent(out PlayerController playerController);
+        interactLayerMask = LayerMask.GetMask("Interactable", "CharacterDetection");
+
+        StatsHandler.OnDeath += OnDeath;
     }
 
-    public void TickSearchForInteractables(float deltaTime)
+    private void OnDestroy()
     {
-        interactablesSearchTimer -= deltaTime;
-        if (interactablesSearchTimer > 0) return;
-
-        interactablesSearchTimer = interactablesSearchTime;
-        SetCurrentInteractable(FindInteractable());
+        StatsHandler.OnDeath -= OnDeath;
     }
 
+    #region OnDeath Event Api
+    private void OnDeath()
+    {
+        if (current is LootableContainer lootable)
+        {
+            if (lootable.Open)
+                current.InteractPress(this);
+        }
+    }
+    #endregion
+
+    #region Interaction Call Types
     public void InteractPress()
     {
         if (current == null) return;
@@ -43,7 +55,6 @@ public class Interactor : MonoBehaviour
         current.InteractPress(this);
         OnInteractCompleted?.Invoke(current);
     }
-
     public void InteractHold(bool holding)
     {
         if (current == null) return;
@@ -66,13 +77,14 @@ public class Interactor : MonoBehaviour
             ResetHold();
         }
     }
-
     private void ResetHold()
     {
         holdTimer = 0f;
         OnHoldProgress?.Invoke(0f);
     }
+    #endregion
 
+    #region Set Current Interactable
     private void SetCurrentInteractable(IInteractable newInteractable)
     {
         if (current == newInteractable) return;
@@ -85,7 +97,17 @@ public class Interactor : MonoBehaviour
         else
             OnInteractChanged?.Invoke(newInteractable);
     }
+    #endregion
 
+    #region Tick Search + Find Interactable
+    public void TickSearchForInteractables(float deltaTime)
+    {
+        interactablesSearchTimer -= deltaTime;
+        if (interactablesSearchTimer > 0) return;
+
+        interactablesSearchTimer = interactablesSearchTime;
+        SetCurrentInteractable(FindInteractable());
+    }
     private IInteractable FindInteractable()
     {
         Ray ray = new(transform.position, transform.forward);
@@ -97,4 +119,5 @@ public class Interactor : MonoBehaviour
 
         return null;
     }
+    #endregion
 }
