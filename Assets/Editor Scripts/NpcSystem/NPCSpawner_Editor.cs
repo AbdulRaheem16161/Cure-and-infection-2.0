@@ -29,7 +29,7 @@ public class NPCSpawner_Editor : Editor
 		if (GUILayout.Button("Clean Up All Npcs"))
 		{
 			if (!ApplicationPlaying()) return;
-			spawner.CleanUpAllNpcs(false);
+			spawner.CleanUpNpcs();
 		}
 
 		if (GUILayout.Button("Spawn Custom Npcs (again)"))

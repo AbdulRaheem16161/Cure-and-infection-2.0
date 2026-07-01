@@ -8,8 +8,9 @@ public class NpcSpawnData
 {
 	[Tooltip("Npc definition to spawn")]
 	public EntityDefinition Definition;
+    [SerializeField] private int id;
 
-	[Tooltip("Spawned Npcs team")]
+    [Tooltip("Spawned Npcs team")]
 	public Teams team;
 
 	[Tooltip("Spawned Npcs movement type. NPC handles fallback: Patrol > RandomArea > Random")]
@@ -56,7 +57,8 @@ public class NpcSpawnData
 		SpawnPosition = spawnPosition;
 		forceInvincible = false;
 		forceDeath = false;
-	}
+		id = -1; //not custom spawned npc
+    }
 	private Teams AssignRandomTeam()
 	{
 		if (IsZombie())
@@ -67,8 +69,19 @@ public class NpcSpawnData
 	}
 	private bool IsZombie()
 	{
+		if (Definition == null) return false;
+
 		if (Definition.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie team
 			return false;
 		else return true;
 	}
+
+	public int GetId()
+    {
+        return id;
+    }
+	public void SetId(int id)
+    {
+		this.id = id;
+    }
 }

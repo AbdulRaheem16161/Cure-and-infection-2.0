@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 3501041157496962398}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 0, z: 10}
+  m_LocalPosition: {x: 25, y: 0, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -84,11 +84,7 @@ MonoBehaviour:
   - {fileID: 4304855453526436638}
   - {fileID: 6964396948563903857}
   - {fileID: 3966124884783634124}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   TrackPointsFolder: {fileID: 3964071398597378811}
-  GizmosColor: {r: 0, g: 0.5019608, b: 1, a: 0.5019608}
   ShowGizmoz: 0
 --- !u!1 &3966124884783634124
 GameObject:
@@ -115,7 +111,7 @@ Transform:
   m_GameObject: {fileID: 3966124884783634124}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10, y: 0, z: 10}
+  m_LocalPosition: {x: -25, y: 0, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -146,7 +142,7 @@ Transform:
   m_GameObject: {fileID: 4304855453526436638}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 0, z: -10}
+  m_LocalPosition: {x: 25, y: 0, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -177,7 +173,7 @@ Transform:
   m_GameObject: {fileID: 6964396948563903857}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10, y: 0, z: -10}
+  m_LocalPosition: {x: -25, y: 0, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

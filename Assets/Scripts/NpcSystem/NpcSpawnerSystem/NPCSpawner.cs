@@ -7,31 +7,17 @@
 /// </summary>
 
 /// <summary> TODO:
-/// set triggers to spawn enemies when player gets close enough + despawn when they get too far away (use object pooling)
-/// set triggers to stop the spawning of enemies when player is too close (stops things spawning infront of player)
-/// add toggle to set spawning to center of spawner or be random within npcs wander area.
-/// 
-/// this works extremely well for making patrol paths and managing enemies in map sections. but needs more customization eg:
-/// list of NpcDefinitions to spawn, weather or not they will spawn with patrols paths or random paths with a bool. scenario one example:
-/// spawner at center of a survivor camp, assign a list of 10 npcs. 
-/// 5 of those toggled to use 1 of 3 random patrol paths (possible option to specify a patrol path)
-/// the other 5 will randomly wander within a the given area.
-/// 
-/// spawner in the wilderness/edge of town: these spawners can have some random wander area overlap with others and have larger areas
-/// limit of spawning 20 over the area. all set to random spawn in the area + randomly wander within the area.
-/// 
-/// spawner in towns cities: these spawners can have some random wander area overlap with others, have smaller areas
-/// esentially same as spawner above
+/// static npcs would benefit from more complex spawning/clean up logic. atm them working same as regular active npc that just despawn at further ranges is fine.
 /// </summary>
 
 using Game.MyNPC;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 using static Game.MyNPC.NPCStateMachine;
-using static NPCSpawner;
 
 public class NPCSpawner : MonoBehaviour
 {
@@ -56,46 +42,55 @@ public class NPCSpawner : MonoBehaviour
 	public RandomAreaMoveManager RandomAreaMoveManager;
 
 	[Header("Toggle Gizmos")]
-	public bool ShowAreaPoints;
-	public bool ShowAllPatrolPaths;
-	public bool ShowAllSpawnPoints;
+	public bool HideSpawnerRangeSphere;
+    public bool HideAreaPoints;
+	public bool HideAllPatrolPaths;
+	public bool HideAllSpawnPoints;
 
 	[Header("Spawner Settings")]
-	[Tooltip("bypasses checks that keep npcs spawned around player, and despawning when player is far away")]
-	public bool forceSpawnNpcs;
-	public SpawnerType spawnerType;
-	public enum SpawnerType
-	{
-		random, custom, both
-	}
-	public bool playerInValidSpawnZone;
-	public bool playerInBlockSpawnZone;
-	private bool SpawnNpcs => ShouldSpawnNpcs();
-	private bool respawnCustomNpcs;
+	[Tooltip("Keeps custom spawned Npc spawned in, ignore distance clean up checks")]
+    public bool keepCustomNpcsSpawned;
+	public bool disableRandomSpawns;
+	[Range(50, 1000)]
+	public int spawnerRadius = 100;
 
-	[Header("Npcs To Spawn")]
+    //values use squared distance to avoid sqrt calculations
+    private readonly int minSqrSpawnDistanceFromPlayer = 50 * 50;
+    private readonly int maxSqrSpawnDistanceFromPlayer = 100 * 100;
+    private readonly int sqrDespawnDistanceFromPlayer = 160 * 160;
+    private int sqrStaticDespawnDistanceFromPlayer;
+
+	//spawner timers
+    private const float NearbySpawnInterval = 3f;
+    private const float DistantSpawnInterval = 10f;
+    private const float CleanUpInterval = 25f;
+
+    private float spawnTimer;
+    private float cleanUpTimer;
+
+    [Header("Npcs To Spawn")]
 	public List<NpcSpawnData> CustomNpcsToSpawn = new();
 
 	[Header("Random Npcs To Spawn")]
-	private readonly float spawnTimerCooldown = 1f;
-	private float spawnTimer;
 	public List<EntityDefinition> NpcsToRandomSpawn = new();
 	public int minSpawnAmount;
 	public int maxSpawnAmount;
 
 	[Header("Runtime Info")]
-	[SerializeField] private List<NpcController> activeNpcs = new();
-	[SerializeField] private List<NpcController> inactiveNpcs = new();
+	private PlayerController Player => GameManager.Instance.PlayerReference;
+    public float playerSqrDistanceToSpawner;
+    [SerializeField] private List<SpawnedNpcData> activeNpcs = new();
+	[SerializeField] private List<SpawnedNpcData> inactiveNpcs = new();
 
 	public enum Teams { Zombie, Team1, Team2, Team3, Team4, Team5, Team6, Team7, Team8, FreeFighter }
 	private readonly System.Random systemRandom = new();
 
 	private void Awake()
 	{
-		respawnCustomNpcs = true;
 		StatsHandler.OnZombificationComplete += HandleNpcZombification;
+        sqrStaticDespawnDistanceFromPlayer = spawnerRadius * spawnerRadius; //squared distance
 
-		if (minSpawnAmount > maxSpawnAmount)
+        if (minSpawnAmount > maxSpawnAmount)
 		{
 			Debug.LogWarning($"{this} Npc Spawners minSpawnAmount bigger then maxSpawnAmount, equilizing");
 			minSpawnAmount = maxSpawnAmount;
@@ -106,64 +101,79 @@ public class NPCSpawner : MonoBehaviour
 			maxSpawnAmount = minSpawnAmount;
 		}
 	}
-	private void OnDestroy()
+    private void Update()
+    {
+		HandleNpcSpawning();
+        HandleMpcCleanup();
+    }
+    private void OnDestroy()
 	{
 		StatsHandler.OnZombificationComplete -= HandleNpcZombification;
 	}
 
-	private void Update()
+    #region Npc Spawning
+	private void HandleNpcSpawning()
 	{
-		if (!SpawnNpcs) return;
-		if (spawnerType == SpawnerType.random || spawnerType == SpawnerType.both)
-			SpawnRandomNpcs();
-		if (spawnerType == SpawnerType.custom || spawnerType == SpawnerType.both)
-		{
-			if (respawnCustomNpcs)
-				SpawnCustomNpcs();
-		}
-	}
+        playerSqrDistanceToSpawner = Player != null ? (Player.transform.position - transform.position).sqrMagnitude : Mathf.Infinity;
+        float interval = playerSqrDistanceToSpawner < sqrStaticDespawnDistanceFromPlayer ? NearbySpawnInterval : DistantSpawnInterval;
 
-	#region spawn npcs on start and update
-	private void SpawnRandomNpcs()
-	{
-		spawnTimer -= Time.deltaTime;
-		if (spawnTimer > 0) return;
-		spawnTimer = spawnTimerCooldown;
+        spawnTimer += Time.deltaTime;
 
-		while (activeNpcs.Count < maxSpawnAmount)
-			SpawnRandomNpc();
-	}
+        if (spawnTimer < interval)
+            return;
+
+        spawnTimer = 0f;
+
+        if (playerSqrDistanceToSpawner < sqrStaticDespawnDistanceFromPlayer)
+        {
+            SpawnCustomNpcs();
+			if (disableRandomSpawns) return;
+            SpawnNpc(new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPointAroundPlayer()), false);
+        }
+    }	
 	public void SpawnCustomNpcs()
 	{
-		respawnCustomNpcs = false;
+		int id = 0;
+
 		foreach (NpcSpawnData npcSpawnData in CustomNpcsToSpawn)
 		{
 			if (npcSpawnData.Definition == null)
 			{ Debug.LogError($"npcSpawnData.npcDefinition is null, skipping, assign one in inspector"); continue; }
 
-			PatrolPathManager patrolPath = npcSpawnData.patrolPath;
+            if (CustomNpcAlreadySpawned(npcSpawnData))
+                continue;
+
+            PatrolPathManager patrolPath = npcSpawnData.patrolPath;
 			if (npcSpawnData.movementType == MovementType.patrolMove && patrolPath == null)
 				npcSpawnData.patrolPath = AssignRandomPatrolPath();
 
 			if (npcSpawnData.spawnPoint == null)
 				npcSpawnData.spawnPoint = transform;
 
-			SpawnNpc(npcSpawnData);
+            float squaredDistance = (GameManager.Instance.PlayerReference.transform.position - npcSpawnData.spawnPoint.transform.position).sqrMagnitude;
+
+			if (squaredDistance < minSqrSpawnDistanceFromPlayer || squaredDistance > maxSqrSpawnDistanceFromPlayer) continue;
+
+			npcSpawnData.SetId(id);
+            SpawnNpc(npcSpawnData, true);
+			id++;
 		}
 	}
-	#endregion
+	private bool CustomNpcAlreadySpawned(NpcSpawnData npcSpawnData)
+    {
+        foreach (SpawnedNpcData spawnedNpc in activeNpcs)
+        {
+            if (spawnedNpc.npcSpawnData.GetId() == npcSpawnData.GetId())
+            {
+                return true;
+            }
+        }
+		return false;
+    }
+    #endregion
 
-	#region spawn npcs
-	private void SpawnRandomNpc()
-	{
-		NpcSpawnData spawnData = new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPosition());
-
-		if (!spawnData.Definition.Flags.HasFlag(EntityDefinition.EntityFlags.canBecomeZombie)) //cant become zombie so is zombie
-			spawnData.team = Teams.Zombie;
-
-		SpawnNpc(spawnData); //path null as randoms spawns dont have paths for now
-	}
-	private void SpawnNpc(NpcSpawnData npcSpawnData)
+    #region Spawn Npcs
+    private void SpawnNpc(NpcSpawnData npcSpawnData, bool staticSpawnedNpc)
 	{
 		if (npcSpawnData.Definition == null)
 		{
@@ -200,44 +210,105 @@ public class NPCSpawner : MonoBehaviour
 			stateMachine.SetMovementType(npcSpawnData.movementType);
 
 		npcController.InitializeNpc(npcSpawnData.Definition, npcSpawnData.team);
-		activeNpcs.Add(npcController);
+		activeNpcs.Add(new(npcController, staticSpawnedNpc, GameManager.Instance.PlayerReference, npcSpawnData));
 
 		if (npcSpawnData.forceInvincible)
 			npcController.StatsHandler.invincible = true;
 		if (npcSpawnData.forceDeath)
 			npcController.StatsHandler.DebugKillNpc();
 	}
-	#endregion
+    #endregion
 
-	#region npc spawner helpers
-	public EntityDefinition AssignRandomNpc(List<EntityDefinition> npcDefinitions)
+    #region Npc Spawner Helpers
+    private EntityDefinition AssignRandomNpc(List<EntityDefinition> npcDefinitions)
 	{
-		if (npcDefinitions.Count == 0)
-		{ Debug.LogError("npcDefinitions.Count == 0, assign definition references to list"); return null; }
+		if (npcDefinitions.Count == 0) return null;
 		return npcDefinitions[systemRandom.Next(0, npcDefinitions.Count)];
 	}
-	public PatrolPathManager AssignRandomPatrolPath()
+    private PatrolPathManager AssignRandomPatrolPath()
 	{
 		if (PatrolPaths.Count == 0)
-		{ Debug.LogError("PatrolPaths.Count == 0, assign patrol path references"); return null; }
+        { Debug.LogWarning($"No patrol paths assigned, NPCs will use fallback movement."); return null; }
 		return PatrolPaths[systemRandom.Next(0, PatrolPaths.Count)];
 	}
-	private Vector3 AssignRandomSpawnPosition()
-	{
-		return Vector3.zero;
-	}
-	#endregion
+    private Vector3 AssignRandomSpawnPointAroundPlayer()
+    {
+        Vector3 playerPos = GameManager.Instance.PlayerReference.transform.position;
 
-	#region fetching valid npc from pooling, or instantiating new one
-	private NpcController GetNpc(EntityDefinition npcDefinition)
+        const int maxAttempts = 20;
+
+        for (int i = 0; i < maxAttempts; i++)
+        {
+            float min = minSqrSpawnDistanceFromPlayer;
+            float max = maxSqrSpawnDistanceFromPlayer;
+
+            double angle = systemRandom.NextDouble() * (Math.PI * 2.0);
+            float distance = Mathf.Sqrt((float)systemRandom.NextDouble() * (max * max - min * min) + min * min);
+            Vector3 point = playerPos + new Vector3(Mathf.Cos((float)angle), 0f, Mathf.Sin((float)angle)) * distance;
+
+            if (NavMesh.SamplePosition(point, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+            {
+                return hit.position;
+            }
+        }
+
+        return playerPos;
+    }
+    #endregion
+
+    #region Npc Clean Up
+    private void HandleMpcCleanup()
+    {
+        cleanUpTimer += Time.deltaTime;
+
+        if (cleanUpTimer < CleanUpInterval)
+            return;
+
+        cleanUpTimer = 0f;
+        CleanUpNpcs();
+    }
+    public void CleanUpNpcs()
+    {
+        for (int i = activeNpcs.Count - 1; i >= 0; i--)
+        {
+            SpawnedNpcData spawnedNpcData = activeNpcs[i];
+
+            if (spawnedNpcData.staticSpawnedNpc && keepCustomNpcsSpawned) continue;
+
+            spawnedNpcData.UpdateSquaredDistanceFromPlayer(GameManager.Instance.PlayerReference);
+            float squaredDistanceToCleanUp = spawnedNpcData.staticSpawnedNpc ? sqrStaticDespawnDistanceFromPlayer : sqrDespawnDistanceFromPlayer;
+
+            if (spawnedNpcData.squaredDistanceToPlayer > squaredDistanceToCleanUp)
+                CleanUpNpc(spawnedNpcData);
+        }
+    }
+    public void CleanUpDeadNpcs()
+    {
+        for (int i = activeNpcs.Count - 1; i >= 0; i--)
+        {
+            if (activeNpcs[i].npc.StatsHandler.LifeState != EntityDefinition.LifeState.dead) continue;
+            CleanUpNpc(activeNpcs[i]);
+        }
+    }
+    private void CleanUpNpc(SpawnedNpcData spawnedNpc)
+    {
+        inactiveNpcs.Add(spawnedNpc);
+        activeNpcs.Remove(spawnedNpc);
+        spawnedNpc.npc.gameObject.SetActive(false);
+        spawnedNpc.npc.transform.SetParent(inactiveNpcsParent.transform);
+    }
+    #endregion
+
+    #region Fetch Inactive Npcs Or Create New From Pooling
+    private NpcController GetNpc(EntityDefinition npcDefinition)
     {
 		NpcController npc = null;
 
 		for (int i = inactiveNpcs.Count - 1; i >= 0; i--)
 		{
-			if (inactiveNpcs[i].Definition.StartingLifeState != npcDefinition.StartingLifeState) continue;
+			if (inactiveNpcs[i].npc.Definition.StartingLifeState != npcDefinition.StartingLifeState) continue;
 
-			npc = inactiveNpcs[i];
+			npc = inactiveNpcs[i].npc;
 			inactiveNpcs.RemoveAt(i);
 			break;
 		}
@@ -251,57 +322,26 @@ public class NPCSpawner : MonoBehaviour
 		return npc;
 	}
 
-	#endregion
-
-	#region npc clean up and repooling
-	public void CleanUpAllNpcs(bool resetRespawnCustomNpcsBool = true)
-	{
-		for (int i = activeNpcs.Count - 1; i >= 0; i--)
-			CleanUpNpc(activeNpcs[i]);
-
-		if (resetRespawnCustomNpcsBool)
-			respawnCustomNpcs = true;
-	}
-	public void CleanUpDeadNpcs()
-	{
-		for (int i = activeNpcs.Count - 1; i >= 0; i--)
-		{
-			if (activeNpcs[i].StatsHandler.LifeState != EntityDefinition.LifeState.dead) continue;
-			CleanUpNpc(activeNpcs[i]);
-		}
-	}
-	private void CleanUpNpc(NpcController npcController)
-	{
-		inactiveNpcs.Add(npcController);
-		activeNpcs.Remove(npcController);
-		npcController.gameObject.SetActive(false);
-		npcController.transform.SetParent(inactiveNpcsParent.transform);
-	}
-	#endregion
+    #endregion
 
 	#region handle zombification events (TODO will need updating to only listen for npc it spawned)
 	private void HandleNpcZombification(GameObject gameObject)
 	{
-		CleanUpNpc(gameObject.GetComponent<NpcController>());
-		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), MovementType.randomAreaMove, gameObject.transform.position));
+		foreach (SpawnedNpcData spawnedNpc in activeNpcs)
+        {
+            if (spawnedNpc.npc.gameObject == gameObject)
+			{
+                CleanUpNpc(spawnedNpc);
+                SpawnNpc(new(AssignRandomNpc(zombieDefinitions), MovementType.randomAreaMove, gameObject.transform.position), false);
+				return;
+            }
+        };
 	}
 	#endregion
 
-	#region Should Spawn Npcs check
-	private bool ShouldSpawnNpcs()
-	{
-		if (forceSpawnNpcs)
-			return true;
-
-		bool result = playerInValidSpawnZone && !playerInBlockSpawnZone;
-		Debug.LogError(result);
-		return result;
-	}
-	#endregion
-
-	//editor methods
-	#region Create New Paths and Spawn Points From Editor
-	public void CreateNewPatrolPointPath()
+    //editor methods
+    #region Create New Paths and Spawn Points From Editor
+    public void CreateNewPatrolPointPath()
 	{
 		GameObject patrolPath = (GameObject)PrefabUtility.InstantiatePrefab(patrolPathPrefab);
 		patrolPath.transform.SetParent(movementAreaAndPathsParent.transform);
@@ -324,30 +364,36 @@ public class NPCSpawner : MonoBehaviour
 	#region Spawn Random Or Specified Npcs From Editor
 	public void SpawnRandomSurvivorNpc(Teams team, MovementType movementType)
 	{
-		SpawnNpc(new(AssignRandomNpc(survivorDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
+		SpawnNpc(new(AssignRandomNpc(survivorDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPointAroundPlayer()), false);
 	}
 	public void SpawnRandomZombieNpc(Teams team, MovementType movementType)
 	{
-		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
+		SpawnNpc(new(AssignRandomNpc(zombieDefinitions), team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPointAroundPlayer()), false);
 	}
 	public void SpawnSpecifiedNpc(EntityDefinition npcDefinition, Teams team, MovementType movementType)
 	{
-		SpawnNpc(new(npcDefinition, team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPosition()));
+		SpawnNpc(new(npcDefinition, team, movementType, AssignRandomPatrolPath(), AssignRandomSpawnPointAroundPlayer()), false);
 	}
 	#endregion
 
 	private void OnDrawGizmos()
 	{
-		if (ShowAreaPoints)
+		if (!HideSpawnerRangeSphere)
+		{
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, spawnerRadius);
+        }
+
+		if (!HideAreaPoints)
 			RandomAreaMoveManager.DrawAreaPointsAndTriangles();
 
-		if (ShowAllPatrolPaths)
+		if (!HideAllPatrolPaths)
 		{
 			foreach (PatrolPathManager patrolPath in PatrolPaths)
 				patrolPath.DrawPatrolPathPoints();
 		}
 
-		if (ShowAllSpawnPoints)
+		if (!HideAllSpawnPoints)
 		{
 			for (int i = 0; i < spawnPointsParent.transform.childCount; i++)
 			{
