@@ -45,6 +45,7 @@ public class EntityDefinition : ScriptableObject
 	#region Definition Prefab To Use
 	[Header("Definition Prefab To Use")]
 	public GameObject gameObjectPrefab;
+	public List<GameObject> allowedCharacterModels = new();
 	#endregion
 
 	#region Items Dropped On Death

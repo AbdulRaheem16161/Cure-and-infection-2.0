@@ -30,4 +30,4 @@ MonoBehaviour:
   lightSwingCooldown: 1
   heavySwingSpeed: 1.5
   heavySwingCooldown: 1.5
-  weaponFlags: 0
+  weaponFlags: 2

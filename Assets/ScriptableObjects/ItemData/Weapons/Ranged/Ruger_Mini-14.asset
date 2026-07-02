@@ -22,9 +22,9 @@ MonoBehaviour:
   allowedEquipmentSlots: 3
   stackLimit: 1
   itemWeight: 0
-  modelPrefab: {fileID: 1829597508155286, guid: 7359baf27e84aa44cafac3788c8be0f1, type: 3}
+  modelPrefab: {fileID: 8519421593830001953, guid: 2c9c7dc659d466048aad2c7db9e84023, type: 3}
   itemUiIcon: {fileID: 0}
-  weaponType: 6
+  weaponType: 5
   impactType: 1
   damage: 45
   magazineSize: 20
@@ -32,8 +32,8 @@ MonoBehaviour:
   fireRateRPM: 120
   reloadTime: 2.2
   effectiveRange: 65
-  weaponFlags: 0
-  adsTime: 2.2
+  weaponFlags: 6
+  adsSpeed: 1
   hipfireBulletSpreadMultiplier: 1
   adsBulletSpreadMultiplier: 0.4
   hipfireRecoilMultiplier: 1
@@ -46,16 +46,16 @@ MonoBehaviour:
   recoilSnappiness: 15
   recoilRecoveryRate: 10
   recoilPattern:
-  - {x: 0.4, y: 0.2, z: 0}
-  - {x: 0.9, y: 0.4, z: 0}
-  - {x: 1.5, y: -0.3, z: 0}
-  - {x: 2.2, y: 0.5, z: 0}
-  - {x: 3.1, y: 0.9, z: 0}
-  - {x: 4.2, y: -0.6, z: 0}
-  - {x: 5.4, y: 0.7, z: 0}
-  - {x: 6.7, y: 1.1, z: 0}
-  - {x: 8.1, y: -1, z: 0}
-  - {x: 9.6, y: 1.3, z: 0}
+  - {x: -0.4, y: 0.2, z: 0}
+  - {x: -0.9, y: 0.4, z: 0}
+  - {x: -1.5, y: -0.3, z: 0}
+  - {x: -2.2, y: 0.5, z: 0}
+  - {x: -3.1, y: 0.9, z: 0}
+  - {x: -4.2, y: -0.6, z: 0}
+  - {x: -5.4, y: 0.7, z: 0}
+  - {x: -6.7, y: 1.1, z: 0}
+  - {x: -8.1, y: -1, z: 0}
+  - {x: -9.6, y: 1.3, z: 0}
   ammoType: {fileID: 11400000, guid: cf345ff4eec91bc4fbe7ff98affc09af, type: 2}
   bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
   bulletVisualSpeed: 50

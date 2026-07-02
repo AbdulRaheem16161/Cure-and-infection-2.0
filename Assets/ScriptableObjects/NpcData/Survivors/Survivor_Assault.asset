@@ -18,6 +18,12 @@ MonoBehaviour:
   capabilities: 1983
   entityFlags: -1
   gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}
+  allowedCharacterModels:
+  - {fileID: 1534467912851604, guid: 8a24513771aad7b4fb0e3d52c969a2c4, type: 3}
+  - {fileID: 1513220350763136, guid: 325c2a72f558d4e419ec4f9ea74e54f5, type: 3}
+  - {fileID: 1497507383330918, guid: b6dd7aa0471525a4ba150a6dd06fc4b4, type: 3}
+  - {fileID: 1485438405061212, guid: 5d65c3bd98b79f84e996821ebfc0a190, type: 3}
+  - {fileID: 1938837853794670, guid: 30c23f6bcd4f35648bbfc61c9f671e51, type: 3}
   itemsDroppedOnDeath: []
   maxHealth: 125
   maxWater: 100

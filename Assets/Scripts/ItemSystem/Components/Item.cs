@@ -37,14 +37,12 @@ public abstract class Item<T> : Item where T : ItemDefinition
 		if (definition.ModelPrefab == null)
 		{
 			Debug.LogWarning($"{TypedDefinition.ItemName} model not assigned ignore if intended or lacks model and isnt required.");
-			if (ModelReference != null)
-				Destroy(ModelReference);
-			return;
+            CleanUpOldModel();
+            return;
 		}
 		else
 		{
-			if (ModelReference != null)
-				Destroy(ModelReference);
+			CleanUpOldModel();
 			ModelReference = Instantiate(definition.ModelPrefab);
 		}
 		/* remove old model, separate model pooling kept for potential future use but not required with current 1:1 items planned.
@@ -57,6 +55,16 @@ public abstract class Item<T> : Item where T : ItemDefinition
 		ModelReference.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		ModelReference.SetActive(true);
 	}
+	private void CleanUpOldModel()
+	{
+        if (ModelReference != null)
+        {
+            if (Application.isPlaying)
+                Destroy(ModelReference);
+            else
+                DestroyImmediate(ModelReference);
+        }
+    }
 	#endregion
 }
 

@@ -174,7 +174,7 @@ public class EquipmentHandler : MonoBehaviour
             return;
 
         Quaternion targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-        ItemsInHandsParent.transform.rotation = targetRotation * Quaternion.Euler(0f, 180f, 0f);
+        ItemsInHandsParent.transform.rotation = targetRotation * Quaternion.Euler(0f, 0f, 0f);
     }
     #endregion
 
