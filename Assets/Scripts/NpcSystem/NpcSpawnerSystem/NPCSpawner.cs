@@ -48,7 +48,9 @@ public class NPCSpawner : MonoBehaviour
 	public bool HideAllSpawnPoints;
 
 	[Header("Spawner Settings")]
-	[Tooltip("Keeps custom spawned Npc spawned in, ignore distance clean up checks")]
+	[Tooltip("Forces custom npcs to be spawned in, ignoring max spawn distance check")]
+    public bool forceSpawnCustomNpcs;
+    [Tooltip("Keeps custom spawned Npc spawned in, ignoring distance clean up checks")]
     public bool keepCustomNpcsSpawned;
 	public bool disableRandomSpawns;
 	[Range(50, 1000)]
@@ -100,7 +102,11 @@ public class NPCSpawner : MonoBehaviour
 			Debug.LogWarning($"{this} Npc Spawners maxSpawnAmount smaller then minSpawnAmount, equilizing");
 			maxSpawnAmount = minSpawnAmount;
 		}
-	}
+
+        float min = 8.0f;
+        float max = 9.0f;
+        spawnTimer = min + (float)systemRandom.NextDouble() * (max - min); //randomize first spawn timer to avoid all spawners spawning at same time
+    }
     private void Update()
     {
 		HandleNpcSpawning();
@@ -124,14 +130,31 @@ public class NPCSpawner : MonoBehaviour
 
         spawnTimer = 0f;
 
-        if (playerSqrDistanceToSpawner < sqrStaticDespawnDistanceFromPlayer)
-        {
+		if (ShouldSpawnCustomNpcs())
+		{
+			Debug.LogError("spawn custom npcs");
             SpawnCustomNpcs();
-			if (disableRandomSpawns) return;
-            SpawnNpc(new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPointAroundPlayer()), false);
         }
-    }	
-	public void SpawnCustomNpcs()
+		else
+		{
+            Debug.LogError("dont spawn custom npcs");
+        }
+
+		if (ShouldSpawnRandomNpcs())
+            SpawnNpc(new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPointAroundPlayer()), false);
+    }
+	private bool ShouldSpawnRandomNpcs()
+	{
+		if (disableRandomSpawns) return false;
+		return playerSqrDistanceToSpawner < sqrStaticDespawnDistanceFromPlayer;
+    }
+	private bool ShouldSpawnCustomNpcs()
+    {
+        if (forceSpawnCustomNpcs) return true;
+        return playerSqrDistanceToSpawner < sqrStaticDespawnDistanceFromPlayer;
+    }
+
+    public void SpawnCustomNpcs()
 	{
 		int id = 0;
 
@@ -152,9 +175,10 @@ public class NPCSpawner : MonoBehaviour
 
             float squaredDistance = (GameManager.Instance.PlayerReference.transform.position - npcSpawnData.spawnPoint.transform.position).sqrMagnitude;
 
-			if (squaredDistance < minSqrSpawnDistanceFromPlayer || squaredDistance > maxSqrSpawnDistanceFromPlayer) continue;
+			if (!forceSpawnCustomNpcs)
+                if (squaredDistance < minSqrSpawnDistanceFromPlayer || squaredDistance > maxSqrSpawnDistanceFromPlayer) continue;
 
-			npcSpawnData.SetId(id);
+            npcSpawnData.SetId(id);
             SpawnNpc(npcSpawnData, true);
 			id++;
 		}

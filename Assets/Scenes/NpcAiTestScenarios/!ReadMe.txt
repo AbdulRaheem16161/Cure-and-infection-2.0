@@ -40,6 +40,11 @@ InvestigateEnemyPosTest:
 1 npc watches as another walks by a gape in the wall, while in view, watching npc will update move pos and chase moving npc.
 once npc disspears behind the wall again, it will enter investigate state and move to its last known position (viewable when selecting npc as red line)
 
+LootChestTest:
+1 npc spawns and patrols around the light blue dots. when chests are close enough and pass its loot score threshold, it will move to the chest and loot it.
+chest top will flip open, loot will be spawned in. once spawned in, npc will loot chest (time to loot depends on amount of items in chest). once empty, npcs
+will add looted chest to long term memory and patrol again till it finds another chest it hasnt personal looted yet.
+
 MovementTypesTest:
 3 npcs spawn in set to each of the movement types, 1 will patrol around on a set blue patrol path, one will move randomly around itself,
 another will move around randomly in a set dark blue area split into triagnles, npc will still move out of the given area to reach
