@@ -53,7 +53,7 @@ public class NPCSpawner : MonoBehaviour
     [Tooltip("Keeps custom spawned Npc spawned in, ignoring distance clean up checks")]
     public bool keepCustomNpcsSpawned;
 	public bool disableRandomSpawns;
-	[Range(50, 1000)]
+	[Range(75, 1000)]
 	public int spawnerRadius = 100;
 
     //values use squared distance to avoid sqrt calculations
@@ -103,6 +103,9 @@ public class NPCSpawner : MonoBehaviour
 			maxSpawnAmount = minSpawnAmount;
 		}
 
+		if (!disableRandomSpawns && NpcsToRandomSpawn.Count == 0)
+            Debug.LogError("'NpcsToRandomSpawn' empty while random spawning is enabled. Add one or more NPC definitions or disable random spawning.");
+
         float min = 8.0f;
         float max = 9.0f;
         spawnTimer = min + (float)systemRandom.NextDouble() * (max - min); //randomize first spawn timer to avoid all spawners spawning at same time
@@ -131,14 +134,7 @@ public class NPCSpawner : MonoBehaviour
         spawnTimer = 0f;
 
 		if (ShouldSpawnCustomNpcs())
-		{
-			Debug.LogError("spawn custom npcs");
             SpawnCustomNpcs();
-        }
-		else
-		{
-            Debug.LogError("dont spawn custom npcs");
-        }
 
 		if (ShouldSpawnRandomNpcs())
             SpawnNpc(new(AssignRandomNpc(NpcsToRandomSpawn), MovementType.randomAreaMove, AssignRandomSpawnPointAroundPlayer()), false);
@@ -258,22 +254,19 @@ public class NPCSpawner : MonoBehaviour
     private Vector3 AssignRandomSpawnPointAroundPlayer()
     {
         Vector3 playerPos = GameManager.Instance.PlayerReference.transform.position;
-
         const int maxAttempts = 20;
 
         for (int i = 0; i < maxAttempts; i++)
         {
-            float min = minSqrSpawnDistanceFromPlayer;
-            float max = maxSqrSpawnDistanceFromPlayer;
+            float sqrDistance = (float)systemRandom.NextDouble() * 
+				(maxSqrSpawnDistanceFromPlayer - minSqrSpawnDistanceFromPlayer) + minSqrSpawnDistanceFromPlayer;
 
-            double angle = systemRandom.NextDouble() * (Math.PI * 2.0);
-            float distance = Mathf.Sqrt((float)systemRandom.NextDouble() * (max * max - min * min) + min * min);
+            double angle = systemRandom.NextDouble() * Math.PI * 2.0;
+            float distance = Mathf.Sqrt(sqrDistance);
             Vector3 point = playerPos + new Vector3(Mathf.Cos((float)angle), 0f, Mathf.Sin((float)angle)) * distance;
 
             if (NavMesh.SamplePosition(point, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-            {
                 return hit.position;
-            }
         }
 
         return playerPos;

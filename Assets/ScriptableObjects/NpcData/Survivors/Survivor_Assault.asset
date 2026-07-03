@@ -18,12 +18,7 @@ MonoBehaviour:
   capabilities: 1983
   entityFlags: -1
   gameObjectPrefab: {fileID: 837096600775374618, guid: c2cb071825e292648a4f57638d0c3f77, type: 3}
-  allowedCharacterModels:
-  - {fileID: 1534467912851604, guid: 8a24513771aad7b4fb0e3d52c969a2c4, type: 3}
-  - {fileID: 1513220350763136, guid: 325c2a72f558d4e419ec4f9ea74e54f5, type: 3}
-  - {fileID: 1497507383330918, guid: b6dd7aa0471525a4ba150a6dd06fc4b4, type: 3}
-  - {fileID: 1485438405061212, guid: 5d65c3bd98b79f84e996821ebfc0a190, type: 3}
-  - {fileID: 1938837853794670, guid: 30c23f6bcd4f35648bbfc61c9f671e51, type: 3}
+  allowedCharacterModels: []
   itemsDroppedOnDeath: []
   maxHealth: 125
   maxWater: 100
@@ -53,8 +48,8 @@ MonoBehaviour:
   viewDistanceMultiplier: 1.5
   soundSensitivity: 0
   weaponOne: {fileID: 11400000, guid: d8800095176a06b41a826c07338bbcea, type: 2}
-  weaponTwo: {fileID: 11400000, guid: 891c4fb4191ce7c479c3aa2c2a088c45, type: 2}
-  meleeWeapon: {fileID: 11400000, guid: e7fdb8a2c482bf8418b945ab71324bdd, type: 2}
+  weaponTwo: {fileID: 0}
+  meleeWeapon: {fileID: 11400000, guid: a9fff7e107251f24aa8e897c12f7d775, type: 2}
   helmet: {fileID: 11400000, guid: a7285e4979e16094b8362f1f237fce64, type: 2}
   chest: {fileID: 11400000, guid: 72d434a0b7f73814c8a452446378a1ca, type: 2}
   backpack: {fileID: 11400000, guid: d82a1822482222f498f1e2b61206aec4, type: 2}

@@ -5,6 +5,13 @@ public class PlayerInventoryUi : MonoBehaviour, IUiPanel
     public EquipmentUi equipmentPanel;
     public InventoryUi inventoryPanel;
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Combat;
+    }
+    #endregion
+
     public void ShowUi(UiContext uiContext)
     {
         equipmentPanel.UpdateObjectReferences(true, uiContext);

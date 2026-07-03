@@ -62,8 +62,8 @@ public class LootableContainer : MonoBehaviour, IInteractable, ILootContainer
         Open = !Open;
         hinge.Toggle();
 
-        if (interactor.IsPlayerInteractor)
-            UiManager.ShowScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, null, this));
+        if (!interactor.IsPlayerInteractor) return;
+        UiManager.ToggleScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, null, this));
     }
     public void InteractHoldComplete(Interactor interactor)
     {

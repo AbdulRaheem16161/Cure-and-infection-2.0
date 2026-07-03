@@ -8,6 +8,12 @@ public class AudioSettingsUi : MonoBehaviour, IUiPanel
 
     public Button backButton;
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.Look | InputManager.InputBlock.Move | InputManager.InputBlock.Combat;
+    }
+    #endregion
 
     #region Initialize Ui + Button Listeners
     private void Start()
@@ -17,7 +23,7 @@ public class AudioSettingsUi : MonoBehaviour, IUiPanel
 
     private void InitializeUi()
     {
-        backButton.onClick.AddListener(() => ShowScreen(new(UiScreens.audioSettings)));
+        backButton.onClick.AddListener(() => ToggleScreen(new(UiScreens.audioSettings)));
     }
 
     private void OnDestroy()

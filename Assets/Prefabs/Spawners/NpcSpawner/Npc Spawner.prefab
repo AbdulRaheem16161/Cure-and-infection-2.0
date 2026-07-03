@@ -183,11 +183,14 @@ MonoBehaviour:
   PatrolPaths:
   - {fileID: 7250597809870208336}
   RandomAreaMoveManager: {fileID: 8023601509976355756}
-  ShowAreaPoints: 0
-  ShowAllPatrolPaths: 0
-  ShowAllSpawnPoints: 0
-  forceSpawnNpcs: 0
-  spawnerRadius: 50
+  HideSpawnerRangeSphere: 0
+  HideAreaPoints: 0
+  HideAllPatrolPaths: 0
+  HideAllSpawnPoints: 0
+  forceSpawnCustomNpcs: 0
+  keepCustomNpcsSpawned: 0
+  disableRandomSpawns: 0
+  spawnerRadius: 100
   CustomNpcsToSpawn: []
   NpcsToRandomSpawn: []
   minSpawnAmount: 10

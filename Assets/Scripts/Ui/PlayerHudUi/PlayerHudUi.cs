@@ -72,6 +72,13 @@ public class PlayerHudUi : MonoBehaviour, IUiPanel
     [SerializeField] private ItemContainer playerInventory;
     #endregion
 
+    #region Blocked Inputs for Ui Screen api
+    public InputManager.InputBlock GetInputBlock()
+    {
+        return InputManager.InputBlock.None;
+    }
+    #endregion
+
     #region Initialize Ui + Button Listeners
     private void InitializeUi(UiContext uiContext)
     {

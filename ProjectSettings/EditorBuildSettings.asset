@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenuScene.unity
     guid: bb5eb2e0fdc10824c818d4510b3cdb53
   - enabled: 1
-    path: Assets/Scenes/WorldMapFIlled.unity
+    path: Assets/Scenes/WorldMapFilled.unity
     guid: d804a06da37f42b4ca35daa8a2c524e5
   - enabled: 1
     path: Assets/Scenes/WoopsiousNPCTestScene.unity

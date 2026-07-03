@@ -107,15 +107,14 @@ public class InventoryHandler : MonoBehaviour, IInteractable, ILootContainer
 			break;
 		}
 	}
-	#endregion
+    #endregion
 
-	#region inventory interact interface methods
-	public void InteractPress(Interactor interactor)
+    #region IInteractable Interface Methods
+    public void InteractPress(Interactor interactor)
     {
 		if (!CanLoot) return;
-
-		//open both this inventory + interactor.Inventory in ui
-		UiManager.ShowScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, EquipmentHandler, this));
+		if (!interactor.IsPlayerInteractor) return;
+		UiManager.ToggleScreen(new(UiManager.UiScreens.LootableInventory, GameManager.Instance.PlayerReference, gameObject, EquipmentHandler, this));
 		return;
     }
 
