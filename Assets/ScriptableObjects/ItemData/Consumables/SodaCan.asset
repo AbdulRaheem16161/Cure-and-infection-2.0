@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60b9af3946b33246af5cd33351f2d85, type: 3}
+  m_Name: SodaCan
+  m_EditorClassIdentifier: 
+  itemId: SodaCan
+  itemName: Soda Can
+  itemDescription: Restores some water and food
+  itemPrice: 60
+  baseSpawnWeight: 0.25
+  tradable: 0
+  allowedSlots: 17
+  allowedEquipmentSlots: 448
+  stackLimit: 5
+  itemWeight: 0.5
+  modelPrefab: {fileID: 2316225345058866127, guid: faf7429aafa271745945a750289f6c7a, type: 3}
+  itemUiIcon: {fileID: 0}
+  restorationType: 12
+  healthRestored: 0
+  foodRestored: 0
+  waterRestored: 40
+  staminaRestored: 15
+  consumableFlags: 2

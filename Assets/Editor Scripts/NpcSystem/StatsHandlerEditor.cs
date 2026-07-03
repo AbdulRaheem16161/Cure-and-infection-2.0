@@ -1,0 +1,48 @@
+using UnityEditor;
+using UnityEngine;
+using static DamageContext;
+
+[CustomEditor(typeof(StatsHandler))]
+public class StatsHandlerEditor : Editor
+{
+	private bool showDebugControls;
+
+	public override void OnInspectorGUI()
+	{
+		DrawDefaultInspector();
+
+		StatsHandler stats = (StatsHandler)target;
+
+		GUILayout.Space(10);
+		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+		showDebugControls = EditorGUILayout.Toggle("Show Debug Controls", showDebugControls);
+
+		if (!showDebugControls) return;
+
+		#region deal damage and kill 
+		if (GUILayout.Button("Damage Npc For 50"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			stats.RecieveDamage(new(50, HitCollider.BodyPart.body, HitImpact.none, stats.gameObject));
+		}
+		if (GUILayout.Button("Kill Npc"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			stats.DebugKillNpc();
+		}
+		#endregion
+	}
+
+	private bool ApplicationPlaying()
+	{
+		if (!Application.isPlaying)
+		{
+			Debug.LogWarning("Must be in Play Mode");
+			return false;
+		}
+
+		return true;
+	}
+}

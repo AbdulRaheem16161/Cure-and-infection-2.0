@@ -2,20 +2,35 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Enemy
+  - CinemachineTarget
+  - NPC
+  - LadderCenter
+  - Ladder
+  - Team 1
+  - Team 2
+  - Team 3
+  - Team 4
+  - Team 5
+  - Team 6
+  - Team 7
+  - Team 8
+  - FreeFighter
+  - Dead
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Environment
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - CharacterDetection
+  - CharacterHitbox
+  - Projectiles
+  - EnvironmentCover
+  - Interactable
   - 
   - 
   - 
@@ -43,34 +58,10 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
-  - Light Layer 1
-  - Light Layer 2
-  - Light Layer 3
-  - Light Layer 4
-  - Light Layer 5
-  - Light Layer 6
-  - Light Layer 7
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Light Layer 1 - Light Layer 1
+  - Light Layer 2 - Light Layer 2
+  - Light Layer 3 - Light Layer 3
+  - Light Layer 4 - Light Layer 4
+  - Light Layer 5 - Light Layer 5
+  - Light Layer 6 - Light Layer 6
+  - Light Layer 7 - Light Layer 7

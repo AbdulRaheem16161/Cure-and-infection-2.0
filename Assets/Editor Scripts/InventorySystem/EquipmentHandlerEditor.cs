@@ -1,0 +1,144 @@
+using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof(EquipmentHandler))]
+public class EquipmentHandlerEditor : Editor
+{
+	private bool showDebugControls;
+
+	public override void OnInspectorGUI()
+	{
+		DrawDefaultInspector();
+
+		EquipmentHandler equipment = (EquipmentHandler)target;
+
+		GUILayout.Space(10);
+		GUILayout.Label("DEBUG CONTROLS", EditorStyles.boldLabel);
+		showDebugControls = EditorGUILayout.Toggle("Show Debug Controls", showDebugControls);
+
+		if (!showDebugControls) return;
+
+		GUILayout.Space(10);
+
+		#region equip item
+		GUILayout.Label("Equipping Items", EditorStyles.boldLabel);
+		equipment.itemToEquip = (ItemDefinition)EditorGUILayout.ObjectField("Item To Equip", equipment.itemToEquip, typeof(ItemDefinition), false);
+		equipment.slotToEquipItemTo = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
+		equipment.itemToEquipCount = EditorGUILayout.IntField("Item To Equip Count", equipment.itemToEquipCount);
+
+		if (GUILayout.Button("Equip Item (destroys any equipped one)"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			if (equipment.itemToEquip == null)
+			{
+				Debug.LogError("no item specified in itemToEquip field");
+				return;
+			}
+
+			if (equipment.itemToEquipCount > equipment.itemToEquip.StackLimit)
+			{
+				Debug.LogWarning($"{equipment.itemToEquipCount} is higher then stack limit of {equipment.itemToEquip.StackLimit}, setting to max");
+				equipment.itemToEquipCount = equipment.itemToEquip.StackLimit;
+			}
+			if (equipment.itemToEquipCount < 1)
+			{
+				Debug.LogWarning($"{equipment.itemToEquipCount} is smaller then minimum limit of 1, setting to 1");
+				equipment.itemToEquipCount = 1;
+			}
+
+			equipment.HandleItemEquipping(equipment.GetEquipmentSlot(equipment.slotToEquipItemTo), new(equipment.itemToEquip, equipment.itemToEquipCount));
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region equip item from inventory
+		GUILayout.Label("Equipping Item From Inventory", EditorStyles.boldLabel);
+		equipment.equipItemFromInventorySlot = EditorGUILayout.IntField("Equip Item From Inventory Slot", equipment.equipItemFromInventorySlot);
+		equipment.slotToEquipItemTo = 
+			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Equip Item To", equipment.slotToEquipItemTo);
+
+		if (GUILayout.Button("Equip Item From Inventory"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			if (equipment.itemToEquip == null)
+			{
+				Debug.LogError("no item specified in itemToEquip field");
+				return;
+			}
+
+			InventoryService.TryResolveSlotEquipping(
+				equipment, equipment.slotToEquipItemTo, equipment.InventoryHandler.ItemContainer, equipment.equipItemFromInventorySlot);
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region unequip item button
+		GUILayout.Label("Unequipping Items", EditorStyles.boldLabel);
+		equipment.equipmentSlotToUnequip =
+			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Slot To Unequip", equipment.equipmentSlotToUnequip);
+
+		if (GUILayout.Button("Unequip Item To Inventory"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			InventoryService.TryResolveSlotEquipping(equipment, equipment.equipmentSlotToUnequip, equipment.InventoryHandler.ItemContainer, -1, true);
+		}
+		if (GUILayout.Button("Unequip Item (destroys)"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.HandleItemUnequipping(equipment.GetEquipmentSlot(equipment.equipmentSlotToUnequip));
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region item holstering/unholstering buttons
+		GUILayout.Label("Holster/Unholster Equipped Items", EditorStyles.boldLabel);
+		equipment.unHolsterItem = (EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Unholster Item", equipment.unHolsterItem);
+
+		if (GUILayout.Button("Un Holster Weapon"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.UnholsterWeapon(equipment.unHolsterItem);
+		}
+		if (GUILayout.Button("Holster Weapon"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.HolsterWeapon();
+		}
+		#endregion
+
+		GUILayout.Space(10);
+
+		#region use consumable in equipment slot button
+		GUILayout.Label("Use Consumable In Slot", EditorStyles.boldLabel);
+		equipment.consumableSlotToUse =
+			(EquipmentHandler.EquipmentType)EditorGUILayout.EnumPopup("Use Consumable In Slot", equipment.consumableSlotToUse);
+
+		if (GUILayout.Button("Use Consumable Item"))
+		{
+			if (!ApplicationPlaying()) return;
+
+			equipment.UseConsumable(equipment.consumableSlotToUse);
+		}
+		#endregion
+	}
+
+	private bool ApplicationPlaying()
+	{
+		if (!Application.isPlaying)
+		{
+			Debug.LogWarning("Must be in Play Mode");
+			return false;
+		}
+
+		return true;
+	}
+}

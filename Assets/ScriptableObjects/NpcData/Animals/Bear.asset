@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a4a1534ad7a932428cae365bfcab85b, type: 3}
+  m_Name: Bear
+  m_EditorClassIdentifier: 
+  entityName: Bear
+  isPlayer: 0
+  startingLifeState: 0
+  capabilities: 53
+  entityFlags: 0
+  gameObjectPrefab: {fileID: 6402345513559696848, guid: d0f6d6f1e6cddf943b572ec3f6123858, type: 3}
+  itemsDroppedOnDeath:
+  - Item: {fileID: 11400000, guid: e71c67953e844c64c987b0a83daf55b8, type: 2}
+    MinDropAmount: 2
+    MaxDropAmount: 4
+  maxHealth: 175
+  maxWater: 100
+  maxFood: 100
+  maxStamina: 100
+  waterDrainSeconds: 15
+  waterDrainAmount: 1
+  foodDrainSeconds: 25
+  foodDrainAmount: 1
+  staminaDrainSeconds: 0.4
+  staminaDrainAmount: 1
+  staminaRegenSeconds: 1
+  staminaRegenAmount: 1
+  exhaustToSprintThreshold: 0.15
+  walkSpeed: 2
+  sprintSpeed: 6
+  rotationSpeed: 240
+  acceleration: 10
+  stoppingDistance: 1
+  fleeDistance: 0
+  minIdleTime: 2
+  maxIdleTime: 3
+  viewAngle: 120
+  viewDistance: 30
+  highAlertDuration: 10
+  viewAngleMultiplier: 1.5
+  viewDistanceMultiplier: 1.5
+  soundSensitivity: 0
+  animalAttack: {fileID: 0}

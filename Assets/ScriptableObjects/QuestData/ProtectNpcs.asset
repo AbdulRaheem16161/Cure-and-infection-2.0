@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37daac3594d03944db1234698600dac2, type: 3}
+  m_Name: ProtectNpcs
+  m_EditorClassIdentifier: 
+  questName: Protect Npcs
+  questDialogues:
+  - questDialogueKey: Quest_Offer
+    questDialogueText: Hey, we need some protection.
+  - questDialogueKey: Quest_intro
+    questDialogueText: We want you to protect us while we gather items.
+  - questDialogueKey: Quest_Accepted
+    questDialogueText: We'll follow you to the area marked on your map.
+  - questDialogueKey: Quest_Fail
+    questDialogueText: We lost contact with the group you where with, you let them
+      die.
+  - questDialogueKey: Quest_Complete
+    questDialogueText: Thanks for the protection, heres your reward.
+  questType: 4
+  questMinDifficulty: 0.2
+  questMaxDifficulty: 0.8
+  forceVehicleVersion: 0
+  chanceForVehicleVersion: 0.2
+  questItemsNeeded: []
+  questRewardType: 1
+  questRewards:
+  - {fileID: 11400000, guid: 7e467749e195ee146bc705b586ea942a, type: 2}
+  questRewardCurrency: 40
+  questFailMoneyLoss: -100

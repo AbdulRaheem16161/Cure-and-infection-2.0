@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcf96dd8c31ea4047b17b631b667d99a, type: 3}
+  m_Name: CZ_P-09
+  m_EditorClassIdentifier: 
+  itemId: CZ_P-09
+  itemName: CZ P-09
+  itemDescription: 
+  itemPrice: 300
+  baseSpawnWeight: 0.1
+  tradable: 1
+  allowedSlots: 3
+  allowedEquipmentSlots: 3
+  stackLimit: 1
+  itemWeight: 0
+  modelPrefab: {fileID: 3965621140697420028, guid: 55b1fd5f577255c4a8338b61385780ec, type: 3}
+  itemUiIcon: {fileID: 0}
+  weaponType: 1
+  impactType: 1
+  damage: 25
+  magazineSize: 17
+  allowedFireModes: 2
+  fireRateRPM: 400
+  reloadTime: 1.3
+  effectiveRange: 20
+  weaponFlags: 14
+  adsSpeed: 1
+  hipfireBulletSpreadMultiplier: 1
+  adsBulletSpreadMultiplier: 0.4
+  hipfireRecoilMultiplier: 1
+  adsRecoilMultiplier: 0.8
+  moveSpeedModifier: 1
+  adsMoveSpeedModifer: 0.4
+  baseSpread: 0.005
+  maxSpread: 5
+  spreadIncreasePerShot: 0.01
+  recoilSnappiness: 15
+  recoilRecoveryRate: 10
+  recoilPattern:
+  - {x: -0.4, y: 0.2, z: 0}
+  - {x: -0.9, y: 0.4, z: 0}
+  - {x: -1.5, y: -0.3, z: 0}
+  - {x: -2.2, y: 0.5, z: 0}
+  - {x: -3.1, y: 0.9, z: 0}
+  - {x: -4.2, y: -0.6, z: 0}
+  - {x: -5.4, y: 0.7, z: 0}
+  - {x: -6.7, y: 1.1, z: 0}
+  - {x: -8.1, y: -1, z: 0}
+  - {x: -9.6, y: 1.3, z: 0}
+  ammoType: {fileID: 11400000, guid: 948da52156225bc4f8229e48462d7096, type: 2}
+  bulletPrefab: {fileID: 9093100548260260981, guid: a1b22696755731b46b691a7211162034, type: 3}
+  bulletVisualSpeed: 50
+  fireSfx: {fileID: 0}
+  reloadSfx: {fileID: 0}
+  muzzleFlashVfx: {fileID: 0}
+  impactVfx: {fileID: 0}
